@@ -1,6 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 0.17.1
+
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -11,7 +13,7 @@ from gi.repository import cairo
 gtk = Gtk
 
 from collections import defaultdict, OrderedDict
-import os, sys, time, re
+import os, io, sys, time, re
 from ftplib import FTP
 from myconfigparser import myConfigParser
 
@@ -21,14 +23,14 @@ from myconfigparser import myConfigParser
 import gettext
 import locale
 import elib_intl3
-#elib_intl.install("Archeotes", "share/locale")
+elib_intl3.install("idefix", "share/locale")
 
 def _(string) :
     return string
 
 
 def ftp_connect(server, login, password) :
-    global conf
+    global ftp1
 
     if password[0:1] == "%" :
         hysteresis = ""
@@ -39,9 +41,15 @@ def ftp_connect(server, login, password) :
             i += 1
         password = hysteresis
 
-    ftp = FTP(server)     # connect to host, default port
-    ftp.login(login, password)
-    return ftp
+    try :
+        ftp = FTP(server)     # connect to host, default port
+        ftp.login(login, password)
+        if "local" in ftp1 :
+            ftp.cwd("idefix")
+        return ftp
+    except :
+        print ("Unable to connect to ftp server with : %s / %s" % (login, password))
+
 
 def ftp_get(ftp, filename, utime = None, required = True, basedir = "") :
 
@@ -49,17 +57,21 @@ def ftp_get(ftp, filename, utime = None, required = True, basedir = "") :
         utime -= time.timezone
     try :
         x = ftp.sendcmd('MDTM '+ filename)          # verify that the file exists on the server
-        f1 = open(basedir + filename, "wb")
         try :
+            f1 = io.BytesIO()
             ftp.retrbinary('RETR ' + filename, f1.write)     # get the file
+            data1 = f1.getvalue()
             f1.close()
-            if utime :
-                os.utime(basedir + filename, (utime, utime))
+            return data1.decode("utf-8-sig").split("\n")
         except :
                 print("could not get " + filename)
     except :
         if required :
             print("We got an error with %s. Is it present on the server?" % filename)
+
+
+
+
 
 
 def ftp_send(ftp, filepath, directory = None, dest_name = None) :
@@ -87,7 +99,7 @@ class Idefix :
 
     def __init__(self):
 
-        global cp
+        global cp, ftp1
         # Load the glade file
         self.widgets = gtk.Builder()
         self.widgets.add_from_file('./idefix-config.glade')
@@ -110,6 +122,33 @@ class Idefix :
         #autoconnect signals for self functions
         self.widgets.connect_signals(self)
 
+##        # ftp connect
+##        self.idefix_config = cp.read("./idefix-config.cfg", "conf")         # $$
+##        ftp1 = self.idefix_config["conf"]["ftp"]
+##        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+##
+##        # retrieve common files from server
+##        if not "local" in ftp1 :
+##            ftp.cwd("common")
+##        data1 = ftp_get(ftp, "firewall-ports.ini")
+##        data2 = ftp_get(ftp, "proxy-groups.ini")
+##        if not "local" in ftp1 :
+##            ftp.cwd("..")
+##
+##        # retrieve perso files from server
+##        data3 = ftp_get(ftp, "users.ini")
+##        data4 = ftp_get(ftp, "firewall-users.ini")
+##        data5 = ftp_get(ftp, "proxy-users.ini")
+##
+##        ftp.close()
+##
+##        self.config = cp.read(data3, "mac", comments = True, isdata = True)
+##        self.config = cp.read(data4, "firewall", merge = self.config, comments = True, isdata = True)
+##        self.config = cp.read(data5, "proxy", merge = self.config, comments = True, isdata = True)
+##        self.config = cp.read(data1, "ports", merge = self.config, comments = True, isdata = True)
+##        self.config = cp.read(data2, "groups", merge = self.config, comments = True, isdata = True)
+
+
         # retrieve common files from server
 ##        self.idefix_config = cp.read("./idefix-config.cfg", "conf")         # $$
 ##        ftp1 = self.idefix_config["conf"]["ftp-common"]
@@ -120,18 +159,15 @@ class Idefix :
 ##        ftp.close()
 
 
-        # retrieve perso files from server
-##        ftp1 = self.idefix_config["conf"]["ftp-perso"]
-##        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
-##        for file1 in ["users.ini", "firewall-users.ini", "proxy-users.ini"] :
-##            ftp_get(ftp, file1, basedir = "./tmp/")
-##        ftp.close()
+
 
         self.config = cp.read("./tmp/users.ini", "mac", comments = True)
         self.config = cp.read("./tmp/firewall-users.ini", "firewall", merge = self.config, comments = True)
         self.config = cp.read("./tmp/proxy-users.ini", "proxy", merge = self.config, comments = True)
         self.config = cp.read("./tmp/firewall-ports.ini", "ports", merge = self.config, comments = True)
         self.config = cp.read("./tmp/proxy-groups.ini", "groups", merge = self.config, comments = True)
+
+
         self.maclist = {}
         data1 = self.config["mac"]
         for section in data1 :
@@ -729,33 +765,49 @@ class Idefix :
     def build_firewall_ini (self, widget) :
         out = ""
         #"active", "action", "ports", "time_condition", "#comments", "user", "mac"
+
         for row in self.firewall_store :
-            out += "\n[%s]\n" % row[0]
-            out += self.format_line("#comments", row[5])
-            out += self.format_line("active", row[1])
-            out += self.format_line("action", row[2])
-            out += self.format_line("ports", row[3])
-            out += self.format_line("time_condition", row[4])
-            out += self.format_line("user", row[6])
-            out += self.format_line("mac", row[7])
+            tmp1 = ""
+            tmp1 += "\n[%s]\n" % row[0]
+            tmp1 += self.format_line("#comments", row[5])
+            tmp1 += self.format_line("active", row[1])
+            tmp1 += self.format_line("action", row[2])
+            tmp1 += self.format_line("ports", row[3])
+            tmp1 += self.format_line("time_condition", row[4])
+            tmp1 += self.format_line("user", row[6])
+            tmp1 += self.format_line("mac", row[7])
+            #print(tmp1)
+            out += tmp1
 
         out2 = ""       # data from the users tree
+        """
+        0 : section (level 1)  - user (level 2)
+        1 : options (text) (no longer used)
+        2 : reserved
+        3 : reserved
+        4 : email (1/0)
+        5 : internet access (1/0)
+        6 : filtered (1/0)
+        7 : open (1/0)
+        8 : full (1/0)
+        """
         for row in self.users_store :
+            print(row[0], row[1], row[2])
             out2 += "\n[__%s]\n" % row[0]
             # set the command lines for the categories
             option = row[1].split("|")
 
             myoptions = ["ACCEPT"]
-            if "email" in option :
+            if row[4] == 1 :
                 myoptions.append("email")
-            if "internet access" in option :
-                if "filtered" in option:
+            if row[5] == 1 :
+                if row[6] == 1:
                     myoptions.append("ftp")
-                elif "open" in option:
+                elif row[7] == 1:
                     myoptions.append("http")
                     if not "email" in myoptions :
                         myoptions.append("email")
-                elif "full" in option:
+                elif row[8] == 1:
                     myoptions.append("any")
 
             if len(myoptions) > 1 :
@@ -773,7 +825,7 @@ class Idefix :
 
 
     def ftp_upload(self) :
-        ftp1 = self.idefix_config["conf"]["ftp-perso"]
+        ftp1 = self.idefix_config["conf"]["ftp"]
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
         for file1 in ["./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini"] :
             ftp_send(ftp, file1)
@@ -791,7 +843,7 @@ class Idefix :
 
 
 if __name__ == "__main__":
-    global win, cp
+    global win, cp, conf
     cp = myConfigParser()
 
     win = Idefix()
