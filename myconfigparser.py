@@ -4,7 +4,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
-# version 0.16.0
+# version 0.16.1  # isdata parameter added
 
 import os, sys, codecs
 from collections import OrderedDict
@@ -19,7 +19,8 @@ class myConfigParser() :
             category,
             comments = False,
             merge = False,
-            encoding = "utf-8-sig") :        # utf-8-sig will handle the BOM
+            encoding = "utf-8-sig",       # utf-8-sig will handle the BOM
+            isdata = False) :
         # ----
         # read ini file and creates a dictionary
         # lines which are not comments (start with #) and don't match the key = value pattern, are stored in a special "lines" entry
@@ -27,15 +28,27 @@ class myConfigParser() :
         # @category : a string which will be used as first level key of the dictionary.
         #             When merging several configurations, it prevents the mixing of the different sources
         # @comments : if True, comments are included in a "#comments" section. Otherwise they are skipped
+        # @merge : if True, instead of building a new dictionary, the function adds data to the dictionary passed in parameter
+        # @encoding : should be obvious
+        # @isdata : if True, @inifile_s contains the full text of the inifile to treat, and not a filename. 
         # @return : The config dictionary, if successful, False otherwise
         #           But if merge is not False and the function fails, it returns the dictionary which passed in merge.
 
-        if not os.path.isfile(iniFile_s) :
-            print("fichier non trouvé " + iniFile_s)
-            if merge != False :
-                return merge
-            else :
-                return False
+        if isdata == False :
+            if not os.path.isfile(iniFile_s) :
+                print("fichier non trouvé " + iniFile_s)
+                if merge != False :
+                    return merge
+                else :
+                    return False
+        else :
+            if iniFile_s == None :
+                print("no data !")
+                if merge != False :
+                    return merge
+                else :
+                    return False
+
 
         if merge == False :                         # nouveau fichier de configuration
             myconfig = OrderedDict()
@@ -44,29 +57,17 @@ class myConfigParser() :
 
         myconfig[category] = OrderedDict()
 
-        if sys.version_info[0] == 3 :
-            fileIni = open(iniFile_s, "r", encoding = encoding)
-
+        if isdata == True :
+            data1 = iniFile_s
         else :
-            fileIni = open(iniFile_s, "r")
-            # If BOM present, skip the first three bytes
-##                isBOM_s = fileIni.read(1)
-##                if isBOM_s == codecs.BOM_BE :
-##                    pass
-
-##            isBOM_s = fileIni.read(3)
-##            if isBOM_s == chr(239) + chr(187) + chr(191) :  # There is a BOM, skips it
-##                pass
-##            else :
-##                fileIni.seek(0)                          # No BOM, come back to beginning of file
-
+            fileIni = open(iniFile_s, "r", encoding = "utf-8-sig")
+            data1 = fileIni.readlines()
 
         section_s = ""
-        fileIni.readline()  # read first line which contains the BOM and is not valid.
-        while True :
-            record_s = fileIni.readline()
-            if record_s == "" :                     # end of file
-                break
+
+        for record_s in data1 :
+
+
             # format line : strip and replace possible \ by /
             record_s = record_s.strip()
             try :
