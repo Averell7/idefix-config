@@ -1,7 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
-# version 0.19.1  - Github
+# version 0.19.5 - firewall list is now OK
+# version 0.19.1 - colors and icons
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -35,8 +36,9 @@ def _(string) :
 # CONFIGURATION ###########################################################
 ###########################################################################
 
-global ftp_active_config
-ftp_active_config = "dev"
+global ftp_active_config, load_locale
+ftp_active_config = ""
+load_locale = True
 
 
 
@@ -131,8 +133,6 @@ def ask_text(parent, message, default=''):
         return None
 
 
-
-
 def ftp_connect(server, login, password) :
     global ftp1
 
@@ -166,15 +166,13 @@ def ftp_get(ftp, filename, utime = None, required = True, basedir = "") :
             ftp.retrbinary('RETR ' + filename, f1.write)     # get the file
             data1 = f1.getvalue()
             f1.close()
+            print (filename, "received OK.")
             return data1.decode("utf-8-sig").split("\n")
         except :
                 print("could not get " + filename)
     except :
         if required :
             print("We got an error with %s. Is it present on the server?" % filename)
-
-
-
 
 
 
@@ -191,19 +189,17 @@ def ftp_send(ftp, filepath, directory = None, dest_name = None) :
     else :
         print(filepath + " not found")
 
-
     #print( ftp.retrlines('LIST'))
     if directory :
         ftp.cwd('..')               # return to house directory
-
-
 
 
 class Idefix :
 
     def __init__(self):
 
-        global cp, ftp1
+        global cp, ftp1, load_locale
+        self.mem_text = ""
         # Load the glade file
         self.widgets = gtk.Builder()
         self.widgets.add_from_file('./idefix-config.glade')
@@ -226,31 +222,43 @@ class Idefix :
         #autoconnect signals for self functions
         self.widgets.connect_signals(self)
 
-        # ftp connect
-        self.idefix_config = cp.read("./idefix-config.cfg", "conf")         # $$
-        ftp1 = self.idefix_config["conf"][ftp_active_config]
-        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        # autosave textview buffers when typing (see also drag and drop below)
+        for textView in ["maclist",
+                         "proxy_users", "proxy_group", "proxy_dest", "proxy_#comments",
+                         "firewall_ports", "firewall_users", "firewall_comments"] :
 
-        # retrieve common files from server
-        if not "local" in ftp1 :
-            ftp.cwd("common")
-        data1 = ftp_get(ftp, "firewall-ports.ini")
-        data2 = ftp_get(ftp, "proxy-groups.ini")
-        if not "local" in ftp1 :
-            ftp.cwd("..")
+            self.arw[textView].connect("key-release-event", self.update_tv)
+            self.arw[textView].connect("drag-end", self.update_tv)
 
-        # retrieve perso files from server
-        data3 = ftp_get(ftp, "users.ini")
-        data4 = ftp_get(ftp, "firewall-users.ini")
-        data5 = ftp_get(ftp, "proxy-users.ini")
 
-        ftp.close()
 
-        self.config = cp.read(data3, "mac", comments = True, isdata = True)
-        self.config = cp.read(data4, "firewall", merge = self.config, comments = True, isdata = True)
-        self.config = cp.read(data5, "proxy", merge = self.config, comments = True, isdata = True)
-        self.config = cp.read(data1, "ports", merge = self.config, comments = True, isdata = True)
-        self.config = cp.read(data2, "groups", merge = self.config, comments = True, isdata = True)
+        if load_locale == False :
+
+            # ftp connect
+            self.idefix_config = cp.read("./idefix-config.cfg", "conf")         # $$
+            ftp1 = self.idefix_config["conf"][ftp_active_config]
+            ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+
+            # retrieve common files from server
+            if not "local" in ftp1 :
+                ftp.cwd("common")
+            data1 = ftp_get(ftp, "firewall-ports.ini")
+            data2 = ftp_get(ftp, "proxy-groups.ini")
+            if not "local" in ftp1 :
+                ftp.cwd("..")
+
+            # retrieve perso files from server
+            data3 = ftp_get(ftp, "users.ini")
+            data4 = ftp_get(ftp, "firewall-users.ini")
+            data5 = ftp_get(ftp, "proxy-users.ini")
+
+            ftp.close()
+
+            self.config = cp.read(data3, "mac", comments = True, isdata = True)
+            self.config = cp.read(data4, "firewall", merge = self.config, comments = True, isdata = True)
+            self.config = cp.read(data5, "proxy", merge = self.config, comments = True, isdata = True)
+            self.config = cp.read(data1, "ports", merge = self.config, comments = True, isdata = True)
+            self.config = cp.read(data2, "groups", merge = self.config, comments = True, isdata = True)
 
 
         # retrieve common files from server
@@ -264,12 +272,13 @@ class Idefix :
 
 
 
-
-##        self.config = cp.read("./tmp/users.ini", "mac", comments = True)
-##        self.config = cp.read("./tmp/firewall-users.ini", "firewall", merge = self.config, comments = True)
-##        self.config = cp.read("./tmp/proxy-users.ini", "proxy", merge = self.config, comments = True)
-##        self.config = cp.read("./tmp/firewall-ports.ini", "ports", merge = self.config, comments = True)
-##        self.config = cp.read("./tmp/proxy-groups.ini", "groups", merge = self.config, comments = True)
+        else :
+            self.idefix_config = cp.read("./idefix-config.cfg", "conf")
+            self.config = cp.read("./tmp/users.ini", "mac", comments = True)
+            self.config = cp.read("./tmp/firewall-users.ini", "firewall", merge = self.config, comments = True)
+            self.config = cp.read("./tmp/proxy-users.ini", "proxy", merge = self.config, comments = True)
+            self.config = cp.read("./tmp/firewall-ports.ini", "ports", merge = self.config, comments = True)
+            self.config = cp.read("./tmp/proxy-groups.ini", "groups", merge = self.config, comments = True)
 
 
         self.maclist = {}
@@ -293,33 +302,40 @@ class Idefix :
         0 : section (level 1)  - user (level 2)
         1 : options (text)
         2 : reserved
-        3 : reserved
+        3 : time condition
         4 : email (1/0)
         5 : internet access (1/0)
         6 : filtered (1/0)
         7 : open (1/0)
         8 : full (1/0)
+        9 : color 1
+        10 : color 2
+        11 : icon 1
+        12 : icon 2
         """
         # section / user
-        self.users_store = gtk.TreeStore(str,str,str, str, int, int, int, int, int) #
+        self.users_store = gtk.TreeStore(str,str,str, str, int, int, int, int, int, str, str, str, str) #
 
         self.treeview1 = self.arw["treeview1"]
         self.treeview1.set_model(self.users_store)
 
         self.cell = gtk.CellRendererText()
-        self.cellpb = gtk.CellRendererPixbuf()
+        self.cellpb = gtk.CellRendererPixbuf(xalign = 0.0)
+        self.cellpb2 = gtk.CellRendererPixbuf(xalign = 0.0)
 
 
         self.tvcolumn = gtk.TreeViewColumn(_('Filename'))
         self.treeview1.connect("button-press-event", self.load_user)
 
-        self.tvcolumn.pack_start(self.cellpb, False)
         self.tvcolumn.pack_start(self.cell, False)
-##        self.tvcolumn.add_attribute(self.cell, "cell-background", 5)
-##        self.tvcolumn.add_attribute(self.cell, "foreground", 7)
+        self.tvcolumn.pack_start(self.cellpb, False)
+        self.tvcolumn.pack_start(self.cellpb2, False)
+        self.tvcolumn.add_attribute(self.cell, "background", 10)
+##        self.tvcolumn.add_attribute(self.cell, "foreground", 9)
 ##        self.tvcolumn.add_attribute(self.cell, "weight", 8)
         self.tvcolumn.add_attribute(self.cell, "text", 0)
-##        self.tvcolumn.add_attribute(self.cellpb, "stock_id", 6)
+        self.tvcolumn.add_attribute(self.cellpb, "stock_id", 11)
+        self.tvcolumn.add_attribute(self.cellpb2, "stock_id", 12)
 
         #self.tvcolumn1 = gtk.TreeViewColumn(_('Restore'), self.check, active=3)
         #self.tvcolumn2 = gtk.TreeViewColumn(_('Test'), self.test, text=3)
@@ -342,20 +358,21 @@ class Idefix :
         9 :
         10 : (int)
         11 : (int)
-        12 : (int)
+        12 : checkbox3
         13 : checkbox1   (0/1)
         14 : checkbox2   (0/1)
         15 : color1
+        16 : color2
 
 
         """
 
-        self.firewall_store = gtk.ListStore(str,str,str, str, str, str,str,str, str, str, int, int, int, int, int, str) #
+        self.firewall_store = gtk.ListStore(str,str,str, str, str, str,str,str, str, str, int, int, int, int, int, str, str) #
         self.cell2 = gtk.CellRendererText()
 
         self.check3 = gtk.CellRendererToggle(activatable = True)
         #self.check.set_property('xalign', 0.0)
-        self.check3.connect( 'toggled', self.toggle_col13, self.firewall_store )
+        self.check3.connect( 'toggled', self.toggle_col13, self.firewall_store, "firewall" )
         self.check4 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
         self.check4.connect( 'toggled', self.toggle_col14, self.firewall_store )
 
@@ -363,7 +380,7 @@ class Idefix :
         self.treeview2.set_model(self.firewall_store)
         self.treeview2.connect("button-press-event", self.firewall_user)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('Key'), self.cell2, text = 0)
+        self.tvcolumn = gtk.TreeViewColumn(_('Key'), self.cell2, text = 0, foreground = 15, background = 16)
         #self.tvcolumn.pack_start(self.cell2, False)
         #self.tvcolumn.add_attribute(self.cell2, "text", 0)
         self.treeview2.append_column(self.tvcolumn)
@@ -393,20 +410,24 @@ class Idefix :
         7 : dest_group
         8 : dest_domain
         9 : dest_ip
-        10 : ""
+        10 : destination
         11 : ""
-        12 : ""
+        12 : checkbox3
         13 : checkbox1   (0/1)
         14 : checkbox2   (0/1)
         15 : color1
         16 : color2
         """
-        self.proxy_store = gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, str, int, int, str, str) #
+
+
+        self.proxy_store = gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, int, int, int, str, str) #
         self.cell3 = gtk.CellRendererText()
         self.check1 = gtk.CellRendererToggle(activatable = True)
-        self.check1.connect( 'toggled', self.toggle_col13, self.proxy_store )
+        self.check1.connect( 'toggled', self.toggle_col13, self.proxy_store, "proxy" )
         self.check2 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
         self.check2.connect( 'toggled', self.toggle_col14, self.proxy_store )
+        self.check5 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
+        self.check5.connect( 'toggled', self.toggle_col12, self.proxy_store )
 
 
         self.treeview3 = self.arw["treeview3"]
@@ -414,13 +435,16 @@ class Idefix :
         self.treeview3.connect("button-press-event", self.proxy_user)
 
 
-        self.tvcolumn = gtk.TreeViewColumn(_('Key'), self.cell3, text = 0, foreground = 15)
+        self.tvcolumn = gtk.TreeViewColumn(_('Key'), self.cell3, text = 0, foreground = 15, background = 16)
         self.treeview3.append_column(self.tvcolumn)
 
         self.tvcolumn = gtk.TreeViewColumn(_('Allow/deny'), self.check1, active = 13)
         self.treeview3.append_column(self.tvcolumn)
 
         self.tvcolumn = gtk.TreeViewColumn(_('On/Off'), self.check2, active = 14)
+        self.treeview3.append_column(self.tvcolumn)
+
+        self.tvcolumn = gtk.TreeViewColumn(_('full'), self.check5, active = 12)
         self.treeview3.append_column(self.tvcolumn)
 
         # chooser
@@ -440,9 +464,10 @@ class Idefix :
 
         self.empty_store = gtk.ListStore(str) #
 
-##        self.arw["proxy_group"].drag_dest_add_text_targets()
-##        self.arw["proxy_group"].drag_dest_set(Gtk.DestDefaults.ALL, [], DRAG_ACTION)
-##        self.arw["proxy_group"].connect("drag-data-received", self.on_drag_data_received)
+##        Commented because it provokes a double drag-dest. TextView seems to be already ready to receive.
+        self.arw["proxy_group"].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
+        self.arw["proxy_group"].drag_dest_add_text_targets()
+        self.arw["proxy_group"].connect("drag-data-received", self.on_drag_data_received)
 
         for chooser in["chooser", "chooser2"] :
 
@@ -465,15 +490,6 @@ class Idefix :
         pass
 
 
-    def format_list(self, listtext, prefix) :
-        # add a key (example : "user = ") at the beginning of each line of a text
-        if len(listtext.strip()) == 0 :
-            return ""
-        temp1 = listtext.split("\n")
-        data1 = ""
-        for line1 in temp1 :
-            data1 += prefix + line1 + "\n"
-        return data1
 
     def populate_users(self):
         self.users_store.clear()
@@ -489,12 +505,17 @@ class Idefix :
                         options_list.append(0)
             else :
                 options_list = [0,0,0,0,0]
-            node = self.users_store.append(None, [section, "", "", ""] + options_list)
+
+            if "time_condition" in data1[section] :
+                time_condition = data1[section]["time_condition"][0]
+            else :
+                time_condition = ""
+            node = self.users_store.append(None, [section, "", "", time_condition] + options_list + ["", "#ffffff", "", ""])
             for user in data1[section] :
-                if user in ["option"] :
+                if user in ["option", "time_condition"] :
                     continue
                 else :
-                    node2 = self.users_store.append(node, [user, "", "", "", 0, 0, 0, 0, 0])
+                    node2 = self.users_store.append(node, [user, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", "", ""])
 
     def populate_firewall(self):
         self.firewall_store.clear()
@@ -508,14 +529,14 @@ class Idefix :
                 else :
                     data2.append("")
             data2 += ["", "",1, 1, 1]   # reserved
-            data2 += [1, 1, "#009900"]  # check boxes dans colors
+            data2 += [1, 1, "#009900", "#ffffff"]  # check boxes and colors (green on white)
             node = self.firewall_store.append(data2)
 
 
     def populate_proxy(self):
         self.proxy_store.clear()
         data1 = self.config["proxy"]
-        keys = ["active", "action", "time_condition", "#comments", "user", "xxx", "dest_group", "dest_domain", "xxx", "destination", "", ""]
+        keys = ["active", "action", "time_condition", "#comments", "user", "xxx", "dest_group", "dest_domain", "xxx", "destination", ""]
         for section in data1 :
             out = [section]
             data2 = data1[section]
@@ -542,7 +563,7 @@ class Idefix :
                 else :
                     out.append("")
             # check boxes
-            out += [1,1,"#009900", ""]
+            out += [1,1,1,"#009900", "#ffffff"]
 
             node = self.proxy_store.append(out)
 
@@ -566,18 +587,71 @@ class Idefix :
                 row[14] = 0
             if row[2].strip().lower() == "deny" :
                 row[13] = 0
+            if row[10].strip().lower() == "any" :
+                row[12] = 1
+            else :
+                row[12] = 0
+
+        for row in self.firewall_store :
+            if row[1].strip().lower() == "off" :
+                row[14] = 0
+            if row[2].strip().lower() == "drop" :
+                row[13] = 0
+##            if row[10].strip().lower() == "any" :
+##                row[12] = 1
+##            else :
+##                row[12] = 0
 
     def set_colors(self) :
         # col 13 = allow/deny state; col 15 = text color
         # col 14 = on/off state; col 15 = text color
-        for row in self.proxy_store :
-            if row[13] == 1 :
-                row[15] = "#009900"
-            else :
-                row[15] = "#ff0000"
+        for store in[self.proxy_store, self.firewall_store] :
+            for row in store :
+                if row[13] == 1 :
+                    row[15] = "#009900"
+                else :
+                    row[15] = "#ff0000"
 
-            if row[14] == 0 :
-                row[15] = "#aaaaaa"
+                if row[14] == 0 :
+                    row[15] = "#bbbbbb"
+
+                if row[10] == "any" :
+                    row[16] = "#ffff88"
+
+        for row in self.users_store :
+            """
+            0 : section (level 1)  - user (level 2)
+            1 : options (text)
+            2 : reserved
+            3 : reserved
+            4 : email (1/0)
+            5 : internet access (1/0)
+            6 : filtered (1/0)
+            7 : open (1/0)
+            8 : full (1/0)
+            9 : color 1
+            10 : color 2
+            11 : icon 1
+            12 : icon 2
+            """
+            # yellow background for open or full Internet access
+            if row[5] == 1 and (row[7] == 1 or row[8] == 1) :
+                row[10] = "#ffff88"
+            else :
+                row[10] = "#ffffff"
+
+            # icons for email and Internet access
+            if row[4] == 1 :
+                row[11] = "gtk-edit"
+            else :
+                row[11] = ""
+            if row[5] == 1 :
+                row[12] = "gtk-home"
+            else :
+                row[12] = ""
+
+
+
 
 
     def load_user(self, widget, event) :
@@ -606,6 +680,29 @@ class Idefix :
             self.arw["internet_full"].set_active(self.users_store[iter1][8])
           # TODO :          self.arw["internet_email"].set_active(True)
 
+          # time conditions
+            data1 = self.users_store[iter1][3].strip()
+            if data1 == "" :
+                #self.arw["users_time_days"].set_text("")
+                self.arw["users_time_from"].set_text("")
+                self.arw["users_time_to"].set_text("")
+
+            elif len(data1) > 6 :
+                try :
+                    #tmp1 = data1.split()
+                    tmp2 = data1.split("-")
+                    #days = tmp1[0].strip()
+                    time_from = tmp2[0].strip()
+                    time_to = tmp2[1].strip()
+
+                    #self.arw["users_time_days"].set_text(days)
+                    self.arw["users_time_from"].set_text(time_from)
+                    self.arw["users_time_to"].set_text(time_to)
+                except :
+                    print("Error handling time condition :", data1)
+            else:
+                print("Invalid time :", data1)
+
 
         elif level == 2 :         # user level
             self.arw["notebook5"].set_current_page(2)
@@ -629,69 +726,135 @@ class Idefix :
         iter1 = self.firewall_store.get_iter(path[0])
         self.iter_firewall = iter1
 
-        keys = ["section", "active", "action", "ports", "time_condition", "#comments"]
-        for i in [2, 4, 5] :
-            self.arw["entry_" + keys[i]].set_text(self.firewall_store[iter1][i])
+        # TODO
+        self.arw["firewall_time_from"].set_text(self.firewall_store[iter1][4])
+        # time conditions
+        data1 = self.firewall_store[iter1][4].strip()
+        if data1 == "" :
+            #self.arw["firewall_time_days"].set_text("")
+            self.arw["firewall_time_from"].set_text("")
+            self.arw["firewall_time_to"].set_text("")
+
+        elif len(data1) > 8 :
+            try :
+                #tmp1 = data1.split()
+                tmp2 = data1.split("-")
+                #days = tmp1[0].strip()
+                time_from = tmp2[0].strip()
+                time_to = tmp2[1].strip()
+
+                #self.arw["firewall_time_days"].set_text(days)
+                self.arw["firewall_time_from"].set_text(time_from)
+                self.arw["firewall_time_to"].set_text(time_to)
+            except :
+                print("Error handling firewall time condition :", data1)
+
+        # add comments
+        data1 = self.firewall_store[iter1][5]
+        self.arw["firewall_comments"].get_buffer().set_text(data1)
 
         # add ports
-        data1 = self.format_list(self.firewall_store[iter1][3], "") # dest_group
+        data1 = self.firewall_store[iter1][3]
         self.arw["firewall_ports"].get_buffer().set_text(data1)
 
         # add users
-        data1 = self.format_list(self.firewall_store[iter1][6], "")
+        data1 = self.firewall_store[iter1][6]
+        # TODO problème ici
         # add mac, if any
-        data1 += self.format_list(self.firewall_store[iter1][7], "")
-        buffer = self.arw["firewall_users"].get_buffer()
-        buffer.set_text(data1)
+        data1 += self.firewall_store[iter1][7]
+        self.firewall_store[iter1][7] = ""
+        buffer = self.arw["firewall_users"].get_buffer().set_text(data1)
 
 
     def proxy_user(self, widget, event) :
+
         # Loads user data when a user is selected in the list
         path = widget.get_path_at_pos(event.x, event.y)
         if path == None :
             return
         iter1 = self.proxy_store.get_iter(path[0])
         self.iter_proxy =iter1
-        data1 = ""
-        self.arw["proxy_time_condition"].set_text(self.proxy_store[iter1][3])
+
+        # time conditions
+        data1 = self.proxy_store[iter1][3].strip()
+        if data1 == "" :
+            self.arw["proxy_time_condition_days"].set_text("")
+            self.arw["proxy_time_condition_from"].set_text("")
+            self.arw["proxy_time_condition_to"].set_text("")
+
+        elif len(data1) > 8 :
+            try :
+                print (data1)
+                tmp1 = data1.split()
+                tmp2 = tmp1[1].split("-")
+                days = tmp1[0].strip()
+                time_from = tmp2[0].strip()
+                time_to = tmp2[1].strip()
+
+                self.arw["proxy_time_condition_days"].set_text(days)
+                self.arw["proxy_time_condition_from"].set_text(time_from)
+                self.arw["proxy_time_condition_to"].set_text(time_to)
+            except :
+                print("Error handling time condition :", data1)
+        else:
+            print("Invalid time :", data1)
+
         self.arw["proxy_#comments"].get_buffer().set_text(self.proxy_store[iter1][4])
 
         # add users
-        data1 = self.format_list(self.proxy_store[iter1][5], "")  # user
+        data1 = self.proxy_store[iter1][5]  # user
         # add mac, if any
-        data1 += self.format_list(self.proxy_store[iter1][6], "")  # mac
-        buffer = self.arw["proxy_users"].get_buffer()
-        buffer.set_text(data1)
+        data1 += self.proxy_store[iter1][6]  # mac
+        buffer = self.arw["proxy_users"].get_buffer().set_text(data1)
 
         # add groups
-        data1 = self.format_list(self.proxy_store[iter1][7], "") # dest_group
+        data1 = self.proxy_store[iter1][7] # dest_group
         self.arw["proxy_group"].get_buffer().set_text(data1)
         # add dest_domains
-        data1 = self.format_list(self.proxy_store[iter1][8], "") # dest_domain
+        data1 = self.proxy_store[iter1][8] # dest_domain
         # add dest_ip, if any
-        data1 += self.format_list(self.proxy_store[iter1][9], "") # dest_ip
+        data1 += self.proxy_store[iter1][9] # dest_ip
         self.arw["proxy_dest"].get_buffer().set_text(data1)
 
         # set full access
-        self.arw["proxy_full_access"].set_active(False)
         self.arw["paned2"].set_sensitive(True)
-        if self.proxy_store[iter1][10] == "any" :
-            self.arw["proxy_full_access"].set_active(True)
+        if self.proxy_store[iter1][12] == 1 :
             self.arw["paned2"].set_sensitive(False)
 
     def _____________actions_______________() :
         pass
 
-    def toggle_col13(self, cellrenderer, row, treestore) :
+
+    def toggle_col12(self, cellrenderer, row, treestore) :
         # callback of the allow/deny checkbox in proxy tab.
         # col 13 = allow/deny state; col 15 = text color
+        if treestore[row][12] == 0 :
+            treestore[row][12] = 1
+            treestore[row][10] = "any"
+            treestore[row][16] = "#ffff88"
+        else :
+            treestore[row][12] = 0
+            treestore[row][10] = ""
+            treestore[row][16] = "#ffffff"
+
+
+    def toggle_col13(self, cellrenderer, row, treestore, name) :
+        # callback of the allow/deny checkbox in proxy tab.
+        # col 13 = allow/deny state; col 15 = text color
+
         if treestore[row][13] == 0 :
             treestore[row][13] = 1
-            treestore[row][2] = "allow"
+            if name == "proxy" :
+                treestore[row][2] = "allow"
+            elif name == "firewall" :
+                treestore[row][2] = "ACCEPT"
             treestore[row][15] = "#009900"
         else :
             treestore[row][13] = 0
-            treestore[row][2] = "deny"
+            if name == "proxy" :
+                treestore[row][2] = "deny"
+            elif name == "firewall" :
+                treestore[row][2] = "DROP"
             treestore[row][15] = "#ff0000"
 
     def toggle_col14(self, cellrenderer, row, treestore) :
@@ -707,25 +870,32 @@ class Idefix :
         else :
             treestore[row][14] = 0
             treestore[row][1] = "off"
-            treestore[row][15] = "#aaaaaa"
+            treestore[row][15] = "#bbbbbb"
 
-    def update_tv(self, widget, event) :
+    def update_tv(self, TextView, event=None, a=None, b=None,c=None) :
 
-        TextBuffer = widget.get_buffer()
+        TextBuffer = TextView.get_buffer()
         (start_iter, end_iter) = TextBuffer.get_bounds()
         text = TextBuffer.get_text(start_iter, end_iter, False)
+        widget = TextView
 
         if widget.name == "proxy_group" :
-            self.proxy_store.set(self.iter_proxy, 7, text)
+            text0 = self.proxy_store.get_value(self.iter_proxy, 7)
+            if text != text0 :
+                self.proxy_store.set(self.iter_proxy, 7, text)
         elif widget.name == "proxy_dest" :
             self.proxy_store.set(self.iter_proxy, 8, text)
         elif widget.name == "proxy_users" :
             self.proxy_store.set(self.iter_proxy, 5, text)
+        elif widget.name == "proxy_#comments" :
+            self.proxy_store.set(self.iter_proxy, 4, text)
 
         elif widget.name == "firewall_ports" :
             self.firewall_store.set(self.iter_firewall, 3, text)
         elif widget.name == "firewall_users" :
             self.firewall_store.set(self.iter_firewall, 6, text)
+        elif widget.name == "firewall_comments" :
+            self.firewall_store.set(self.iter_firewall, 5, text)
 
         elif widget.name == "maclist" :
             mac_addresses = text.split("\n")           # create list
@@ -774,12 +944,37 @@ class Idefix :
             else :
                 self.users_store[self.iter_user][8] = 0
 
+        self.set_colors()
 
-    def rappel_toggled_col2(self, a, b, c) :
-        return
 
-    def rappel_toggled_col3(self, a, b, c) :
-        return
+    def update_time(self, widget, x=None) :
+        if widget.name in["proxy_time_condition_days", "proxy_time_condition_from", "proxy_time_condition_to"] :
+            time_condition = self.arw["proxy_time_condition_days"].get_text() + " "
+            time_condition += self.arw["proxy_time_condition_from"].get_text().strip() + "-"
+            time_condition += self.arw["proxy_time_condition_to"].get_text().strip()
+            self.proxy_store[self.iter_user][3] = time_condition
+
+        if widget.name in["users_time_days", "users_time_from", "users_time_to"] :
+            #time_condition = self.arw["users_time_days"].get_text() + " "
+            time_condition = self.arw["users_time_from"].get_text().strip() + "-"
+            time_condition += self.arw["users_time_to"].get_text().strip()
+            if time_condition.strip() == "-" :
+                time_condition = ""
+            self.users_store[self.iter_user][3] = time_condition
+
+        if widget.name in["firewall_time_days", "firewall_time_from", "firewall_time_to"] :
+            #time_condition = self.arw["users_time_days"].get_text() + " "
+            time_condition = self.arw["firewall_time_from"].get_text().strip() + "-"
+            time_condition += self.arw["firewall_time_to"].get_text().strip()
+            if time_condition.strip() == "-" :
+                time_condition = ""
+            self.firewall_store[self.iter_firewall][4] = time_condition
+
+    def treeview_expand(self, widget) :
+        if widget.get_active() == 1 :
+            self.arw["treeview1"].expand_all()
+        else :
+            self.arw["treeview1"].collapse_all()
 
     def test1(self, widget, a = "") :
         print ("test1", repr(a))
@@ -873,7 +1068,7 @@ class Idefix :
         if x == None :
             return
         else :
-            self.users_store.insert_after(None, node, [x, "", "", "", 0, 0, 0, 0, 0])
+            self.users_store.insert_after(None, node, [x, "", "", "", 0, 0, 0, 0, 0,"", "", "", ""])
 
     def delete_user(self, widget) :
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
@@ -894,7 +1089,7 @@ class Idefix :
         if x == None :
             return
         else :
-            self.proxy_store.insert_after(node, [x, "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, "", "" ])
+            self.proxy_store.insert_after(node, [x, "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, "", "", "", "" ])
 
     def delete_user2(self, widget) :
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
@@ -946,10 +1141,14 @@ class Idefix :
         if not user1 in self.maclist :
             out = "User %s has no mac address !" % user1
         else :
-            out = "Mac address(es) for user %s : \n" % user1
-            out += "\n".join(self.maclist[user1])
+            num = len (self.maclist[user1])
+            if num == 1 :
+                out = "1 Mac address for user %s : \n" % user1
+            else:
+                out = str(num) + " Mac addresses for user %s : \n" % user1
 
-        out += "\nAccès Internet : \n"
+
+        out += "\nAccès Internet : "
 
         for row in self.users_store :
             mem = "\n[%s]\n" % row[0]      # section
@@ -957,25 +1156,48 @@ class Idefix :
             options = ["", "", "", "", "email", "internet access", "filtered", "open", "full"]
             for i in [4,5,6,7,8] :
                 if row[i] == 1 :
-                    mem += "option = " + options[i] + "\n"
+                    mem += options[i] + "\n"
             for child in row.iterchildren() :     # write users and macaddress
                 user = child[0]
                 if user1 == user :
-                    out += mem + "\n\n"
+                    out += mem + "\n"
                     mem = ""
 
+        out += "\nAccès Internet (compléments) : "
+
+        for row in self.firewall_store :
+            users = row[6].split("\n")
+            for userx in users :
+                if userx.strip() == user1 :
+                    tmp1 = ""
+                    tmp1 += "\n[%s]\n" % row[0]
+                    tmp1 += self.format_comment(row[5])
+                    tmp1 += self.format_line("active", row[1])
+                    tmp1 += self.format_line("action", row[2])
+                    tmp1 += self.format_line("ports", row[3])
+                    tmp1 += self.format_line("time_condition", row[4])
+                    out += tmp1
 
 
-##        for row in self.proxy_store :
-##            out += "\n[%s]\n" % row[0]
-##            out += self.format_line("", row[4])      # comments
-##            out += self.format_line("active", row[1])
-##            out += self.format_line("action", row[2])
-##            out += self.format_line("time_condition", row[3])
-##            out += self.format_userline("user", row[5])
-##            out += self.format_line("dest_group", row[7])
-##            out += self.format_line("destination", row[10])
-##            out += self.format_domainline("dest_domain", row[8])
+        out += "\nFiltrage Internet : "
+
+        for row in self.proxy_store :
+            users = row[5].split("\n")
+            for userx in users :
+                if userx.strip() == user1 :
+                    out += "\n[%s]\n" % row[0]
+                    "%s present in proxy config" % user1
+                    out += self.format_line("", row[4])      # comments
+                    out += self.format_line("active", row[1])
+                    out += self.format_line("action", row[2])
+                    out += self.format_line("time_condition", row[3])
+                    out += self.format_line("dest_group", row[7])
+                    out += self.format_line("destination", row[10])
+                    out += self.format_domainline("dest_domain", row[8])
+
+
+
+
 
         self.arw["user_summary"].get_buffer().set_text(out)
 
@@ -992,8 +1214,15 @@ class Idefix :
             data.set_text(text, -1)
 
     def on_drag_data_received(self, widget, drag_context, x,y, data,info, time):
-            text = data.get_text()
-            print("Received text: %s" % text)
+        text = data.get_text()
+##            print("Received text: %s" % text)
+        if text == self.mem_text :
+            mem_text = text
+            return
+        else :
+            mem_text = text
+            self.update_tv(widget)
+
 
     def ______________output____________() :
         pass
@@ -1006,6 +1235,23 @@ class Idefix :
             if value.strip() != "" :
                 text += key + value + "\n"
         return text
+
+
+    def format_comment(self, line1) :
+        text = ""
+        for value in line1.split("\n") :
+            if value.strip() == "" :
+                continue
+            if value.strip() == "#" :
+                continue
+            if value.strip()[0:1] != "#" :
+                text += "# " + value + "\n"
+            else :
+                text += value + "\n"
+        return text
+
+    def format_time(self, line1) :
+        pass
 
     def format_userline(self, dummy, line1) :
         # separate domains and ips
@@ -1052,7 +1298,10 @@ class Idefix :
         for row in self.users_store :
             out += "\n[%s]\n" % row[0]      # section
             # write options
-            options = ["", "", "", "", "email", "internet access", "filtered", "open", "full"]
+            time_condition = row[3]
+            if time_condition.strip() != "" :
+                out += "time_condition = " + time_condition + "\n"
+            options = ["", "", "", "time_condition", "email", "internet access", "filtered", "open", "full"]
             for i in [4,5,6,7,8] :
                 if row[i] == 1 :
                     out += "option = " + options[i] + "\n"
@@ -1075,7 +1324,7 @@ class Idefix :
         out = ""
         for row in self.proxy_store :
             out += "\n[%s]\n" % row[0]
-            out += self.format_line("", row[4])      # comments
+            out += self.format_comment(row[4])      # comments
             out += self.format_line("active", row[1])
             out += self.format_line("action", row[2])
             out += self.format_line("time_condition", row[3])
@@ -1096,7 +1345,7 @@ class Idefix :
         for row in self.firewall_store :
             tmp1 = ""
             tmp1 += "\n[%s]\n" % row[0]
-            tmp1 += self.format_line("#comments", row[5])
+            tmp1 += self.format_comment(row[5])  # comments
             tmp1 += self.format_line("active", row[1])
             tmp1 += self.format_line("action", row[2])
             tmp1 += self.format_line("ports", row[3])
@@ -1154,6 +1403,9 @@ class Idefix :
     def ftp_upload(self) :
         ftp1 = self.idefix_config["conf"][ftp_active_config]
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        if ftp == None :
+            print("No FTP connexion")
+            return
         for file1 in ["./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini"] :
             ftp_send(ftp, file1)
             print(file1, "envoyé")

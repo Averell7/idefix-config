@@ -4,6 +4,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
+# version 0.16.2 bug fix
 # version 0.16.1  # isdata parameter added
 
 import os, sys, codecs
@@ -97,7 +98,7 @@ class myConfigParser() :
                 if comment_b == True :
                     if  not "#comments" in myconfig[category][section_s] :
                         myconfig[category][section_s]["#comments"] = []
-                    myconfig[category][section_s]["#comments"].append(record_s + "\n")
+                    myconfig[category][section_s]["#comments"].append(record_s)
                     continue
                 record_data = record_s.split("=")
                 if len(record_data) > 1 :
