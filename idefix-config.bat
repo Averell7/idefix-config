@@ -1,2 +1,2 @@
-c:\prog2\python34\python.exe idefix011.py
+c:\prog2\python34\python.exe idefix-config019.py
 pause
