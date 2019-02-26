@@ -45,7 +45,7 @@ elib_intl3.install("idefix-config", "share/locale")
 global version, future
 
 future = True   # activate beta functions
-version = "0.22.0"
+version = "0.22.1"
 
 #
 
@@ -1016,6 +1016,7 @@ class Idefix :
 
         # if the first tab of permissions is empty, open the second
         x = self.arw["notebook2"].get_current_page()
+        current_page = x
 
         TextBuffer = self.arw["proxy_group"].get_buffer()
         (start_iter, end_iter) = TextBuffer.get_bounds()
@@ -1032,8 +1033,16 @@ class Idefix :
             pass
         elif x == 0 and len0 == 0 :
             self.arw["notebook2"].set_current_page(1)
+            current_page = 1
         elif x == 1 and len1 == 0 :
             self.arw["notebook2"].set_current_page(0)
+            current_page = 0
+
+        # load the chooser if the "groups" tab is active.
+        if current_page == 0 :
+            self.arw["chooser"].set_model(self.groups_store)
+        else :
+            self.arw["chooser"].set_model(self.empty_store)
 
 
 
@@ -1286,6 +1295,13 @@ class Idefix :
             print("===>", repr(data))
 
 
+    def on_permissions_tab_change(self,widget, a, page) :
+        # launched by the switch page signal of notebook2
+        #
+        if page == 0 :
+            self.arw["chooser"].set_model(self.groups_store)
+        else :
+            self.arw["chooser"].set_model(self.empty_store)
 
 
 
@@ -1361,11 +1377,11 @@ class Idefix :
 
     def ask_user_dialog(self, level) :
         if level == 1 :
-            new = _("category")
+            new = _("Name of the new category")
         else:
-            new = _("user")
+            new = _("Name of the new user")
 
-        name = ask_text(self.arw["window1"], "Name of the new %s :" % new, "")
+        name = ask_text(self.arw["window1"], new, "")
         if name == None :
             return False
         return name
@@ -1717,7 +1733,7 @@ class Idefix :
         if self.local_control == True :
             f1 = open("./tmp/update", "w")
             f1.close()
-            self.ftp_upload(["./tmp/update"])
+            self.ftp_upload(["./tmp/update"], message = False)
 
 
 
@@ -1842,21 +1858,25 @@ class Idefix :
 
 
 
-    def ftp_upload(self, uploadlist = None) :
+    def ftp_upload(self, uploadlist = None, message = True) :
         ftp1 = self.ftp_config
+        msg = ""
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
         if ftp == None :
-            print("No FTP connexion")
+            msg += _("No FTP connexion")
             return
         if uploadlist == None :
             uploadlist = ["./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini"]
         for file1 in uploadlist :
             ftp_send(ftp, file1)
-            print(file1, "envoyé")
+            msg += file1 + _(" sent\n")
         ftp.close()
 
         # TODO : message to indicate upload was successful
-        print("Upload OK")
+        msg += _("\nUpload OK\n")
+        print(msg)
+        if message == True :
+            alert(msg)
 
 
     def destroy(self, widget=None, donnees=None):
