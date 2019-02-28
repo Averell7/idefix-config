@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 0.23.0 : "mac" replaced by "users"; bugs fixed
 # version 0.22.1 : information after ftp upload
 # version 0.22.0 : Quick update mechanism added
 # version 0.21.0 : Drag and Drop enhanced
@@ -9,6 +10,14 @@
 # version 0.19.1 - colors and icons
 
 
+###########################################################################
+# CONFIGURATION ###########################################################
+###########################################################################
+
+global version, future
+
+future = True   # activate beta functions
+version = "0.23.0"
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -39,16 +48,7 @@ elib_intl3.install("idefix-config", "share/locale")
 # test
 #print(_("SAVE"))
 
-###########################################################################
-# CONFIGURATION ###########################################################
-###########################################################################
 
-global version, future
-
-future = True   # activate beta functions
-version = "0.22.1"
-
-#
 
 class ask_for_config:
     def __init__(self, idefix_config) :
@@ -345,40 +345,43 @@ class Idefix :
                 print("WARNING ! unable to get proxy-users.ini.")
 
 
-            self.config = parser.read(data3, "mac", comments = True, isdata = True)
+            self.config = parser.read(data3, "users", comments = True, isdata = True)
             self.config = parser.read(data4, "firewall", merge = self.config, comments = True, isdata = True)
             self.config = parser.read(data5, "proxy", merge = self.config, comments = True, isdata = True)
             self.config = parser.read(data1, "ports", merge = self.config, comments = True, isdata = True)
             self.config = parser.read(data2, "groups", merge = self.config, comments = True, isdata = True)
 
 
-        # retrieve common files from server
-##        self.idefix_config = parser.read("./idefix-config.cfg", "conf")         # $$
-##        ftp1 = self.idefix_config["conf"]["ftp-common"]
-##        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
-##        ftp.cwd("common")
-##        for file1 in ["firewall-ports.ini", "proxy-groups.ini"] :
-##            ftp_get(ftp, file1, basedir = "./tmp/")
-##        ftp.close()
-
-
-
         else :
             self.config = OrderedDict()
             self.idefix_config = parser.read("./idefix-config.cfg", "conf")
-            self.config = parser.read("./tmp/users.ini", "mac", merge = self.config, comments = True)
+            self.config = parser.read("./tmp/users.ini", "users", merge = self.config, comments = True)
             self.config = parser.read("./tmp/firewall-users.ini", "firewall", merge = self.config, comments = True)
             self.config = parser.read("./tmp/proxy-users.ini", "proxy", merge = self.config, comments = True)
             self.config = parser.read("./tmp/firewall-ports.ini", "ports", merge = self.config, comments = True)
             self.config = parser.read("./tmp/proxy-groups.ini", "groups", merge = self.config, comments = True)
 
 
-        for category in ["firewall", "mac", "proxy", "ports", "groups"] :
+        for category in ["firewall", "proxy", "ports", "groups"] :
             if not category in self.config :
                 self.config[category] = OrderedDict()
 
+        if not "users" in self.config :
+            response = askyesno(_("No user data"),
+                                _("There is no user data present. \nDo you want to create standard categories ?"))
+            print(response)
+            if response == 1 :
+                self.config["users"] = OrderedDict([(_('No access'), OrderedDict()),
+                                                  (_('email only'), OrderedDict([('option', ['email'])])),
+                                                  (_('Filtered Internet access'), OrderedDict([('option', ['email', 'internet access', 'filtered'])])),
+                                                  (_('Open Internet access'), OrderedDict([('option', ['email', 'internet access', 'open'])]))
+                                                  ])
+            else :
+                self.config["users"] = OrderedDict()
+
+
         self.maclist = {}
-        data1 = self.config["mac"]
+        data1 = self.config["users"]
         for section in data1 :
             for user in data1[section] :
                 self.maclist[user] = data1[section][user]
@@ -452,7 +455,7 @@ class Idefix :
         4 : "time_condition",
         5 : "#comments",
         6 : "user",
-        7 : "mac",
+        7 : "users",
         8 :
         9 :
         10 : (int)
@@ -630,7 +633,7 @@ class Idefix :
     def populate_users(self):
         self.users_store.clear()
         self.cat_list = {}
-        data1 = self.config["mac"]
+        data1 = self.config["users"]
         options = ["", "", "", "", "email", "internet access", "filtered", "open", ""]
         for section in data1 :
             if "option" in data1[section] :
@@ -665,7 +668,7 @@ class Idefix :
     def populate_firewall(self):
         self.firewall_store.clear()
         data1 = self.config["firewall"]
-        keys = ["active", "action", "ports", "time_condition", "#comments", "user", "mac"]
+        keys = ["active", "action", "ports", "time_condition", "#comments", "user", "users"]
         for section in data1 :
             data2 = [section]
             if section[0:2] == "__"  :     # for sections generated from the users data, don't load data here
@@ -695,11 +698,11 @@ class Idefix :
             data2 = data1[section]
             # merge user and mac
             if not "user" in data2 :
-                if "mac" in data2 :
-                    data2["user"] = data2["mac"]
+                if "users" in data2 :
+                    data2["user"] = data2["users"]
             else :
-                if "mac" in data2 :
-                    data2["user"] += data2["mac"]
+                if "users" in data2 :
+                    data2["user"] += data2["users"]
             # merge dest_domain and dest_ip
             if not "dest_domain" in data2 :
                 if "dest_ip" in data2 :
@@ -1164,7 +1167,6 @@ class Idefix :
         text1 = TextBuffer.get_text(start_iter, end_iter, False)  + text
         widget = TextView
 
-        print("update_tv")
         if widget.name == "proxy_group" :
             self.proxy_store.set(self.iter_proxy, 7, text1)
         elif widget.name == "proxy_dest" :
@@ -1697,7 +1699,7 @@ class Idefix :
             if value.strip() != "" :
                 if len(re.findall("[:]", value)) == 5 :  # five : means this is a mac address
                     # TODO  check that the mac address is valid
-                    key = "mac"
+                    key = "users"
                 else : key = "user"
                 text += key + " = " + value + "\n"
         return text
@@ -1786,13 +1788,14 @@ class Idefix :
     def build_firewall_ini (self) :
         out = {}
         sections = []
-        #"active", "action", "ports", "time_condition", "#comments", "user", "mac"
+        #"active", "action", "ports", "time_condition", "#comments", "user", "users"
 
         for row in self.firewall_store :
             section = row[0]
-            sections.append(section)
             if section[0:2] == "__" :    # This section was generated, skip
                 continue
+            sections.append(section)
+
             tmp1 = ""
             tmp1 += "\n[%s]\n" % section
             tmp1 += self.format_comment(row[5])  # comments
@@ -1801,7 +1804,7 @@ class Idefix :
             tmp1 += self.format_line("ports", row[3])
             tmp1 += self.format_line("time_condition", row[4])
             tmp1 += self.format_line("user", row[6])
-            tmp1 += self.format_line("mac", row[7])
+            tmp1 += self.format_line("users", row[7])
             #print(tmp1)
             out[section] = tmp1
 
@@ -1827,10 +1830,12 @@ class Idefix :
             option = row[1].split("|")
 
             myoptions = ["ACCEPT"]
-            if row[4] == 1 :
+            if row[4] == 1 :                            # email
                 myoptions.append("email")
-            if row[5] == 1 :
                 myoptions.append("ports_techniques")    #  TODO problème de traduction
+            if row[5] == 1 :
+                if not "ports_techniques" in myoptions :
+                    myoptions.append("ports_techniques")    #  TODO problème de traduction
                 if row[6] == 1:
                     myoptions.append("ftp")
                 elif row[7] == 1:
