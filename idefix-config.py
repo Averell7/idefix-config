@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
-# version 0.23.0 : "mac" replaced by "users"; bugs fixed
+# version 0.23.1 : "mac" replaced by "users"; bugs fixed
 # version 0.22.1 : information after ftp upload
 # version 0.22.0 : Quick update mechanism added
 # version 0.21.0 : Drag and Drop enhanced
@@ -325,6 +325,15 @@ class Idefix :
             data2 = ftp_get(ftp, "proxy-groups.ini")
             if not "local" in ftp1 :
                 ftp.cwd("..")
+
+            # make a local copy for debug purpose
+            f1 = open("./tmp/firewall-ports.ini", "w", encoding="utf-8-sig")
+            f1.write("\n".join(data1))
+            f1.close()
+            f1 = open("./tmp/proxy-groups.ini", "w", encoding="utf-8-sig")
+            f1.write("\n".join(data2))
+            f1.close()
+
 
             # retrieve perso files by ftp
             data3 = ftp_get(ftp, "users.ini")
@@ -1731,9 +1740,9 @@ class Idefix :
         self.build_users()
         self.build_proxy_ini()
         self.build_firewall_ini()
-        if not load_locale == True :
+        if not load_locale == True :  #send the files bt FTP
             self.ftp_upload()
-        if self.local_control == True :
+        if self.local_control == True :   # if connected to Idefix, send the update signal
             f1 = open("./tmp/update", "w")
             f1.close()
             self.ftp_upload(["./tmp/update"], message = False)
