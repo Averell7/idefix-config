@@ -9,91 +9,94 @@
 # version 0.19.5 - firewall list is now OK
 # version 0.19.1 - colors and icons
 
-
-###########################################################################
-# CONFIGURATION ###########################################################
-###########################################################################
-
-global version, future
-
-future = True   # activate beta functions
-version = "0.23.0"
+import glob
+import io
+import os
+import re
+import sys
+import time
+import traceback
+from collections import OrderedDict
+from ftplib import FTP, Error as FTPError
 
 import gi
+
+import elib_intl3
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
-from gi.repository import Pango
-from gi.repository import Gio, GLib
-from gi.repository import cairo
+
+from myconfigparser import myConfigParser
+
+###########################################################################
+# CONFIGURATION ###########################################################
+###########################################################################
+global version, future
+future = True  # activate beta functions
+version = "0.23.0"
+
+
 gtk = Gtk
 Pixbuf = GdkPixbuf.Pixbuf
-
-from collections import defaultdict, OrderedDict
-import os, io, sys, time, re, glob
-from ftplib import FTP
-from myconfigparser import myConfigParser
 
 DRAG_ACTION = Gdk.DragAction.COPY
 
 ###########################################################################
 # LOCALISATION ############################################################
 ###########################################################################
-import gettext
-import locale
-import elib_intl3
-elib_intl3.install("idefix-config", "share/locale")
-
-# test
-#print(_("SAVE"))
+_ = elib_intl3.install_module("idefix-config", "share/locale")
 
 
+class AskForConfig:
 
-class ask_for_config:
-    def __init__(self, idefix_config) :
-        #dialog = gtk.Dialog(title=None, parent=None, flags=0, buttons=None)
-        self.dialog = gtk.Dialog(title='Configuration choice', parent=None, flags=gtk.DialogFlags.MODAL, buttons=("OK", 1, "Cancel", 0));
-        self.combo = gtk.ComboBoxText();
+    def __init__(self, idefix_config):
+        # dialog = gtk.Dialog(title=None, parent=None, flags=0, buttons=None)
+        self.dialog = gtk.Dialog(title='Configuration choice', parent=None, flags=gtk.DialogFlags.MODAL,
+                                 buttons=("OK", 1, "Cancel", 0))
+        self.combo = gtk.ComboBoxText()
 
-        for key in idefix_config["conf"] :
-            self.combo.append_text(key);
-        self.combo.set_active(0);
-        self.dialog.vbox.pack_start(self.combo, 0, 0, 0);
-        self.dialog.show_all();
+        for key in idefix_config["conf"]:
+            self.combo.append_text(key)
+        self.combo.set_active(0)
+        self.dialog.vbox.pack_start(self.combo, 0, 0, 0)
+        self.dialog.show_all()
 
-    def run(self) :
-        result = self.dialog.run();
-        configname = self.combo.get_active_text();
-        self.dialog.destroy();
+    def run(self):
+        self.dialog.run()
+        configname = self.combo.get_active_text()
+        self.dialog.destroy()
         return configname
 
 
-def printExcept() :
-    a,b,c = sys.exc_info()
-    for d in traceback.format_exception(a,b,c) :
+def print_except():
+    a, b, c = sys.exc_info()
+    for d in traceback.format_exception(a, b, c):
         print(d, end=' ')
 
-def bool_test(value) :
-    if isinstance(value, str) :
-        try :
+
+def bool_test(value):
+    if isinstance(value, str):
+        try:
             value = int(value)
-        except :
-            if value.strip().lower() == "true" :
+        except ValueError:
+            if value.strip().lower() == "true":
                 return True
-            else :
+            else:
                 return False
 
     return bool(value)
 
-def alert(message, type = 0) :
 
-        dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.WARNING,
-                                     Gtk.ButtonsType.CLOSE , message)
-        dialog.run()
-        dialog.destroy()
+def alert(message, type_=0):
+    dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.WARNING,
+                               Gtk.ButtonsType.CLOSE, message)
+    dialog.run()
+    dialog.destroy()
 
-def showwarning(title, message) :
+
+def showwarning(title, message):
     """
       GTK_MESSAGE_INFO,
       GTK_MESSAGE_WARNING,
@@ -102,26 +105,24 @@ def showwarning(title, message) :
       GTK_MESSAGE_OTHER
     """
 
-    resetTransform_b = False
+    reset_transform = False
 
-    dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL , Gtk.MessageType.WARNING,
-                                 Gtk.ButtonsType.CLOSE , title)
+    dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.WARNING,
+                               Gtk.ButtonsType.CLOSE, title)
 
     dialog.format_secondary_text(message)
-    if "transformWindow" in app.arw :
+    if "transformWindow" in app.arw:
         app.arw["transformWindow"].set_keep_above(False)
-        resetTransform_b = True
+        reset_transform = True
     dialog.set_keep_above(True)
     dialog.run()
     dialog.destroy()
-    if resetTransform_b == True :
+    if reset_transform:
         app.arw["transformWindow"].set_keep_above(True)
 
 
-def askyesno(title, string) :
-
-
-    dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL , Gtk.MessageType.QUESTION,
+def askyesno(title, string):
+    dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.QUESTION,
                                Gtk.ButtonsType.NONE, title)
     dialog.add_button(Gtk.STOCK_YES, True)
     dialog.add_button(Gtk.STOCK_NO, False)
@@ -130,6 +131,7 @@ def askyesno(title, string) :
     rep = dialog.run()
     dialog.destroy()
     return rep
+
 
 def ask_text(parent, message, default=''):
     """
@@ -150,7 +152,7 @@ def ask_text(parent, message, default=''):
 
     r = d.run()
     text = entry.get_text()
-    if sys.version_info[0] == 2 :
+    if sys.version_info[0] == 2:
         text = text.decode('utf8')
     d.destroy()
     if r == Gtk.ResponseType.OK:
@@ -159,74 +161,76 @@ def ask_text(parent, message, default=''):
         return None
 
 
-
-def ftp_connect(server, login, password) :
+def ftp_connect(server, login, password):
     global ftp1
 
-    if password[0:1] == "%" :
+    if password[0:1] == "%":
         hysteresis = ""
         i = 0
-        for deplacement in password :
-            if i % 2 == 1 :
+        for deplacement in password:
+            if i % 2 == 1:
                 hysteresis += deplacement
             i += 1
         password = hysteresis
 
-    try :
-        ftp = FTP(server)     # connect to host, default port
+    try:
+        ftp = FTP(server)  # connect to host, default port
         ftp.login(login, password)
-        if "local" in ftp1 :
+        if "local" in ftp1:
             ftp.cwd("idefix")
         return ftp
-    except :
-        print ("Unable to connect to ftp server with : %s / %s" % (login, password))
+    except FTPError:
+        print("Unable to connect to ftp server with : %s / %s" % (login, password))
 
 
-def ftp_get(ftp, filename, utime = None, required = True, basedir = "") :
-
-    if utime :
+def ftp_get(ftp, filename, utime=None, required=True, basedir=""):
+    if utime:
         utime -= time.timezone
-    try :
-        x = ftp.sendcmd('MDTM '+ filename)          # verify that the file exists on the server
-        try :
-            f1 = io.BytesIO()
-            ftp.retrbinary('RETR ' + filename, f1.write)     # get the file
-            data1 = f1.getvalue()
-            f1.close()
-            print (filename, "received OK.")
-            return data1.decode("utf-8-sig").split("\n")
-        except :
-                print("could not get " + filename)
-    except :
-        if required :
+    try:
+        ftp.sendcmd('MDTM ' + filename)  # verify that the file exists on the server
+    except FTPError:
+        if required:
             print("We got an error with %s. Is it present on the server?" % filename)
+    try:
+        f1 = io.BytesIO()
+        ftp.retrbinary('RETR ' + filename, f1.write)  # get the file
+        data1 = f1.getvalue()
+        f1.close()
+        print(filename, "received OK.")
+        return data1.decode("utf-8-sig").split("\n")
+    except FTPError:
+        print("could not get " + filename)
 
 
-
-def ftp_send(ftp, filepath, directory = None, dest_name = None) :
-
-    if directory :
-        ftp.cwd(directory)               # change into subdirectory
-    if not dest_name :
+def ftp_send(ftp, filepath, directory=None, dest_name=None):
+    if directory:
+        ftp.cwd(directory)  # change into subdirectory
+    if not dest_name:
         dest_name = os.path.split(filepath)[1]
 
-    if os.path.isfile(filepath) :
-        with open(filepath,'rb') as f1 :               # file to send
-            ftp.storbinary('STOR ' + dest_name, f1)     # send the file
-    else :
+    if os.path.isfile(filepath):
+        with open(filepath, 'rb') as f1:  # file to send
+            ftp.storbinary('STOR ' + dest_name, f1)  # send the file
+    else:
         print(filepath + " not found")
 
-    #print( ftp.retrlines('LIST'))
-    if directory :
-        ftp.cwd('..')               # return to house directory
+    # print( ftp.retrlines('LIST'))
+    if directory:
+        ftp.cwd('..')  # return to house directory
 
-def get_row(treestore, iter1) :
+
+def get_row(treestore, iter1):
     row = []
     for i in range(treestore.get_n_columns()):
-            row.append(treestore.get_value(iter1, i))
+        row.append(treestore.get_value(iter1, i))
     return row
 
-class Idefix :
+
+class Idefix:
+    cat_list = {}
+    iter_user = None
+    iter_firewall = None
+    iter_proxy = None
 
     def __init__(self, ftp_config):
 
@@ -240,14 +244,14 @@ class Idefix :
         self.widgets = gtk.Builder()
         self.widgets.add_from_file('./idefix-config.glade')
         # create an array of all objects with their name as key
-        arWidgets = self.widgets.get_objects()
+        ar_widgets = self.widgets.get_objects()
         self.arw = {}
-        for z in arWidgets :
-            try :
+        for z in ar_widgets:
+            try:
                 name = gtk.Buildable.get_name(z)
-                self.arw[name]= z
+                self.arw[name] = z
                 z.name = name
-            except :
+            except:
                 pass
 
         self.arw["configname"].set_text(configname)
@@ -257,73 +261,67 @@ class Idefix :
         window1.set_title(_("Idefix admin"))
         window1.connect("destroy", self.destroy)
 
-        if future == False :
-            for widget in ["vbox6", "paned3", "box2", "frame6", "inifiles_list", "inifiles_view"] :
+        if not future:
+            for widget in ["vbox6", "paned3", "box2", "frame6", "inifiles_list", "inifiles_view"]:
                 self.arw[widget].hide()
 
+            # images for buttons
+            # image = Gtk.Image()
+            # image.set_from_file("./data/Bouton bleu.png")
+            # self.blue_button = image
+            # image2 = Gtk.Image()
+            # image2.set_from_file("./data/Bouton rouge.png")
+            # self.red_button = image2
+            # image3 = Gtk.Image()
+            # image3.set_from_file("./data/Bouton jaune.png")
+            # self.yellow_button = image3
+            # image4 = Gtk.Image()
+            # image4.set_from_file("./data/Bouton vert.png")
+            # self.green_button = image4
 
-
-             # images for buttons
-##        image = Gtk.Image()
-##        image.set_from_file("./data/Bouton bleu.png")
-##        self.blue_button = image
-##        image2 = Gtk.Image()
-##        image2.set_from_file("./data/Bouton rouge.png")
-##        self.red_button = image2
-##        image3 = Gtk.Image()
-##        image3.set_from_file("./data/Bouton jaune.png")
-##        self.yellow_button = image3
-##        image4 = Gtk.Image()
-##        image4.set_from_file("./data/Bouton vert.png")
-##        self.green_button = image4
-
-
-##        self.arw["button1"].set_image(self.blue_button)
-##        self.arw["button1"].set_always_show_image(True)
-##        self.arw["toggle_proxy_open_button"].set_image(self.yellow_button)
-##        self.arw["toggle_proxy_open_button"].set_always_show_image(True)
-##        self.arw["toggle_proxy_allow_button"].set_image(self.green_button)
-##        self.arw["toggle_proxy_allow_button"].set_always_show_image(True)
-
+            # self.arw["button1"].set_image(self.blue_button)
+            # self.arw["button1"].set_always_show_image(True)
+            # self.arw["toggle_proxy_open_button"].set_image(self.yellow_button)
+            # self.arw["toggle_proxy_open_button"].set_always_show_image(True)
+            # self.arw["toggle_proxy_allow_button"].set_image(self.green_button)
+            # self.arw["toggle_proxy_allow_button"].set_always_show_image(True)
 
         # get the style from the css file and apply it
-        cssProvider = Gtk.CssProvider()
-        cssProvider.load_from_path('./data/idefixadmin.css')
+        css_provider = Gtk.CssProvider()
+        css_provider.load_from_path('./data/idefixadmin.css')
         screen = Gdk.Screen.get_default()
-        styleContext = Gtk.StyleContext()
-        styleContext.add_provider_for_screen(screen, cssProvider,
-                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
+        style_context = Gtk.StyleContext()
+        style_context.add_provider_for_screen(screen, css_provider,
+                                              Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
-        #autoconnect signals for self functions
+        # autoconnect signals for self functions
         self.widgets.connect_signals(self)
 
         # autosave textview buffers when typing (see also drag and drop below)
         # and when drag is received
         for textView in ["maclist",
                          "proxy_users", "proxy_group", "proxy_dest", "proxy_#comments",
-                         "firewall_ports", "firewall_users", "firewall_comments"] :
-
+                         "firewall_ports", "firewall_users", "firewall_comments"]:
             self.arw[textView].connect("key-release-event", self.update_tv)
-            #self.arw[textView].connect("drag-end", self.update_tv)
+            # self.arw[textView].connect("drag-end", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
 
-
         # load configuration
-        if load_locale == False :
+        if not load_locale:
 
             # ftp connect
 
             ftp1 = ftp_config
-            if "local" in ftp1 :
+            if "local" in ftp1:
                 self.local_control = True
             ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
 
             # retrieve common files by ftp
-            if not "local" in ftp1 :
+            if not "local" in ftp1:
                 ftp.cwd("common")
             data1 = ftp_get(ftp, "firewall-ports.ini")
             data2 = ftp_get(ftp, "proxy-groups.ini")
-            if not "local" in ftp1 :
+            if not "local" in ftp1:
                 ftp.cwd("..")
 
             # make a local copy for debug purpose
@@ -334,7 +332,6 @@ class Idefix :
             f1.write("\n".join(data2))
             f1.close()
 
-
             # retrieve perso files by ftp
             data3 = ftp_get(ftp, "users.ini")
             data4 = ftp_get(ftp, "firewall-users.ini")
@@ -342,70 +339,65 @@ class Idefix :
 
             ftp.close()
 
-            if data1 == None :
+            if data1 is None:
                 print("WARNING ! unable to get firewall-ports.ini.")
-            if data2 == None :
+            if data2 is None:
                 print("WARNING ! unable to get proxy-groups.ini.")
-            if data3 == None :
+            if data3 is None:
                 print("WARNING ! unable to get users.ini.")
-            if data4 == None :
+            if data4 is None:
                 print("WARNING ! unable to get users.ini.")
-            if data5 == None :
+            if data5 is None:
                 print("WARNING ! unable to get proxy-users.ini.")
 
+            self.config = parser.read(data3, "users", comments=True, isdata=True)
+            self.config = parser.read(data4, "firewall", merge=self.config, comments=True, isdata=True)
+            self.config = parser.read(data5, "proxy", merge=self.config, comments=True, isdata=True)
+            self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
+            self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
-            self.config = parser.read(data3, "users", comments = True, isdata = True)
-            self.config = parser.read(data4, "firewall", merge = self.config, comments = True, isdata = True)
-            self.config = parser.read(data5, "proxy", merge = self.config, comments = True, isdata = True)
-            self.config = parser.read(data1, "ports", merge = self.config, comments = True, isdata = True)
-            self.config = parser.read(data2, "groups", merge = self.config, comments = True, isdata = True)
-
-
-        else :
+        else:
             self.config = OrderedDict()
             self.idefix_config = parser.read("./idefix-config.cfg", "conf")
-            self.config = parser.read("./tmp/users.ini", "users", merge = self.config, comments = True)
-            self.config = parser.read("./tmp/firewall-users.ini", "firewall", merge = self.config, comments = True)
-            self.config = parser.read("./tmp/proxy-users.ini", "proxy", merge = self.config, comments = True)
-            self.config = parser.read("./tmp/firewall-ports.ini", "ports", merge = self.config, comments = True)
-            self.config = parser.read("./tmp/proxy-groups.ini", "groups", merge = self.config, comments = True)
+            self.config = parser.read("./tmp/users.ini", "users", merge=self.config, comments=True)
+            self.config = parser.read("./tmp/firewall-users.ini", "firewall", merge=self.config, comments=True)
+            self.config = parser.read("./tmp/proxy-users.ini", "proxy", merge=self.config, comments=True)
+            self.config = parser.read("./tmp/firewall-ports.ini", "ports", merge=self.config, comments=True)
+            self.config = parser.read("./tmp/proxy-groups.ini", "groups", merge=self.config, comments=True)
 
-
-        for category in ["firewall", "proxy", "ports", "groups"] :
-            if not category in self.config :
+        for category in ["firewall", "proxy", "ports", "groups"]:
+            if category not in self.config:
                 self.config[category] = OrderedDict()
 
-        if not "users" in self.config :
+        if "users" not in self.config:
             response = askyesno(_("No user data"),
                                 _("There is no user data present. \nDo you want to create standard categories ?"))
             print(response)
-            if response == 1 :
+            if response == 1:
                 self.config["users"] = OrderedDict([(_('No access'), OrderedDict()),
-                                                  (_('email only'), OrderedDict([('option', ['email'])])),
-                                                  (_('Filtered Internet access'), OrderedDict([('option', ['email', 'internet access', 'filtered'])])),
-                                                  (_('Open Internet access'), OrderedDict([('option', ['email', 'internet access', 'open'])]))
-                                                  ])
-            else :
+                                                    (_('email only'), OrderedDict([('option', ['email'])])),
+                                                    (_('Filtered Internet access'), OrderedDict(
+                                                        [('option', ['email', 'internet access', 'filtered'])])),
+                                                    (_('Open Internet access'),
+                                                     OrderedDict([('option', ['email', 'internet access', 'open'])]))
+                                                    ])
+            else:
                 self.config["users"] = OrderedDict()
-
 
         self.maclist = {}
         data1 = self.config["users"]
-        for section in data1 :
-            for user in data1[section] :
+        for section in data1:
+            for user in data1[section]:
                 self.maclist[user] = data1[section][user]
 
-        if future == True :
-            pass
-        else :
+        if not future:
             # delete from config["firewall"] the generated lines
             todel = []
-            for key in self.config["firewall"] :
-                if key[0:2] == "__" :
+            for key in self.config["firewall"]:
+                if key[0:2] == "__":
                     todel.append(key)
-            for key in todel :
+            for key in todel:
                 del self.config["firewall"][key]
-
 
         # Trees
         # 1 - users
@@ -425,15 +417,14 @@ class Idefix :
         12 : icon 2
         """
         # section / user
-        self.users_store = gtk.TreeStore(str,str,str, str, int, int, int, int, int, str, str, Pixbuf, Pixbuf) #
+        self.users_store = gtk.TreeStore(str, str, str, str, int, int, int, int, int, str, str, Pixbuf, Pixbuf)  #
 
         self.treeview1 = self.arw["treeview1"]
         self.treeview1.set_model(self.users_store)
 
         self.cell = gtk.CellRendererText()
-        self.cellpb = gtk.CellRendererPixbuf(xalign = 0.0)
-        self.cellpb2 = gtk.CellRendererPixbuf(xalign = 0.0)
-
+        self.cellpb = gtk.CellRendererPixbuf(xalign=0.0)
+        self.cellpb2 = gtk.CellRendererPixbuf(xalign=0.0)
 
         self.tvcolumn = gtk.TreeViewColumn(_('Filename'))
         self.treeview1.connect("button-press-event", self.load_user)
@@ -442,17 +433,17 @@ class Idefix :
         self.tvcolumn.pack_start(self.cellpb, False)
         self.tvcolumn.pack_start(self.cellpb2, False)
         self.tvcolumn.add_attribute(self.cell, "background", 10)
-##        self.tvcolumn.add_attribute(self.cell, "foreground", 9)
-##        self.tvcolumn.add_attribute(self.cell, "weight", 8)
+        # self.tvcolumn.add_attribute(self.cell, "foreground", 9)
+        # self.tvcolumn.add_attribute(self.cell, "weight", 8)
         self.tvcolumn.add_attribute(self.cell, "text", 0)
         self.tvcolumn.add_attribute(self.cellpb, "pixbuf", 11)
         self.tvcolumn.add_attribute(self.cellpb2, "pixbuf", 12)
 
-        #self.tvcolumn1 = gtk.TreeViewColumn(_('Restore'), self.check, active=3)
-        #self.tvcolumn2 = gtk.TreeViewColumn(_('Test'), self.test, text=3)
-        #self.tvcolumn = gtk.TreeViewColumn(_('Yes'), self.cell, text=0, background=2)
+        # self.tvcolumn1 = gtk.TreeViewColumn(_('Restore'), self.check, active=3)
+        # self.tvcolumn2 = gtk.TreeViewColumn(_('Test'), self.test, text=3)
+        # self.tvcolumn = gtk.TreeViewColumn(_('Yes'), self.cell, text=0, background=2)
         self.treeview1.append_column(self.tvcolumn)
-        #self.treeview1.append_column(self.tvcolumn1)
+        # self.treeview1.append_column(self.tvcolumn1)
         self.populate_users()
 
         # 2 - firewall
@@ -478,41 +469,41 @@ class Idefix :
 
         """
 
-        self.firewall_store = gtk.ListStore(str,str,str, str, str, str,str,str, str, str, int, int, int, int, int, str, str) #
+        self.firewall_store = gtk.ListStore(str, str, str, str, str, str, str, str, str, str, int, int, int, int, int,
+                                            str, str)  #
         self.cell2 = gtk.CellRendererText()
 
-        self.check3 = gtk.CellRendererToggle(activatable = True)
-        #self.check.set_property('xalign', 0.0)
-        self.check3.connect( 'toggled', self.toggle_col13, self.firewall_store, "firewall" )
-        self.check4 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
-        self.check4.connect( 'toggled', self.toggle_col14, self.firewall_store )
-##        self.check6 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
-##        self.check6.connect( 'toggled', self.toggle_col12_firewall, self.firewall_store )
+        self.check3 = gtk.CellRendererToggle(activatable=True)
+        # self.check.set_property('xalign', 0.0)
+        self.check3.connect('toggled', self.toggle_col13, self.firewall_store, "firewall")
+        self.check4 = gtk.CellRendererToggle(activatable=True, xalign=0.5)
+        self.check4.connect('toggled', self.toggle_col14, self.firewall_store)
+        # self.check6 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
+        # self.check6.connect( 'toggled', self.toggle_col12_firewall, self.firewall_store )
 
         self.treeview2 = self.arw["treeview2"]
         self.treeview2.set_model(self.firewall_store)
         self.treeview2.connect("button-press-event", self.firewall_user)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('Key'), self.cell2, text = 0, foreground = 15, background = 16)
-        #self.tvcolumn.pack_start(self.cell2, False)
-        #self.tvcolumn.add_attribute(self.cell2, "text", 0)
+        self.tvcolumn = gtk.TreeViewColumn(_('Key'), self.cell2, text=0, foreground=15, background=16)
+        # self.tvcolumn.pack_start(self.cell2, False)
+        # self.tvcolumn.add_attribute(self.cell2, "text", 0)
         self.treeview2.append_column(self.tvcolumn)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('Accept/Drop'), self.check3, active = 13, visible = 11)
+        self.tvcolumn = gtk.TreeViewColumn(_('Accept/Drop'), self.check3, active=13, visible=11)
         self.treeview2.append_column(self.tvcolumn)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('On/Off'), self.check4, active = 14, visible = 11)
+        self.tvcolumn = gtk.TreeViewColumn(_('On/Off'), self.check4, active=14, visible=11)
         self.treeview2.append_column(self.tvcolumn)
 
-##        self.tvcolumn = gtk.TreeViewColumn(_('Open'), self.check6, active = 12, visible = 11)
-##        self.treeview2.append_column(self.tvcolumn)
+        # self.tvcolumn = gtk.TreeViewColumn(_('Open'), self.check6, active = 12, visible = 11)
+        # self.treeview2.append_column(self.tvcolumn)
 
-##        self.tvcolumn = gtk.TreeViewColumn(_('Value'), self.check )
-##        #self.tvcolumn.pack_start(self.check, False)
-##        #self.tvcolumn.add_attribute(self.check, "text", 1)
-##        self.treeview2.append_column(self.tvcolumn)
-##        # self.tvcolumn1 = gtk.TreeViewColumn(_('Restore'), self.check, active=3)
-
+        # self.tvcolumn = gtk.TreeViewColumn(_('Value'), self.check )
+        # self.tvcolumn.pack_start(self.check, False)
+        # self.tvcolumn.add_attribute(self.check, "text", 1)
+        # self.treeview2.append_column(self.tvcolumn)
+        # self.tvcolumn1 = gtk.TreeViewColumn(_('Restore'), self.check, active=3)
 
         # 3 - proxy
         """
@@ -535,79 +526,73 @@ class Idefix :
         16 : color2
         """
 
-
-        self.proxy_store = gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, int, int, int, str, str) #
+        self.proxy_store = gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, int, int, int, str,
+                                         str)  #
         self.cell3 = gtk.CellRendererText()
-##        self.check1 = gtk.CellRendererToggle(activatable = True)
-##        self.check1.connect( 'toggled', self.toggle_col13, self.proxy_store, "proxy" )
-        self.check2 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
-        self.check2.connect( 'toggled', self.toggle_col14, self.proxy_store )
-##        self.check5 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
-##        self.check5.connect_after( 'toggled', self.toggle_col12, self.proxy_store )
-
+        # self.check1 = gtk.CellRendererToggle(activatable = True)
+        # self.check1.connect( 'toggled', self.toggle_col13, self.proxy_store, "proxy" )
+        self.check2 = gtk.CellRendererToggle(activatable=True, xalign=0.5)
+        self.check2.connect('toggled', self.toggle_col14, self.proxy_store)
+        # self.check5 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
+        # self.check5.connect_after( 'toggled', self.toggle_col12, self.proxy_store )
 
         self.treeview3 = self.arw["treeview3"]
         self.treeview3.set_model(self.proxy_store)
         self.treeview3.connect("button-press-event", self.load_proxy_user)
 
-
-        self.tvcolumn = gtk.TreeViewColumn(_('Key'), self.cell3, text = 0, foreground = 15, background = 16)
+        self.tvcolumn = gtk.TreeViewColumn(_('Key'), self.cell3, text=0, foreground=15, background=16)
         self.tvcolumn.set_fixed_width(250)
         self.treeview3.append_column(self.tvcolumn)
 
-##        self.tvcolumn = gtk.TreeViewColumn(_('Allow/deny'), self.check1, active = 13)
-##        self.treeview3.append_column(self.tvcolumn)
+        # self.tvcolumn = gtk.TreeViewColumn(_('Allow/deny'), self.check1, active = 13)
+        # self.treeview3.append_column(self.tvcolumn)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('On/Off'), self.check2, active = 14)
+        self.tvcolumn = gtk.TreeViewColumn(_('On/Off'), self.check2, active=14)
 
         self.treeview3.append_column(self.tvcolumn)
 
-##        self.tvcolumn = gtk.TreeViewColumn(_('Open'), self.check5, active = 12)
-##        self.treeview3.append_column(self.tvcolumn)
+        # self.tvcolumn = gtk.TreeViewColumn(_('Open'), self.check5, active = 12)
+        # self.treeview3.append_column(self.tvcolumn)
 
         # chooser
 
-        self.tvcolumn = gtk.TreeViewColumn(_('---'), self.cell, text = 0)
+        self.tvcolumn = gtk.TreeViewColumn(_('---'), self.cell, text=0)
         self.arw["chooser"].append_column(self.tvcolumn)
-        sel = self.arw["chooser"].get_selection()
-        ## sel.set_mode(Gtk.SelectionMode.MULTIPLE)
+        self.arw["chooser"].get_selection()
+        # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('---'), self.cell, text = 0)
+        self.tvcolumn = gtk.TreeViewColumn(_('---'), self.cell, text=0)
         self.arw["chooser2"].append_column(self.tvcolumn)
-        sel = self.arw["chooser2"].get_selection()
-        ## sel.set_mode(Gtk.SelectionMode.MULTIPLE)
+        self.arw["chooser2"].get_selection()
+        # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
-        self.ports_store = gtk.ListStore(str) #
-        self.groups_store = gtk.ListStore(str) #
-        self.empty_store = gtk.ListStore(str) #
+        self.ports_store = gtk.ListStore(str)  #
+        self.groups_store = gtk.ListStore(str)  #
+        self.empty_store = gtk.ListStore(str)  #
 
-
-
-        for chooser in["chooser", "chooser2"] :
-
+        for chooser in ["chooser", "chooser2"]:
             self.arw[chooser].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [],
-                DRAG_ACTION)
+                                                       DRAG_ACTION)
             self.arw[chooser].drag_source_add_text_targets()
             self.arw[chooser].connect("drag-data-get", self.chooser_drag_data_get)
 
         # list of inifiles
 
         self.inifiles_store = gtk.ListStore(str, str)
-        self.tvcolumn = gtk.TreeViewColumn(_('---'), self.cell, text = 0)
+        self.tvcolumn = gtk.TreeViewColumn(_('---'), self.cell, text=0)
         self.arw["inifiles_list"].append_column(self.tvcolumn)
         self.arw["inifiles_list"].connect("button-press-event", self.load_file)
         self.arw["inifiles_list"].set_model(self.inifiles_store)
 
         # drag and drop for users tree
         self.arw["treeview1"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [],
-            DRAG_ACTION)
+                                                       DRAG_ACTION)
         self.arw["treeview1"].drag_source_add_text_targets()
         self.arw["treeview1"].connect("drag-data-get", self.users_drag_data_get)
 
         self.arw["treeview1"].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
         self.arw["treeview1"].drag_dest_add_text_targets()
         self.arw["treeview1"].connect("drag-data-received", self.users_drag_data_received)
-
 
         # drop for TextView
         # see above, the line : self.arw["proxy_group"].connect("drag-data-received", self.on_drag_data_received)
@@ -622,8 +607,6 @@ class Idefix :
         image.set_from_file('./data/internet-filtered-32.gif')
         self.internet_filtered_icon = image.get_pixbuf()
 
-
-
         self.populate_firewall()
         self.populate_proxy()
         self.populate_ports()
@@ -632,160 +615,153 @@ class Idefix :
         self.set_colors()
         self.load_ini_files()
 
-
-
-    def __________load_interface____________ () :
-        pass
-
-
+    """ Load interface """
 
     def populate_users(self):
         self.users_store.clear()
         self.cat_list = {}
         data1 = self.config["users"]
         options = ["", "", "", "", "email", "internet access", "filtered", "open", ""]
-        for section in data1 :
-            if "option" in data1[section] :
+        for section in data1:
+            if "option" in data1[section]:
                 options_list = []
-                for i in [4,5,6,7,8] :
-                    if options[i] in data1[section]["option"] :
+                for i in [4, 5, 6, 7, 8]:
+                    if options[i] in data1[section]["option"]:
                         options_list.append(1)
-                    else :
+                    else:
                         options_list.append(0)
-            else :
-                options_list = [0,0,0,0,0]
+            else:
+                options_list = [0, 0, 0, 0, 0]
 
-            if "time_condition" in data1[section] :
+            if "time_condition" in data1[section]:
                 time_condition = data1[section]["time_condition"][0]
-            else :
+            else:
                 time_condition = ""
             # add section
-            node = self.users_store.append(None, [section, "", "", time_condition] + options_list + ["", "#ffffff", None, None])
+            node = self.users_store.append(None,
+                                           [section, "", "", time_condition] + options_list + ["", "#ffffff", None,
+                                                                                               None])
             # N.B. : icons are set in the set_colors function
-            # keep memory of the nodes, it will be used for changing the category of a user (function change_category below)
+            # keep memory of the nodes, it will be used for changing the category of a user
+            # (function change_category below)
             self.cat_list[section] = node
 
-
             # add users for this section
-            for user in data1[section] :
-                if user in ["option", "time_condition"] :
-                    continue
-                else :
-                    node2 = self.users_store.append(node, [user, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None])
-
+            for user in data1[section]:
+                if user not in ["option", "time_condition"]:
+                    self.users_store.append(node, [user, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None])
 
     def populate_firewall(self):
         self.firewall_store.clear()
         data1 = self.config["firewall"]
         keys = ["active", "action", "ports", "time_condition", "#comments", "user", "users"]
-        for section in data1 :
+        for section in data1:
             data2 = [section]
-            if section[0:2] == "__"  :     # for sections generated from the users data, don't load data here
+            if section[0:2] == "__":  # for sections generated from the users data, don't load data here
                 self.firewall_store.append([section] + [""] * 9 + [0] * 5 + ["", ""])
                 continue
-            for key in keys :
-                if key in data1[section] :
+            for key in keys:
+                if key in data1[section]:
                     data2.append("\n".join(data1[section][key]))
-                else :
+                else:
                     data2.append("")
-            data2 += ["", "",1]   # reserved
-            if section[0:2] == "__" :
+            data2 += ["", "", 1]  # reserved
+            if section[0:2] == "__":
                 data2 += [0]
-            else :
+            else:
                 data2 += [1]
-            data2 += [1]   # reserved
+            data2 += [1]  # reserved
             data2 += [1, 1, "#009900", "#ffffff"]  # check boxes and colors (green on white)
             self.firewall_store.append(data2)
-
 
     def populate_proxy(self):
         self.proxy_store.clear()
         data1 = self.config["proxy"]
-        keys = ["active", "action", "time_condition", "#comments", "user", "xxx", "dest_group", "dest_domain", "xxx", "destination", ""]
-        for section in data1 :
+        keys = ["active", "action", "time_condition", "#comments", "user", "xxx", "dest_group", "dest_domain", "xxx",
+                "destination", ""]
+        for section in data1:
             out = [section]
             data2 = data1[section]
             # merge user and mac
-            if not "user" in data2 :
-                if "users" in data2 :
+            if "user" not in data2:
+                if "users" in data2:
                     data2["user"] = data2["users"]
-            else :
-                if "users" in data2 :
+            else:
+                if "users" in data2:
                     data2["user"] += data2["users"]
             # merge dest_domain and dest_ip
-            if not "dest_domain" in data2 :
-                if "dest_ip" in data2 :
+            if "dest_domain" not in data2:
+                if "dest_ip" in data2:
                     data2["dest_domain"] = data2["dest_ip"]
-            else :
-                if "dest_ip" in data2 :
+            else:
+                if "dest_ip" in data2:
                     data2["dest_domain"] += data2["dest_ip"]
 
-            for key in keys :
-                if key in data1[section] :
+            for key in keys:
+                if key in data1[section]:
                     out.append("\n".join(data1[section][key]) + "\n")
-                else :
+                else:
                     out.append("")
             # check boxes
-            out += [1,1,1,"#009900", "#ffffff"]
+            out += [1, 1, 1, "#009900", "#ffffff"]
 
-            node = self.proxy_store.append(out)
+            self.proxy_store.append(out)
 
-    def populate_ports(self) :
+    def populate_ports(self):
         self.ports_store.clear()
         data1 = self.config["ports"]
-        for key in data1 :
+        for key in data1:
             self.ports_store.append([key])
 
-    def populate_groups(self) :
+    def populate_groups(self):
         self.groups_store.clear()
         data1 = self.config["groups"]
-        for key in data1 :
+        for key in data1:
             self.groups_store.append([key])
 
-
-
-    def set_check_boxes(self) :
-        for row in self.proxy_store :
-            if row[1].strip().lower() == "off" :
+    def set_check_boxes(self):
+        for row in self.proxy_store:
+            if row[1].strip().lower() == "off":
                 row[14] = 0
-            if row[2].strip().lower() == "deny" :
+            if row[2].strip().lower() == "deny":
                 row[13] = 0
-            if row[10].strip().lower() == "any" :
+            if row[10].strip().lower() == "any":
                 row[12] = 1
-            else :
+            else:
                 row[12] = 0
 
-        for row in self.firewall_store :
-            if row[1].strip().lower() == "off" :
+        for row in self.firewall_store:
+            if row[1].strip().lower() == "off":
                 row[14] = 0
-            if row[2].strip().lower() == "drop" :
+            if row[2].strip().lower() == "drop":
                 row[13] = 0
-##            if row[10].strip().lower() == "any" :
-##                row[12] = 1
-##            else :
-##                row[12] = 0
 
-    def set_colors(self) :
+            # if row[10].strip().lower() == "any" :
+            #     row[12] = 1
+            # else:
+            #     row[12] = 0
+
+    def set_colors(self):
         global iconx
         # col 13 = allow/deny state; col 15 = text color
         # col 14 = on/off state; col 15 = text color
-        for store in[self.proxy_store, self.firewall_store] :
-            for row in store :
-                if row[13] == 1 :            # allow
-                    row[15] = "#009900"      # green
-                else :                       # deny
-                    row[15] = "#ff0000"      # red
+        for store in [self.proxy_store, self.firewall_store]:
+            for row in store:
+                if row[13] == 1:  # allow
+                    row[15] = "#009900"  # green
+                else:  # deny
+                    row[15] = "#ff0000"  # red
 
-                if row[14] == 0 :            # off
-                    row[15] = "#bbbbbb"      # grey
+                if row[14] == 0:  # off
+                    row[15] = "#bbbbbb"  # grey
 
-                if row[12] == 1 :            # any
-                    row[16] = "#ffff88"      # yellow background
+                if row[12] == 1:  # any
+                    row[16] = "#ffff88"  # yellow background
 
-                if row[0][0:2] == "__" :
-                    row[16] = "#fbfbff"      # light grey background
+                if row[0][0:2] == "__":
+                    row[16] = "#fbfbff"  # light grey background
 
-        for row in self.users_store :
+        for row in self.users_store:
             """
             0 : section (level 1)  - user (level 2)
             1 : options (text)
@@ -802,35 +778,30 @@ class Idefix :
             12 : icon 2
             """
             # yellow background for open Internet access
-            if row[5] == 1 and (row[7] == 1 ) :
+            if row[5] == 1 and (row[7] == 1):
                 row[10] = "#ffff88"
-            else :
+            else:
                 row[10] = "#ffffff"
 
             # icons for email and Internet access
-            if row[4] == 1 :
+            if row[4] == 1:
                 row[11] = self.email_icon
-            else :
+            else:
                 row[11] = None
-            if row[5] == 1 and (row[7] == 1 ) :
+            if row[5] == 1 and (row[7] == 1):
                 row[12] = self.internet_full_icon
-            elif row[5] == 1 and (row[6] == 1 ) :
+            elif row[5] == 1 and (row[6] == 1):
                 row[12] = self.internet_filtered_icon
-            else :
+            else:
                 row[12] = None
 
-
-
-
-
-    def load_user(self, widget, event) :
+    def load_user(self, widget, event):
         # loads data in right pane when a category or a user is selected in the tree
 
         self.block_signals = True  # to prevent the execution of update_check wich causes errors
 
-
         path = widget.get_path_at_pos(event.x, event.y)
-        if path == None :   # click outside a valid line
+        if path is None:  # click outside a valid line
             # if click outside the list, unselect all. It is good to view the global configuration
             #  with the colors, otherwise, there is always a line masked by the cursor.
             sel = self.arw["treeview1"].get_selection()
@@ -839,9 +810,9 @@ class Idefix :
 
         iter1 = self.users_store.get_iter(path[0])
         self.iter_user = iter1
-        level =  path[0].get_depth()
+        level = path[0].get_depth()
 
-        if level == 1 :         # category level
+        if level == 1:  # category level
             self.arw["notebook5"].set_current_page(0)
 
             # set internet rights in the check boxes and radio list
@@ -855,32 +826,30 @@ class Idefix :
             self.arw["menu_add_user"].show()
             self.arw["menu_add_cat"].show()
 
-
-          # time conditions
+            # time conditions
             data1 = self.users_store[iter1][3].strip()
-            if data1 == "" :
-                #self.arw["users_time_days"].set_text("")
+            if data1 == "":
+                # self.arw["users_time_days"].set_text("")
                 self.arw["users_time_from"].set_text("")
                 self.arw["users_time_to"].set_text("")
 
-            elif len(data1) > 6 :
-                try :
-                    #tmp1 = data1.split()
+            elif len(data1) > 6:
+                try:
+                    # tmp1 = data1.split()
                     tmp2 = data1.split("-")
-                    #days = tmp1[0].strip()
+                    # days = tmp1[0].strip()
                     time_from = tmp2[0].strip()
                     time_to = tmp2[1].strip()
 
-                    #self.arw["users_time_days"].set_text(days)
+                    # self.arw["users_time_days"].set_text(days)
                     self.arw["users_time_from"].set_text(time_from)
                     self.arw["users_time_to"].set_text(time_to)
-                except :
+                except:
                     print("Error handling time condition :", data1)
             else:
                 print("Invalid time :", data1)
 
-
-        elif level == 2 :         # user level
+        elif level == 2:  # user level
             self.arw["notebook5"].set_current_page(2)
             # adapt the right click menu
             self.arw["menu_add_above"].show()
@@ -888,13 +857,12 @@ class Idefix :
             self.arw["menu_add_user"].hide()
             self.arw["menu_add_cat"].hide()
 
-
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
-            if username in self.maclist :
+            if username in self.maclist:
                 data1 = "\n".join(self.maclist[username])
                 buffer.set_text(data1)
-            else :
+            else:
                 buffer.set_text("")
                 alert("No mac address for this user !")
             self.user_summary(username)
@@ -902,11 +870,10 @@ class Idefix :
             # get data in lists for this user
         self.block_signals = False
 
-
-    def firewall_user(self, widget, event) :
+    def firewall_user(self, widget, event):
         # Loads user data when a user is selected in the list
         path = widget.get_path_at_pos(event.x, event.y)
-        if path == None :
+        if path is None:
             return
         iter1 = self.firewall_store.get_iter(path[0])
         self.iter_firewall = iter1
@@ -915,23 +882,23 @@ class Idefix :
         self.arw["firewall_time_from"].set_text(self.firewall_store[iter1][4])
         # time conditions
         data1 = self.firewall_store[iter1][4].strip()
-        if data1 == "" :
-            #self.arw["firewall_time_days"].set_text("")
+        if data1 == "":
+            # self.arw["firewall_time_days"].set_text("")
             self.arw["firewall_time_from"].set_text("")
             self.arw["firewall_time_to"].set_text("")
 
-        elif len(data1) > 8 :
-            try :
-                #tmp1 = data1.split()
+        elif len(data1) > 8:
+            try:
+                # tmp1 = data1.split()
                 tmp2 = data1.split("-")
-                #days = tmp1[0].strip()
+                # days = tmp1[0].strip()
                 time_from = tmp2[0].strip()
                 time_to = tmp2[1].strip()
 
-                #self.arw["firewall_time_days"].set_text(days)
+                # self.arw["firewall_time_days"].set_text(days)
                 self.arw["firewall_time_from"].set_text(time_from)
                 self.arw["firewall_time_to"].set_text(time_to)
-            except :
+            except:
                 print("Error handling firewall time condition :", data1)
 
         # add comments
@@ -948,31 +915,30 @@ class Idefix :
         # add mac, if any
         data1 += self.firewall_store[iter1][7]
         self.firewall_store[iter1][7] = ""
-        buffer = self.arw["firewall_users"].get_buffer().set_text(data1)
+        self.arw["firewall_users"].get_buffer().set_text(data1)
 
-
-    def load_proxy_user(self, widget, event) :
+    def load_proxy_user(self, widget, event):
 
         # Loads user data when a user is selected in the list
         path = widget.get_path_at_pos(event.x, event.y)
-        if path == None :      # if click outside the list, unselect all.
-                               # It is good to view the global configurations with the colors,
-                               # otherwise, the cursor always masks one line.
+        if path is None:  # if click outside the list, unselect all.
+            # It is good to view the global configurations with the colors,
+            # otherwise, the cursor always masks one line.
             sel = self.arw["treeview3"].get_selection()
             sel.unselect_all()
             return
         iter1 = self.proxy_store.get_iter(path[0])
-        self.iter_proxy =iter1
+        self.iter_proxy = iter1
 
         # time conditions
         data1 = self.proxy_store[iter1][3].strip()
-        if data1 == "" :
+        if data1 == "":
             self.arw["proxy_time_condition_days"].set_text("")
             self.arw["proxy_time_condition_from"].set_text("")
             self.arw["proxy_time_condition_to"].set_text("")
 
-        elif len(data1) > 8 :
-            try :
+        elif len(data1) > 8:
+            try:
                 tmp1 = data1.split()
                 tmp2 = tmp1[1].split("-")
                 days = tmp1[0].strip()
@@ -982,7 +948,7 @@ class Idefix :
                 self.arw["proxy_time_condition_days"].set_text(days)
                 self.arw["proxy_time_condition_from"].set_text(time_from)
                 self.arw["proxy_time_condition_to"].set_text(time_to)
-            except :
+            except:
                 print("Error handling time condition :", data1)
         else:
             print("Invalid time :", data1)
@@ -993,93 +959,86 @@ class Idefix :
         data1 = self.proxy_store[iter1][5]  # user
         # add mac, if any
         data1 += self.proxy_store[iter1][6]  # mac
-        buffer = self.arw["proxy_users"].get_buffer().set_text(data1)
+        self.arw["proxy_users"].get_buffer().set_text(data1)
 
         # add groups
-        data1 = self.proxy_store[iter1][7] # dest_group
+        data1 = self.proxy_store[iter1][7]  # dest_group
         self.arw["proxy_group"].get_buffer().set_text(data1)
         # add dest_domains
-        data1 = self.proxy_store[iter1][8] # dest_domain
+        data1 = self.proxy_store[iter1][8]  # dest_domain
         # add dest_ip, if any
-        data1 += self.proxy_store[iter1][9] # dest_ip
+        data1 += self.proxy_store[iter1][9]  # dest_ip
         self.arw["proxy_dest"].get_buffer().set_text(data1)
         self.load_proxy_user2()
 
-    def load_proxy_user2(self) :
+    def load_proxy_user2(self):
         # used by the function above, and by the buttons of the proxy tab
 
         # set full access
-        if self.proxy_store[self.iter_proxy][12] == 1 :
+        if self.proxy_store[self.iter_proxy][12] == 1:
             self.arw["notebook2"].hide()
             self.arw["toggle_proxy_open"].set_label(_("<b>All</b>"))
-            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60535, green = 60535, blue = 0))
-        else :
+            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL,
+                                                           Gdk.Color(red=60535, green=60535, blue=0))
+        else:
             self.arw["notebook2"].show()
             self.arw["toggle_proxy_open"].set_label(_("<b>List</b>"))
             self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL, None)
 
         # set allow/deny button
-        if self.proxy_store[self.iter_proxy][13] == 1 :
+        if self.proxy_store[self.iter_proxy][13] == 1:
             self.arw["toggle_proxy_allow"].set_label(_("<b>Allow</b>"))
-            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=0, green = 60535, blue = 0))
-        else :
+            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=0, green=60535, blue=0))
+        else:
             self.arw["toggle_proxy_allow"].set_label(_("<b>Deny</b>"))
-            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60535, green = 0, blue = 0))
-
+            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60535, green=0, blue=0))
 
         # if the first tab of permissions is empty, open the second
         x = self.arw["notebook2"].get_current_page()
         current_page = x
 
-        TextBuffer = self.arw["proxy_group"].get_buffer()
-        (start_iter, end_iter) = TextBuffer.get_bounds()
-        group_text = TextBuffer.get_text(start_iter, end_iter, False)
+        text_buffer = self.arw["proxy_group"].get_buffer()
+        (start_iter, end_iter) = text_buffer.get_bounds()
+        group_text = text_buffer.get_text(start_iter, end_iter, False)
 
-        TextBuffer = self.arw["proxy_dest"].get_buffer()
-        (start_iter, end_iter) = TextBuffer.get_bounds()
-        dest_text = TextBuffer.get_text(start_iter, end_iter, False)
+        text_buffer = self.arw["proxy_dest"].get_buffer()
+        (start_iter, end_iter) = text_buffer.get_bounds()
+        dest_text = text_buffer.get_text(start_iter, end_iter, False)
 
         len0 = len(group_text.strip())
         len1 = len(dest_text.strip())
 
-        if len0 == 0 and len1 == 0 :
+        if len0 == 0 and len1 == 0:
             pass
-        elif x == 0 and len0 == 0 :
+        elif x == 0 and len0 == 0:
             self.arw["notebook2"].set_current_page(1)
             current_page = 1
-        elif x == 1 and len1 == 0 :
+        elif x == 1 and len1 == 0:
             self.arw["notebook2"].set_current_page(0)
             current_page = 0
 
         # load the chooser if the "groups" tab is active.
-        if current_page == 0 :
+        if current_page == 0:
             self.arw["chooser"].set_model(self.groups_store)
-        else :
+        else:
             self.arw["chooser"].set_model(self.empty_store)
 
+    """Actions"""
 
-
-        c = 1
-
-
-    def _____________actions_______________() :
-        pass
-
-
-
-    def toggle_col12(self, widget) :
+    def toggle_col12(self, widget):
         # callback of the open access checkbox in proxy tab.
         # col 12 = open access state; col 16 = background color
 
         treestore = self.proxy_store
-        if treestore.get_value(self.iter_proxy, 12) == 0 :
+        if treestore.get_value(self.iter_proxy, 12) == 0:
             self.arw["toggle_proxy_open"].set_label(_("<b>All</b>"))
-            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60535, green = 60535, blue = 0))
+            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL,
+                                                           Gdk.Color(red=60535, green=60535, blue=0))
             treestore.set_value(self.iter_proxy, 12, 1)
             treestore.set_value(self.iter_proxy, 10, "any")
             self.arw["notebook2"].show()
             treestore.set_value(self.iter_proxy, 16, "#ffff88")
-        else :
+        else:
             self.arw["toggle_proxy_open"].set_label(_("<b>List</b>"))
             self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL, None)
             treestore.set_value(self.iter_proxy, 12, 0)
@@ -1088,241 +1047,232 @@ class Idefix :
             treestore.set_value(self.iter_proxy, 16, "#ffffff")
         self.load_proxy_user2()
 
-    def toggle_col13_proxy(self, widget) :
+    def toggle_col13_proxy(self, widget):
         # callback of the allow/deny button in proxy tab.
         # col 13 = allow/deny state; col 15 = text color
 
         treestore = self.proxy_store
-        if treestore.get_value(self.iter_proxy, 13) == 0 :
+        if treestore.get_value(self.iter_proxy, 13) == 0:
             self.arw["toggle_proxy_allow"].set_label(_("<b>Allow</b>"))
-            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=0, green = 60535, blue = 0))
+            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=0, green=60535, blue=0))
             treestore.set_value(self.iter_proxy, 13, 1)
             treestore.set_value(self.iter_proxy, 2, "allow")
             self.arw["notebook2"].show()
             treestore.set_value(self.iter_proxy, 15, "#009900")
-        else :
+        else:
             self.arw["toggle_proxy_allow"].set_label(_("<b>Deny</b>"))
-            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60000, green = 0, blue = 0))
+            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60000, green=0, blue=0))
             treestore.set_value(self.iter_proxy, 13, 0)
             treestore.set_value(self.iter_proxy, 2, "deny")
             self.arw["notebook2"].hide()
             treestore.set_value(self.iter_proxy, 15, "#f00000")
         self.load_proxy_user2()
 
-##        if treestore[row][13] == 0 :
-##            treestore[row][13] = 1
-##            treestore[row][2] = "allow"
-##            treestore[row][15] = "#009900"
-##        else :
-##            treestore[row][13] = 0
-##            treestore[row][2] = "deny"
-##            treestore[row][15] = "#ff0000"
+    #        if treestore[row][13] == 0 :
+    #            treestore[row][13] = 1
+    #            treestore[row][2] = "allow"
+    #            treestore[row][15] = "#009900"
+    #        else :
+    #            treestore[row][13] = 0
+    #            treestore[row][2] = "deny"
+    #            treestore[row][15] = "#ff0000"
 
-
-
-    def toggle_col12_firewall(self, cellrenderer, row, treestore) :
+    def toggle_col12_firewall(self, cellrenderer, row, treestore):
         # callback of the open access checkbox in firewall tab.
-         # col 12 = open access state; col 16 = background color
-        if treestore[row][12] == 0 :
+        # col 12 = open access state; col 16 = background color
+        if treestore[row][12] == 0:
             treestore[row][12] = 1
             treestore[row][3] = "any"
             treestore[row][16] = "#ffff88"
-        else :
+        else:
             treestore[row][12] = 0
             treestore[row][3] = ""
             treestore[row][16] = "#ffffff"
 
-
-
-
-    def toggle_col13(self, cellrenderer, row, treestore, name) :
+    def toggle_col13(self, cellrenderer, row, treestore, name):
         # callback of the allow/deny checkbox in proxy tab.
         # col 13 = allow/deny state; col 15 = text color
 
-        if treestore[row][13] == 0 :
+        if treestore[row][13] == 0:
             treestore[row][13] = 1
-            if name == "proxy" :
+            if name == "proxy":
                 treestore[row][2] = "allow"
-            elif name == "firewall" :
+            elif name == "firewall":
                 treestore[row][2] = "ACCEPT"
             treestore[row][15] = "#009900"
-        else :
+        else:
             treestore[row][13] = 0
-            if name == "proxy" :
+            if name == "proxy":
                 treestore[row][2] = "deny"
-            elif name == "firewall" :
+            elif name == "firewall":
                 treestore[row][2] = "DROP"
             treestore[row][15] = "#ff0000"
 
-    def toggle_col14(self, cellrenderer, row, treestore) :
+    def toggle_col14(self, cellrenderer, row, treestore):
         # callback of the on/off checkbox in proxy tab.
         # col 14 = on/off state; col 15 = text color
-        if treestore[row][14] == 0 :
+        if treestore[row][14] == 0:
             treestore[row][14] = 1
             treestore[row][1] = "on"
             if treestore[row][13] == 1:
                 treestore[row][15] = "#009900"
-            else :
+            else:
                 treestore[row][15] = "#ff0000"
-        else :
+        else:
             treestore[row][14] = 0
             treestore[row][1] = "off"
             treestore[row][15] = "#bbbbbb"
 
-    def update_tv(self, TextView, event=None, a=None, b=None,c=None, text = "") :
+    def update_tv(self, text_view, event=None, a=None, b=None, c=None, text=""):
 
-        TextBuffer = TextView.get_buffer()
-        (start_iter, end_iter) = TextBuffer.get_bounds()
-        text1 = TextBuffer.get_text(start_iter, end_iter, False)  + text
-        widget = TextView
+        text_buffer = text_view.get_buffer()
+        (start_iter, end_iter) = text_buffer.get_bounds()
+        text1 = text_buffer.get_text(start_iter, end_iter, False) + text
+        widget = text_view
 
-        if widget.name == "proxy_group" :
+        if widget.name == "proxy_group":
             self.proxy_store.set(self.iter_proxy, 7, text1)
-        elif widget.name == "proxy_dest" :
+        elif widget.name == "proxy_dest":
             self.proxy_store.set(self.iter_proxy, 8, text1)
-        elif widget.name == "proxy_users" :
+        elif widget.name == "proxy_users":
             self.proxy_store.set(self.iter_proxy, 5, text1)
-        elif widget.name == "proxy_#comments" :
+        elif widget.name == "proxy_#comments":
             self.proxy_store.set(self.iter_proxy, 4, text1)
 
-        elif widget.name == "firewall_ports" :
+        elif widget.name == "firewall_ports":
             self.firewall_store.set(self.iter_firewall, 3, text1)
-        elif widget.name == "firewall_users" :
+        elif widget.name == "firewall_users":
             self.firewall_store.set(self.iter_firewall, 6, text1)
-        elif widget.name == "firewall_comments" :
+        elif widget.name == "firewall_comments":
             self.firewall_store.set(self.iter_firewall, 5, text1)
 
-        elif widget.name == "maclist" :
-            mac_addresses = text1.split("\n")           # create list
+        elif widget.name == "maclist":
+            mac_addresses = text1.split("\n")  # create list
             # get usr name
             (model, node) = self.arw["treeview1"].get_selection().get_selected()
-            name = model.get_value(node,0)
+            name = model.get_value(node, 0)
             self.maclist[name] = mac_addresses
 
-
-
-    def update_check(self, widget) :
+    def update_check(self, widget):
         # Updates the stores according to the settings of the check buttons
         # @execute : if False, the function will exit immediately. Used to prevent the function to be executed
         #            when a widget is toggled programmatically.
 
-        if self.block_signals == True :
+        if self.block_signals:
             return
         # proxy
-        if widget.name == "proxy_full_access" :
-            if widget.get_active() == True :
+        if widget.name == "proxy_full_access":
+            if widget.get_active():
                 self.proxy_store[self.iter_proxy][10] = "any"
                 self.arw["paned2"].set_sensitive(False)
-            else :
+            else:
                 self.proxy_store[self.iter_proxy][10] = ""
                 self.arw["paned2"].set_sensitive(True)
         # users
-        elif widget.name == "internet_email" :
-            if widget.get_active() == True :
+        elif widget.name == "internet_email":
+            if widget.get_active():
                 self.users_store[self.iter_user][4] = 1
-            else :
+            else:
                 self.users_store[self.iter_user][4] = 0
-        elif widget.name == "internet_access" :
-            if widget.get_active() == True :
+        elif widget.name == "internet_access":
+            if widget.get_active():
                 self.users_store[self.iter_user][5] = 1
-                if self.arw["internet_filtered"].get_active() == True :
+                if self.arw["internet_filtered"].get_active():
                     self.users_store[self.iter_user][6] = 1
-                else :
+                else:
                     self.users_store[self.iter_user][6] = 0
-                if self.arw["internet_open"].get_active() == True :
+                if self.arw["internet_open"].get_active():
                     self.users_store[self.iter_user][7] = 1
-                else :
+                else:
                     self.users_store[self.iter_user][7] = 0
                 self.arw["box_internet"].show()
-            else :
+            else:
                 self.users_store[self.iter_user][5] = 0
                 self.arw["box_internet"].hide()
-        elif widget.name == "internet_filtered" :
-            if widget.get_active() == True :
+        elif widget.name == "internet_filtered":
+            if widget.get_active():
                 self.users_store[self.iter_user][6] = 1
-            else :
+            else:
                 self.users_store[self.iter_user][6] = 0
 
-        elif widget.name == "internet_open" :
-            if widget.get_active() == True :
+        elif widget.name == "internet_open":
+            if widget.get_active():
                 self.users_store[self.iter_user][7] = 1
-            else :
+            else:
                 self.users_store[self.iter_user][7] = 0
 
         self.set_colors()
 
+    def update_time(self, widget, x=None):
 
-    def update_time(self, widget, x=None) :
-
-        if widget.name in["proxy_time_condition_days", "proxy_time_condition_from", "proxy_time_condition_to"] :
+        if widget.name in ["proxy_time_condition_days", "proxy_time_condition_from", "proxy_time_condition_to"]:
             time_condition = self.arw["proxy_time_condition_days"].get_text() + " "
-            if time_condition.strip() == "" :
+            if time_condition.strip() == "":
                 time_condition = "MTWHFAS "
             time_condition += self.arw["proxy_time_condition_from"].get_text().strip() + "-"
             time_condition += self.arw["proxy_time_condition_to"].get_text().strip()
             self.proxy_store[self.iter_proxy][3] = time_condition
 
-        if widget.name in["users_time_days", "users_time_from", "users_time_to"] :
-            #time_condition = self.arw["users_time_days"].get_text() + " "
+        if widget.name in ["users_time_days", "users_time_from", "users_time_to"]:
+            # time_condition = self.arw["users_time_days"].get_text() + " "
             time_condition = self.arw["users_time_from"].get_text().strip() + "-"
             time_condition += self.arw["users_time_to"].get_text().strip()
-            if time_condition.strip() == "-" :
+            if time_condition.strip() == "-":
                 time_condition = ""
             self.users_store[self.iter_user][3] = time_condition
 
-        if widget.name in["firewall_time_days", "firewall_time_from", "firewall_time_to"] :
-            #time_condition = self.arw["users_time_days"].get_text() + " "
+        if widget.name in ["firewall_time_days", "firewall_time_from", "firewall_time_to"]:
+            # time_condition = self.arw["users_time_days"].get_text() + " "
             time_condition = self.arw["firewall_time_from"].get_text().strip() + "-"
             time_condition += self.arw["firewall_time_to"].get_text().strip()
-            if time_condition.strip() == "-" :
+            if time_condition.strip() == "-":
                 time_condition = ""
             self.firewall_store[self.iter_firewall][4] = time_condition
 
-    def treeview_expand(self, widget) :
-        if widget.get_active() == 1 :
+    def treeview_expand(self, widget):
+        if widget.get_active() == 1:
             self.arw["treeview1"].expand_all()
-        else :
+        else:
             self.arw["treeview1"].collapse_all()
 
-    def test1(self, widget, a = "") :
-        print ("test1", repr(a))
+    def test1(self, widget, a=""):
+        print("test1", repr(a))
 
-    def load_chooser(self, widget, event = None, data = None) :
+    def load_chooser(self, widget, event=None, data=None):
 
-        if data == None :  # cela sert-il à quelque chose ???
-
-            if widget.name in [ "proxy_users"] :
+        if data is None:  # cela sert-il à quelque chose ???
+            if widget.name in ["proxy_users"]:
                 self.arw["chooser"].set_model(self.users_store)
             elif widget.name == "firewall_users":
                 self.arw["chooser2"].set_model(self.users_store)
-            elif widget.name in [ "proxy_group"] :
+            elif widget.name in ["proxy_group"]:
                 self.arw["chooser"].set_model(self.groups_store)
-            elif widget.name in [ "firewall_ports"] :
+            elif widget.name in ["firewall_ports"]:
                 self.arw["chooser2"].set_model(self.ports_store)
 
-            else :
+            else:
                 self.arw["chooser"].set_model(self.empty_store)
                 self.arw["chooser2"].set_model(self.empty_store)
-        else :
+        else:
             print("===>", repr(data))
 
-
-    def on_permissions_tab_change(self,widget, a, page) :
+    def on_permissions_tab_change(self, widget, a, page):
         # launched by the switch page signal of notebook2
         #
-        if page == 0 :
+        if page == 0:
             self.arw["chooser"].set_model(self.groups_store)
-        else :
+        else:
             self.arw["chooser"].set_model(self.empty_store)
 
+    def general_chooser_answer(self, *params):
 
-
-    def general_chooser_answer(self, *params) :
-
+        # XXX: chooser_widget_source does not exist
+        # XXX: magutils does not exist
+        # XXX: get_sel_row_data does not exist
         widget = self.chooser_widget_source
         widget_type = magutils.widget_type(widget)
 
-        if widget_type == "GtkEntry" :
+        if widget_type == "GtkEntry":
             response = get_sel_row_data(self.arw["treeview8"], 0, 0)
             widget.set_text(response)
 
@@ -1330,53 +1280,50 @@ class Idefix :
             category_s = temp1[0]
             field_s = temp1[1]
 
-            if category_s in ["central", "peripheral"] :
+            if category_s in ["central", "peripheral"]:
                 configuration = self.database_structure_active[1]
                 self.config[category_s][configuration][field_s] = response
                 self.load_database_tree()
 
-            elif category_s == "xtabs" :
+            elif category_s == "xtabs":
                 configuration = self.search_active
                 self.config["xtabs"][configuration][field_s] = response
 
-            elif category_s == "inversion" :
+            elif category_s == "inversion":
                 configuration = self.inversion_active
                 self.config["inversion"][configuration][field_s] = response
 
-            elif category_s == "combobox" :
+            elif category_s == "combobox":
                 configuration = self.combobox_active
                 self.config["combobox"][configuration][field_s] = response
 
-            elif category_s == "details" :
+            elif category_s == "details":
                 configuration = self.details_active
                 self.config["details"][configuration][field_s] = response
 
-            elif category_s == "popup" :
+            elif category_s == "popup":
                 configuration = self.popup_active
                 self.config["popup"][configuration][field_s] = response
 
-
-        elif widget_type == "GtkTreeView" :
-            if widget.name == "treeview6" :     # Search lists
-                (row,col,treeview) = self.search_edit_cell
+        elif widget_type == "GtkTreeView":
+            if widget.name == "treeview6":  # Search lists
+                (row, col, treeview) = self.search_edit_cell
                 response = get_sel_row_data(self.arw["treeview8"], 0, 0)
-                self.edit_list_search("",row,response,col, treeview)
+                self.edit_list_search("", row, response, col, treeview)
 
-            elif widget.name == "treeview5" :       # Result lists
-                (row,col,treeview) = self.search_edit_cell
+            elif widget.name == "treeview5":  # Result lists
+                (row, col, treeview) = self.search_edit_cell
                 response = get_sel_row_data(self.arw["treeview8"], 0, 0)
-                self.edit_list_search("",row,response,col, treeview)
+                self.edit_list_search("", row, response, col, treeview)
 
-    def ________________user_management________________________() :
-        pass
+    """ User Management """
 
-
-    def manage_users(self, widget, event=None) :
+    def manage_users(self, widget, event=None):
         if event.type == Gdk.EventType.BUTTON_RELEASE:
-            if event.button == 3 :            # right click, runs the context menu
+            if event.button == 3:  # right click, runs the context menu
                 submenu = Gtk.Menu()
                 submenu.show()
-                for row in self.users_store :
+                for row in self.users_store:
                     cat = row[0]
                     commandes = Gtk.MenuItem(cat)
                     submenu.append(commandes)
@@ -1387,64 +1334,61 @@ class Idefix :
                 self.arw["users_menu"].popup(None, None, None, None, event.button, event.time)
         return
 
-    def ask_user_dialog(self, level) :
-        if level == 1 :
+    def ask_user_dialog(self, level):
+        if level == 1:
             new = _("Name of the new category")
         else:
             new = _("Name of the new user")
 
-        name = ask_text(self.arw["window1"], new, "")
-        if name == None :
-            return False
-        return name
+        return ask_text(self.arw["window1"], new, "")
 
-    def add_user_above(self, widget) :
+    def add_user_above(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
         level = model.get_path(node).get_depth()
         name = self.ask_user_dialog(level)
 
-        if name :
+        if name:
             name = self.format_name(name)
-            self.users_store.insert_before(None, node, [name, "", "", "", 0, 0, 0, 0, 0,"", "", None, None])
+            self.users_store.insert_before(None, node, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
-    def add_user_below(self, widget) :
+    def add_user_below(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
         level = model.get_path(node).get_depth()
         name = self.ask_user_dialog(level)
-        if name :
-            self.users_store.insert_after(None, node, [name, "", "", "", 0, 0, 0, 0, 0,"", "", None, None])
+        if name:
+            self.users_store.insert_after(None, node, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
-    def add_new_user(self, widget) :
+    def add_new_user(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
         level = model.get_path(node).get_depth()
         name = self.ask_user_dialog(level)
-        if name :
-            self.users_store.insert(node, 1, [name, "", "", "", 0, 0, 0, 0, 0,"", "", None, None])
+        if name:
+            self.users_store.insert(node, 1, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
-    def add_new_category(self, widget) :
+    def add_new_category(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
-        if node == None :
+        if node is None:
             level = 1
-        else :
+        else:
             level = model.get_path(node).get_depth()
         name = self.ask_user_dialog(level)
-        if name :
-            self.users_store.insert_after(None, node, [name, "", "", "", 0, 0, 0, 0, 0,"", "", None, None])
+        if name:
+            self.users_store.insert_after(None, node, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
-    def delete_user(self, widget) :
+    def delete_user(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
         self.users_store.remove(node)
 
-    def edit_user(self, widget) :
+    def edit_user(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
-        name = model.get_value(node,0)
+        name = model.get_value(node, 0)
         x = ask_text(self.arw["window1"], "Name of the user :", name)
-        if x == None :
+        if x is None:
             return
-        else :
+        else:
             self.users_store.set(node, [0], [x])
 
-    def change_category(self, widget, cat) :
+    def change_category(self, widget, cat):
 
         # get user data
         row = []
@@ -1455,100 +1399,91 @@ class Idefix :
         self.users_store.append(node, row)
         self.users_store.remove(self.iter_user)
 
-        #self.users_store.move_after(self.iter_user, node)       # serait plus élégant mais ne marche pas
+        # self.users_store.move_after(self.iter_user, node)       # serait plus élégant mais ne marche pas
 
-
-
-    def add_user_below2(self, widget) :
+    def add_user_below2(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
         x = ask_text(self.arw["window1"], "Name of the new user :", "")
-        if x == None :
+        if x is None:
             return
-        else :
+        else:
             x = self.format_name(x)
-            self.proxy_store.insert_after(node, [x, "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", "" ])
+            self.proxy_store.insert_after(node, [x, "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", ""])
 
-    def delete_user2(self, widget) :
+    def delete_user2(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
         self.proxy_store.remove(node)
 
-    def edit_user2(self, widget) :
+    def edit_user2(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
-        name = model.get_value(node,0)
+        name = model.get_value(node, 0)
         x = ask_text(self.arw["window1"], "Name of the user :", name)
-        if x == None :
+        if x is None:
             return
-        else :
+        else:
             x = self.format_name(x)
             self.proxy_store.set(node, [0], [x])
 
-
-
-    def add_user_below3(self, widget) :
+    def add_user_below3(self, widget):
         (model, node) = self.arw["treeview2"].get_selection().get_selected()
         x = ask_text(self.arw["window1"], "Name of the new user :", "")
-        if x == None :
+        if x is None:
             return
-        else :
+        else:
             x = self.format_name(x)
             self.firewall_store.insert_after(node, [x] + [""] * 9 + [0, 1, 0, 0, 0, "", "#ffffff"])
 
-    def delete_user3(self, widget) :
+    def delete_user3(self, widget):
         (model, node) = self.arw["treeview2"].get_selection().get_selected()
         self.firewall_store.remove(node)
 
-    def edit_user3(self, widget) :
+    def edit_user3(self, widget):
         (model, node) = self.arw["treeview2"].get_selection().get_selected()
-        name = model.get_value(node,0)
+        name = model.get_value(node, 0)
         x = ask_text(self.arw["window1"], "Name of the user :", name)
-        if x == None :
+        if x is None:
             return
-        else :
+        else:
             x = self.format_name(x)
             self.firewall_store.set(node, [0], [x])
 
-
-    def check_addresses(self, widget) :
+    def check_addresses(self, widget):
         print("check_addresses not yet implemented")
 
+    """ User Summary """
 
-    def ________________user_summary________________________() :
-        pass
+    def user_summary(self, user1):
 
-
-    def user_summary(self, user1) :
-
-        if not user1 in self.maclist :
+        if not user1 in self.maclist:
             out = "User %s has no mac address !" % user1
-        else :
-            num = len (self.maclist[user1])
-            if num == 1 :
+        else:
+            num = len(self.maclist[user1])
+            if num == 1:
                 out = "1 Mac address for user %s : \n" % user1
             else:
                 out = str(num) + " Mac addresses for user %s : \n" % user1
 
-
         out += "\nAccès Internet : "
 
-        for row in self.users_store :
-            mem = "\n[%s]\n" % row[0]      # section
+        for row in self.users_store:
+            mem = "\n[%s]\n" % row[0]  # section
             # write options
             options = ["", "", "", "", "email", "internet access", "filtered", "open", ""]
-            for i in [4,5,6,7] :
-                if row[i] == 1 :
+            for i in [4, 5, 6, 7]:
+                if row[i] == 1:
                     mem += options[i] + "\n"
-            for child in row.iterchildren() :     # write users and macaddress
+            for child in row.iterchildren():  # write users and macaddress
                 user = child[0]
-                if user1 == user :
+                if user1 == user:
                     out += mem + "\n"
                     mem = ""
 
         out += "\nAccès Internet (compléments) : "
 
-        for row in self.firewall_store :
+        for row in self.firewall_store:
             users = row[6].split("\n")
-            for userx in users :
-                if userx.strip() == user1 :
+            for userx in users:
+                if userx.strip() == user1:
                     tmp1 = ""
                     tmp1 += "\n[%s]\n" % row[0]
                     tmp1 += self.format_comment(row[5])
@@ -1558,16 +1493,15 @@ class Idefix :
                     tmp1 += self.format_line("time_condition", row[4])
                     out += tmp1
 
-
         out += "\nFiltrage Internet : "
 
-        for row in self.proxy_store :
+        for row in self.proxy_store:
             users = row[5].split("\n")
-            for userx in users :
-                if userx.strip() == user1 :
+            for userx in users:
+                if userx.strip() == user1:
                     out += "\n[%s]\n" % row[0]
                     "%s present in proxy config" % user1
-                    out += self.format_line("", row[4])      # comments
+                    out += self.format_line("", row[4])  # comments
                     out += self.format_line("active", row[1])
                     out += self.format_line("action", row[2])
                     out += self.format_line("time_condition", row[3])
@@ -1575,48 +1509,40 @@ class Idefix :
                     out += self.format_line("destination", row[10])
                     out += self.format_domainline("dest_domain", row[8])
 
-
-
-
-
         self.arw["user_summary"].get_buffer().set_text(out)
 
+    """ Drag and Drop """
 
-
-    def ________________drag_and_drop________________________() :
-        pass
-
-    def chooser_drag_data_get(self, treeview, drag_context , data, info, time) :
+    def chooser_drag_data_get(self, treeview, drag_context, data, info, time):
 
         (model, node) = treeview.get_selection().get_selected()
-        if node :
-            text = model.get_value(node,0) + "\n"
+        if node:
+            text = model.get_value(node, 0) + "\n"
             data.set_text(text, -1)
 
-    def on_drag_data_received(self, widget, drag_context, x,y, data,info, etime):
+    def on_drag_data_received(self, widget, drag_context, x, y, data, info, etime):
         text1 = data.get_text()
-##        if time.time() - self.mem_time < 1 :  # dirty workaround to prevent two drags
-##            return
+        #        if time.time() - self.mem_time < 1 :  # dirty workaround to prevent two drags
+        #            return
         self.mem_time = time.time()
-        self.update_tv(widget, text = text1)
+        self.update_tv(widget, text=text1)
         print("drag received", text1)
 
-
-    def users_drag_data_get(self, treeview, drag_context , data, info, time) :
+    def users_drag_data_get(self, treeview, drag_context, data, info, time):
 
         (model, iter1) = treeview.get_selection().get_selected()
-        if iter1 :
+        if iter1:
             path = model.get_string_from_iter(iter1)
             data.set_text(path, -1)
 
-    def users_drag_data_received(self, treeview, drag_context, x,y, data,info, etime):
+    def users_drag_data_received(self, treeview, drag_context, x, y, data, info, etime):
 
-        if time.time() - self.mem_time < 1 :  # dirty workaround to prevent two drags
+        if time.time() - self.mem_time < 1:  # dirty workaround to prevent two drags
             return
         self.mem_time = time.time()
         path = data.get_text()
         level = len(path.split(":"))
-        if level == 1 :
+        if level == 1:
             print("moving categories not yet implemented")
             return
         model = treeview.get_model()
@@ -1632,13 +1558,13 @@ class Idefix :
             level = path1.get_depth()
             iter1 = model.get_iter(path1)
 
-            if level == 1 :
-                #print("drop on category")
-                model.append(iter1,row)
+            if level == 1:
+                # print("drop on category")
+                model.append(iter1, row)
                 model.remove(iter_source)
 
             elif (position == Gtk.TreeViewDropPosition.BEFORE
-                or position == Gtk.TreeViewDropPosition.BEFORE):
+                  or position == Gtk.TreeViewDropPosition.BEFORE):
                 model.insert_before(None, iter1, row)
                 model.remove(iter_source)
                 print("BEFORE")
@@ -1647,140 +1573,132 @@ class Idefix :
                 model.remove(iter_source)
         else:
             model.append([data])
-##        if drag_context.get_actions() == Gdk.DragAction.MOVE:
-##            drag_context.finish(True, True, etime)
 
+    #        if drag_context.get_actions() == Gdk.DragAction.MOVE:
+    #            drag_context.finish(True, True, etime)
 
-    def ______________view_______________() :
-        pass
+    """ View """
 
-    def load_ini_files(self) :
-        for path in glob.glob("./tmp/*.ini") :
+    def load_ini_files(self):
+        for path in glob.glob("./tmp/*.ini"):
             filename = os.path.split(path)[1]
             self.inifiles_store.append([filename, path])
 
-    def load_file(self, widget, event) :
+    def load_file(self, widget, event):
         pos = widget.get_path_at_pos(event.x, event.y)
-        if pos == None :    # click outside a valid line
+        if pos is None:  # click outside a valid line
             return
         iter1 = self.inifiles_store.get_iter(pos[0])
         path = self.inifiles_store[iter1][1]
-        f1 = open(path, "r", encoding = "utf-8-sig")
+        f1 = open(path, "r", encoding="utf-8-sig")
         text = f1.read()
         f1.close()
         self.arw["inifiles_view"].get_buffer().set_text(text)
 
+    """ Output """
 
-
-    def ______________output____________() :
-        pass
-
-    def format_line(self, key, line1) :
+    def format_line(self, key, line1):
         text = ""
-        if key != "" :
+        if key != "":
             key += " = "
-        for value in line1.split("\n") :
-            if value.strip() != "" :
+        for value in line1.split("\n"):
+            if value.strip() != "":
                 text += key + value + "\n"
         return text
 
-
-    def format_comment(self, line1) :
+    def format_comment(self, line1):
         text = ""
-        for value in line1.split("\n") :
-            if value.strip() == "" :
+        for value in line1.split("\n"):
+            if value.strip() == "":
                 continue
-            if value.strip() == "#" :
+            if value.strip() == "#":
                 continue
-            if value.strip()[0:1] != "#" :
+            if value.strip()[0:1] != "#":
                 text += "# " + value + "\n"
-            else :
+            else:
                 text += value + "\n"
         return text
 
-    def format_time(self, line1) :
+    def format_time(self, line1):
         pass
 
-    def format_userline(self, dummy, line1) :
+    def format_userline(self, dummy, line1):
         # separate domains and ips
         text = ""
-        for value in line1.split("\n") :
-            if value.strip() != "" :
-                if len(re.findall("[:]", value)) == 5 :  # five : means this is a mac address
+        for value in line1.split("\n"):
+            if value.strip() != "":
+                if len(re.findall("[:]", value)) == 5:  # five : means this is a mac address
                     # TODO  check that the mac address is valid
                     key = "users"
-                else : key = "user"
+                else:
+                    key = "user"
                 text += key + " = " + value + "\n"
         return text
 
-
-    def format_domainline(self, dummy, line1) :
+    def format_domainline(self, dummy, line1):
         # separate domains and ips
         text = ""
-        for value in line1.split("\n") :
-            if value.strip() != "" :
-                if len(re.findall("[a-zA-Z]", value)) == 0 :  # no alphabetical characters, it is an IP address
+        for value in line1.split("\n"):
+            if value.strip() != "":
+                if len(re.findall("[a-zA-Z]", value)) == 0:  # no alphabetical characters, it is an IP address
                     # TODO  check that the ip address is valid
                     key = "dest_ip"
-                else : key = "dest_domain"
+                else:
+                    key = "dest_domain"
                 text += key + " = " + value + "\n"
         return text
 
-    def format_directive(self, list1) :
+    def format_directive(self, list1):
         out = "action = " + list1[0] + "\n"
-        for line in list1[1:] :
+        for line in list1[1:]:
             out += "ports = " + line + "\n"
         return out + "\n"
 
-    def format_name(self,name) :
+    def format_name(self, name):
         return name.replace(" ", "_")
 
-    def build_files (self, widget) :
+    def build_files(self, widget):
         # launched by the GO button
         self.build_users()
         self.build_proxy_ini()
         self.build_firewall_ini()
-        if not load_locale == True :  #send the files bt FTP
+        if not load_locale:  # send the files bt FTP
             self.ftp_upload()
-        if self.local_control == True :   # if connected to Idefix, send the update signal
+        if self.local_control:  # if connected to Idefix, send the update signal
             f1 = open("./tmp/update", "w")
             f1.close()
-            self.ftp_upload(["./tmp/update"], message = False)
+            self.ftp_upload(["./tmp/update"], message=False)
 
-
-
-    def build_users(self) :
+    def build_users(self):
         out = ""
-        for row in self.users_store :
-            out += "\n[%s]\n" % row[0]      # section
+        for row in self.users_store:
+            out += "\n[%s]\n" % row[0]  # section
             # write options
             time_condition = row[3]
-            if time_condition.strip() != "" :
+            if time_condition.strip() != "":
                 out += "time_condition = " + time_condition + "\n"
             options = ["", "", "", "time_condition", "email", "internet access", "filtered", "open"]
-            for i in [4,5,6,7] :
-                if row[i] == 1 :
+            for i in [4, 5, 6, 7]:
+                if row[i] == 1:
                     out += "option = " + options[i] + "\n"
-            for child in row.iterchildren() :     # write users and macaddress
+            for child in row.iterchildren():  # write users and macaddress
                 user = child[0]
-                if not user in self.maclist :
+                if not user in self.maclist:
                     alert("User %s has no mac address !" % user)
-                else :
+                else:
                     macaddress = self.maclist[user]
-                    for address in macaddress :
+                    for address in macaddress:
                         out += user + " = " + address + "\n"
 
-        with open("./tmp/users.ini", "w", encoding = "utf-8-sig",  newline = "\n") as f1 :
+        with open("./tmp/users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(out)
 
-
-
-    def build_proxy_ini (self) :
+    def build_proxy_ini(self):
 
         out = ""
-        for row in self.proxy_store :
+        for row in self.proxy_store:
             out += "\n[%s]\n" % row[0]
-            out += self.format_comment(row[4])      # comments
+            out += self.format_comment(row[4])  # comments
             out += self.format_line("active", row[1])
             out += self.format_line("action", row[2])
             out += self.format_line("time_condition", row[3])
@@ -1789,19 +1707,17 @@ class Idefix :
             out += self.format_line("destination", row[10])
             out += self.format_domainline("dest_domain", row[8])
 
-
-        with open("./tmp/proxy-users.ini", "w", encoding = "utf-8-sig",  newline = "\n") as f1 :
+        with open("./tmp/proxy-users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(out)
 
-
-    def build_firewall_ini (self) :
+    def build_firewall_ini(self):
         out = {}
         sections = []
-        #"active", "action", "ports", "time_condition", "#comments", "user", "users"
+        # "active", "action", "ports", "time_condition", "#comments", "user", "users"
 
-        for row in self.firewall_store :
+        for row in self.firewall_store:
             section = row[0]
-            if section[0:2] == "__" :    # This section was generated, skip
+            if section[0:2] == "__":  # This section was generated, skip
                 continue
             sections.append(section)
 
@@ -1814,7 +1730,7 @@ class Idefix :
             tmp1 += self.format_line("time_condition", row[4])
             tmp1 += self.format_line("user", row[6])
             tmp1 += self.format_line("users", row[7])
-            #print(tmp1)
+            # print(tmp1)
             out[section] = tmp1
 
         # data from the users tree
@@ -1829,60 +1745,57 @@ class Idefix :
         7 : open (1/0)
         8 : full (1/0)
         """
-        for row in self.users_store :
+        for row in self.users_store:
             section = "__" + row[0]
-            if not section in sections :
+            if not section in sections:
                 sections.append(section)
-            #print(row[0], row[1], row[2])
+            # print(row[0], row[1], row[2])
             tmp2 = "\n[%s]\n" % section
             # set the command lines for the categories
             option = row[1].split("|")
 
             myoptions = ["ACCEPT"]
-            if row[4] == 1 :                            # email
+            if row[4] == 1:  # email
                 myoptions.append("email")
-                myoptions.append("ports_techniques")    #  TODO problème de traduction
-            if row[5] == 1 :
-                if not "ports_techniques" in myoptions :
-                    myoptions.append("ports_techniques")    #  TODO problème de traduction
+                myoptions.append("ports_techniques")  # TODO problème de traduction
+            if row[5] == 1:
+                if not "ports_techniques" in myoptions:
+                    myoptions.append("ports_techniques")  # TODO problème de traduction
                 if row[6] == 1:
                     myoptions.append("ftp")
                 elif row[7] == 1:
                     myoptions.append("http")
-                    if not "email" in myoptions :
+                    if not "email" in myoptions:
                         myoptions.append("email")
                 elif row[8] == 1:
                     myoptions.append("any")
 
-            if len(myoptions) > 1 :
+            if len(myoptions) > 1:
                 tmp2 += self.format_directive(myoptions)
-            else :
+            else:
                 tmp2 += self.format_directive(["DROP", "any"])
 
-            for b in row.iterchildren() :
-                tmp2 += "user = " + b[0] +"\n"
+            for b in row.iterchildren():
+                tmp2 += "user = " + b[0] + "\n"
             out[section] = tmp2
 
         output = ""
-        for section in sections :
+        for section in sections:
             output += out[section]
 
-
-        with open("./tmp/firewall-users.ini", "w", encoding = "utf-8-sig", newline = "\n") as f1 :
+        with open("./tmp/firewall-users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(output)
 
-
-
-    def ftp_upload(self, uploadlist = None, message = True) :
+    def ftp_upload(self, uploadlist=None, message=True):
         ftp1 = self.ftp_config
         msg = ""
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
-        if ftp == None :
+        if ftp is None:
             msg += _("No FTP connexion")
             return
-        if uploadlist == None :
+        if uploadlist is None:
             uploadlist = ["./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini"]
-        for file1 in uploadlist :
+        for file1 in uploadlist:
             ftp_send(ftp, file1)
             msg += file1 + _(" sent\n")
         ftp.close()
@@ -1890,33 +1803,33 @@ class Idefix :
         # TODO : message to indicate upload was successful
         msg += _("\nUpload OK\n")
         print(msg)
-        if message == True :
+        if message == True:
             alert(msg)
 
-
     def destroy(self, widget=None, donnees=None):
-        print ("Évènement destroy survenu.")
+        print("Évènement destroy survenu.")
         gtk.main_quit()
-        return(True)
+        return (True)
 
 
 if __name__ == "__main__":
     global win, parser, configname, load_locale
 
-    load_locale = False    # when set to true (see below), the configuration is loaded and written from and to local files (development mode)
+    # When set to true (see below), the configuration is loaded and written from and to local files (development mode)
+    load_locale = False
     parser = myConfigParser()
     idefix_config = parser.read("./idefix-config.cfg", "conf")
 
     # Get the configuration
 
-    if len(sys.argv) > 1 :         # if the config is indicated on the command line
-        if len(sys.argv[1].strip()) > 0 :
+    if len(sys.argv) > 1:  # if the config is indicated on the command line
+        if len(sys.argv[1].strip()) > 0:
             configname = sys.argv[1]
-    else :           # ask for config
-        config_dialog = ask_for_config(idefix_config)
+    else:  # ask for config
+        config_dialog = AskForConfig(idefix_config)
         configname = config_dialog.run()
 
-    if configname.strip().lower() == "dev" :
+    if configname.strip().lower() == "dev":
         load_locale = True
     win = Idefix(idefix_config["conf"][configname])
     gtk.main()
