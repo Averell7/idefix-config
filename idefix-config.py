@@ -313,7 +313,7 @@ class Idefix:
         # autosave textview buffers when typing (see also drag and drop below)
         # and when drag is received
         for textView in ["maclist",
-                         "proxy_group", "proxy_dest", "proxy_#comments",
+                         "proxy_dest", "proxy_#comments",
                          "firewall_ports", "firewall_users", "firewall_comments"]:
             self.arw[textView].connect("key-release-event", self.update_tv)
             # self.arw[textView].connect("drag-end", self.update_tv)
@@ -323,6 +323,11 @@ class Idefix:
         self.arw['proxy_users'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
         self.arw['proxy_users'].drag_dest_add_text_targets()
         self.arw['proxy_users'].connect("drag-data-received", self.update_proxy_user_list_view)
+
+        self.arw["proxy_group"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
+        self.arw['proxy_group'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
+        self.arw['proxy_group'].drag_dest_add_text_targets()
+        self.arw['proxy_group'].connect("drag-data-received", self.update_proxy_group_list_view)
 
         # load configuration
         if not load_locale:
@@ -948,10 +953,38 @@ class Idefix:
         self.proxy_store.set_value(self.iter_proxy, 5, '\n'.join(names))
         self.update_proxy_user_list()
 
+    def delete_proxy_group(self, widget):
+        model, iter = self.arw['proxy_group'].get_selection().get_selected()
+        name = model.get_value(iter, 0).strip()
+
+        names = self.proxy_store.get_value(self.iter_proxy, 7).split('\n')
+        if name not in names or name == 'any':
+            return
+
+        names.remove(name)
+
+        self.proxy_store.set_value(self.iter_proxy, 7, '\n'.join(names))
+        self.update_proxy_group_list()
+
     def proxy_user_select(self, widget, event):
         if event.type == Gdk.EventType.BUTTON_RELEASE:
             if event.button == 3:  # right click, runs the context menu
                 self.arw["proxy_users_menu"].popup(None, None, None, None, event.button, event.time)
+
+    def proxy_group_select(self, widget, event):
+        if event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 3:  # right click, runs the context menu
+                self.arw["proxy_groups_menu"].popup(None, None, None, None, event.button, event.time)
+
+    def update_proxy_group_list(self, proxy_iter=None):
+        if not proxy_iter:
+            proxy_iter = self.iter_proxy
+
+        self.arw['proxy_groups_store'].clear()
+        for name in self.proxy_store[proxy_iter][7].split('\n'):
+            if name:
+                iter = self.arw['proxy_groups_store'].append()
+                self.arw['proxy_groups_store'].set_value(iter, 0, name)
 
     def update_proxy_user_list(self, proxy_iter=None):
         if not proxy_iter:
@@ -1015,10 +1048,8 @@ class Idefix:
         self.arw["proxy_#comments"].get_buffer().set_text(self.proxy_store[iter1][4])
 
         self.update_proxy_user_list(iter1)
+        self.update_proxy_group_list(iter1)
 
-        # add groups
-        data1 = self.proxy_store[iter1][7]  # dest_group
-        self.arw["proxy_group"].get_buffer().set_text(data1)
         # add dest_domains
         data1 = self.proxy_store[iter1][8]  # dest_domain
         # add dest_ip, if any
@@ -1052,20 +1083,18 @@ class Idefix:
         x = self.arw["notebook2"].get_current_page()
         current_page = x
 
-        text_buffer = self.arw["proxy_group"].get_buffer()
-        (start_iter, end_iter) = text_buffer.get_bounds()
-        group_text = text_buffer.get_text(start_iter, end_iter, False)
+        groups_iter = self.arw['proxy_groups_store'].get_iter_first()
+        has_groups = groups_iter is not None
 
         text_buffer = self.arw["proxy_dest"].get_buffer()
         (start_iter, end_iter) = text_buffer.get_bounds()
         dest_text = text_buffer.get_text(start_iter, end_iter, False)
 
-        len0 = len(group_text.strip())
         len1 = len(dest_text.strip())
 
-        if len0 == 0 and len1 == 0:
+        if not has_groups and len1 == 0:
             pass
-        elif x == 0 and len0 == 0:
+        elif x == 0 and not has_groups:
             self.arw["notebook2"].set_current_page(1)
             current_page = 1
         elif x == 1 and len1 == 0:
@@ -1188,6 +1217,17 @@ class Idefix:
         names.append(new_name)
         self.proxy_store.set_value(self.iter_proxy, 5, '\n'.join(names))
         self.update_proxy_user_list(self.iter_proxy)
+
+    def update_proxy_group_list_view(self, widget, ctx, x, y, data, info, etime):
+        """Add a proxy group to the list"""
+        new_name = data.get_text().strip()
+
+        names = self.proxy_store.get_value(self.iter_proxy, 7).split('\n')
+        if new_name in names:
+            return
+        names.append(new_name)
+        self.proxy_store.set_value(self.iter_proxy, 7, '\n'.join(names))
+        self.update_proxy_group_list(self.iter_proxy)
 
     def update_tv(self, text_view, event=None, a=None, b=None, c=None, text=""):
 

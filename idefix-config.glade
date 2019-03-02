@@ -140,6 +140,24 @@
       <action-widget response="1">button9</action-widget>
     </action-widgets>
   </object>
+  <object class="GtkMenu" id="proxy_groups_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="menuitem5">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">delete</property>
+        <signal name="activate" handler="delete_proxy_group" swapped="no"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="proxy_groups_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkMenu" id="proxy_users_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1339,11 +1357,28 @@
                                             <property name="can_focus">True</property>
                                             <property name="shadow_type">in</property>
                                             <child>
-                                              <object class="GtkTextView" id="proxy_group">
+                                              <object class="GtkTreeView" id="proxy_group">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
-                                                <property name="left_margin">5</property>
+                                                <property name="model">proxy_groups_store</property>
+                                                <property name="headers_visible">False</property>
+                                                <property name="search_column">0</property>
                                                 <signal name="button-press-event" handler="load_chooser" swapped="no"/>
+                                                <signal name="button-release-event" handler="proxy_group_select" swapped="no"/>
+                                                <child internal-child="selection">
+                                                  <object class="GtkTreeSelection"/>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkTreeViewColumn">
+                                                    <property name="title" translatable="yes">Users</property>
+                                                    <child>
+                                                      <object class="GtkCellRendererText"/>
+                                                      <attributes>
+                                                        <attribute name="text">0</attribute>
+                                                      </attributes>
+                                                    </child>
+                                                  </object>
+                                                </child>
                                               </object>
                                             </child>
                                           </object>
