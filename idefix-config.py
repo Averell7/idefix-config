@@ -1577,38 +1577,67 @@ class Idefix:
             return
         self.mem_time = time.time()
         path = data.get_text()
-        level = len(path.split(":"))
-        if level == 1:
-            print("moving categories not yet implemented")
-            return
+        source_level = len(path.split(":"))
         model = treeview.get_model()
         iter_source = model.get_iter(path)
+
+        # if level == 1:
+        #    print("moving categories not yet implemented")
+        #    return
+
         # create the row to insert
         row = []
         for i in range(model.get_n_columns()):
             row.append(model.get_value(iter_source, i))
 
         drop_info = treeview.get_dest_row_at_pos(x, y)
-        if drop_info:
+
+        if source_level == 1:
+            # Move an entire Category
             path1, position = drop_info
-            level = path1.get_depth()
             iter1 = model.get_iter(path1)
 
-            if level == 1:
-                # print("drop on category")
-                model.append(iter1, row)
-                model.remove(iter_source)
+            # Always ensure top level
+            if not model.iter_has_child(iter1):
+                iter1 = model.iter_parent(iter1)
 
-            elif (position == Gtk.TreeViewDropPosition.BEFORE
-                  or position == Gtk.TreeViewDropPosition.BEFORE):
-                model.insert_before(None, iter1, row)
-                model.remove(iter_source)
-                print("BEFORE")
+            if (position == Gtk.TreeViewDropPosition.BEFORE
+                    or position == Gtk.TreeViewDropPosition.BEFORE):
+                iter_dest = model.insert_before(None, iter1, row)
             else:
-                model.insert_after(None, iter1, row)
-                model.remove(iter_source)
+                iter_dest = model.insert_after(None, iter1, row)
+
+            child_iter = model.iter_children(iter_source)
+
+            # Move users
+            while child_iter:
+                child_row = []
+                for i in range(model.get_n_columns()):
+                    child_row.append(model.get_value(child_iter, i))
+                model.insert_after(iter_dest, None, child_row)
+                child_iter = model.iter_next(child_iter)
+
+            model.remove(iter_source)
         else:
-            model.append([data])
+            if drop_info:
+                path1, position = drop_info
+                dest_level = path1.get_depth()
+                iter1 = model.get_iter(path1)
+
+                if dest_level == 1:
+                    # print("drop on category")
+                    model.append(iter1, row)
+                    model.remove(iter_source)
+                elif (position == Gtk.TreeViewDropPosition.BEFORE
+                      or position == Gtk.TreeViewDropPosition.BEFORE):
+                    model.insert_before(None, iter1, row)
+                    model.remove(iter_source)
+                    print("BEFORE")
+                else:
+                    model.insert_after(None, iter1, row)
+                    model.remove(iter_source)
+            else:
+                model.append([data])
 
     #        if drag_context.get_actions() == Gdk.DragAction.MOVE:
     #            drag_context.finish(True, True, etime)
