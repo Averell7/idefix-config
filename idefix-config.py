@@ -105,20 +105,20 @@ def showwarning(title, message):
       GTK_MESSAGE_OTHER
     """
 
-    reset_transform = False
+    # reset_transform = False
 
     dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.WARNING,
                                Gtk.ButtonsType.CLOSE, title)
 
     dialog.format_secondary_text(message)
-    if "transformWindow" in app.arw:
-        app.arw["transformWindow"].set_keep_above(False)
-        reset_transform = True
+    # if "transformWindow" in app.arw:
+    #    app.arw["transformWindow"].set_keep_above(False)
+    #    reset_transform = True
     dialog.set_keep_above(True)
     dialog.run()
     dialog.destroy()
-    if reset_transform:
-        app.arw["transformWindow"].set_keep_above(True)
+    # if reset_transform:
+    #     app.arw["transformWindow"].set_keep_above(True)
 
 
 def askyesno(title, string):
@@ -1342,6 +1342,16 @@ class Idefix:
 
         return ask_text(self.arw["window1"], new, "")
 
+    def does_user_exist(self, name):
+        """Check if the user exists or not"""
+        name = name.strip().lower()
+        for row in self.users_store:
+            for child in row.iterchildren():
+                existing_name = child[0].strip().lower()
+                if existing_name == name:
+                    return True
+        return False
+
     def add_user_above(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
         level = model.get_path(node).get_depth()
@@ -1349,6 +1359,9 @@ class Idefix:
 
         if name:
             name = self.format_name(name)
+            if self.does_user_exist(name):
+                showwarning(_("User Exists"), _("Username exists"))
+                return
             self.users_store.insert_before(None, node, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
     def add_user_below(self, widget):
@@ -1356,6 +1369,14 @@ class Idefix:
         level = model.get_path(node).get_depth()
         name = self.ask_user_dialog(level)
         if name:
+            if level == 1:
+                if self.does_category_exist(name):
+                    showwarning(_("Category Exists"), _("The category name already exists"))
+                    return
+            else:
+                if self.does_user_exist(name):
+                    showwarning(_("User Exists"), _("Username exists"))
+                    return
             self.users_store.insert_after(None, node, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
     def add_new_user(self, widget):
@@ -1363,7 +1384,19 @@ class Idefix:
         level = model.get_path(node).get_depth()
         name = self.ask_user_dialog(level)
         if name:
+            if self.does_user_exist(name):
+                showwarning(_("User Exists"), _("Username exists"))
+                return
             self.users_store.insert(node, 1, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
+
+    def does_category_exist(self, name):
+        """Check if the category exists or not"""
+        name = name.strip().lower()
+        for row in self.users_store:
+            existing_name = row[0].strip().lower()
+            if existing_name == name:
+                return True
+        return False
 
     def add_new_category(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
@@ -1373,6 +1406,9 @@ class Idefix:
             level = model.get_path(node).get_depth()
         name = self.ask_user_dialog(level)
         if name:
+            if self.does_category_exist(name):
+                showwarning(_("Category Exists"), _("The category name already exists"))
+                return
             self.users_store.insert_after(None, node, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
     def delete_user(self, widget):
