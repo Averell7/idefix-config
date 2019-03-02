@@ -313,11 +313,16 @@ class Idefix:
         # autosave textview buffers when typing (see also drag and drop below)
         # and when drag is received
         for textView in ["maclist",
-                         "proxy_users", "proxy_group", "proxy_dest", "proxy_#comments",
+                         "proxy_group", "proxy_dest", "proxy_#comments",
                          "firewall_ports", "firewall_users", "firewall_comments"]:
             self.arw[textView].connect("key-release-event", self.update_tv)
             # self.arw[textView].connect("drag-end", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
+
+        self.arw["proxy_users"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
+        self.arw['proxy_users'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
+        self.arw['proxy_users'].drag_dest_add_text_targets()
+        self.arw['proxy_users'].connect("drag-data-received", self.update_proxy_user_list_view)
 
         # load configuration
         if not load_locale:
@@ -930,6 +935,47 @@ class Idefix:
         self.firewall_store[iter1][7] = ""
         self.arw["firewall_users"].get_buffer().set_text(data1)
 
+    def delete_proxy_user(self, widget):
+        model, iter = self.arw['proxy_users'].get_selection().get_selected()
+        name = model.get_value(iter, 0).strip()
+
+        names = self.proxy_store.get_value(self.iter_proxy, 5).split('\n')
+        if name not in names or name == 'any':
+            return
+
+        names.remove(name)
+
+        self.proxy_store.set_value(self.iter_proxy, 5, '\n'.join(names))
+        self.update_proxy_user_list()
+
+    def proxy_user_select(self, widget, event):
+        if event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 3:  # right click, runs the context menu
+                self.arw["proxy_users_menu"].popup(None, None, None, None, event.button, event.time)
+
+    def update_proxy_user_list(self, proxy_iter=None):
+        if not proxy_iter:
+            proxy_iter = self.iter_proxy
+
+        self.arw['proxy_users_store'].clear()
+
+        # add users
+        data1 = self.proxy_store[proxy_iter][5]  # user
+        for name in self.proxy_store[proxy_iter][5].split('\n'):
+            if name:
+                iter = self.arw['proxy_users_store'].append()
+                self.arw['proxy_users_store'].set_value(iter, 0, name)
+
+        # add mac, if any
+        data1 += self.proxy_store[proxy_iter][6]  # mac
+
+        for name in self.proxy_store[proxy_iter][6].split('\n'):
+            if name:
+                iter = self.arw['proxy_users_store'].append()
+                self.arw['proxy_users_store'].set_value(iter, 0, name)
+
+        return data1
+
     def load_proxy_user(self, widget, event):
 
         # Loads user data when a user is selected in the list
@@ -968,11 +1014,7 @@ class Idefix:
 
         self.arw["proxy_#comments"].get_buffer().set_text(self.proxy_store[iter1][4])
 
-        # add users
-        data1 = self.proxy_store[iter1][5]  # user
-        # add mac, if any
-        data1 += self.proxy_store[iter1][6]  # mac
-        self.arw["proxy_users"].get_buffer().set_text(data1)
+        self.update_proxy_user_list(iter1)
 
         # add groups
         data1 = self.proxy_store[iter1][7]  # dest_group
@@ -1136,6 +1178,17 @@ class Idefix:
             treestore[row][1] = "off"
             treestore[row][15] = "#bbbbbb"
 
+    def update_proxy_user_list_view(self, widget, ctx, x, y, data, info, etime):
+        """Add a user or a group to the list"""
+        new_name = data.get_text().strip()
+
+        names = self.proxy_store.get_value(self.iter_proxy, 5).split('\n')
+        if new_name in names:
+            return
+        names.append(new_name)
+        self.proxy_store.set_value(self.iter_proxy, 5, '\n'.join(names))
+        self.update_proxy_user_list(self.iter_proxy)
+
     def update_tv(self, text_view, event=None, a=None, b=None, c=None, text=""):
 
         text_buffer = text_view.get_buffer()
@@ -1147,8 +1200,6 @@ class Idefix:
             self.proxy_store.set(self.iter_proxy, 7, text1)
         elif widget.name == "proxy_dest":
             self.proxy_store.set(self.iter_proxy, 8, text1)
-        elif widget.name == "proxy_users":
-            self.proxy_store.set(self.iter_proxy, 5, text1)
         elif widget.name == "proxy_#comments":
             self.proxy_store.set(self.iter_proxy, 4, text1)
 
