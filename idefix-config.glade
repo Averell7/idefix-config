@@ -1193,14 +1193,22 @@
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <child>
-                                          <object class="GtkButton" id="button1">
-                                            <property name="label" translatable="yes">---</property>
-                                            <property name="sensitive">False</property>
+                                          <object class="GtkButton" id="toggle_proxy_user_open_button">
+                                            <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">True</property>
+                                            <signal name="clicked" handler="toggle_col5" swapped="no"/>
+                                            <child>
+                                              <object class="GtkLabel" id="toggle_proxy_user_open">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">False</property>
+                                                <property name="label" translatable="yes">label</property>
+                                                <property name="use_markup">True</property>
+                                              </object>
+                                            </child>
                                           </object>
                                           <packing>
-                                            <property name="expand">False</property>
+                                            <property name="expand">True</property>
                                             <property name="fill">True</property>
                                             <property name="position">0</property>
                                           </packing>

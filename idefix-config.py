@@ -940,6 +940,10 @@ class Idefix:
         self.firewall_store[iter1][7] = ""
         self.arw["firewall_users"].get_buffer().set_text(data1)
 
+    def proxy_user_has_any(self):
+        """Return True if the proxy user has any"""
+        return 'any' in self.proxy_store.get_value(self.iter_proxy, 5).split('\n')
+
     def delete_proxy_user(self, widget):
         model, iter = self.arw['proxy_users'].get_selection().get_selected()
         name = model.get_value(iter, 0).strip()
@@ -1060,6 +1064,14 @@ class Idefix:
     def load_proxy_user2(self):
         # used by the function above, and by the buttons of the proxy tab
 
+        if self.proxy_user_has_any():
+            self.arw['toggle_proxy_user_open'].set_label(_("<b>All</b>"))
+            self.arw["toggle_proxy_user_open_button"].modify_bg(Gtk.StateType.NORMAL,
+                                                                Gdk.Color(red=60535, green=60535, blue=0))
+        else:
+            self.arw["toggle_proxy_user_open"].set_label(_("<b>List</b>"))
+            self.arw["toggle_proxy_user_open_button"].modify_bg(Gtk.StateType.NORMAL, None)
+
         # set full access
         if self.proxy_store[self.iter_proxy][12] == 1:
             self.arw["notebook2"].hide()
@@ -1108,6 +1120,19 @@ class Idefix:
             self.arw["chooser"].set_model(self.empty_store)
 
     """Actions"""
+
+    def toggle_col5(self, widget):
+        """Toggle any user or specific users"""
+        users = self.proxy_store.get_value(self.iter_proxy, 5).split('\n')
+        if 'any' in users:
+            users.remove('any')
+        else:
+            users = ['any']
+
+        self.proxy_store.set_value(self.iter_proxy, 5, '\n'.join(users))
+        self.update_proxy_user_list()
+
+        self.load_proxy_user2()
 
     def toggle_col12(self, widget):
         # callback of the open access checkbox in proxy tab.
@@ -1211,6 +1236,9 @@ class Idefix:
         """Add a user or a group to the list"""
         new_name = data.get_text().strip()
 
+        if self.proxy_user_has_any():
+            return
+
         names = self.proxy_store.get_value(self.iter_proxy, 5).split('\n')
         if new_name in names:
             return
@@ -1236,9 +1264,7 @@ class Idefix:
         text1 = text_buffer.get_text(start_iter, end_iter, False) + text
         widget = text_view
 
-        if widget.name == "proxy_group":
-            self.proxy_store.set(self.iter_proxy, 7, text1)
-        elif widget.name == "proxy_dest":
+        if widget.name == "proxy_dest":
             self.proxy_store.set(self.iter_proxy, 8, text1)
         elif widget.name == "proxy_#comments":
             self.proxy_store.set(self.iter_proxy, 4, text1)
