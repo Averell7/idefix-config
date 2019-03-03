@@ -849,25 +849,49 @@ class Idefix:
             self.arw["menu_add_user"].show()
             self.arw["menu_add_cat"].show()
 
-            # time conditions
-            data1 = self.users_store[iter1][3].strip()
-            if data1 == "":
-                # self.arw["users_time_days"].set_text("")
-                self.arw["users_time_from"].set_text("")
-                self.arw["users_time_to"].set_text("")
+            self.arw['email_time_condition'].set_sensitive(self.users_store[self.iter_user][4])
+            self.arw['internet_time_condition'].set_sensitive(self.users_store[self.iter_user][5])
 
-            elif len(data1) > 6:
+            # time conditions internet
+            data1 = self.users_store[iter1][3].strip()
+            if not data1:
+                self.arw["users_time_days_internet"].set_text("")
+                self.arw["users_time_from_internet"].set_text("")
+                self.arw["users_time_to_internet"].set_text("")
+            elif len(data1) > 8:
                 try:
-                    # tmp1 = data1.split()
-                    tmp2 = data1.split("-")
-                    # days = tmp1[0].strip()
+                    tmp1 = data1.split()
+                    tmp2 = tmp1[1].split("-")
+                    days = tmp1[0].strip()
                     time_from = tmp2[0].strip()
                     time_to = tmp2[1].strip()
 
-                    # self.arw["users_time_days"].set_text(days)
-                    self.arw["users_time_from"].set_text(time_from)
-                    self.arw["users_time_to"].set_text(time_to)
-                except:
+                    self.arw["users_time_days_internet"].set_text(days)
+                    self.arw["users_time_from_internet"].set_text(time_from)
+                    self.arw["users_time_to_internet"].set_text(time_to)
+                except IndexError:
+                    print("Error handling time condition :", data1)
+            else:
+                print("Invalid time :", data1)
+
+            # time conditions email
+            data1 = self.users_store[iter1][2].strip()
+            if not data1:
+                self.arw["users_time_days_email"].set_text("")
+                self.arw["users_time_from_email"].set_text("")
+                self.arw["users_time_to_email"].set_text("")
+            elif len(data1) > 8:
+                try:
+                    tmp1 = data1.split()
+                    tmp2 = tmp1[1].split("-")
+                    days = tmp1[0].strip()
+                    time_from = tmp2[0].strip()
+                    time_to = tmp2[1].strip()
+
+                    self.arw["users_time_days_email"].set_text(days)
+                    self.arw["users_time_from_email"].set_text(time_from)
+                    self.arw["users_time_to_email"].set_text(time_to)
+                except IndexError:
                     print("Error handling time condition :", data1)
             else:
                 print("Invalid time :", data1)
@@ -1333,6 +1357,10 @@ class Idefix:
 
         self.set_colors()
 
+        # Update the time conditions frames
+        self.arw['email_time_condition'].set_sensitive(self.users_store[self.iter_user][4])
+        self.arw['internet_time_condition'].set_sensitive(self.users_store[self.iter_user][5])
+
     def update_time(self, widget, x=None):
 
         if widget.name in ["proxy_time_condition_days", "proxy_time_condition_from", "proxy_time_condition_to"]:
@@ -1341,13 +1369,27 @@ class Idefix:
                 time_condition = "MTWHFAS "
             time_condition += self.arw["proxy_time_condition_from"].get_text().strip() + "-"
             time_condition += self.arw["proxy_time_condition_to"].get_text().strip()
+            if time_condition == "MTWHFAS -":
+                time_condition = ""
             self.proxy_store[self.iter_proxy][3] = time_condition
 
-        if widget.name in ["users_time_days", "users_time_from", "users_time_to"]:
-            # time_condition = self.arw["users_time_days"].get_text() + " "
-            time_condition = self.arw["users_time_from"].get_text().strip() + "-"
-            time_condition += self.arw["users_time_to"].get_text().strip()
-            if time_condition.strip() == "-":
+        if widget.name in ["users_time_days_email", "users_time_from_email", "users_time_to_email"]:
+            time_condition = self.arw["users_time_days_email"].get_text() + " "
+            if time_condition.strip() == "":
+                time_condition = "MTWHFAS "
+            time_condition += self.arw["users_time_from_email"].get_text().strip() + "-"
+            time_condition += self.arw["users_time_to_email"].get_text().strip()
+            if time_condition == "MTWHFAS -":
+                time_condition = ""
+            self.users_store[self.iter_user][2] = time_condition
+
+        if widget.name in ["users_time_days_internet", "users_time_from_internet", "users_time_to_internet"]:
+            time_condition = self.arw["users_time_days_internet"].get_text() + " "
+            if time_condition.strip() == "":
+                time_condition = "MTWHFAS "
+            time_condition += self.arw["users_time_from_internet"].get_text().strip() + "-"
+            time_condition += self.arw["users_time_to_internet"].get_text().strip()
+            if time_condition == "MTWHFAS -":
                 time_condition = ""
             self.users_store[self.iter_user][3] = time_condition
 

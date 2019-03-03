@@ -554,7 +554,7 @@
                                 <property name="can_focus">False</property>
                                 <property name="orientation">vertical</property>
                                 <child>
-                                  <object class="GtkFrame" id="frame3">
+                                  <object class="GtkFrame" id="email_time_condition">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="margin_left">4</property>
@@ -573,7 +573,6 @@
                                           <object class="GtkEntry" id="users_time_to_email">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="editable">False</property>
                                             <property name="max_length">5</property>
                                             <property name="invisible_char">●</property>
                                             <property name="width_chars">0</property>
@@ -605,7 +604,6 @@
                                           <object class="GtkEntry" id="users_time_from_email">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="editable">False</property>
                                             <property name="max_length">5</property>
                                             <property name="invisible_char">●</property>
                                             <property name="width_chars">0</property>
@@ -645,19 +643,6 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkEntry" id="users_time_days">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="editable">False</property>
-                                            <property name="invisible_char">●</property>
-                                            <property name="placeholder_text">inutilisé pour l'instant</property>
-                                          </object>
-                                          <packing>
-                                            <property name="left_attach">2</property>
-                                            <property name="right_attach">5</property>
-                                          </packing>
-                                        </child>
-                                        <child>
                                           <object class="GtkImage" id="image2">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
@@ -665,6 +650,19 @@
                                           </object>
                                           <packing>
                                             <property name="bottom_attach">2</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkEntry" id="users_time_days_email">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="invisible_char">●</property>
+                                            <property name="placeholder_text">inutilisé pour l'instant</property>
+                                            <signal name="key-release-event" handler="update_time" swapped="no"/>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">2</property>
+                                            <property name="right_attach">5</property>
                                           </packing>
                                         </child>
                                       </object>
@@ -685,7 +683,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkFrame" id="frame4">
+                                  <object class="GtkFrame" id="internet_time_condition">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="margin_left">4</property>
@@ -700,12 +698,13 @@
                                         <property name="n_rows">2</property>
                                         <property name="n_columns">5</property>
                                         <child>
-                                          <object class="GtkEntry" id="users_time_to">
+                                          <object class="GtkEntry" id="users_time_to_internet">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="max_length">5</property>
                                             <property name="invisible_char">●</property>
                                             <property name="width_chars">0</property>
+                                            <signal name="key-release-event" handler="update_time" swapped="no"/>
                                           </object>
                                           <packing>
                                             <property name="left_attach">4</property>
@@ -730,12 +729,13 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkEntry" id="users_time_from">
+                                          <object class="GtkEntry" id="users_time_from_internet">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="max_length">5</property>
                                             <property name="invisible_char">●</property>
                                             <property name="width_chars">0</property>
+                                            <signal name="key-release-event" handler="update_time" swapped="no"/>
                                           </object>
                                           <packing>
                                             <property name="left_attach">2</property>
@@ -771,12 +771,12 @@
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkEntry" id="users_time_days1">
+                                          <object class="GtkEntry" id="users_time_days_internet">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
-                                            <property name="editable">False</property>
                                             <property name="invisible_char">●</property>
                                             <property name="placeholder_text">inutilisé pour l'instant</property>
+                                            <signal name="key-release-event" handler="update_time" swapped="no"/>
                                           </object>
                                           <packing>
                                             <property name="left_attach">2</property>
