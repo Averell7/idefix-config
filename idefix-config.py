@@ -630,6 +630,12 @@ class Idefix:
         image.set_from_file('./data/internet-filtered-32.gif')
         self.internet_filtered_icon = image.get_pixbuf()
 
+        image.set_from_file('./data/internet-disabled-32.gif')
+        self.internet_disabled_icon = image.get_pixbuf()
+
+        image.set_from_file('./data/email-disabled-32.png')
+        self.email_disabled_icon = image.get_pixbuf()
+
         self.populate_firewall()
         self.populate_proxy()
         self.populate_ports()
@@ -1667,31 +1673,42 @@ class Idefix:
 
     def user_summary(self, user1):
 
-        if not user1 in self.maclist:
-            out = "User %s has no mac address !" % user1
-        else:
-            num = len(self.maclist[user1])
-            if num == 1:
-                out = "1 Mac address for user %s : \n" % user1
-            else:
-                out = str(num) + " Mac addresses for user %s : \n" % user1
+        self.arw['user_summary_frame_label'].set_label(_("Summary For ") + user1)
 
-        out += "\nAccès Internet : "
+        if not user1 in self.maclist:
+            self.arw['user_summary_mac_address'].set_label(_("Number of MAC Addresses: ") + "0")
+        else:
+            self.arw['user_summary_mac_address'].set_label(_("Number of MAC Addresses: ") + len(self.maclist[user1]))
 
         for row in self.users_store:
-            mem = "\n[%s]\n" % row[0]  # section
-            # write options
-            options = ["", "", "", "", "email", "internet access", "filtered", "open", ""]
-            for i in [4, 5, 6, 7]:
-                if row[i] == 1:
-                    mem += options[i] + "\n"
-            for child in row.iterchildren():  # write users and macaddress
-                user = child[0]
-                if user1 == user:
-                    out += mem + "\n"
-                    mem = ""
+            email_enabled = row[4]
+            internet_enabled = row[5]
+            internet_filtered = row[6]
+            internet_open = row[7]
 
-        out += "\nAccès Internet (compléments) : "
+            if not email_enabled:
+                self.arw['user_summary_email_icon'].set_pixbuf(self.email_disabled_icon)
+            else:
+                self.arw['user_summary_email_icon'].set_pixbuf(self.email_icon)
+
+            if not internet_enabled:
+                self.arw['user_summary_internet_icon'].set_pixbuf(self.internet_disabled_icon)
+            elif internet_filtered:
+                self.arw['user_summary_internet_icon'].set_pixbuf(self.internet_filtered_icon)
+            elif internet_open:
+                self.arw['user_summary_internet_icon'].set_pixbuf(self.internet_full_icon)
+
+            # internet time conditions
+            if row[3]:
+                self.arw['user_summary_internet_time_conditions'].set_label(row[3])
+            else:
+                self.arw['user_summary_internet_time_conditions'].set_label("")
+
+            # email time conditions
+            if row[2]:
+                self.arw['user_summary_email_time_conditions'].set_label(row[2])
+            else:
+                self.arw['user_summary_email_time_conditions'].set_label("")
 
         for row in self.firewall_store:
             users = row[6].split("\n")
