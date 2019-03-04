@@ -178,16 +178,20 @@
   </object>
   <object class="GtkTextBuffer" id="textbuffer1"/>
   <object class="GtkTextBuffer" id="textbuffer2"/>
-  <object class="GtkListStore" id="user_summary_tree_store">
+  <object class="GtkTreeStore" id="user_summary_tree_store">
     <columns>
       <!-- column-name filter_name -->
       <column type="gchararray"/>
-      <!-- column-name time_condition -->
+      <!-- column-name time_conditions -->
       <column type="gchararray"/>
       <!-- column-name icon1 -->
       <column type="GdkPixbuf"/>
       <!-- column-name icon2 -->
       <column type="GdkPixbuf"/>
+      <!-- column-name text_colour -->
+      <column type="gchararray"/>
+      <!-- column-name active -->
+      <column type="gboolean"/>
     </columns>
   </object>
   <object class="GtkWindow" id="window1">
@@ -1082,6 +1086,8 @@
                                             <child>
                                               <object class="GtkCellRendererText"/>
                                               <attributes>
+                                                <attribute name="foreground">4</attribute>
+                                                <attribute name="strikethrough">5</attribute>
                                                 <attribute name="text">0</attribute>
                                               </attributes>
                                             </child>

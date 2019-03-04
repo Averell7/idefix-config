@@ -1673,73 +1673,102 @@ class Idefix:
 
     def user_summary(self, user1):
 
+        parent_iter = self.users_store.iter_parent(self.iter_user)
+        if not parent_iter:
+            parent_iter = self.iter_user
+
         self.arw['user_summary_frame_label'].set_label(_("Summary For ") + user1)
 
-        if not user1 in self.maclist:
+        if user1 not in self.maclist:
             self.arw['user_summary_mac_address'].set_label(_("Number of MAC Addresses: ") + "0")
         else:
-            self.arw['user_summary_mac_address'].set_label(_("Number of MAC Addresses: ") + len(self.maclist[user1]))
+            self.arw['user_summary_mac_address'].set_label(
+                _("Number of MAC Addresses: ") + str(len(self.maclist[user1]))
+            )
 
-        for row in self.users_store:
-            email_enabled = row[4]
-            internet_enabled = row[5]
-            internet_filtered = row[6]
-            internet_open = row[7]
+        email_time_conditions = self.users_store.get_value(parent_iter, 2)
+        internet_time_conditions = self.users_store.get_value(parent_iter, 3)
+        email_enabled = self.users_store.get_value(parent_iter, 4)
+        internet_enabled = self.users_store.get_value(parent_iter, 5)
+        internet_filtered = self.users_store.get_value(parent_iter, 6)
+        internet_open = self.users_store.get_value(parent_iter, 7)
 
-            if not email_enabled:
-                self.arw['user_summary_email_icon'].set_pixbuf(self.email_disabled_icon)
-            else:
-                self.arw['user_summary_email_icon'].set_pixbuf(self.email_icon)
+        if not email_enabled:
+            self.arw['user_summary_email_icon'].set_from_pixbuf(self.email_disabled_icon)
+        else:
+            self.arw['user_summary_email_icon'].set_from_pixbuf(self.email_icon)
 
-            if not internet_enabled:
-                self.arw['user_summary_internet_icon'].set_pixbuf(self.internet_disabled_icon)
-            elif internet_filtered:
-                self.arw['user_summary_internet_icon'].set_pixbuf(self.internet_filtered_icon)
-            elif internet_open:
-                self.arw['user_summary_internet_icon'].set_pixbuf(self.internet_full_icon)
+        if not internet_enabled:
+            self.arw['user_summary_internet_icon'].set_from_pixbuf(self.internet_disabled_icon)
+        elif internet_filtered:
+            self.arw['user_summary_internet_icon'].set_from_pixbuf(self.internet_filtered_icon)
+        elif internet_open:
+            self.arw['user_summary_internet_icon'].set_from_pixbuf(self.internet_full_icon)
 
-            # internet time conditions
-            if row[3]:
-                self.arw['user_summary_internet_time_conditions'].set_label(row[3])
-            else:
-                self.arw['user_summary_internet_time_conditions'].set_label("")
+        # internet time conditions
+        if internet_time_conditions:
+            self.arw['user_summary_internet_time_conditions'].set_label(internet_time_conditions)
+        else:
+            self.arw['user_summary_internet_time_conditions'].set_label("")
 
-            # email time conditions
-            if row[2]:
-                self.arw['user_summary_email_time_conditions'].set_label(row[2])
-            else:
-                self.arw['user_summary_email_time_conditions'].set_label("")
+        # email time conditions
+        if email_time_conditions:
+            self.arw['user_summary_email_time_conditions'].set_label(email_time_conditions)
+        else:
+            self.arw['user_summary_email_time_conditions'].set_label("")
 
+        store = self.arw['user_summary_tree_store']
+        store.clear()
+
+        # 0 - name
+        # 1 - time conditions
+        # 2 - icon1
+        # 3 - icon2
+        # 4 - text colour
+        # 5 - strikethrough
         for row in self.firewall_store:
             users = row[6].split("\n")
             for userx in users:
                 if userx.strip() == user1:
-                    tmp1 = ""
-                    tmp1 += "\n[%s]\n" % row[0]
-                    tmp1 += self.format_comment(row[5])
-                    tmp1 += self.format_line("active", row[1])
-                    tmp1 += self.format_line("action", row[2])
-                    tmp1 += self.format_line("ports", row[3])
-                    tmp1 += self.format_line("time_condition", row[4])
-                    out += tmp1
+                    parent_iter = store.append(None)
+                    store.set_value(parent_iter, 0, row[0])
+                    store.set_value(parent_iter, 1, row[4])
 
-        out += "\nFiltrage Internet : "
+                    store.set_value(parent_iter, 5, row[1] == 'no')
+
+                    if row[2] == 'deny':
+                        store.set_value(parent_iter, 4, 'red')
+                    else:
+                        store.set_value(parent_iter, 4, 'green')
+
+                    for port in row[3].split('\n'):
+                        child_iter = store.append(parent_iter)
+                        store.set_value(child_iter, 0, port)
+
 
         for row in self.proxy_store:
             users = row[5].split("\n")
             for userx in users:
                 if userx.strip() == user1:
-                    out += "\n[%s]\n" % row[0]
-                    "%s present in proxy config" % user1
-                    out += self.format_line("", row[4])  # comments
-                    out += self.format_line("active", row[1])
-                    out += self.format_line("action", row[2])
-                    out += self.format_line("time_condition", row[3])
-                    out += self.format_line("dest_group", row[7])
-                    out += self.format_line("destination", row[10])
-                    out += self.format_domainline("dest_domain", row[8])
+                    parent_iter = store.append(None)
+                    store.set_value(parent_iter, 0, row[0])
+                    store.set_value(parent_iter, 1, row[3])
 
-        self.arw["user_summary"].get_buffer().set_text(out)
+                    store.set_value(parent_iter, 5, row[1] == 'no')
+
+                    if row[2] == 'deny':
+                        store.set_value(parent_iter, 4, 'red')
+                    else:
+                        store.set_value(parent_iter, 4, 'green')
+
+                    if row[10] == 'any':
+                        store.set_value(parent_iter, 2, self.internet_full_icon)
+                    else:
+                        store.set_value(parent_iter, 2, self.internet_filtered_icon)
+
+                    for domain in row[8].split('\n'):
+                        child_iter = store.append(parent_iter)
+                        store.set_value(child_iter, 0, domain)
 
     """ Drag and Drop """
 
