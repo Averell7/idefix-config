@@ -79,14 +79,14 @@ def print_except():
 def mac_address_test(value):
     """Check that a MAC Address is valid"""
 
-    result = re.search(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2})', value, re.I)
+    result = re.search(r'^([+\-]@)?([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$', value, re.I)
     return result is not None
 
 
 def ip_address_test(value):
     """Check IP Address is valid"""
 
-    result = re.search(r'((2[0-5]|1[0-9]|[0-9])?[0-9]\.){3}((2[0-5]|1[0-9]|[0-9])?[0-9])', value, re.I)
+    result = re.search(r'^([+\-]@)?((2[0-5]|1[0-9]|[0-9])?[0-9]\.){3}((2[0-5]|1[0-9]|[0-9])?[0-9])$', value, re.I)
     return result is not None
 
 def bool_test(value):
@@ -1666,8 +1666,9 @@ class Idefix:
         (start_iter, end_iter) = buffer.get_bounds()
         value = buffer.get_text(start_iter, end_iter, False)
 
-        if not mac_address_test(value) and not ip_address_test(value):
-            showwarning(_("Address Invalid"), _("The address entered is not valid"))
+        for v in value.split('\n'):
+            if not mac_address_test(v) and not ip_address_test(v):
+                showwarning(_("Address Invalid"), _("The address entered is not valid"))
 
     """ User Summary """
 
