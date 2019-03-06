@@ -412,6 +412,11 @@ class Idefix:
         for section in data1:
             for user in data1[section]:
                 self.maclist[user] = data1[section][user]
+                for macs in self.maclist[user]:
+                    if macs.startswith('-@') or macs.startswith('+@'):
+                        self.block_signals = True
+                        self.arw['simulate_user_toggle'].set_active(True)
+                        self.block_signals = False
 
         if not future:
             # delete from config["firewall"] the generated lines
@@ -444,6 +449,7 @@ class Idefix:
 
         self.treeview1 = self.arw["treeview1"]
         self.treeview1.set_model(self.users_store)
+        self.arw['select_user_tree_view'].set_model(self.users_store)
 
         self.cell = gtk.CellRendererText()
         self.cellpb = gtk.CellRendererPixbuf(xalign=0.0)
@@ -1669,6 +1675,63 @@ class Idefix:
         for v in value.split('\n'):
             if not mac_address_test(v) and not ip_address_test(v):
                 showwarning(_("Address Invalid"), _("The address entered is not valid"))
+
+    def confirm_select_user_popup(self, widget):
+        self.arw['select_user_popup'].hide()
+
+        model, iter = self.arw['select_user_tree_view'].get_selection().get_selected()
+        target_user = model.get_value(iter, 0).strip()
+        current_user = model.get_value(self.iter_user, 0).strip()
+
+        if target_user == current_user:
+            return
+
+        self.enable_simulated_user(current_user, target_user)
+
+    def cancel_select_user_popup(self, widget):
+        self.arw['select_user_popup'].hide()
+
+    def simulate_user_toggled(self, widget):
+        if self.block_signals:
+            return
+
+        if widget.get_active():
+            self.arw['select_user_popup'].show()
+        else:
+            self.disable_simulated_user()
+
+    def enable_simulated_user(self, user, target_user):
+        """Add -@ to user and add +@ to target_user"""
+
+        mac_list = []
+
+        for mac in self.maclist[user]:
+            mac_list.append(mac)
+
+        # Update the user to ignore previous set addresses
+        self.maclist[user] = ['-@' + mac for mac in mac_list]
+
+        self.maclist[target_user].extend(['+@' + mac for mac in mac_list])
+        self.arw["maclist"].get_buffer().set_text('\n'.join(self.maclist[user]))
+        self.user_summary(user)
+
+    def disable_simulated_user(self):
+        """Remove -@ and +@ prefixes from all users"""
+        for user in self.maclist:
+            maclist = self.maclist[user]
+            updated_macs = []
+            for mac in maclist:
+                if mac.startswith('-@'):  # Enable old addresses
+                    updated_macs.append(mac[2:])
+                elif not mac.startswith('+@'):  # Remove added addresses completely
+                    updated_macs.append(mac)
+            self.maclist[user] = updated_macs
+
+        current_user = self.users_store.get_value(self.iter_user, 0).strip()
+        self.arw["maclist"].get_buffer().set_text(
+            '\n'.join(self.maclist[current_user])
+        )
+        self.user_summary(user)
 
     """ User Summary """
 
