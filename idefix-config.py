@@ -1055,6 +1055,10 @@ class Idefix:
         if name not in names or name == 'any':
             return
 
+        res = askyesno("Remove user", "Do you want to remove user %s?" % name)
+        if not res:
+            return
+
         names.remove(name)
 
         self.proxy_store.set_value(self.iter_proxy, 5, '\n'.join(names))
@@ -1066,6 +1070,10 @@ class Idefix:
 
         names = self.proxy_store.get_value(self.iter_proxy, 7).split('\n')
         if name not in names or name == 'any':
+            return
+
+        res = askyesno("Remove group", "Do you want to remove group %s?" % name)
+        if not res:
             return
 
         names.remove(name)
@@ -1743,7 +1751,9 @@ class Idefix:
 
     def delete_user2(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
-        self.proxy_store.remove(node)
+        name = model.get_value(node, 0)
+        if askyesno("Remove proxy", "Do you want to remove %s?" % name):
+            self.proxy_store.remove(node)
 
     def edit_user2(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
@@ -1769,7 +1779,9 @@ class Idefix:
 
     def delete_user3(self, widget):
         (model, node) = self.arw["treeview2"].get_selection().get_selected()
-        self.firewall_store.remove(node)
+        name = model.get_value(node, 0)
+        if askyesno("Remove rule", "Do you want to remove %s?" % name):
+            self.firewall_store.remove(node)
 
     def edit_user3(self, widget):
         (model, node) = self.arw["treeview2"].get_selection().get_selected()
