@@ -693,10 +693,10 @@ class Idefix:
         data1 = self.config["users"]
         options = ["", "", "", "", "email", "internet access", "filtered", "open", ""]
         for section in data1:
-            if "option" in data1[section]:
+            if "@_option" in data1[section]:
                 options_list = []
                 for i in [4, 5, 6, 7, 8]:
-                    if options[i] in data1[section]["option"]:
+                    if options[i] in data1[section]["@_option"]:
                         options_list.append(1)
                     else:
                         options_list.append(0)
@@ -735,7 +735,7 @@ class Idefix:
 
             # add users for this section
             for user in data1[section]:
-                if user not in ["option", "time_condition"]:
+                if not user.startswith('@_'):
                     self.users_store.append(node, [user, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None])
 
     def populate_firewall(self):
@@ -2102,7 +2102,7 @@ class Idefix:
             options = ["", "", "", "time_condition", "email", "internet access", "filtered", "open"]
             for i in [4, 5, 6, 7]:
                 if row[i] == 1:
-                    out += "option = " + options[i] + "\n"
+                    out += "@_option = " + options[i] + "\n"
             for child in row.iterchildren():  # write users and macaddress
                 user = child[0]
                 if not user in self.maclist:
