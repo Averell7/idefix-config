@@ -1682,7 +1682,13 @@ class Idefix:
 
     def delete_user(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
-        self.users_store.remove(node)
+        name = model.get_value(node, 0)
+        if model.iter_has_child(node):
+            res = askyesno("Remove user", "Do you want to remove category %s?" % name)
+        else:
+            res = askyesno("Remove user", "Do you want to remove user %s?" % name)
+        if res:
+            self.users_store.remove(node)
 
     def edit_user(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
