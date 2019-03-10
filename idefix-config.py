@@ -224,7 +224,7 @@ def ftp_connect(server, login, password):
     try:
         ftp = FTP(server)  # connect to host, default port
         ftp.login(login, password)
-        if "local" in ftp1:
+        if ftp1['mode'][0] == 'local':
             ftp.cwd("idefix")
         return ftp
     except FTPError:
@@ -374,16 +374,17 @@ class Idefix:
             # ftp connect
 
             ftp1 = ftp_config
-            if "local" in ftp1:
+            if ftp1['mode'][0] == 'local':
                 self.local_control = True
             ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
 
             # retrieve common files by ftp
-            if not "local" in ftp1:
+
+            if ftp1['mode'][0] == 'local':
                 ftp.cwd("common")
             data1 = ftp_get(ftp, "firewall-ports.ini")
             data2 = ftp_get(ftp, "proxy-groups.ini")
-            if not "local" in ftp1:
+            if ftp1['mode'][0] != 'local':
                 ftp.cwd("..")
 
             # make a local copy for debug purpose
@@ -2406,7 +2407,8 @@ class Idefix:
         # TODO : message to indicate upload was successful
         msg += _("\nUpload OK\n")
         print(msg)
-        if message == True:
+
+        if message:
             alert(msg)
 
     def destroy(self, widget=None, donnees=None):
@@ -2432,7 +2434,8 @@ if __name__ == "__main__":
         config_dialog = AskForConfig(idefix_config)
         configname = config_dialog.run()
 
-    if configname.strip().lower() == "dev":
+    if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
         load_locale = True
+
     win = Idefix(idefix_config["conf"][configname])
     gtk.main()
