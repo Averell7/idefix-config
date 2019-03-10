@@ -695,17 +695,15 @@ class Idefix:
         self.users_store.clear()
         self.cat_list = {}
         data1 = self.config["users"]
-        options = ["", "", "", "", "email", "internet access", "filtered", "open", ""]
+
+        # Email, Internet, Filtered, Open
+        options_list = [0, 0, 0, 0, 0]
         for section in data1:
-            if "@_option" in data1[section]:
-                options_list = []
-                for i in [4, 5, 6, 7, 8]:
-                    if options[i] in data1[section]["@_option"]:
-                        options_list.append(1)
-                    else:
-                        options_list.append(0)
-            else:
-                options_list = [0, 0, 0, 0, 0]
+
+            options_list[0] = data1[section].get('@_email', [0])[0] == '1'
+            options_list[1] = data1[section].get('@_internet', ['none'])[0] != 'none'
+            options_list[2] = data1[section].get('@_internet', [''])[0] == 'filtered'
+            options_list[3] = data1[section].get('@_internet', [''])[0] == 'open'
 
             internet_time_condition = data1[section].get("@_internet_time_condition", [''])[0]
             if internet_time_condition:
@@ -2267,13 +2265,20 @@ class Idefix:
                     internet_time_condition = days
                 out += "@_internet_time_condition = " + internet_time_condition + "\n"
 
-            options = ["", "", "", "time_condition", "email", "internet access", "filtered", "open"]
-            for i in [4, 5, 6, 7]:
-                if row[i] == 1:
-                    out += "@_option = " + options[i] + "\n"
+            # email - 4, internet - 5, filtered - 6, open - 7
+
+            out += '@_email = %s\n' % row[4]
+            if row[5]:
+                if row[6]:
+                    out += '@_internet = filtered\n'
+                elif row[7]:
+                    out += '@_internet = open\n'
+            else:
+                out += '@_internet = none\n'
+
             for child in row.iterchildren():  # write users and macaddress
                 user = child[0]
-                if not user in self.maclist:
+                if user not in self.maclist:
                     alert("User %s has no mac address !" % user)
                 else:
                     macaddress = self.maclist[user]
