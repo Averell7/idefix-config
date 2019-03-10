@@ -891,6 +891,9 @@ class Idefix:
             else:
                 row[12] = None
 
+            if row[7]:
+                row[11] = self.email_icon
+
     def load_user(self, widget, event):
         # loads data in right pane when a category or a user is selected in the tree
 
@@ -912,7 +915,7 @@ class Idefix:
             self.arw["notebook5"].set_current_page(0)
 
             # set internet rights in the check boxes and radio list
-            self.arw["internet_email"].set_active(self.users_store[iter1][4])
+            self.arw["internet_email"].set_active(self.users_store[iter1][4] or self.users_store[iter1][7])
             self.arw["internet_access"].set_active(self.users_store[iter1][5])
             self.arw["internet_filtered"].set_active(self.users_store[iter1][6])
             self.arw["internet_open"].set_active(self.users_store[iter1][7])
@@ -922,7 +925,10 @@ class Idefix:
             self.arw["menu_add_user"].show()
             self.arw["menu_add_cat"].show()
 
-            self.arw['email_time_condition'].set_sensitive(self.users_store[self.iter_user][4])
+            self.arw['email_time_condition'].set_sensitive(
+                self.users_store[self.iter_user][4] or self.users_store[self.iter_user][7]
+            )
+
             self.arw['internet_time_condition'].set_sensitive(self.users_store[self.iter_user][5])
 
             # time conditions internet
@@ -1410,6 +1416,7 @@ class Idefix:
                     self.users_store[self.iter_user][6] = 0
                 if self.arw["internet_open"].get_active():
                     self.users_store[self.iter_user][7] = 1
+                    self.arw["internet_email"].set_active(True)
                 else:
                     self.users_store[self.iter_user][7] = 0
                 self.arw["box_internet"].show()
@@ -1431,7 +1438,9 @@ class Idefix:
         self.set_colors()
 
         # Update the time conditions frames
-        self.arw['email_time_condition'].set_sensitive(self.users_store[self.iter_user][4])
+        self.arw['email_time_condition'].set_sensitive(
+            self.users_store[self.iter_user][4] or self.users_store[self.iter_user][7]
+        )
         self.arw['internet_time_condition'].set_sensitive(self.users_store[self.iter_user][5])
 
     def update_time(self, widget, x=None):
