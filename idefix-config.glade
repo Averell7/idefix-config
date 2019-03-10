@@ -1507,7 +1507,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkScrolledWindow" id="scrolledwindow5">
+                                      <object class="GtkScrolledWindow" id="proxy_users_scroll_window">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="vscrollbar_policy">always</property>
@@ -1643,7 +1643,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                         <property name="can_focus">True</property>
                                         <signal name="switch-page" handler="on_permissions_tab_change" swapped="no"/>
                                         <child>
-                                          <object class="GtkScrolledWindow" id="scrolledwindow8">
+                                          <object class="GtkScrolledWindow" id="proxy_group_scroll_window">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="shadow_type">in</property>

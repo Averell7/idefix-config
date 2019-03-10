@@ -1589,10 +1589,20 @@ class Idefix:
         if data is None:  # cela sert-il à quelque chose ???
             if widget.name in ["proxy_users"]:
                 self.arw["chooser"].set_model(self.users_store)
+                ctx = self.arw['proxy_users_scroll_window'].get_style_context()
+                ctx.add_class('chosen_list')
+
+                ctx = self.arw['proxy_group_scroll_window'].get_style_context()
+                ctx.remove_class('chosen_list')
             elif widget.name == "firewall_users":
                 self.arw["chooser2"].set_model(self.users_store)
             elif widget.name in ["proxy_group"]:
                 self.arw["chooser"].set_model(self.groups_store)
+                ctx = self.arw['proxy_group_scroll_window'].get_style_context()
+                ctx.add_class('chosen_list')
+
+                ctx = self.arw['proxy_users_scroll_window'].get_style_context()
+                ctx.remove_class('chosen_list')
             elif widget.name in ["firewall_ports"]:
                 self.arw["chooser2"].set_model(self.ports_store)
 
