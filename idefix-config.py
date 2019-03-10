@@ -1616,6 +1616,11 @@ class Idefix:
             if self.does_user_exist(name):
                 showwarning(_("User Exists"), _("Username exists"))
                 return
+
+            address = ask_text(self.arw['window1'], "Enter address of the user", "")
+            if ip_address_test(address) or mac_address_test(address):
+                self.maclist[name] = [address]
+
             self.users_store.insert_before(None, node, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
     def add_user_below(self, widget):
@@ -1631,6 +1636,11 @@ class Idefix:
                 if self.does_user_exist(name):
                     showwarning(_("User Exists"), _("Username exists"))
                     return
+
+                address = ask_text(self.arw['window1'], "Enter address of the user", "")
+                if ip_address_test(address) or mac_address_test(address):
+                    self.maclist[name] = [address]
+
             self.users_store.insert_after(None, node, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
     def add_new_user(self, widget):
@@ -1641,6 +1651,11 @@ class Idefix:
             if self.does_user_exist(name):
                 showwarning(_("User Exists"), _("Username exists"))
                 return
+
+            address = ask_text(self.arw['window1'], "Enter address of the user", "")
+            if ip_address_test(address) or mac_address_test(address):
+                self.maclist[name] = [address]
+
             self.users_store.insert(node, 1, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
 
     def does_category_exist(self, name):
@@ -1698,6 +1713,11 @@ class Idefix:
             return
         else:
             x = self.format_name(x)
+
+            address = ask_text(self.arw['window1'], "Enter address of the user", "")
+            if ip_address_test(address) or mac_address_test(address):
+                self.maclist[x] = [address]
+
             self.proxy_store.insert_after(node, [x, "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", ""])
 
     def delete_user2(self, widget):
@@ -1721,6 +1741,9 @@ class Idefix:
             return
         else:
             x = self.format_name(x)
+            address = ask_text(self.arw['window1'], "Enter address of the user", "")
+            if ip_address_test(address) or mac_address_test(address):
+                self.maclist[x] = [address]
             self.firewall_store.insert_after(node, [x] + [""] * 9 + [0, 1, 0, 0, 0, "", "#ffffff"])
 
     def delete_user3(self, widget):
