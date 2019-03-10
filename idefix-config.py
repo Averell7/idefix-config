@@ -76,6 +76,40 @@ def print_except():
         print(d, end=' ')
 
 
+def parse_date_format_to_squid(value):
+    """Translate numerical day of week to Squid day of week"""
+    n = {
+        '1': "M",
+        '2': "T",
+        '3': "W",
+        '4': "H",
+        '5': "F",
+        '6': "A",
+        '7': "S"
+    }
+    try:
+        return ''.join([n[c] for c in value])
+    except KeyError:
+        return ''
+
+
+def parse_date_format_from_squid(value):
+    """Translate squid day of week to numerical day of week"""
+    n = {
+        'M': '1',
+        'T': '2',
+        'W': '3',
+        'H': '4',
+        'F': '5',
+        'A': '6',
+        'S': '7',
+    }
+    try:
+        return ''.join([n[c] for c in value])
+    except KeyError:
+        return ''
+
+
 def mac_address_test(value):
     """Check that a MAC Address is valid"""
 
@@ -88,6 +122,7 @@ def ip_address_test(value):
 
     result = re.search(r'^([+\-]@)?((2[0-5]|1[0-9]|[0-9])?[0-9]\.){3}((2[0-5]|1[0-9]|[0-9])?[0-9])$', value, re.I)
     return result is not None
+
 
 def bool_test(value):
     if isinstance(value, str):
@@ -669,7 +704,24 @@ class Idefix:
                 options_list = [0, 0, 0, 0, 0]
 
             internet_time_condition = data1[section].get("@_internet_time_condition", [''])[0]
+            if internet_time_condition:
+                days = internet_time_condition.split(' ')[0]
+                days = parse_date_format_from_squid(days)
+
+                if len(internet_time_condition.split(' ')) > 1:
+                    internet_time_condition = days + ' ' + internet_time_condition.split(' ', 1)[1]
+                else:
+                    internet_time_condition = days
+
             email_time_condition = data1[section].get("@_email_time_condition", [''])[0]
+            if email_time_condition:
+                days = email_time_condition.split(' ')[0]
+                days = parse_date_format_from_squid(days)
+
+                if len(email_time_condition.split(' ')) > 1:
+                    email_time_condition = days + ' ' + email_time_condition.split(' ', 1)[1]
+                else:
+                    email_time_condition = days
 
             # add section
             node = self.users_store.append(None,
@@ -2027,12 +2079,24 @@ class Idefix:
             out += "\n[%s]\n" % row[0]  # section
             # write options
 
-            email_time_condition = row[2]
-            if email_time_condition.strip() != "":
+            email_time_condition = row[2].strip()
+            if email_time_condition != "":
+                days = email_time_condition.split(' ')[0]
+                days = parse_date_format_to_squid(days)
+                if len(email_time_condition.split(' ')) > 1:
+                    email_time_condition = days + ' ' + email_time_condition.split(' ', 1)[1]
+                else:
+                    email_time_condition = days
                 out += "@_email_time_condition = " + email_time_condition + "\n"
 
-            internet_time_condition = row[3]
-            if internet_time_condition.strip() != "":
+            internet_time_condition = row[3].strip()
+            if internet_time_condition != "":
+                days = internet_time_condition.split(' ')[0]
+                days = parse_date_format_to_squid(days)
+                if len(internet_time_condition.split(' ')) > 1:
+                    internet_time_condition = days + ' ' + internet_time_condition.split(' ', 1)[1]
+                else:
+                    internet_time_condition = days
                 out += "@_internet_time_condition = " + internet_time_condition + "\n"
 
             options = ["", "", "", "time_condition", "email", "internet access", "filtered", "open"]
