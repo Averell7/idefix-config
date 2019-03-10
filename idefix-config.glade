@@ -910,7 +910,8 @@
                                   <object class="GtkLabel" id="label17">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Format : 18:30</property>
+                                    <property name="label" translatable="yes">Date Format: 1 - Monday, 7 - Sunday. Time Format : 18:30
+Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                     <property name="xalign">0.23000000417232513</property>
                                   </object>
                                   <packing>

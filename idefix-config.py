@@ -786,7 +786,16 @@ class Idefix:
 
             for key in keys:
                 if key in data1[section]:
-                    out.append("\n".join(data1[section][key]) + "\n")
+                    data = data1[section][key]
+
+                    if key == 'time_condition':
+                        days = parse_date_format_from_squid(data[0].split(' ')[0])
+                        if len(data[0].split(' ')) > 1:
+                            data = [days + ' ' + data[0].split(' ', 1)[1]]
+                        else:
+                            data = [days]
+
+                    out.append("\n".join(data) + "\n")
                 else:
                     out.append("")
             # check boxes
@@ -2123,7 +2132,15 @@ class Idefix:
             out += self.format_comment(row[4])  # comments
             out += self.format_line("active", row[1])
             out += self.format_line("action", row[2])
-            out += self.format_line("time_condition", row[3])
+            time_condition = row[3]
+            if time_condition:
+                days = parse_date_format_to_squid(time_condition.split(' ')[0])
+                if len(time_condition.split(' ')) > 1:
+                    time_condition = days + ' ' + time_condition.split(' ', 1)[1]
+                else:
+                    time_condition = days
+
+            out += self.format_line("time_condition", time_condition)
             out += self.format_userline("user", row[5])
             out += self.format_line("dest_group", row[7])
             out += self.format_line("destination", row[10])
