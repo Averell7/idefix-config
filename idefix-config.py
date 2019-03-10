@@ -1119,14 +1119,20 @@ class Idefix:
     def load_proxy_user(self, widget, event):
 
         # Loads user data when a user is selected in the list
-        path = widget.get_path_at_pos(event.x, event.y)
-        if path is None:  # if click outside the list, unselect all.
-            # It is good to view the global configurations with the colors,
-            # otherwise, the cursor always masks one line.
-            sel = self.arw["treeview3"].get_selection()
-            sel.unselect_all()
-            return
-        iter1 = self.proxy_store.get_iter(path[0])
+        if event:
+            path = widget.get_path_at_pos(event.x, event.y)
+            if path is None:  # if click outside the list, unselect all.
+                # It is good to view the global configurations with the colors,
+                # otherwise, the cursor always masks one line.
+                sel = self.arw["treeview3"].get_selection()
+                sel.unselect_all()
+                return
+            iter1 = self.proxy_store.get_iter(path[0])
+        else:
+            model, iter1 = self.arw["treeview3"].get_selection().get_selected()
+            if not iter1:
+                return
+
         self.iter_proxy = iter1
 
         # time conditions
@@ -1697,6 +1703,15 @@ class Idefix:
         if x is None:
             return
         else:
+            # Rename all existing entries in the proxy_store
+            for item in self.proxy_store:
+                users = item[5].split('\n')
+                if name in users:
+                    i = users.index(name)
+                    users[i] = x
+                self.proxy_store.set_value(item.iter, 5, '\n'.join(users))
+                self.load_proxy_user(self.arw['treeview3'], event=None)
+
             self.users_store.set(node, [0], [x])
 
     def change_category(self, widget, cat):
