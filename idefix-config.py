@@ -668,14 +668,14 @@ class Idefix:
             else:
                 options_list = [0, 0, 0, 0, 0]
 
-            if "time_condition" in data1[section]:
-                time_condition = data1[section]["time_condition"][0]
-            else:
-                time_condition = ""
+            internet_time_condition = data1[section].get("@_internet_time_condition", [''])[0]
+            email_time_condition = data1[section].get("@_email_time_condition", [''])[0]
+
             # add section
             node = self.users_store.append(None,
-                                           [section, "", "", time_condition] + options_list + ["", "#ffffff", None,
-                                                                                               None])
+                                           [section, "", email_time_condition,
+                                            internet_time_condition] + options_list + ["", "#ffffff", None,
+                                                                                       None])
             # N.B. : icons are set in the set_colors function
             # keep memory of the nodes, it will be used for changing the category of a user
             # (function change_category below)
@@ -2026,9 +2026,15 @@ class Idefix:
         for row in self.users_store:
             out += "\n[%s]\n" % row[0]  # section
             # write options
-            time_condition = row[3]
-            if time_condition.strip() != "":
-                out += "time_condition = " + time_condition + "\n"
+
+            email_time_condition = row[2]
+            if email_time_condition.strip() != "":
+                out += "@_email_time_condition = " + email_time_condition + "\n"
+
+            internet_time_condition = row[3]
+            if internet_time_condition.strip() != "":
+                out += "@_internet_time_condition = " + internet_time_condition + "\n"
+
             options = ["", "", "", "time_condition", "email", "internet access", "filtered", "open"]
             for i in [4, 5, 6, 7]:
                 if row[i] == 1:
