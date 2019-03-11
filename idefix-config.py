@@ -1,6 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 0.25.0 : Chris (2)
+# version 0.24.0 : Chris (1)
 # version 0.23.1 : "mac" replaced by "users"; bugs fixed
 # version 0.22.1 : information after ftp upload
 # version 0.22.0 : Quick update mechanism added
@@ -380,7 +382,7 @@ class Idefix:
 
             # retrieve common files by ftp
 
-            if ftp1['mode'][0] == 'local':
+            if ftp1['mode'][0] != 'local':
                 ftp.cwd("common")
             data1 = ftp_get(ftp, "firewall-ports.ini")
             data2 = ftp_get(ftp, "proxy-groups.ini")
@@ -776,6 +778,8 @@ class Idefix:
         keys = ["active", "action", "time_condition", "#comments", "user", "xxx", "dest_group", "dest_domain", "xxx",
                 "destination", ""]
         for section in data1:
+            if section[0:2] == "@_" :       # generated sections must not be loaded
+                continue
             out = [section]
             data2 = data1[section]
             # merge user and mac
@@ -1490,8 +1494,6 @@ class Idefix:
 
     def update_check(self, widget):
         # Updates the stores according to the settings of the check buttons
-        # @execute : if False, the function will exit immediately. Used to prevent the function to be executed
-        #            when a widget is toggled programmatically.
 
         if self.block_signals:
             return
@@ -2332,6 +2334,11 @@ class Idefix:
             out += self.format_line("dest_group", row[7])
             out += self.format_line("destination", row[10])
             out += self.format_domainline("dest_domain", row[8])
+
+
+        # add default permissions
+        with open("./default.cfg", "r", encoding = "utf-8-sig") as f1 :
+            out += "\n" + f1.read()
 
         with open("./tmp/proxy-users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(out)

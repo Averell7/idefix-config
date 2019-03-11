@@ -1,59 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.0"/>
+  <!-- interface-requires gtk+ 3.0 -->
   <object class="GtkDialog" id="dialog1">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="type_hint">dialog</property>
-    <child>
-      <placeholder/>
-    </child>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialogbox1">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area1">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="button8">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button9">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack_type">end</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
         <child>
           <object class="GtkLabel" id="dialog1_label">
             <property name="visible">True</property>
@@ -139,18 +95,6 @@
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Add Address</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkEntry" id="new_user_address_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -165,6 +109,46 @@
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area1">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button8">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button9">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
             <property name="position">4</property>
           </packing>
         </child>
@@ -214,76 +198,18 @@
   <object class="GtkDialog" id="select_user_popup">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
-    <child>
-      <placeholder/>
-    </child>
     <child internal-child="vbox">
-      <object class="GtkBox">
+      <object class="GtkBox" id="dialog-vbox2">
         <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox">
+          <object class="GtkButtonBox" id="dialog-action_area2">
             <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton">
-                <property name="label" translatable="yes">Cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="cancel_select_user_popup" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton">
-                <property name="label" translatable="yes">Select</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="confirm_select_user_popup" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkTreeView" id="select_user_tree_view">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <child internal-child="selection">
-              <object class="GtkTreeSelection"/>
-            </child>
-            <child>
-              <object class="GtkTreeViewColumn">
-                <property name="title" translatable="yes">Name</property>
-                <child>
-                  <object class="GtkCellRendererText"/>
-                  <attributes>
-                    <attribute name="text">0</attribute>
-                  </attributes>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
           </packing>
         </child>
       </object>
@@ -307,13 +233,64 @@
       <column type="gboolean"/>
     </columns>
   </object>
+  <object class="GtkMenu" id="users_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="menu_add_above">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">add user above</property>
+        <signal name="activate" handler="add_user_above" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menu_add_below">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">add user below</property>
+        <signal name="activate" handler="add_user_below" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menuitem15">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">delete</property>
+        <signal name="activate" handler="delete_user" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menu_add_user">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">add new user</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="add_new_user" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menu_add_cat">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">add new category</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="add_new_category" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menuitem3">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">move user to category...</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="window1">
     <property name="width_request">800</property>
     <property name="height_request">600</property>
     <property name="can_focus">False</property>
-    <child>
-      <placeholder/>
-    </child>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -413,8 +390,8 @@
               <object class="GtkLabel" id="label22">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Active configuration :</property>
                 <property name="xalign">1</property>
+                <property name="label" translatable="yes">Active configuration :</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -590,6 +567,8 @@
                                   <packing>
                                     <property name="left_attach">0</property>
                                     <property name="top_attach">0</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -605,6 +584,8 @@
                                   <packing>
                                     <property name="left_attach">0</property>
                                     <property name="top_attach">1</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -655,6 +636,8 @@
                                   <packing>
                                     <property name="left_attach">0</property>
                                     <property name="top_attach">2</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                               </object>
@@ -788,7 +771,7 @@
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="invisible_char">●</property>
-                                            <property name="placeholder_text">inutilisé pour l'instant</property>
+                                            <property name="placeholder_text">1234567</property>
                                             <signal name="key-release-event" handler="update_time" swapped="no"/>
                                           </object>
                                           <packing>
@@ -906,7 +889,7 @@
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="invisible_char">●</property>
-                                            <property name="placeholder_text">inutilisé pour l'instant</property>
+                                            <property name="placeholder_text">1234567</property>
                                             <signal name="key-release-event" handler="update_time" swapped="no"/>
                                           </object>
                                           <packing>
@@ -945,9 +928,9 @@
                                   <object class="GtkLabel" id="label17">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="xalign">0.23000000417232513</property>
                                     <property name="label" translatable="yes">Date Format: 1 - Monday, 7 - Sunday. Time Format : 18:30
 Eg: 123 (Monday, Tuesday, Wednesday)</property>
-                                    <property name="xalign">0.23000000417232513</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -1104,154 +1087,6 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="shadow_type">in</property>
-                            <child>
-                              <object class="GtkViewport">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <child>
-                                  <object class="GtkBox">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="orientation">vertical</property>
-                                    <child>
-                                      <object class="GtkLabel" id="user_summary_mac_address">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Number of Mac Addresses: 0</property>
-                                        <property name="xalign">0</property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkBox">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="margin_left">2</property>
-                                        <property name="margin_right">2</property>
-                                        <property name="margin_top">2</property>
-                                        <property name="margin_bottom">2</property>
-                                        <property name="orientation">vertical</property>
-                                        <child>
-                                          <object class="GtkGrid">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="row_spacing">2</property>
-                                            <property name="column_spacing">2</property>
-                                            <child>
-                                              <object class="GtkImage" id="user_summary_email_icon">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="pixbuf">data/email-32.png</property>
-                                              </object>
-                                              <packing>
-                                                <property name="left_attach">0</property>
-                                                <property name="top_attach">0</property>
-                                              </packing>
-                                            </child>
-                                            <child>
-                                              <object class="GtkImage" id="user_summary_internet_icon">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="pixbuf">data/internet-32.gif</property>
-                                              </object>
-                                              <packing>
-                                                <property name="left_attach">0</property>
-                                                <property name="top_attach">1</property>
-                                              </packing>
-                                            </child>
-                                            <child>
-                                              <object class="GtkLabel" id="user_summary_email_time_conditions">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                              </object>
-                                              <packing>
-                                                <property name="left_attach">1</property>
-                                                <property name="top_attach">0</property>
-                                              </packing>
-                                            </child>
-                                            <child>
-                                              <object class="GtkLabel" id="user_summary_internet_time_conditions">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                              </object>
-                                              <packing>
-                                                <property name="left_attach">1</property>
-                                                <property name="top_attach">1</property>
-                                              </packing>
-                                            </child>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">1</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkTreeView" id="user_summary_tree_view">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="model">user_summary_tree_store</property>
-                                        <child internal-child="selection">
-                                          <object class="GtkTreeSelection"/>
-                                        </child>
-                                        <child>
-                                          <object class="GtkTreeViewColumn">
-                                            <property name="title" translatable="yes">Filter Name</property>
-                                            <child>
-                                              <object class="GtkCellRendererText"/>
-                                              <attributes>
-                                                <attribute name="foreground">4</attribute>
-                                                <attribute name="strikethrough">5</attribute>
-                                                <attribute name="text">0</attribute>
-                                              </attributes>
-                                            </child>
-                                            <child>
-                                              <object class="GtkCellRendererPixbuf"/>
-                                              <attributes>
-                                                <attribute name="pixbuf">2</attribute>
-                                              </attributes>
-                                            </child>
-                                            <child>
-                                              <object class="GtkCellRendererPixbuf"/>
-                                              <attributes>
-                                                <attribute name="pixbuf">3</attribute>
-                                              </attributes>
-                                            </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="GtkTreeViewColumn">
-                                            <property name="title" translatable="yes">Times</property>
-                                            <child>
-                                              <object class="GtkCellRendererText"/>
-                                              <attributes>
-                                                <attribute name="text">1</attribute>
-                                              </attributes>
-                                            </child>
-                                          </object>
-                                        </child>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">True</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">2</property>
-                                      </packing>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
                           </object>
                         </child>
                         <child type="label">
@@ -1521,18 +1356,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                             <signal name="button-press-event" handler="load_chooser" swapped="no"/>
                                             <signal name="button-release-event" handler="proxy_user_select" swapped="no"/>
                                             <child internal-child="selection">
-                                              <object class="GtkTreeSelection"/>
-                                            </child>
-                                            <child>
-                                              <object class="GtkTreeViewColumn">
-                                                <property name="title" translatable="yes">Users</property>
-                                                <child>
-                                                  <object class="GtkCellRendererText"/>
-                                                  <attributes>
-                                                    <attribute name="text">0</attribute>
-                                                  </attributes>
-                                                </child>
-                                              </object>
+                                              <object class="GtkTreeSelection" id="treeview-selection3"/>
                                             </child>
                                           </object>
                                         </child>
@@ -1657,18 +1481,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                                 <signal name="button-press-event" handler="load_chooser" swapped="no"/>
                                                 <signal name="button-release-event" handler="proxy_group_select" swapped="no"/>
                                                 <child internal-child="selection">
-                                                  <object class="GtkTreeSelection"/>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkTreeViewColumn">
-                                                    <property name="title" translatable="yes">Users</property>
-                                                    <child>
-                                                      <object class="GtkCellRendererText"/>
-                                                      <attributes>
-                                                        <attribute name="text">0</attribute>
-                                                      </attributes>
-                                                    </child>
-                                                  </object>
+                                                  <object class="GtkTreeSelection" id="treeview-selection4"/>
                                                 </child>
                                               </object>
                                             </child>
@@ -1792,6 +1605,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                           <packing>
                             <property name="left_attach">0</property>
                             <property name="top_attach">0</property>
+                            <property name="width">1</property>
+                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -1804,6 +1619,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">2</property>
+                            <property name="width">1</property>
+                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -1832,6 +1649,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                             <property name="left_attach">0</property>
                             <property name="top_attach">4</property>
                             <property name="width">2</property>
+                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -1843,6 +1661,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                           <packing>
                             <property name="left_attach">0</property>
                             <property name="top_attach">2</property>
+                            <property name="width">1</property>
+                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -1854,6 +1674,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                           <packing>
                             <property name="left_attach">0</property>
                             <property name="top_attach">3</property>
+                            <property name="width">1</property>
+                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -1866,6 +1688,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">3</property>
+                            <property name="width">1</property>
+                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -1974,6 +1798,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">0</property>
+                            <property name="width">1</property>
+                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -1987,6 +1813,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">1</property>
+                            <property name="width">1</property>
+                            <property name="height">1</property>
                           </packing>
                         </child>
                         <child>
@@ -2253,6 +2081,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">0</property>
                                 <property name="width">2</property>
+                                <property name="height">1</property>
                               </packing>
                             </child>
                             <child>
@@ -2265,6 +2094,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="top_attach">1</property>
+                                <property name="width">1</property>
+                                <property name="height">1</property>
                               </packing>
                             </child>
                             <child>
@@ -2299,6 +2130,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">4</property>
                                 <property name="width">2</property>
+                                <property name="height">1</property>
                               </packing>
                             </child>
                             <child>
@@ -2311,6 +2143,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                               <packing>
                                 <property name="left_attach">1</property>
                                 <property name="top_attach">2</property>
+                                <property name="width">1</property>
+                                <property name="height">1</property>
                               </packing>
                             </child>
                             <child>
@@ -2322,6 +2156,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                               <packing>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">1</property>
+                                <property name="width">1</property>
+                                <property name="height">1</property>
                               </packing>
                             </child>
                             <child>
@@ -2333,6 +2169,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                               <packing>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">2</property>
+                                <property name="width">1</property>
+                                <property name="height">1</property>
                               </packing>
                             </child>
                             <child>
@@ -2345,6 +2183,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">3</property>
                                 <property name="width">2</property>
+                                <property name="height">1</property>
                               </packing>
                             </child>
                           </object>
@@ -2500,6 +2339,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">0</property>
                                     <property name="top_attach">0</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2512,6 +2353,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">0</property>
                                     <property name="top_attach">1</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2524,6 +2367,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">2</property>
                                     <property name="top_attach">0</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2536,6 +2381,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">2</property>
                                     <property name="top_attach">1</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2550,6 +2397,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">1</property>
                                     <property name="top_attach">0</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2562,6 +2411,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">1</property>
                                     <property name="top_attach">1</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2574,6 +2425,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">3</property>
                                     <property name="top_attach">0</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2586,6 +2439,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">3</property>
                                     <property name="top_attach">1</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2598,6 +2453,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                     <property name="left_attach">0</property>
                                     <property name="top_attach">3</property>
                                     <property name="width">5</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2610,6 +2466,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">3</property>
                                     <property name="top_attach">2</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2622,6 +2480,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">2</property>
                                     <property name="top_attach">2</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2634,6 +2494,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">1</property>
                                     <property name="top_attach">2</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2646,6 +2508,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                   <packing>
                                     <property name="left_attach">0</property>
                                     <property name="top_attach">2</property>
+                                    <property name="width">1</property>
+                                    <property name="height">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -2730,60 +2594,6 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
             <property name="position">1</property>
           </packing>
         </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkMenu" id="users_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkMenuItem" id="menu_add_above">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">add user above</property>
-        <signal name="activate" handler="add_user_above" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="menu_add_below">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">add user below</property>
-        <signal name="activate" handler="add_user_below" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="menuitem15">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">delete</property>
-        <signal name="activate" handler="delete_user" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="menu_add_user">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">add new user</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="add_new_user" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="menu_add_cat">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">add new category</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="add_new_category" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="menuitem3">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">move user to category...</property>
-        <property name="use_underline">True</property>
       </object>
     </child>
   </object>
