@@ -676,11 +676,17 @@ class Idefix:
         image.set_from_file('./data/internet-filtered-32.gif')
         self.internet_filtered_icon = image.get_pixbuf()
 
+        image.set_from_file('./data/internet-clock-32.png')
+        self.internet_timed_icon = image.get_pixbuf()
+
         image.set_from_file('./data/internet-disabled-32.gif')
         self.internet_disabled_icon = image.get_pixbuf()
 
         image.set_from_file('./data/email-disabled-32.png')
         self.email_disabled_icon = image.get_pixbuf()
+
+        image.set_from_file('./data/email-clock-32.png')
+        self.email_timed_icon = image.get_pixbuf()
 
         self.populate_firewall()
         self.populate_proxy()
@@ -864,8 +870,8 @@ class Idefix:
             """
             0 : section (level 1)  - user (level 2)
             1 : options (text)
-            2 : reserved
-            3 : reserved
+            2 : reserved [email time conditions]
+            3 : reserved [internet time conditions]
             4 : email (1/0)
             5 : internet access (1/0)
             6 : filtered (1/0)
@@ -883,19 +889,23 @@ class Idefix:
                 row[10] = "#ffffff"
 
             # icons for email and Internet access
-            if row[4] == 1:
-                row[11] = self.email_icon
-            else:
-                row[11] = None
-            if row[5] == 1 and (row[7] == 1):
-                row[12] = self.internet_full_icon
-            elif row[5] == 1 and (row[6] == 1):
-                row[12] = self.internet_filtered_icon
+            if row[5]:
+                if row[3]:
+                    row[12] = self.internet_timed_icon
+                elif row[7]:
+                    row[12] = self.internet_full_icon
+                elif row[6]:
+                    row[12] = self.internet_filtered_icon
+                else:
+                    row[12] = None
             else:
                 row[12] = None
 
-            if row[7]:
-                row[11] = self.email_icon
+            if row[4]:
+                if row[2]:
+                    row[11] = self.email_timed_icon
+                else:
+                    row[11] = self.email_icon
 
     def load_user(self, widget, event):
         # loads data in right pane when a category or a user is selected in the tree
@@ -1556,6 +1566,7 @@ class Idefix:
             if time_condition == "MTWHFAS -":
                 time_condition = ""
             self.users_store[self.iter_user][2] = time_condition
+            self.set_colors()
 
         if widget.name in ["users_time_days_internet", "users_time_from_internet", "users_time_to_internet"]:
             time_condition = self.arw["users_time_days_internet"].get_text() + " "
@@ -1566,6 +1577,7 @@ class Idefix:
             if time_condition == "MTWHFAS -":
                 time_condition = ""
             self.users_store[self.iter_user][3] = time_condition
+            self.set_colors()
 
         if widget.name in ["firewall_time_days", "firewall_time_from", "firewall_time_to"]:
             # time_condition = self.arw["users_time_days"].get_text() + " "
