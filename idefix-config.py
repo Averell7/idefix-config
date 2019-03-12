@@ -1,6 +1,10 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 0.26.0 : test version for json config (dev mode only, and presently loading disabled).
+#                  TODO : full update of config dict before saving to file.
+# version 0.25.0 : Chris (2)
+# version 0.24.0 : Chris (1)
 # version 0.23.1 : "mac" replaced by "users"; bugs fixed
 # version 0.22.1 : information after ftp upload
 # version 0.22.0 : Quick update mechanism added
@@ -15,6 +19,7 @@ import os
 import re
 import sys
 import time
+import json
 import traceback
 from collections import OrderedDict
 from ftplib import FTP, Error as FTPError
@@ -419,14 +424,18 @@ class Idefix:
             self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
             self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
-        else:
+        else:   # development environment
             self.config = OrderedDict()
             self.idefix_config = parser.read("./idefix-config.cfg", "conf")
-            self.config = parser.read("./tmp/users.ini", "users", merge=self.config, comments=True)
-            self.config = parser.read("./tmp/firewall-users.ini", "firewall", merge=self.config, comments=True)
-            self.config = parser.read("./tmp/proxy-users.ini", "proxy", merge=self.config, comments=True)
-            self.config = parser.read("./tmp/firewall-ports.ini", "ports", merge=self.config, comments=True)
-            self.config = parser.read("./tmp/proxy-groups.ini", "groups", merge=self.config, comments=True)
+            if os.path.isfile("./idefix-config.json$$$") :           # disabled
+                data_str = open("./idefix-config.json", "r").read()
+                self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
+            else :
+                self.config = parser.read("./tmp/users.ini", "users", merge=self.config, comments=True)
+                self.config = parser.read("./tmp/firewall-users.ini", "firewall", merge=self.config, comments=True)
+                self.config = parser.read("./tmp/proxy-users.ini", "proxy", merge=self.config, comments=True)
+                self.config = parser.read("./tmp/firewall-ports.ini", "ports", merge=self.config, comments=True)
+                self.config = parser.read("./tmp/proxy-groups.ini", "groups", merge=self.config, comments=True)
 
         for category in ["firewall", "proxy", "ports", "groups"]:
             if category not in self.config:
@@ -776,6 +785,8 @@ class Idefix:
         keys = ["active", "action", "time_condition", "#comments", "user", "xxx", "dest_group", "dest_domain", "xxx",
                 "destination", ""]
         for section in data1:
+            if section[0:2] == "@_" :       # generated sections must not be loaded
+                continue
             out = [section]
             data2 = data1[section]
             # merge user and mac
@@ -1492,8 +1503,6 @@ class Idefix:
 
     def update_check(self, widget):
         # Updates the stores according to the settings of the check buttons
-        # @execute : if False, the function will exit immediately. Used to prevent the function to be executed
-        #            when a widget is toggled programmatically.
 
         if self.block_signals:
             return
@@ -2214,8 +2223,34 @@ class Idefix:
                 text += value + "\n"
         return text
 
-    def format_time(self, line1):
-        pass
+    def format_time(self, line1) :
+        # Check if time range overlaps 24:00
+        # if yes, returns two ranges.
+        if line1.strip() == "" :
+            return [""]
+        tc0 = line1.strip()
+        elements = re.search("([A-Z]*\s)([0-9:]*)-([0-9:]*)", tc0.strip())
+        if not elements :
+            elements = re.search("([0-9:]*)-([0-9:]*)", tc0.strip())
+            if not elements :
+                return [line1]
+            else :
+                days = ""
+                start = elements.group(1)
+                stop = elements.group(2)
+        else:
+            days = elements.group(1)
+            start = elements.group(2)
+            stop = elements.group(3)
+        start_i = int(start.replace(":", ""))
+        stop_i = int(stop.replace(":", ""))
+        if stop_i < start_i :
+            tc1 = days + start + "-24:00"
+            tc2 = days + "00:00-" + stop
+            return [tc1, tc2]
+        else :
+            return [tc0]
+
 
     def format_userline(self, dummy, line1):
         # separate domains and ips
@@ -2263,6 +2298,10 @@ class Idefix:
             f1 = open("./tmp/update", "w")
             f1.close()
             self.ftp_upload(["./tmp/update"], message=False)
+
+        f1 = open("idefix-config.json", "w")
+        f1.write(json.dumps(self.config, indent = 3))
+        f1.close()
 
     def build_users(self):
         out = ""
@@ -2316,26 +2355,32 @@ class Idefix:
     def build_proxy_ini(self):
 
         out = ""
-        for row in self.proxy_store:
-            out += "\n[%s]\n" % row[0]
-            out += self.format_comment(row[4])  # comments
-            out += self.format_line("active", row[1])
-            out += self.format_line("action", row[2])
+        for row in self.proxy_store :
+            # add support for a time condition from evening to morning.
+            # This requires to create two configurations.
             time_condition = row[3]
-            if time_condition:
-                days = parse_date_format_to_squid(time_condition.split(' ')[0])
-                if len(time_condition.split(' ')) > 1:
-                    time_condition = days + ' ' + time_condition.split(' ', 1)[1]
-                else:
-                    time_condition = days
+            time_condition_list = self.format_time(time_condition)
+            i = 1
+            index= ""
+            for time_condition2 in time_condition_list :
+                if len(time_condition_list) > 1 :  # If the row is duplicated, we must create two different names
+                    index = str(i)
+                    i += 1
+                out += "\n[%s%s]\n" % (row[0], index)
+                out += self.format_comment(row[4])      # comments
+                out += self.format_line("active", row[1])
+                out += self.format_line("action", row[2])
+                out += self.format_line("time_condition", time_condition2)
+                out += self.format_userline("user", row[5])
+                out += self.format_line("destination", row[10])
+                out += self.format_line("dest_group", row[7])
+                out += self.format_domainline("dest_domain", row[8])
 
-            out += self.format_line("time_condition", time_condition)
-            out += self.format_userline("user", row[5])
-            out += self.format_line("dest_group", row[7])
-            out += self.format_line("destination", row[10])
-            out += self.format_domainline("dest_domain", row[8])
+        # add default permissions
+        with open("./default.cfg", "r", encoding = "utf-8-sig") as f1 :
+            out += "\n" + f1.read()
 
-        with open("./tmp/proxy-users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
+        with open("./tmp/proxy-users.ini", "w", encoding = "utf-8-sig",  newline = "\n") as f1 :
             f1.write(out)
 
     def build_firewall_ini(self):
