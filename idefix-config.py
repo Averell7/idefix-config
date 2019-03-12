@@ -227,8 +227,8 @@ def ftp_connect(server, login, password):
         if ftp1['mode'][0] == 'local':
             ftp.cwd("idefix")
         return ftp
-    except FTPError:
-        print("Unable to connect to ftp server with : %s / %s" % (login, password))
+    except FTPError as e:
+        print("Unable to connect to ftp server with : %s / %s. Error: %s" % (login, password, e))
 
 
 def ftp_get(ftp, filename, utime=None, required=True, basedir=""):
@@ -380,7 +380,7 @@ class Idefix:
 
             # retrieve common files by ftp
 
-            if ftp1['mode'][0] == 'local':
+            if ftp1['mode'][0] != 'local':
                 ftp.cwd("common")
             data1 = ftp_get(ftp, "firewall-ports.ini")
             data2 = ftp_get(ftp, "proxy-groups.ini")
@@ -906,6 +906,8 @@ class Idefix:
                     row[11] = self.email_timed_icon
                 else:
                     row[11] = self.email_icon
+            else:
+                row[11] = None
 
     def load_user(self, widget, event):
         # loads data in right pane when a category or a user is selected in the tree
