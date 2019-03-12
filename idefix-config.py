@@ -232,8 +232,8 @@ def ftp_connect(server, login, password):
         if ftp1['mode'][0] == 'local':
             ftp.cwd("idefix")
         return ftp
-    except FTPError:
-        print("Unable to connect to ftp server with : %s / %s" % (login, password))
+    except FTPError as e:
+        print("Unable to connect to ftp server with : %s / %s. Error: %s" % (login, password, e))
 
 
 def ftp_get(ftp, filename, utime=None, required=True, basedir=""):
@@ -917,7 +917,7 @@ class Idefix:
                     row[11] = self.email_timed_icon
                 else:
                     row[11] = self.email_icon
-            else :  
+            else:
                 row[11] = None
 
     def load_user(self, widget, event):
