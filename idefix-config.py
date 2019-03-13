@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
-# version 0.26.0 : test version for json config (dev mode only, and presently loading disabled).
+# version 0.26.1 : test version for json config (dev mode only, and presently loading disabled).
 #                  TODO : full update of config dict before saving to file.
 # version 0.25.0 : Chris (2)
 # version 0.24.0 : Chris (1)
@@ -265,11 +265,14 @@ def ftp_send(ftp, filepath, directory=None, dest_name=None):
         with open(filepath, 'rb') as f1:  # file to send
             ftp.storbinary('STOR ' + dest_name, f1)  # send the file
     else:
-        print(filepath + " not found")
+        message = filepath + " not found"
+        print(message)
+        return message
 
     # print( ftp.retrlines('LIST'))
     if directory:
         ftp.cwd('..')  # return to house directory
+    return True
 
 
 def get_row(treestore, iter1):
@@ -2292,6 +2295,11 @@ class Idefix:
         self.build_users()
         self.build_proxy_ini()
         self.build_firewall_ini()
+        self.rebuild_config()
+        f1 = open("idefix-config.json", "w")
+        f1.write(json.dumps(self.config, indent = 3))
+        f1.close()
+
         if not load_locale:  # send the files bt FTP
             self.ftp_upload()
         if self.local_control:  # if connected to Idefix, send the update signal
@@ -2299,9 +2307,7 @@ class Idefix:
             f1.close()
             self.ftp_upload(["./tmp/update"], message=False)
 
-        f1 = open("idefix-config.json", "w")
-        f1.write(json.dumps(self.config, indent = 3))
-        f1.close()
+
 
     def build_users(self):
         out = ""
@@ -2459,22 +2465,85 @@ class Idefix:
         with open("./tmp/firewall-users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(output)
 
+    def format_row(self, row) :
+        # used by rebuild_config
+        return row.strip().split("\n")
+
+
+    def rebuild_config(self) :
+        config2 = OrderedDict()
+        for section in ["users", "proxy", "firewall", "groups", "ports"] :
+            config2[section] = OrderedDict()
+        config2["groups"] = self.config["groups"]
+        config2["ports"] = self.config["ports"]
+
+        # users store
+        for row in self.users_store :
+            config2["users"][row[0]] = OrderedDict()
+            if row[5]:
+                if row[6]:
+                    internet = 'filtered'
+                elif row[7]:
+                    internet = 'open'
+            else:
+                internet = 'none'
+            config2["users"][row[0]]['@_internet'] = [internet]
+            config2["users"][row[0]]['@_email'] = [row[4]]
+
+            for child in row.iterchildren():  # write users and macaddress
+                user = child[0]
+                mac = []
+                if user not in self.maclist:
+                    alert("User %s has no mac address !" % user)
+                else:
+                    macaddress = self.maclist[user]
+                    for address in macaddress:
+                        mac.append(address)
+                config2["users"][row[0]][user] = mac
+
+        # proxy store
+        for row in self.proxy_store :
+            config2["proxy"][row[0]] = OrderedDict()
+            config2["proxy"][row[0]]["active"] = self.format_row(row[1])
+            config2["proxy"][row[0]]["action"]=  self.format_row(row[2])
+            #config2["proxy"][row[0]]["time_condition"] = time_condition2
+            config2["proxy"][row[0]]["user"] = self.format_row(row[5])
+            config2["proxy"][row[0]]["destination"] = self.format_row(row[10])
+            config2["proxy"][row[0]]["dest_group"] = self.format_row(row[7])
+            config2["proxy"][row[0]]["dest_domain"] = self.format_row(row[8])
+            # #comments, dest_ip
+
+
+        for row in self.firewall_store :
+            config2["firewall"][row[0]] = OrderedDict()
+
+        return
+
+
     def ftp_upload(self, uploadlist=None, message=True):
         ftp1 = self.ftp_config
         msg = ""
+        OK = True
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
         if ftp is None:
             msg += _("No FTP connexion")
             return
         if uploadlist is None:
-            uploadlist = ["./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini"]
+            uploadlist = ["./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini", "./idefix-config.json"]
         for file1 in uploadlist:
-            ftp_send(ftp, file1)
-            msg += file1 + _(" sent\n")
+            ret = ftp_send(ftp, file1)
+            if ret == True :
+                msg += file1 + _(" sent\n")
+            else :
+                msg += ret
+                OK = False
         ftp.close()
 
         # TODO : message to indicate upload was successful
-        msg += _("\nUpload OK\n")
+        if OK :
+            msg += _("\nUpload OK\n")
+        else :
+            msg += _("\n ERRORS in upload\n")
         print(msg)
 
         if message:
