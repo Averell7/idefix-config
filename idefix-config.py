@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
-# version 0.26.1 : test version for json config (dev mode only, and presently loading disabled).
+# version 0.26.2 : test version for json config (dev mode only, and presently loading disabled).
 #                  TODO : full update of config dict before saving to file.
 # version 0.25.0 : Chris (2)
 # version 0.24.0 : Chris (1)
@@ -430,7 +430,7 @@ class Idefix:
         else:   # development environment
             self.config = OrderedDict()
             self.idefix_config = parser.read("./idefix-config.cfg", "conf")
-            if os.path.isfile("./idefix-config.json$$$") :           # disabled
+            if os.path.isfile("./idefix-config.json") :           # disabled
                 data_str = open("./idefix-config.json", "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
             else :
@@ -463,6 +463,8 @@ class Idefix:
         data1 = self.config["users"]
         for section in data1:
             for user in data1[section]:
+                if user.startswith("@_"):
+                    continue
                 self.maclist[user] = data1[section][user]
                 for macs in self.maclist[user]:
                     if macs.startswith('-@') or macs.startswith('+@'):
@@ -2297,7 +2299,8 @@ class Idefix:
         self.build_firewall_ini()
         self.rebuild_config()
         f1 = open("idefix-config.json", "w")
-        f1.write(json.dumps(self.config, indent = 3))
+        config2 = self.rebuild_config()
+        f1.write(json.dumps(config2, indent = 3))
         f1.close()
 
         if not load_locale:  # send the files bt FTP
@@ -2488,7 +2491,7 @@ class Idefix:
             else:
                 internet = 'none'
             config2["users"][row[0]]['@_internet'] = [internet]
-            config2["users"][row[0]]['@_email'] = [row[4]]
+            config2["users"][row[0]]['@_email'] = [str(row[4])]         # TODO str should not be necessary.
 
             for child in row.iterchildren():  # write users and macaddress
                 user = child[0]
@@ -2506,18 +2509,19 @@ class Idefix:
             config2["proxy"][row[0]] = OrderedDict()
             config2["proxy"][row[0]]["active"] = self.format_row(row[1])
             config2["proxy"][row[0]]["action"]=  self.format_row(row[2])
-            #config2["proxy"][row[0]]["time_condition"] = time_condition2
+            config2["proxy"][row[0]]["time_condition"] = self.format_row(row[3])
+            config2["proxy"][row[0]]["comments"] = self.format_row(row[4])
             config2["proxy"][row[0]]["user"] = self.format_row(row[5])
             config2["proxy"][row[0]]["destination"] = self.format_row(row[10])
             config2["proxy"][row[0]]["dest_group"] = self.format_row(row[7])
             config2["proxy"][row[0]]["dest_domain"] = self.format_row(row[8])
-            # #comments, dest_ip
+            config2["proxy"][row[0]]["dest_ip"] = self.format_row(row[9])
 
 
         for row in self.firewall_store :
             config2["firewall"][row[0]] = OrderedDict()
 
-        return
+        return config2
 
 
     def ftp_upload(self, uploadlist=None, message=True):
