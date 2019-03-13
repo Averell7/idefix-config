@@ -40,7 +40,7 @@ from myconfigparser import myConfigParser
 ###########################################################################
 global version, future
 future = True  # activate beta functions
-version = "0.23.0"
+version = "0.26.2"
 
 
 gtk = Gtk
@@ -2234,7 +2234,7 @@ class Idefix:
         if line1.strip() == "" :
             return [""]
         tc0 = line1.strip()
-        elements = re.search("([A-Z]*\s)([0-9:]*)-([0-9:]*)", tc0.strip())
+        elements = re.search("([0-9]*)\s([0-9:]*)-([0-9:]*)", tc0.strip())
         if not elements :
             elements = re.search("([0-9:]*)-([0-9:]*)", tc0.strip())
             if not elements :
@@ -2245,16 +2245,17 @@ class Idefix:
                 stop = elements.group(2)
         else:
             days = elements.group(1)
+            days = parse_date_format_to_squid(days)
             start = elements.group(2)
             stop = elements.group(3)
         start_i = int(start.replace(":", ""))
         stop_i = int(stop.replace(":", ""))
         if stop_i < start_i :
-            tc1 = days + start + "-24:00"
+            tc1 = days + " " + start + "-24:00"
             tc2 = days + "00:00-" + stop
             return [tc1, tc2]
         else :
-            return [tc0]
+            return [days + " " + start + "-" + stop]
 
 
     def format_userline(self, dummy, line1):
