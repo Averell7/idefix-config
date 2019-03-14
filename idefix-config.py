@@ -1,8 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
-# version 0.26.2 : test version for json config (dev mode only, and presently loading disabled).
-#                  TODO : full update of config dict before saving to file.
+# version 0.27.1 : lots of little fixes
+# version 0.27.0 : json config
 # version 0.25.0 : Chris (2)
 # version 0.24.0 : Chris (1)
 # version 0.23.1 : "mac" replaced by "users"; bugs fixed
@@ -40,7 +40,7 @@ from myconfigparser import myConfigParser
 ###########################################################################
 global version, future
 future = True  # activate beta functions
-version = "0.26.2"
+version = "0.27.0"
 
 
 gtk = Gtk
@@ -149,29 +149,27 @@ def alert(message, type_=0):
     dialog.destroy()
 
 
-def showwarning(title, message):
+def showwarning(title, message, msgtype = 1):
     """
-      GTK_MESSAGE_INFO,
-      GTK_MESSAGE_WARNING,
-      GTK_MESSAGE_QUESTION,
-      GTK_MESSAGE_ERROR,
-      GTK_MESSAGE_OTHER
+      type 1 = INFO,
+      type 2 = WARNING,
+      type 3 = QUESTION,
+      type 4 = ERROR,
+      type 5 = OTHER
     """
+    types = [Gtk.MessageType.INFO,
+             Gtk.MessageType.WARNING,
+             Gtk.MessageType.QUESTION,
+             Gtk.MessageType.ERROR,
+             Gtk.MessageType.OTHER ]
 
-    # reset_transform = False
-
-    dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.WARNING,
+    dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, types[msgtype - 1],
                                Gtk.ButtonsType.CLOSE, title)
-
     dialog.format_secondary_text(message)
-    # if "transformWindow" in app.arw:
-    #    app.arw["transformWindow"].set_keep_above(False)
-    #    reset_transform = True
     dialog.set_keep_above(True)
     dialog.run()
     dialog.destroy()
-    # if reset_transform:
-    #     app.arw["transformWindow"].set_keep_above(True)
+
 
 
 def askyesno(title, string):
@@ -236,9 +234,8 @@ def ftp_connect(server, login, password):
         print("Unable to connect to ftp server with : %s / %s. Error: %s" % (login, password, e))
 
 
-def ftp_get(ftp, filename, utime=None, required=True, basedir=""):
-    if utime:
-        utime -= time.timezone
+def ftp_get(ftp, filename,required=True, json = False):
+
     try:
         ftp.sendcmd('MDTM ' + filename)  # verify that the file exists on the server
     except FTPError:
@@ -250,7 +247,10 @@ def ftp_get(ftp, filename, utime=None, required=True, basedir=""):
         data1 = f1.getvalue()
         f1.close()
         print(filename, "received OK.")
-        return data1.decode("utf-8-sig").split("\n")
+        if json :           # returns string
+            return data1.decode("ascii")
+        else :              # returns list
+            return data1.decode("utf-8-sig").split("\n")
     except FTPError:
         print("could not get " + filename)
 
@@ -318,29 +318,33 @@ class Idefix:
         window1.connect("destroy", self.destroy)
 
         if not future:
-            for widget in ["vbox6", "paned3", "box2", "frame6", "inifiles_list", "inifiles_view"]:
+            for widget in ["scrolledwindow2", "toolbar3", "paned3", "box2", "frame6", "inifiles_list", "inifiles_view"]:
                 self.arw[widget].hide()
+            self.arw["firewall_disabled"].show()
+        else :
+            self.arw["firewall_disabled"].hide()
 
-            # images for buttons
-            # image = Gtk.Image()
-            # image.set_from_file("./data/Bouton bleu.png")
-            # self.blue_button = image
-            # image2 = Gtk.Image()
-            # image2.set_from_file("./data/Bouton rouge.png")
-            # self.red_button = image2
-            # image3 = Gtk.Image()
-            # image3.set_from_file("./data/Bouton jaune.png")
-            # self.yellow_button = image3
-            # image4 = Gtk.Image()
-            # image4.set_from_file("./data/Bouton vert.png")
-            # self.green_button = image4
+        # images for buttons
+        # image = Gtk.Image()
+        # image.set_from_file("./data/Bouton bleu.png")
+        # self.blue_button = image
+        # image2 = Gtk.Image()
+        # image2.set_from_file("./data/Bouton rouge.png")
+        # self.red_button = image2
+        # image3 = Gtk.Image()
+        # image3.set_from_file("./data/Bouton jaune.png")
+        # self.yellow_button = image3
+        # image4 = Gtk.Image()
+        # image4.set_from_file("./data/Bouton vert.png")
+        # self.green_button = image4
 
-            # self.arw["button1"].set_image(self.blue_button)
-            # self.arw["button1"].set_always_show_image(True)
-            # self.arw["toggle_proxy_open_button"].set_image(self.yellow_button)
-            # self.arw["toggle_proxy_open_button"].set_always_show_image(True)
-            # self.arw["toggle_proxy_allow_button"].set_image(self.green_button)
-            # self.arw["toggle_proxy_allow_button"].set_always_show_image(True)
+        # self.arw["button1"].set_image(self.blue_button)
+        # self.arw["button1"].set_always_show_image(True)
+        # self.arw["toggle_proxy_open_button"].set_image(self.yellow_button)
+        # self.arw["toggle_proxy_open_button"].set_always_show_image(True)
+        # self.arw["toggle_proxy_allow_button"].set_image(self.green_button)
+        # self.arw["toggle_proxy_allow_button"].set_always_show_image(True)
+
 
         # get the style from the css file and apply it
         css_provider = Gtk.CssProvider()
@@ -386,46 +390,58 @@ class Idefix:
                 self.local_control = True
             ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
 
-            # retrieve common files by ftp
+            # retrieve files by ftp
 
-            if ftp1['mode'][0] != 'local':
-                ftp.cwd("common")
-            data1 = ftp_get(ftp, "firewall-ports.ini")
-            data2 = ftp_get(ftp, "proxy-groups.ini")
-            if ftp1['mode'][0] != 'local':
-                ftp.cwd("..")
+            data0 = ftp_get(ftp, "idefix-config.json", json  = True)
+            if data0 :
+                self.config = json.loads(data0, object_pairs_hook=OrderedDict)
+                print("json file loaded")
+            else :
+                print("WARNING ! unable to get idefix-config.json.\n Loading ini files")
 
-            # make a local copy for debug purpose
-            f1 = open("./tmp/firewall-ports.ini", "w", encoding="utf-8-sig")
-            f1.write("\n".join(data1))
-            f1.close()
-            f1 = open("./tmp/proxy-groups.ini", "w", encoding="utf-8-sig")
-            f1.write("\n".join(data2))
-            f1.close()
 
-            # retrieve perso files by ftp
-            data3 = ftp_get(ftp, "users.ini")
-            data4 = ftp_get(ftp, "firewall-users.ini")
-            data5 = ftp_get(ftp, "proxy-users.ini")
+                # retrieve common files by ftp
+                if ftp1['mode'][0] != 'local':
+                    ftp.cwd("common")
+                data1 = ftp_get(ftp, "firewall-ports.ini")
+                data2 = ftp_get(ftp, "proxy-groups.ini")
+                if ftp1['mode'][0] != 'local':
+                    ftp.cwd("..")
 
-            ftp.close()
+                # make a local copy for debug purpose
+                f1 = open("./tmp/firewall-ports.ini", "w", encoding="utf-8-sig")
+                f1.write("\n".join(data1))
+                f1.close()
+                f1 = open("./tmp/proxy-groups.ini", "w", encoding="utf-8-sig")
+                f1.write("\n".join(data2))
+                f1.close()
 
-            if data1 is None:
-                print("WARNING ! unable to get firewall-ports.ini.")
-            if data2 is None:
-                print("WARNING ! unable to get proxy-groups.ini.")
-            if data3 is None:
-                print("WARNING ! unable to get users.ini.")
-            if data4 is None:
-                print("WARNING ! unable to get users.ini.")
-            if data5 is None:
-                print("WARNING ! unable to get proxy-users.ini.")
+                # retrieve perso files by ftp
+                data3 = ftp_get(ftp, "users.ini")
+                data4 = ftp_get(ftp, "firewall-users.ini")
+                data5 = ftp_get(ftp, "proxy-users.ini")
 
-            self.config = parser.read(data3, "users", comments=True, isdata=True)
-            self.config = parser.read(data4, "firewall", merge=self.config, comments=True, isdata=True)
-            self.config = parser.read(data5, "proxy", merge=self.config, comments=True, isdata=True)
-            self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
-            self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
+
+                ftp.close()
+
+                if data1 is None:
+                    print("WARNING ! unable to get firewall-ports.ini.")
+                if data2 is None:
+                    print("WARNING ! unable to get proxy-groups.ini.")
+                if data3 is None:
+                    print("WARNING ! unable to get users.ini.")
+                if data4 is None:
+                    print("WARNING ! unable to get users.ini.")
+                if data5 is None:
+                    print("WARNING ! unable to get proxy-users.ini.")
+
+
+
+                self.config = parser.read(data3, "users", comments=True, isdata=True)
+                self.config = parser.read(data4, "firewall", merge=self.config, comments=True, isdata=True)
+                self.config = parser.read(data5, "proxy", merge=self.config, comments=True, isdata=True)
+                self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
+                self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
         else:   # development environment
             self.config = OrderedDict()
@@ -485,9 +501,9 @@ class Idefix:
         # 1 - users
         """
         0 : section (level 1)  - user (level 2)
-        1 : options (text)
-        2 : reserved
-        3 : time condition
+        1 : options (text)    TODO : probably no longer used, verify
+        2 : email time condition
+        3 : internet time condition
         4 : email (1/0)
         5 : internet access (1/0)
         6 : filtered (1/0)
@@ -639,6 +655,11 @@ class Idefix:
 
         # chooser
 
+        # create a special store with users who have an Internet access
+        self.chooser_users_store = gtk.TreeStore(str, str, str)
+
+
+
         self.tvcolumn = gtk.TreeViewColumn(_('---'), self.cell, text=0)
         self.arw["chooser"].append_column(self.tvcolumn)
         self.arw["chooser"].get_selection()
@@ -706,6 +727,7 @@ class Idefix:
         self.populate_proxy()
         self.populate_ports()
         self.populate_groups()
+        self.populate_users_chooser()
         self.set_check_boxes()
         self.set_colors()
         self.load_ini_files()
@@ -729,7 +751,7 @@ class Idefix:
             internet_time_condition = data1[section].get("@_internet_time_condition", [''])[0]
             if internet_time_condition:
                 days = internet_time_condition.split(' ')[0]
-                days = parse_date_format_from_squid(days)
+                #days = parse_date_format_from_squid(days)
 
                 if len(internet_time_condition.split(' ')) > 1:
                     internet_time_condition = days + ' ' + internet_time_condition.split(' ', 1)[1]
@@ -739,7 +761,7 @@ class Idefix:
             email_time_condition = data1[section].get("@_email_time_condition", [''])[0]
             if email_time_condition:
                 days = email_time_condition.split(' ')[0]
-                days = parse_date_format_from_squid(days)
+                #days = parse_date_format_from_squid(days)
 
                 if len(email_time_condition.split(' ')) > 1:
                     email_time_condition = days + ' ' + email_time_condition.split(' ', 1)[1]
@@ -814,7 +836,8 @@ class Idefix:
                     data = data1[section][key]
 
                     if key == 'time_condition':
-                        days = parse_date_format_from_squid(data[0].split(' ')[0])
+                        #days = parse_date_format_from_squid(data[0].split(' ')[0])
+                        days = data[0].split(' ')[0]
                         if len(data[0].split(' ')) > 1:
                             data = [days + ' ' + data[0].split(' ', 1)[1]]
                         else:
@@ -839,6 +862,16 @@ class Idefix:
         data1 = self.config["groups"]
         for key in data1:
             self.groups_store.append([key])
+
+    def populate_users_chooser(self) :
+        for row in self.users_store :
+            category = row[0]
+            if row[5] :         # Add category only if Internet access is enabled
+                iter1 = self.chooser_users_store.append(None, [category, "", ""])
+                for child in row.iterchildren():  # write users
+                    user = child[0]
+                    self.chooser_users_store.append(iter1, [user, "", ""])
+
 
     def set_check_boxes(self):
         for row in self.proxy_store:
@@ -955,6 +988,7 @@ class Idefix:
             self.arw["menu_add_below"].hide()
             self.arw["menu_add_user"].show()
             self.arw["menu_add_cat"].show()
+            self.arw["menu_move_user"].hide()
 
             self.arw['email_time_condition'].set_sensitive(
                 self.users_store[self.iter_user][4] or self.users_store[self.iter_user][7]
@@ -1013,6 +1047,7 @@ class Idefix:
             self.arw["menu_add_below"].show()
             self.arw["menu_add_user"].hide()
             self.arw["menu_add_cat"].hide()
+            self.arw["menu_move_user"].show()
 
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
@@ -1562,24 +1597,24 @@ class Idefix:
         self.arw['internet_time_condition'].set_sensitive(self.users_store[self.iter_user][5])
 
     def update_time(self, widget, x=None):
-
+        # TODO  this function is not very well written.
         if widget.name in ["proxy_time_condition_days", "proxy_time_condition_from", "proxy_time_condition_to"]:
             time_condition = self.arw["proxy_time_condition_days"].get_text() + " "
             if time_condition.strip() == "":
-                time_condition = "MTWHFAS "
+                time_condition = "1234567 "
             time_condition += self.arw["proxy_time_condition_from"].get_text().strip() + "-"
             time_condition += self.arw["proxy_time_condition_to"].get_text().strip()
-            if time_condition == "MTWHFAS -":
+            if time_condition == "1234567 -":
                 time_condition = ""
             self.proxy_store[self.iter_proxy][3] = time_condition
 
         if widget.name in ["users_time_days_email", "users_time_from_email", "users_time_to_email"]:
             time_condition = self.arw["users_time_days_email"].get_text() + " "
             if time_condition.strip() == "":
-                time_condition = "MTWHFAS "
+                time_condition = "1234567 "
             time_condition += self.arw["users_time_from_email"].get_text().strip() + "-"
             time_condition += self.arw["users_time_to_email"].get_text().strip()
-            if time_condition == "MTWHFAS -":
+            if time_condition == "1234567 -":
                 time_condition = ""
             self.users_store[self.iter_user][2] = time_condition
             self.set_colors()
@@ -1587,10 +1622,10 @@ class Idefix:
         if widget.name in ["users_time_days_internet", "users_time_from_internet", "users_time_to_internet"]:
             time_condition = self.arw["users_time_days_internet"].get_text() + " "
             if time_condition.strip() == "":
-                time_condition = "MTWHFAS "
+                time_condition = "1234567 "
             time_condition += self.arw["users_time_from_internet"].get_text().strip() + "-"
             time_condition += self.arw["users_time_to_internet"].get_text().strip()
-            if time_condition == "MTWHFAS -":
+            if time_condition == "1234567 -":
                 time_condition = ""
             self.users_store[self.iter_user][3] = time_condition
             self.set_colors()
@@ -1614,9 +1649,9 @@ class Idefix:
 
     def load_chooser(self, widget, event=None, data=None):
 
-        if data is None:  # cela sert-il à quelque chose ???
+        if data is None:  # TODO is this useful ???
             if widget.name in ["proxy_users"]:
-                self.arw["chooser"].set_model(self.users_store)
+                self.arw["chooser"].set_model(self.chooser_users_store)
                 ctx = self.arw['proxy_users_scroll_window'].get_style_context()
                 ctx.add_class('chosen_list')
 
@@ -1711,10 +1746,12 @@ class Idefix:
                     cat = row[0]
                     commandes = Gtk.MenuItem(cat)
                     submenu.append(commandes)
-                    commandes.connect("activate", self.change_category, cat)
+                    #commandes.connect("activate", self.change_category, cat)       # works only with a right click, hence replaced by the following
+                    commandes.connect("button-press-event", self.change_category, cat)
+
                     commandes.show()
 
-                self.arw["menuitem3"].set_submenu(submenu)
+                self.arw["menu_move_user"].set_submenu(submenu)
                 self.arw["users_menu"].popup(None, None, None, None, event.button, event.time)
         return
 
@@ -1838,7 +1875,7 @@ class Idefix:
 
             self.users_store.set(node, [0], [x])
 
-    def change_category(self, widget, cat):
+    def change_category(self, widget, void, cat):
 
         # get user data
         row = []
@@ -2076,6 +2113,14 @@ class Idefix:
                         child_iter = store.append(parent_iter)
                         store.set_value(child_iter, 0, domain)
 
+
+    def summary_warning(self, widget = None, event = None):
+
+        if event.get_keyval()[1] in range(65360,65370) :   # allow direction keys
+            return
+        message = _("The user summary is not editable. \n See the Internet Filter tab.")
+        showwarning(_("Not editable"), message, 2)
+
     """ Drag and Drop """
 
     def chooser_drag_data_get(self, treeview, drag_context, data, info, time):
@@ -2208,9 +2253,13 @@ class Idefix:
 
     def format_line(self, key, line1):
         text = ""
-        if key != "":
-            key += " = "
-        for value in line1.split("\n"):
+        key += " = "
+
+        list1 = line1.split("\n")
+        if "any" in list1 :
+            return key + "any\n"
+
+        for value in list1:
             if value.strip() != "":
                 text += key + value + "\n"
         return text
@@ -2252,7 +2301,7 @@ class Idefix:
         stop_i = int(stop.replace(":", ""))
         if stop_i < start_i :
             tc1 = days + " " + start + "-24:00"
-            tc2 = days + "00:00-" + stop
+            tc2 = days + " 00:00-" + stop
             return [tc1, tc2]
         else :
             return [days + " " + start + "-" + stop]
@@ -2319,36 +2368,36 @@ class Idefix:
             out += "\n[%s]\n" % row[0]  # section
             # write options
 
-            email_time_condition = row[2].strip()
-            if email_time_condition != "":
-                days = email_time_condition.split(' ')[0]
-                days = parse_date_format_to_squid(days)
-                if len(email_time_condition.split(' ')) > 1:
-                    email_time_condition = days + ' ' + email_time_condition.split(' ', 1)[1]
-                else:
-                    email_time_condition = days
-                out += "@_email_time_condition = " + email_time_condition + "\n"
-
-            internet_time_condition = row[3].strip()
-            if internet_time_condition != "":
-                days = internet_time_condition.split(' ')[0]
-                days = parse_date_format_to_squid(days)
-                if len(internet_time_condition.split(' ')) > 1:
-                    internet_time_condition = days + ' ' + internet_time_condition.split(' ', 1)[1]
-                else:
-                    internet_time_condition = days
-                out += "@_internet_time_condition = " + internet_time_condition + "\n"
-
-            # email - 4, internet - 5, filtered - 6, open - 7
-
-            out += '@_email = %s\n' % row[4]
-            if row[5]:
-                if row[6]:
-                    out += '@_internet = filtered\n'
-                elif row[7]:
-                    out += '@_internet = open\n'
-            else:
-                out += '@_internet = none\n'
+##            email_time_condition = row[2].strip()
+##            if email_time_condition != "":
+##                days = email_time_condition.split(' ')[0]
+##                days = parse_date_format_to_squid(days)
+##                if len(email_time_condition.split(' ')) > 1:
+##                    email_time_condition = days + ' ' + email_time_condition.split(' ', 1)[1]
+##                else:
+##                    email_time_condition = days
+##                out += "@_email_time_condition = " + email_time_condition + "\n"
+##
+##            internet_time_condition = row[3].strip()
+##            if internet_time_condition != "":
+##                days = internet_time_condition.split(' ')[0]
+##                days = parse_date_format_to_squid(days)
+##                if len(internet_time_condition.split(' ')) > 1:
+##                    internet_time_condition = days + ' ' + internet_time_condition.split(' ', 1)[1]
+##                else:
+##                    internet_time_condition = days
+##                out += "@_internet_time_condition = " + internet_time_condition + "\n"
+##
+##            # email - 4, internet - 5, filtered - 6, open - 7
+##
+##            out += '@_email = %s\n' % row[4]
+##            if row[5]:
+##                if row[6]:
+##                    out += '@_internet = filtered\n'
+##                elif row[7]:
+##                    out += '@_internet = open\n'
+##            else:
+##                out += '@_internet = none\n'
 
             for child in row.iterchildren():  # write users and macaddress
                 user = child[0]
@@ -2357,6 +2406,11 @@ class Idefix:
                 else:
                     macaddress = self.maclist[user]
                     for address in macaddress:
+                        if address.startswith("-@"):
+                            continue
+                        elif address.startswith("+@"):
+                            address = address[2:]
+                            print(address)
                         out += user + " = " + address + "\n"
 
         with open("./tmp/users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
@@ -2382,13 +2436,19 @@ class Idefix:
                 out += self.format_line("action", row[2])
                 out += self.format_line("time_condition", time_condition2)
                 out += self.format_userline("user", row[5])
-                out += self.format_line("destination", row[10])
-                out += self.format_line("dest_group", row[7])
-                out += self.format_domainline("dest_domain", row[8])
+                if self.format_line("destination", row[10]) == "" :
+                    out += self.format_line("dest_group", row[7])
+                    out += self.format_domainline("dest_domain", row[8])
+                else:
+                    out += self.format_line("destination", row[10])
 
         # add default permissions
-        with open("./default.cfg", "r", encoding = "utf-8-sig") as f1 :
-            out += "\n" + f1.read()
+        out += "\n[@_antivirus]\n"
+        out += "active = on \n"
+        out += "action = allow \n"
+        out += "user = any \n"
+        out += "dest_group = antivirus \n"
+
 
         with open("./tmp/proxy-users.ini", "w", encoding = "utf-8-sig",  newline = "\n") as f1 :
             f1.write(out)
@@ -2420,19 +2480,19 @@ class Idefix:
         """
         0 : section (level 1)  - user (level 2)
         1 : options (text) (no longer used)
-        2 : reserved
-        3 : reserved
+        2 : email time condition
+        3 : internet time condition
         4 : email (1/0)
         5 : internet access (1/0)
         6 : filtered (1/0)
         7 : open (1/0)
-        8 : full (1/0)
         """
+
         for row in self.users_store:
             section = "__" + row[0]
             if not section in sections:
                 sections.append(section)
-            # print(row[0], row[1], row[2])
+            print(row[0], row[1], row[2], row[3], row[4])
             tmp2 = "\n[%s]\n" % section
             # set the command lines for the categories
             option = row[1].split("|")
@@ -2447,16 +2507,14 @@ class Idefix:
                 if row[6] == 1:
                     myoptions.append("ftp")
                 elif row[7] == 1:
-                    myoptions.append("http")
-                    if not "email" in myoptions:
-                        myoptions.append("email")
-                elif row[8] == 1:
-                    myoptions.append("any")
+                    myoptions = ["ACCEPT", "any"]
 
             if len(myoptions) > 1:
                 tmp2 += self.format_directive(myoptions)
             else:
                 tmp2 += self.format_directive(["DROP", "any"])
+
+            tmp2 += self.format_line("time_condition", row[3])
 
             for b in row.iterchildren():
                 tmp2 += "user = " + b[0] + "\n"
@@ -2493,6 +2551,8 @@ class Idefix:
                 internet = 'none'
             config2["users"][row[0]]['@_internet'] = [internet]
             config2["users"][row[0]]['@_email'] = [str(row[4])]         # TODO str should not be necessary.
+            config2["users"][row[0]]['@_email_time_condition'] = [row[2]]
+            config2["users"][row[0]]['@_internet_time_condition'] = [row[3]]
 
             for child in row.iterchildren():  # write users and macaddress
                 user = child[0]
@@ -2546,13 +2606,13 @@ class Idefix:
 
         # TODO : message to indicate upload was successful
         if OK :
-            msg += _("\nUpload OK\n")
+            title = "Upload OK"
         else :
-            msg += _("\n ERRORS in upload\n")
+            title ="ERRORS in upload"
         print(msg)
 
         if message:
-            alert(msg)
+            showwarning(title, msg, 1)
 
     def destroy(self, widget=None, donnees=None):
         print("Évènement destroy survenu.")
