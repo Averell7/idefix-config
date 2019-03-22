@@ -191,6 +191,8 @@
     <columns>
       <!-- column-name name -->
       <column type="gchararray"/>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkMenu" id="proxy_users_menu">
@@ -1485,6 +1487,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                         <property name="can_focus">False</property>
                                         <child>
                                           <object class="GtkButton" id="toggle_proxy_user_open_button">
+                                            <property name="name">toggle_proxy_user_open_button</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">True</property>
@@ -1593,6 +1596,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                     <property name="can_focus">False</property>
                                     <child>
                                       <object class="GtkButton" id="toggle_proxy_open_button">
+                                        <property name="name">toggle_proxy_open_button</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -1614,6 +1618,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                     </child>
                                     <child>
                                       <object class="GtkButton" id="toggle_proxy_allow_button">
+                                        <property name="name">toggle_proxy_allow_button</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
@@ -1662,6 +1667,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                                 <property name="model">proxy_groups_store</property>
                                                 <property name="headers_visible">False</property>
                                                 <property name="search_column">0</property>
+                                                <property name="tooltip_column">1</property>
                                                 <signal name="button-press-event" handler="load_chooser" swapped="no"/>
                                                 <signal name="button-release-event" handler="proxy_group_select" swapped="no"/>
                                                 <child internal-child="selection">
@@ -2015,6 +2021,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                           <object class="GtkTreeView" id="chooser">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
+                            <property name="tooltip_column">1</property>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="treeview-selection5"/>
                             </child>
