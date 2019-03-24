@@ -12,7 +12,6 @@ class ProxyGroup:
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
-        self.proxy_store = self.controller.proxy_users.proxy_store
 
         self.arw["proxy_group"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
         self.arw['proxy_group'].drag_source_add_text_targets()
@@ -39,7 +38,7 @@ class ProxyGroup:
             proxy_iter = self.controller.iter_proxy
 
         self.arw['proxy_groups_store'].clear()
-        for name in self.proxy_store[proxy_iter][7].split('\n'):
+        for name in self.controller.iter_firewall[proxy_iter][7].split('\n'):
             if name:
                 iter = self.arw['proxy_groups_store'].append()
                 self.arw['proxy_groups_store'].set_value(iter, 0, name)
@@ -53,7 +52,7 @@ class ProxyGroup:
         model, iter = self.arw['proxy_group'].get_selection().get_selected()
         name = model.get_value(iter, 0).strip()
 
-        names = self.proxy_store.get_value(self.controller.iter_proxy, 7).split('\n')
+        names = self.controller.proxy_users.proxy_store.get_value(self.controller.iter_proxy, 7).split('\n')
         if name not in names or name == 'any':
             return
 
@@ -63,7 +62,7 @@ class ProxyGroup:
 
         names.remove(name)
 
-        self.proxy_store.set_value(self.controller.iter_proxy, 7, '\n'.join(names))
+        self.controller.proxy_users.proxy_store.set_value(self.controller.iter_proxy, 7, '\n'.join(names))
         self.update_proxy_group_list()
 
     def update_proxy_group_list_view(self, widget, ctx, x, y, data, info, etime):
@@ -103,14 +102,14 @@ class ProxyGroup:
                 model.set_value(iter_dest, i, values[i])
             model.remove(iter_source)
             names = [name[0] for name in model]
-            self.proxy_store.set_value(self.controller.iter_proxy, 7, '\n'.join(names))
+            self.controller.proxy_users.proxy_store.set_value(self.controller.iter_proxy, 7, '\n'.join(names))
             return
 
         new_name = data.get_text().strip()
 
-        names = self.proxy_store.get_value(self.controller.iter_proxy, 7).split('\n')
+        names = self.controller.proxy_users.proxy_store.get_value(self.controller.iter_proxy, 7).split('\n')
         if new_name in names:
             return
         names.append(new_name)
-        self.proxy_store.set_value(self.controller.iter_proxy, 7, '\n'.join(names))
+        self.controller.proxy_users.proxy_store.set_value(self.controller.iter_proxy, 7, '\n'.join(names))
         self.update_proxy_group_list(self.controller.iter_proxy)
