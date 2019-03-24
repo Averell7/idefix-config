@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 0.28.0 : Chris (4) = gui reorganization
 # version 0.27.1 : lots of little fixes
 # version 0.27.0 : json config
 # version 0.25.0 : Chris (2)
@@ -49,7 +50,7 @@ from users import Users
 ###########################################################################
 global version, future
 future = True  # activate beta functions
-version = "0.27.0"
+version = "0.28.0"
 
 
 gtk = Gtk
@@ -752,8 +753,12 @@ class Idefix:
 
     """ User Management """
 
-    def show_ini_files(self) :
-        pass
+    def show_debug_window(self, widget) :
+        self.arw["system_window"].show_all()
+
+    def hide_debug_window(self,widget):
+        self.arw["system_window"].hide()
+
 
     """ View """
 

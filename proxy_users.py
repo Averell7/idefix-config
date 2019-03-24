@@ -349,6 +349,11 @@ class ProxyUsers:
         else:
             self.arw["chooser"].set_model(EMPTY_STORE)
 
+    def proxy_profile_select(self, widget, event):
+        if event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 3:  # right click, runs the context menu
+                self.arw["proxy_profiles_menu"].popup(None, None, None, None, event.button, event.time)
+
     def proxy_users_data_get(self, treeview, drag_context, data, info, time):
         (model, iter1) = treeview.get_selection().get_selected()
         if iter1:

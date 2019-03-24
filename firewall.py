@@ -209,7 +209,7 @@ class Firewall:
             section = "__" + row[0]
             if not section in sections:
                 sections.append(section)
-            print(row[0], row[1], row[2], row[3], row[4])
+            #print(row[0], row[1], row[2], row[3], row[4])
             tmp2 = "\n[%s]\n" % section
             # set the command lines for the categories
             option = row[1].split("|")

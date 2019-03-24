@@ -38,7 +38,7 @@ class ProxyGroup:
             proxy_iter = self.controller.iter_proxy
 
         self.arw['proxy_groups_store'].clear()
-        for name in self.controller.iter_firewall[proxy_iter][7].split('\n'):
+        for name in self.controller.proxy_store[proxy_iter][7].split('\n'):
             if name:
                 iter = self.arw['proxy_groups_store'].append()
                 self.arw['proxy_groups_store'].set_value(iter, 0, name)
