@@ -17,7 +17,6 @@ import glob
 import io
 import json
 import os
-import re
 import sys
 import time
 from collections import OrderedDict
@@ -33,8 +32,7 @@ from gi.repository import GdkPixbuf
 from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
-    AskForConfig, parse_date_format_to_squid,
-    alert, showwarning, askyesno,
+    AskForConfig, alert, showwarning, askyesno,
     EMPTY_STORE, SignalHandler, _,
 )
 from icons import (
@@ -827,97 +825,6 @@ class Idefix:
         self.arw["inifiles_view"].get_buffer().set_text(text)
 
     """ Output """
-
-    def format_line(self, key, line1):
-        text = ""
-        key += " = "
-
-        list1 = line1.split("\n")
-        if "any" in list1 :
-            return key + "any\n"
-
-        for value in list1:
-            if value.strip() != "":
-                text += key + value + "\n"
-        return text
-
-    def format_comment(self, line1):
-        text = ""
-        for value in line1.split("\n"):
-            if value.strip() == "":
-                continue
-            if value.strip() == "#":
-                continue
-            if value.strip()[0:1] != "#":
-                text += "# " + value + "\n"
-            else:
-                text += value + "\n"
-        return text
-
-    def format_time(self, line1) :
-        # Check if time range overlaps 24:00
-        # if yes, returns two ranges.
-        if line1.strip() == "" :
-            return [""]
-        tc0 = line1.strip()
-        elements = re.search("([0-9]*)\s([0-9:]*)-([0-9:]*)", tc0.strip())
-        if not elements :
-            elements = re.search("([0-9:]*)-([0-9:]*)", tc0.strip())
-            if not elements :
-                return [line1]
-            else :
-                days = ""
-                start = elements.group(1)
-                stop = elements.group(2)
-        else:
-            days = elements.group(1)
-            days = parse_date_format_to_squid(days)
-            start = elements.group(2)
-            stop = elements.group(3)
-        start_i = int(start.replace(":", ""))
-        stop_i = int(stop.replace(":", ""))
-        if stop_i < start_i :
-            tc1 = days + " " + start + "-24:00"
-            tc2 = days + " 00:00-" + stop
-            return [tc1, tc2]
-        else :
-            return [days + " " + start + "-" + stop]
-
-    def format_userline(self, dummy, line1):
-        # separate domains and ips
-        text = ""
-        for value in line1.split("\n"):
-            if value.strip() != "":
-                if len(re.findall("[:]", value)) == 5:  # five : means this is a mac address
-                    # TODO  check that the mac address is valid
-                    key = "users"
-                else:
-                    key = "user"
-                text += key + " = " + value + "\n"
-        return text
-
-    def format_domainline(self, dummy, line1):
-        # separate domains and ips
-        text = ""
-        for value in line1.split("\n"):
-            if value.strip() != "":
-                if len(re.findall("[a-zA-Z]", value)) == 0:  # no alphabetical characters, it is an IP address
-                    # TODO  check that the ip address is valid
-                    key = "dest_ip"
-                else:
-                    key = "dest_domain"
-                text += key + " = " + value + "\n"
-        return text
-
-    def format_directive(self, list1):
-        out = "action = " + list1[0] + "\n"
-        for line in list1[1:]:
-            out += "ports = " + line + "\n"
-        return out + "\n"
-
-    def format_name(self, name):
-        return name.replace(" ", "_")
-
     def build_files(self, widget):
         # launched by the GO button
         self.build_users()
@@ -1031,7 +938,7 @@ class Idefix:
         for row in self.proxy_store :
             config2["proxy"][row[0]] = OrderedDict()
             config2["proxy"][row[0]]["active"] = self.format_row(row[1])
-            config2["proxy"][row[0]]["action"]=  self.format_row(row[2])
+            config2["proxy"][row[0]]["action"] = self.format_row(row[2])
             config2["proxy"][row[0]]["time_condition"] = self.format_row(row[3])
             config2["proxy"][row[0]]["comments"] = self.format_row(row[4])
             config2["proxy"][row[0]]["user"] = self.format_row(row[5])
