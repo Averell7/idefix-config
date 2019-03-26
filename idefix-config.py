@@ -44,6 +44,7 @@ from proxy_users import ProxyUsers
 from proxy_group import ProxyGroup
 from firewall import Firewall
 from users import Users
+from config_profile import ConfigProfile
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -203,12 +204,15 @@ class Idefix:
         self.proxy_group = ProxyGroup(self.arw, self)
         self.firewall = Firewall(self.arw, self)
         self.users = Users(self.arw, self)
-        self.users_store = self.users.users_store
+        self.profiles = ConfigProfile(self.arw, self)
 
+        self.users_store = self.users.users_store
         self.proxy_store = self.proxy_users.proxy_store
         self.firewall_store = self.firewall.firewall_store
 
-        self.signal_handler = SignalHandler([self, self.proxy_users, self.proxy_group, self.firewall, self.users])
+        self.signal_handler = SignalHandler([
+            self, self.proxy_users, self.proxy_group, self.firewall, self.users, self.profiles
+        ])
         self.widgets.connect_signals(self.signal_handler)
 
         # autosave textview buffers when typing (see also drag and drop below)
@@ -286,7 +290,7 @@ class Idefix:
             if os.path.isfile("./idefix-config.json") :           # disabled
                 data_str = open("./idefix-config.json", "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
-            else :
+            else:
                 self.config = parser.read("./tmp/users.ini", "users", merge=self.config, comments=True)
                 self.config = parser.read("./tmp/firewall-users.ini", "firewall", merge=self.config, comments=True)
                 self.config = parser.read("./tmp/proxy-users.ini", "proxy", merge=self.config, comments=True)
@@ -381,6 +385,7 @@ class Idefix:
         self.set_check_boxes()
         self.set_colors()
         self.load_ini_files()
+        self.profiles.list_configuration_profiles()
 
     """ Load interface """
 
