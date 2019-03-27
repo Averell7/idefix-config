@@ -235,10 +235,10 @@ class Idefix:
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
 
         # load configuration
-        if not load_locale:
-            self.config = OrderedDict()
-            self.idefix_config = parser.read("./idefix-config.cfg", "conf")
-
+        self.config = OrderedDict()
+        self.idefix_config = parser.read("./idefix-config.cfg", "conf")
+        
+        if not load_locale:         
             # ftp connect
 
             ftp1 = ftp_config
@@ -296,9 +296,7 @@ class Idefix:
                 self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
                 self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
-        else:   # development environment
-            self.config = OrderedDict()
-            self.idefix_config = parser.read("./idefix-config.cfg", "conf")
+        else:   # development environment            
             if os.path.isfile("./idefix-config.json") :
                 data_str = open("./idefix-config.json", "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
