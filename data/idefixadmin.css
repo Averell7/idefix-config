@@ -1,15 +1,11 @@
+/*
 .button {
-    background-image: -gtk-gradient (linear,
-                                     left top, left bottom,
-                                     from (shade (@selected_bg_color, 1.1)),
-                                     color-stop (0.55, shade (@selected_bg_color, 1.0)),
-                                     color-stop (0.55, shade (@selected_bg_color, 0.8)),
-                                     to (shade (@selected_bg_color, 0.9)));
+    background: #0000ff;
 }
 
-/*
  GtkButton:hover {
-   transition: 100ms linear;
+    background: #00ffff;
+    transition: 100ms linear;
  }
 
  GtkCheckButton:active {
@@ -25,4 +21,16 @@
 
 .chosen_list {
     border: 2px #FF0000 solid;
+}
+
+#toggle_proxy_user_open_button,
+#toggle_proxy_open_button,
+#toggle_proxy_allow_button
+{
+    background-image: -gtk-gradient (linear,
+                                     left top, left bottom,
+                                     from (shade (@selected_bg_color, 1.1)),
+                                     color-stop (0.55, shade (@selected_bg_color, 1.0)),
+                                     color-stop (0.55, shade (@selected_bg_color, 0.8)),
+                                     to (shade (@selected_bg_color, 0.9)));
 }
