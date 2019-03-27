@@ -34,7 +34,7 @@ from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
-    EMPTY_STORE, SignalHandler, _,
+    EMPTY_STORE, SignalHandler, 
 )
 from icons import (
     internet_full_icon, internet_filtered_icon,
@@ -45,6 +45,16 @@ from proxy_group import ProxyGroup
 from firewall import Firewall
 from users import Users
 from config_profile import ConfigProfile
+
+###########################################################################
+# LOCALISATION ############################################################
+###########################################################################
+
+import gettext
+import locale
+import elib_intl3
+elib_intl3.install("idefix-config", "share/locale")
+#print(_("No user data"))
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -226,6 +236,8 @@ class Idefix:
 
         # load configuration
         if not load_locale:
+            self.config = OrderedDict()
+            self.idefix_config = parser.read("./idefix-config.cfg", "conf")
 
             # ftp connect
 
@@ -287,7 +299,7 @@ class Idefix:
         else:   # development environment
             self.config = OrderedDict()
             self.idefix_config = parser.read("./idefix-config.cfg", "conf")
-            if os.path.isfile("./idefix-config.json") :           # disabled
+            if os.path.isfile("./idefix-config.json") :
                 data_str = open("./idefix-config.json", "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
             else:

@@ -3,7 +3,7 @@ import time
 from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
-from util import askyesno, EMPTY_STORE, _, format_comment, format_line, format_time, format_userline, format_domainline
+from util import askyesno, EMPTY_STORE, format_comment, format_line, format_time, format_userline, format_domainline
 
 
 # 3 - proxy

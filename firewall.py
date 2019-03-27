@@ -1,7 +1,7 @@
 from gi.repository import Gtk
 
 from util import (
-    askyesno, ask_text, ip_address_test, mac_address_test, format_comment, format_line, format_directive, _
+    askyesno, ask_text, ip_address_test, mac_address_test, format_comment, format_line, format_directive
 )
 
 

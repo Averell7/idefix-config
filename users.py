@@ -8,7 +8,7 @@ from icons import (
     internet_filtered_icon, internet_full_icon, internet_disabled_icon,
     email_disabled_icon, email_icon
 )
-from util import alert, _, ask_text, showwarning, askyesno, format_name, mac_address_test, ip_address_test
+from util import alert, ask_text, showwarning, askyesno, format_name, mac_address_test, ip_address_test
 
 
 class Users:

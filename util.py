@@ -283,4 +283,4 @@ EMPTY_STORE = gtk.ListStore(str)
 ###########################################################################
 # LOCALISATION ############################################################
 ###########################################################################
-_ = elib_intl3.install_module("idefix-config", "share/locale")
+#_ = elib_intl3.install_module("idefix-config", "share/locale")
