@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Idéfix 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-03-27 03:33+0100\n"
-"PO-Revision-Date: 2019-03-27 03:42+0100\n"
+"PO-Revision-Date: 2019-03-27 10:52+0100\n"
 "Last-Translator: Averell <dy1977@orange.fr>\n"
 "Language-Team: --- <webmaster@idefix.org>\n"
 "MIME-Version: 1.0\n"
@@ -73,15 +73,13 @@ msgid "Key"
 msgstr "Clef"
 
 #: firewall.py:57
-#, fuzzy
 msgid "Accept/Drop"
-msgstr "Ombre _portée"
+msgstr "Accepter/Refuser"
 
 #: firewall.py:60
 #: proxy_users.py:65
-#, fuzzy
 msgid "On/Off"
-msgstr "Légende activée/désactivée"
+msgstr "Actif/inactif"
 
 #: proxy_group.py:48
 msgid "(error)"
@@ -110,33 +108,28 @@ msgid "<b>Deny</b>"
 msgstr "<b>Refuser</b>"
 
 #: users.py:51
-#, fuzzy
 msgid "Filename"
 msgstr "Nom du fichier"
 
 #: users.py:263
-#, fuzzy
 msgid "Name of the new category"
-msgstr "Ajouter une catégorie"
+msgstr "Nom de la nouvelle catégorie"
 
 #: users.py:265
-#, fuzzy
 msgid "Name of the new user"
-msgstr "Nouvel index personnalisé"
+msgstr "Nom du nouvel utilisateur"
 
 #: users.py:298
 msgid "User Exists"
 msgstr "L'utilisateur existe déjà !"
 
 #: users.py:298
-#, fuzzy
 msgid "Username exists"
-msgstr "Le fichier existe"
+msgstr "Ce nom existe déjà"
 
 #: users.py:318
-#, fuzzy
 msgid "Enter address"
-msgstr "Adresse FTP:"
+msgstr "Entrez l'adresse "
 
 #: users.py:318
 msgid "Please, enter the Mac or IP address for this user"
@@ -147,7 +140,6 @@ msgid "Category Exists"
 msgstr "La catégorie existe déjà"
 
 #: users.py:338
-#, fuzzy
 msgid "The category name already exists"
 msgstr "Ce nom existe déjà."
 
@@ -156,27 +148,27 @@ msgid "Address Invalid"
 msgstr "Adresse invalide"
 
 #: users.py:421
-#, fuzzy, python-format
+#, python-format
 msgid ""
 "The address \n"
 "%s\n"
 " entered is not valid"
-msgstr "« %s » n'est pas un nom d'attribut valide"
+msgstr ""
+"L'adresse \n"
+"%s\n"
+"n'est pas valide"
 
 #: users.py:424
-#, fuzzy
 msgid "Addresses OK"
-msgstr "Bouton « Valider »"
+msgstr "Les adresses sont valides"
 
 #: users.py:424
-#, fuzzy
 msgid "All addresses are valid"
-msgstr "Aucune adresse valide n'a été trouvée"
+msgstr "Toutes les adresses sont valides"
 
 #: users.py:495
-#, fuzzy
 msgid "Summary For "
-msgstr "Attendez..."
+msgstr "Sommaire pour "
 
 #: users.py:498
 #: users.py:501
@@ -192,9 +184,8 @@ msgstr ""
 "Voyez dans l'onglet du Filtre Internet. "
 
 #: users.py:592
-#, fuzzy
 msgid "Not editable"
-msgstr "La brosse « %s » n'est pas modifiable"
+msgstr "non modifiable"
 
 #: idefix-config.glade:91
 #: idefix-config.glade:1065
@@ -444,9 +435,8 @@ msgid "Filter Name"
 msgstr "Nom du _filtre :"
 
 #: idefix-config.glade:1782
-#, fuzzy
 msgid "Times"
-msgstr "Fois"
+msgstr "Conditions horaires"
 
 #: idefix-config.glade:1824
 msgid "User summary"
