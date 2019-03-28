@@ -43,6 +43,24 @@ class AskForConfig:
         return configname
 
 
+class PasswordDialog:
+    def __init__(self):
+        # dialog = gtk.Dialog(title=None, parent=None, flags=0, buttons=None)
+        self.dialog = gtk.Dialog(title='Config Password', parent=None, flags=gtk.DialogFlags.MODAL,
+                                 buttons=("OK", 1, "Cancel", 0))
+        self.entry = gtk.Entry()
+        self.entry.set_visibility(False)
+        # self.entry.set_invisible_char('*')
+        self.dialog.vbox.pack_start(self.entry, 0, 0, 0)
+        self.dialog.show_all()
+
+    def run(self):
+        self.dialog.run()
+        data = self.entry.get_text()
+        self.dialog.destroy()
+        return data
+
+
 def print_except():
     a, b, c = sys.exc_info()
     for d in traceback.format_exception(a, b, c):
@@ -279,6 +297,14 @@ def format_name(name):
 
 
 EMPTY_STORE = gtk.ListStore(str)
+
+
+def get_config_path(filename):
+    """Return the full path for the configuration"""
+    return filename
+
+
+CONFIG_FILE = get_config_path('idefix-config.cfg')
 
 ###########################################################################
 # LOCALISATION ############################################################

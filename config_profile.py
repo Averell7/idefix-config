@@ -1,14 +1,88 @@
 import configparser
 
+import pyaes
 from gi.repository import Gdk
 
-from util import askyesno, ask_text
+from myconfigparser import myConfigParser
+from util import askyesno, ask_text, CONFIG_FILE
 
 COLUMN_NAME = 0
 COLUMN_MODE = 1
 COLUMN_USERNAME = 2
 COLUMN_PASSWORD = 3
 COLUMN_SERVER = 4
+
+DEFAULT_KEY = "idefix-config"
+DEFAULT_CONFIG = {
+    'conf': {
+        'default': {
+            'mode': ['local'],
+            'server': ['192.168.84.184'],
+            'login': ['rock64'],
+            'pass': ['rock64']
+        }
+    }
+}
+
+
+# AES CTR encryption using user supplied password or default password
+# Pads the key with \0 if it is too short and pads the data with \0
+# to ensure a minimum length of 16. Assumes both the key and the password
+# does not contain \0.
+
+
+def _get_aes_key(key):
+    """Return a padded key in the correct format"""
+    if len(key) % 16 != 0:
+        key += '\0' * (16 - (len(key) % 16))
+    if isinstance(key, str):
+        return key.encode('utf-8')
+    return key
+
+
+def decrypt_password(password, key=DEFAULT_KEY):
+    """Decrypt a password with the given key"""
+    if password.startswith('$aes$'):
+        ctx = pyaes.AESModeOfOperationCTR(_get_aes_key(key))
+        try:
+            p = ctx.decrypt(bytes.fromhex(password[5:])).decode('utf-8')
+            return p.replace('\0', '')  # Quick way to remove any padding
+        except UnicodeDecodeError:
+            return None
+    else:
+        return password
+
+
+def encrypt_password(password, key=DEFAULT_KEY):
+    """Encrypt a password with the given key"""
+    if not password:
+        return ''
+
+    ctx = pyaes.AESModeOfOperationCTR(_get_aes_key(key))
+    if len(password) % 16 != 0:
+        # Pad with \0
+        password += '\0' * (16 - (len(password) % 16))
+    return '$aes$' + ctx.encrypt(password.encode('utf-8')).hex()
+
+
+def decrypt_config(cfg, password):
+    for key, value in cfg['conf'].items():
+        if 'pass' in value:
+            value['pass'][0] = decrypt_password(value['pass'][0], password)
+
+    return cfg
+
+
+def get_config(filename, password=DEFAULT_KEY):
+    """Get the configuration for the given filename and decrypt any passwords. Optionally will return
+     a default configuration if one does not already exist"""
+    parser = myConfigParser()
+
+    data = parser.read(filename, "conf")
+    if not data:
+        return DEFAULT_CONFIG
+    else:
+        return decrypt_config(data, password)
 
 
 class ConfigProfile:
@@ -17,9 +91,11 @@ class ConfigProfile:
     mode_iters = {}
     block_signals = False
 
-    def __init__(self, arw, controller):
+    def __init__(self, arw, controller, filename=CONFIG_FILE, password=DEFAULT_KEY):
         self.arw = arw
         self.controller = controller
+        self.password = password
+        self.filename = filename
         self.window = self.arw['profiles_window']
         self.profiles_store = self.arw['profiles_store']
 
@@ -30,16 +106,22 @@ class ConfigProfile:
             self.mode_iters[self.arw['profile_mode_store'].get_value(mode_iter, 0)] = mode_iter
             mode_iter = self.arw['profile_mode_store'].iter_next(mode_iter)
 
+        self.config = get_config(self.filename, self.password)
+
     def list_configuration_profiles(self):
         """Update the list view with all the configuration profiles found"""
         self.profiles_store.clear()
-        for key, config in self.controller.idefix_config['conf'].items():
+        for key, config in self.config['conf'].items():
             new_iter = self.profiles_store.append()
             self.profiles_store.set_value(new_iter, COLUMN_NAME, key)
-            self.profiles_store.set_value(new_iter, COLUMN_MODE, config['mode'][0])
-            self.profiles_store.set_value(new_iter, COLUMN_USERNAME, config['login'][0])
-            self.profiles_store.set_value(new_iter, COLUMN_PASSWORD, config['pass'][0])
-            self.profiles_store.set_value(new_iter, COLUMN_SERVER, config['server'][0])
+            if 'mode' in config:
+                self.profiles_store.set_value(new_iter, COLUMN_MODE, config['mode'][0])
+            if 'login' in config:
+                self.profiles_store.set_value(new_iter, COLUMN_USERNAME, config['login'][0])
+            if 'pass' in config:
+                self.profiles_store.set_value(new_iter, COLUMN_PASSWORD, config['pass'][0])
+            if 'server' in config:
+                self.profiles_store.set_value(new_iter, COLUMN_SERVER, config['server'][0])
 
     def profile_open_window(self, *args):
         """Show the profiles window"""
@@ -111,8 +193,8 @@ class ConfigProfile:
             config[row[COLUMN_NAME]] = {
                 'server': row[COLUMN_SERVER],
                 'login': row[COLUMN_USERNAME],
-                'pass': row[COLUMN_PASSWORD],
+                'pass': encrypt_password(row[COLUMN_PASSWORD], self.password),
                 'mode': row[COLUMN_MODE]
             }
-        with open('idefix-config.cfg', 'w') as f:
+        with open(self.filename, 'w') as f:
             config.write(f)

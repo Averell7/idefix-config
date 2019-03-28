@@ -34,7 +34,8 @@ from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
-    EMPTY_STORE, SignalHandler, _,
+    EMPTY_STORE, SignalHandler, _, PasswordDialog,
+    CONFIG_FILE
 )
 from icons import (
     internet_full_icon, internet_filtered_icon,
@@ -44,7 +45,7 @@ from proxy_users import ProxyUsers
 from proxy_group import ProxyGroup
 from firewall import Firewall
 from users import Users
-from config_profile import ConfigProfile
+from config_profile import ConfigProfile, DEFAULT_CONFIG
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -134,10 +135,11 @@ class Idefix:
     iter_firewall = None
     iter_proxy = None
 
-    def __init__(self, ftp_config):
+    def __init__(self, active_config, config_password):
 
         global ftp1, load_locale, configname
-        self.ftp_config = ftp_config
+
+        # self.ftp_config = ftp_config
         self.mem_text = ""
         self.mem_time = 0
         self.block_signals = False
@@ -204,7 +206,14 @@ class Idefix:
         self.proxy_group = ProxyGroup(self.arw, self)
         self.firewall = Firewall(self.arw, self)
         self.users = Users(self.arw, self)
-        self.profiles = ConfigProfile(self.arw, self)
+
+        if config_password:
+            kargs = {'password': config_password}
+        else:
+            kargs = {}
+        self.profiles = ConfigProfile(self.arw, self, **kargs)
+        self.idefix_config = self.profiles.config
+        self.ftp_config = self.idefix_config['conf'][active_config]
 
         self.users_store = self.users.users_store
         self.proxy_store = self.proxy_users.proxy_store
@@ -224,12 +233,14 @@ class Idefix:
             # self.arw[textView].connect("drag-end", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
 
+        self.config = OrderedDict()
+
         # load configuration
         if not load_locale:
 
             # ftp connect
 
-            ftp1 = ftp_config
+            ftp1 = self.ftp_config
             if ftp1['mode'][0] == 'local':
                 self.local_control = True
             ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
@@ -285,8 +296,6 @@ class Idefix:
                 self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
         else:   # development environment
-            self.config = OrderedDict()
-            self.idefix_config = parser.read("./idefix-config.cfg", "conf")
             if os.path.isfile("./idefix-config.json") :           # disabled
                 data_str = open("./idefix-config.json", "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
@@ -1003,19 +1012,26 @@ if __name__ == "__main__":
     # When set to true (see below), the configuration is loaded and written from and to local files (development mode)
     load_locale = False
     parser = myConfigParser()
-    idefix_config = parser.read("./idefix-config.cfg", "conf")
 
-    # Get the configuration
+    idefix_config = parser.read(CONFIG_FILE, "conf")
 
-    if len(sys.argv) > 1:  # if the config is indicated on the command line
-        if len(sys.argv[1].strip()) > 0:
-            configname = sys.argv[1]
-    else:  # ask for config
-        config_dialog = AskForConfig(idefix_config)
-        configname = config_dialog.run()
+    if not idefix_config:
+        idefix_config = DEFAULT_CONFIG
+        configname = 'default'
+    else:
+        # Get the configuration
+        if len(sys.argv) > 1:  # if the config is indicated on the command line
+            if len(sys.argv[1].strip()) > 0:
+                configname = sys.argv[1]
+        else:  # ask for config
+            config_dialog = AskForConfig(idefix_config)
+            configname = config_dialog.run()
 
-    if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
-        load_locale = True
+        if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
+            load_locale = True
 
-    win = Idefix(idefix_config["conf"][configname])
+    dialog = PasswordDialog()
+    password = dialog.run()
+
+    win = Idefix(configname, password)
     gtk.main()
