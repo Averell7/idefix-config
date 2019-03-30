@@ -1,0 +1,568 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Idéfix 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-03-27 03:33+0100\n"
+"PO-Revision-Date: 2019-03-27 10:52+0100\n"
+"Last-Translator: Averell <dy1977@orange.fr>\n"
+"Language-Team: --- <webmaster@idefix.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: French\n"
+"X-Poedit-Country: FRANCE\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: idefix-config.py:173
+msgid "Idefix admin"
+msgstr "Idefix Admin"
+
+#: idefix-config.py:317
+msgid "No user data"
+msgstr "Données utilisateur non disponibles."
+
+#: idefix-config.py:318
+msgid ""
+"There is no user data present. \n"
+"Do you want to create standard categories ?"
+msgstr ""
+"Aucune donnée pour les utilisateurs. \n"
+"Voulez-vous créer les catégories standard ? "
+
+#: idefix-config.py:321
+msgid "No access"
+msgstr "Aucun accès"
+
+#: idefix-config.py:322
+msgid "email only"
+msgstr "email uniquement"
+
+#: idefix-config.py:323
+msgid "Filtered Internet access"
+msgstr "Accès Internet filtré"
+
+#: idefix-config.py:325
+msgid "Open Internet access"
+msgstr "Accès Internet ouvert"
+
+#: idefix-config.py:358
+#: idefix-config.py:363
+#: idefix-config.py:381
+#: idefix-config.glade:361
+#: idefix-config.glade:2275
+#: idefix-config.glade:2302
+msgid "---"
+msgstr "---"
+
+#: idefix-config.py:983
+msgid "No FTP connexion"
+msgstr "Aucune connection FTP"
+
+#: idefix-config.py:990
+msgid " sent\n"
+msgstr "Envoyé\n"
+
+#: firewall.py:52
+#: proxy_users.py:58
+msgid "Key"
+msgstr "Clef"
+
+#: firewall.py:57
+msgid "Accept/Drop"
+msgstr "Accepter/Refuser"
+
+#: firewall.py:60
+#: proxy_users.py:65
+msgid "On/Off"
+msgstr "Actif/inactif"
+
+#: proxy_group.py:48
+msgid "(error)"
+msgstr "(erreur)"
+
+#: proxy_users.py:78
+#: proxy_users.py:298
+#: proxy_users.py:308
+msgid "<b>All</b>"
+msgstr "<b>Tout</b>"
+
+#: proxy_users.py:86
+#: proxy_users.py:302
+#: proxy_users.py:313
+msgid "<b>List</b>"
+msgstr "<b>Liste</b>"
+
+#: proxy_users.py:114
+#: proxy_users.py:318
+msgid "<b>Allow</b>"
+msgstr "<b>Autoriser</b>"
+
+#: proxy_users.py:121
+#: proxy_users.py:321
+msgid "<b>Deny</b>"
+msgstr "<b>Refuser</b>"
+
+#: users.py:51
+msgid "Filename"
+msgstr "Nom du fichier"
+
+#: users.py:263
+msgid "Name of the new category"
+msgstr "Nom de la nouvelle catégorie"
+
+#: users.py:265
+msgid "Name of the new user"
+msgstr "Nom du nouvel utilisateur"
+
+#: users.py:298
+msgid "User Exists"
+msgstr "L'utilisateur existe déjà !"
+
+#: users.py:298
+msgid "Username exists"
+msgstr "Ce nom existe déjà"
+
+#: users.py:318
+msgid "Enter address"
+msgstr "Entrez l'adresse "
+
+#: users.py:318
+msgid "Please, enter the Mac or IP address for this user"
+msgstr "Veuillez entrer une adresse Mac ou IP pour cet utilisateur"
+
+#: users.py:338
+msgid "Category Exists"
+msgstr "La catégorie existe déjà"
+
+#: users.py:338
+msgid "The category name already exists"
+msgstr "Ce nom existe déjà."
+
+#: users.py:421
+msgid "Address Invalid"
+msgstr "Adresse invalide"
+
+#: users.py:421
+#, python-format
+msgid ""
+"The address \n"
+"%s\n"
+" entered is not valid"
+msgstr ""
+"L'adresse \n"
+"%s\n"
+"n'est pas valide"
+
+#: users.py:424
+msgid "Addresses OK"
+msgstr "Les adresses sont valides"
+
+#: users.py:424
+msgid "All addresses are valid"
+msgstr "Toutes les adresses sont valides"
+
+#: users.py:495
+msgid "Summary For "
+msgstr "Sommaire pour "
+
+#: users.py:498
+#: users.py:501
+msgid "Number of MAC Addresses: "
+msgstr "Nombre d'adresses Mac : "
+
+#: users.py:591
+msgid ""
+"The user summary is not editable. \n"
+" See the Internet Filter tab."
+msgstr ""
+"Le résumé des permissions de l'utilisateur n'est pas éditable. \n"
+"Voyez dans l'onglet du Filtre Internet. "
+
+#: users.py:592
+msgid "Not editable"
+msgstr "non modifiable"
+
+#: idefix-config.glade:91
+#: idefix-config.glade:1065
+#: idefix-config.glade:1932
+#: idefix-config.glade:2624
+msgid "SAVE"
+msgstr "Enregistrer"
+
+#: idefix-config.glade:111
+msgid "Disabled"
+msgstr "Désactivé"
+
+#: idefix-config.glade:158
+msgid "<b>Ports</b>"
+msgstr "<b>Ports</b>"
+
+#: idefix-config.glade:192
+#: idefix-config.glade:2061
+msgid "<b>Users</b>"
+msgstr "<b>Utilisateurs</b>"
+
+#: idefix-config.glade:222
+msgid "time condition"
+msgstr "condition horaire"
+
+#: idefix-config.glade:265
+msgid "<b>Comments</b>"
+msgstr "<b>Commentaires</b>"
+
+#: idefix-config.glade:292
+msgid "from"
+msgstr "de"
+
+#: idefix-config.glade:303
+msgid "to"
+msgstr "à"
+
+#: idefix-config.glade:314
+msgid "Format 12:00"
+msgstr "Format 12:00"
+
+#: idefix-config.glade:428
+msgid "Add new :"
+msgstr "Ajouter :"
+
+#: idefix-config.glade:442
+msgid "user"
+msgstr "utilisateur"
+
+#: idefix-config.glade:458
+msgid "category"
+msgstr "catégorie"
+
+#: idefix-config.glade:512
+msgid "Add Address"
+msgstr "Ajouter une adresse"
+
+#: idefix-config.glade:552
+msgid "Add New"
+msgstr "Ajouter un nouveau"
+
+#: idefix-config.glade:561
+msgid "Remove"
+msgstr "Enlever"
+
+#: idefix-config.glade:605
+#: idefix-config.glade:656
+#: idefix-config.glade:2810
+msgid "delete"
+msgstr "supprimer"
+
+#: idefix-config.glade:625
+msgid "add profile"
+msgstr "Ajouter un profil"
+
+#: idefix-config.glade:634
+msgid "delete profile"
+msgstr "Supprimer le profil"
+
+#: idefix-config.glade:643
+msgid "rename profile"
+msgstr "Renommer le profil"
+
+#: idefix-config.glade:684
+msgid "Cancel"
+msgstr "Annuler"
+
+#: idefix-config.glade:698
+msgid "Select"
+msgstr "Sélectionner"
+
+#: idefix-config.glade:726
+#: idefix-config.glade:2606
+#: idefix-config.glade:2656
+msgid "Name"
+msgstr "Nom"
+
+#: idefix-config.glade:793
+msgid "Close"
+msgstr "Fermer"
+
+#: idefix-config.glade:849
+msgid "_File"
+msgstr "_Fichier"
+
+#: idefix-config.glade:859
+msgid "Save (Send configuration to the server)"
+msgstr "Enregistrer (Envoyer la configuration vers le serveur)"
+
+#: idefix-config.glade:888
+msgid "System"
+msgstr "Système"
+
+#: idefix-config.glade:898
+msgid "Connexions"
+msgstr "Connections"
+
+#: idefix-config.glade:906
+msgid "Profiles"
+msgstr "Profils"
+
+#: idefix-config.glade:919
+msgid "Debug"
+msgstr "Débogage"
+
+#: idefix-config.glade:929
+msgid "show system files"
+msgstr "Afficher les fichiers système"
+
+#: idefix-config.glade:942
+msgid "_Help"
+msgstr "_Aide"
+
+#: idefix-config.glade:972
+msgid "Idefix Admin"
+msgstr "Idefix Admin"
+
+#: idefix-config.glade:987
+msgid "Active configuration :"
+msgstr "Configuration active :"
+
+#: idefix-config.glade:1001
+#: idefix-config.glade:1997
+#: idefix-config.glade:2106
+#: idefix-config.glade:2128
+msgid "label"
+msgstr "étiquette"
+
+#: idefix-config.glade:1064
+msgid "Save configuration on the server"
+msgstr "Enregistrer la configuration"
+
+#: idefix-config.glade:1078
+msgid "Rename user or category"
+msgstr "Renommer un utilisateur ou une catégorie"
+
+#: idefix-config.glade:1079
+msgid "toolbutton3"
+msgstr "toolbutton3"
+
+#: idefix-config.glade:1123
+msgid "email"
+msgstr "courriel"
+
+#: idefix-config.glade:1138
+msgid "internet access"
+msgstr "Accès Internet"
+
+#: idefix-config.glade:1158
+msgid "filtered access"
+msgstr "Accès filtré"
+
+#: idefix-config.glade:1175
+msgid "open access"
+msgstr "accès ouvert"
+
+#: idefix-config.glade:1207
+msgid "<b>Internet access</b>"
+msgstr "<b>Accès Internet</b>"
+
+#: idefix-config.glade:1265
+#: idefix-config.glade:1393
+msgid "à"
+msgstr "à"
+
+#: idefix-config.glade:1296
+#: idefix-config.glade:1424
+msgid "de "
+msgstr "de "
+
+#: idefix-config.glade:1310
+#: idefix-config.glade:1438
+msgid "Jours"
+msgstr "Jours"
+
+#: idefix-config.glade:1346
+msgid "<b>for email</b>"
+msgstr "<b>pour le courriel</b>"
+
+#: idefix-config.glade:1474
+msgid "<b>for Internet</b>"
+msgstr "<b>pour Internet</b>"
+
+#: idefix-config.glade:1489
+msgid ""
+"Date Format: 1 - Monday, 7 - Sunday. Time Format : 18:30\n"
+"Eg: 123 (Monday, Tuesday, Wednesday)"
+msgstr ""
+"Format de date : 1 = Lundi, 7 = Dimanche. Format del'heure : 18:30\n"
+"Exemple : 124 = Lundi, mardi, jeudi"
+
+#: idefix-config.glade:1505
+msgid "<b>Time condition</b>"
+msgstr "<b>condition horaire</b>"
+
+#: idefix-config.glade:1518
+msgid "Expand tree"
+msgstr "Développer l'arbre"
+
+#: idefix-config.glade:1538
+#: idefix-config.glade:2262
+msgid "Autorisations"
+msgstr "Autorisations"
+
+#: idefix-config.glade:1577
+msgid "Simulate User"
+msgstr "Simuler un utilisateur"
+
+#: idefix-config.glade:1591
+msgid "Check addresses"
+msgstr "Vérifier les addresses"
+
+#: idefix-config.glade:1618
+msgid "<b>Adresses</b>"
+msgstr "<b>Adresses</b>"
+
+#: idefix-config.glade:1631
+msgid "Adresses"
+msgstr "Adresses"
+
+#: idefix-config.glade:1661
+msgid "Number of Mac Addresses: 0"
+msgstr "Nombre d'adresses Mac : 0"
+
+#: idefix-config.glade:1757
+msgid "Filter Name"
+msgstr "Nom du _filtre :"
+
+#: idefix-config.glade:1782
+msgid "Times"
+msgstr "Conditions horaires"
+
+#: idefix-config.glade:1824
+msgid "User summary"
+msgstr "Résumé des permissions de l'utilisateur"
+
+#: idefix-config.glade:1850
+msgid "Utilisateurs et Groupes"
+msgstr "Utilisateurs et Groupes"
+
+#: idefix-config.glade:2037
+#: idefix-config.glade:2176
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: idefix-config.glade:2193
+msgid "<b>Allowed groups</b>"
+msgstr "<b>Groupes autorisés</b>"
+
+#: idefix-config.glade:2223
+msgid "<b>Allowed sites</b>"
+msgstr "<b>Sites autorisés</b>"
+
+#: idefix-config.glade:2246
+msgid "<b>Permissions</b>"
+msgstr "<b>Permissions</b>"
+
+#: idefix-config.glade:2338
+msgid "Comments"
+msgstr "Commentaires"
+
+#: idefix-config.glade:2353
+msgid "from :"
+msgstr "de :"
+
+#: idefix-config.glade:2364
+msgid "to :"
+msgstr "à :"
+
+#: idefix-config.glade:2551
+msgid "Filtre Internet"
+msgstr "Filtre Internet"
+
+#: idefix-config.glade:2668
+msgid "Mode"
+msgstr "Mode"
+
+#: idefix-config.glade:2680
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#: idefix-config.glade:2692
+msgid "Password"
+msgstr "Mot de passe"
+
+#: idefix-config.glade:2758
+msgid "Server"
+msgstr "Serveur"
+
+#: idefix-config.glade:2794
+msgid "add user above"
+msgstr "ajouter au dessus"
+
+#: idefix-config.glade:2802
+msgid "add user below"
+msgstr "ajouter en dessous"
+
+#: idefix-config.glade:2818
+msgid "add new user"
+msgstr "ajouter un nouvel utilisateur"
+
+#: idefix-config.glade:2827
+msgid "add new category"
+msgstr "Ajouter une catégorie"
+
+#: idefix-config.glade:2836
+msgid "move user to category..."
+msgstr "déplacer vers la catégorie..."
+
+#: idefix-config.glade:2844
+msgid "Simulate user"
+msgstr "Simuler un utilisateur"
+
+#~ msgid "Add user or category"
+#~ msgstr "Ajouter un utilisateur ou une catégorie"
+
+#~ msgid "Delete user or category"
+#~ msgstr "Supprimer un utilisateur ou une catégorie"
+
+#~ msgid "Format : 18:30"
+#~ msgstr "Format : 18:30"
+
+#~ msgid "<b>Condition horaire</b>"
+#~ msgstr "<b>Condition horaire</b>"
+
+#~ msgid "Ini files"
+#~ msgstr "Fichiers Ini"
+
+#~ msgid "Internet filtré, de :"
+#~ msgstr "Internet filtré, de :"
+
+#~ msgid "Internet ouvert, de :"
+#~ msgstr "Internet ouvert, de :"
+
+#~ msgid "formats autorisés : 18:30 ou 18h30 (sur 24h)"
+#~ msgstr "formats autorisés : 18:30 ou 18h30 (sur 24h)"
+
+#~ msgid "email, de :"
+#~ msgstr "email, de :"
+
+#~ msgid "<b>Coupure de nuit</b>"
+#~ msgstr "<b>Coupure de nuit</b>"
+
+#~ msgid "Advanced configuration"
+#~ msgstr "Configuration avancée"
+
+#~ msgid "Configuration active :"
+#~ msgstr "Configuration active :"
+
+#~ msgid "Days"
+#~ msgstr "jours"
+
+#~ msgid "coupure de nuit"
+#~ msgstr "coupure de nuit"
+
+#~ msgid "user unknown. This should not happen !"
+#~ msgstr "Utilisateur inconnu. Cela ne devrait pas arriver !"
+
+#~ msgid "full access"
+#~ msgstr "accès intégral"

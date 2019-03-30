@@ -4,8 +4,6 @@ import traceback
 
 from gi.repository import Gtk
 
-import elib_intl3
-
 gtk = Gtk
 
 
@@ -309,4 +307,4 @@ CONFIG_FILE = get_config_path('idefix-config.cfg')
 ###########################################################################
 # LOCALISATION ############################################################
 ###########################################################################
-_ = elib_intl3.install_module("idefix-config", "share/locale")
+# _ = elib_intl3.install_module("idefix-config", "share/locale")

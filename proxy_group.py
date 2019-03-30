@@ -3,7 +3,7 @@ import time
 from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
-from util import askyesno, _
+from util import askyesno
 
 
 class ProxyGroup:
