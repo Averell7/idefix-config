@@ -33,23 +33,19 @@ class ProxyUsers:
         8 : dest_domain
         9 : dest_ip
         10 : destination
-        11 : ""
-        12 : checkbox3   (0/1)   [list/all]
-        13 : checkbox1   (0/1)   [deny/allow]
-        14 : checkbox2   (0/1)   [off/on]
+        11 : toggleButton (0/1) users [list/all]
+        12 : toggleButton (0/1) destination [list/all]
+        13 : toggleButton (0/1) [deny/allow]
+        14 : checkbox    (0/1)  [off/on]
         15 : color1      (foreground)
         16 : color2      (background)
         """
 
-        self.proxy_store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, str, int, int, int, str,
+        self.proxy_store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, int, int, int, int, str,
                                          str)  #
         self.cell3 = Gtk.CellRendererText()
-        # self.check1 = gtk.CellRendererToggle(activatable = True)
-        # self.check1.connect( 'toggled', self.toggle_col13, self.proxy_store, "proxy" )
         self.check2 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
         self.check2.connect('toggled', self.controller.toggle_col14, self.proxy_store)
-        # self.check5 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
-        # self.check5.connect_after( 'toggled', self.toggle_col12, self.proxy_store )
 
         self.treeview3 = self.arw["treeview3"]
         self.treeview3.set_model(self.proxy_store)
@@ -59,15 +55,9 @@ class ProxyUsers:
         self.tvcolumn.set_fixed_width(250)
         self.treeview3.append_column(self.tvcolumn)
 
-        # self.tvcolumn = gtk.TreeViewColumn(_('Allow/deny'), self.check1, active = 13)
-        # self.treeview3.append_column(self.tvcolumn)
-
         self.tvcolumn = Gtk.TreeViewColumn(_('On/Off'), self.check2, active=14)
-
         self.treeview3.append_column(self.tvcolumn)
 
-        # self.tvcolumn = gtk.TreeViewColumn(_('Open'), self.check5, active = 12)
-        # self.treeview3.append_column(self.tvcolumn)
 
     def toggle_col12(self, widget):
         # callback of the open access button in proxy tab.
@@ -75,17 +65,11 @@ class ProxyUsers:
 
         treestore = self.proxy_store
         if treestore.get_value(self.controller.iter_proxy, 12) == 0:
-            self.arw["toggle_proxy_open"].set_label(_("<b>All</b>"))
-            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL,
-                                                           Gdk.Color(red=60535, green=60535, blue=0))
             treestore.set_value(self.controller.iter_proxy, 12, 1)
             treestore.set_value(self.controller.iter_proxy, 10, "any")
             self.arw["notebook2"].show()
             treestore.set_value(self.controller.iter_proxy, 16, "#ffff88")
         else:
-            self.arw["toggle_proxy_open"].set_label(_("<b>List</b>"))
-            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL,
-                                                           Gdk.Color(red=50535, green=60535, blue=45000))
             treestore.set_value(self.controller.iter_proxy, 12, 0)
             treestore.set_value(self.controller.iter_proxy, 10, "")
             self.arw["notebook2"].hide()
@@ -94,13 +78,12 @@ class ProxyUsers:
 
     def toggle_col5(self, widget):
         """Toggle any user or specific users"""
-        users = self.proxy_store.get_value(self.controller.iter_proxy, 5).split('\n')
-        if 'any' in users:
-            users.remove('any')
-        else:
-            users = ['any']
-
-        self.proxy_store.set_value(self.controller.iter_proxy, 5, '\n'.join(users))
+        if self.proxy_store.get_value(self.controller.iter_proxy, 11) == 0:
+             self.proxy_store.set_value(self.controller.iter_proxy, 11, 1)
+             self.arw["proxy_users"].hide()
+        else :
+             self.proxy_store.set_value(self.controller.iter_proxy, 11, 0)
+             self.arw["proxy_users"].show()
         self.update_proxy_user_list()
 
         self.load_proxy_user2()
@@ -111,15 +94,11 @@ class ProxyUsers:
 
         treestore = self.proxy_store
         if treestore.get_value(self.controller.iter_proxy, 13) == 0:
-            self.arw["toggle_proxy_allow"].set_label(_("<b>Allow</b>"))
-            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=0, green=60535, blue=0))
             treestore.set_value(self.controller.iter_proxy, 13, 1)
             treestore.set_value(self.controller.iter_proxy, 2, "allow")
             self.arw["notebook2"].show()
             treestore.set_value(self.controller.iter_proxy, 15, "#009900")
         else:
-            self.arw["toggle_proxy_allow"].set_label(_("<b>Deny</b>"))
-            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60000, green=0, blue=0))
             treestore.set_value(self.controller.iter_proxy, 13, 0)
             treestore.set_value(self.controller.iter_proxy, 2, "deny")
             self.arw["notebook2"].hide()
@@ -135,7 +114,7 @@ class ProxyUsers:
         name = model.get_value(iter, 0).strip()
 
         names = self.proxy_store.get_value(self.controller.iter_proxy, 5).split('\n')
-        if name not in names or name == 'any':
+        if name not in names:
             return
 
         res = askyesno("Remove user", "Do you want to remove user %s?" % name)
@@ -294,11 +273,13 @@ class ProxyUsers:
         # used by the function above, and by the buttons of the proxy tab
         list_color = Gdk.Color(red=50535, green=50535, blue=60535)
 
-        if self.proxy_user_has_any():
+        if self.proxy_store[self.controller.iter_proxy][11] == 1:
+            self.arw["proxy_users"].hide()
             self.arw['toggle_proxy_user_open'].set_label(_("<b>All</b>"))
             self.arw["toggle_proxy_user_open_button"].modify_bg(Gtk.StateType.NORMAL,
                                                                 Gdk.Color(red=60535, green=60535, blue=0))
         else:
+            self.arw["proxy_users"].show()
             self.arw["toggle_proxy_user_open"].set_label(_("<b>List</b>"))
             self.arw["toggle_proxy_user_open_button"].modify_bg(Gtk.StateType.NORMAL, list_color)
 
@@ -364,7 +345,7 @@ class ProxyUsers:
         self.proxy_store.clear()
         data1 = self.controller.config["proxy"]
         keys = ["active", "action", "time_condition", "#comments", "user", "xxx", "dest_group", "dest_domain", "xxx",
-                "destination", ""]
+                "destination"]
         for section in data1:
             if section[0:2] == "@_":  # generated sections must not be loaded
                 continue
@@ -400,8 +381,12 @@ class ProxyUsers:
                     out.append("\n".join(data) + "\n")
                 else:
                     out.append("")
-            # check boxes
-            out += [1, 1, 1, "#009900", "#ffffff"]
+            # check boxes and ToggleButtons
+            if "anyuser" in data1[section] :
+                anyuser = data1[section]["anyuser"]
+            else :
+                anyuser = 0
+            out += [anyuser, 1, 1, 1, "#009900", "#ffffff"]
 
             self.proxy_store.append(out)
 
@@ -423,8 +408,11 @@ class ProxyUsers:
                 out += format_comment(row[4])  # comments
                 out += format_line("active", row[1])
                 out += format_line("action", row[2])
+                if row[11]:
+                    out += "user = any\n"
+                else:
+                    out += format_userline("user", row[5])
                 out += format_line("time_condition", time_condition2)
-                out += format_userline("user", row[5])
                 if format_line("destination", row[10]) == "":
                     out += format_line("dest_group", row[7])
                     out += format_domainline("dest_domain", row[8])
