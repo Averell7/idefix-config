@@ -35,7 +35,7 @@ from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
     EMPTY_STORE, SignalHandler, PasswordDialog,
-    CONFIG_FILE
+    CONFIG_FILE, get_config_path
 )
 from icons import (
     internet_full_icon, internet_filtered_icon,
@@ -120,8 +120,8 @@ def ftp_send(ftp, filepath, directory=None, dest_name=None):
     if not dest_name:
         dest_name = os.path.split(filepath)[1]
 
-    if os.path.isfile(filepath):
-        with open(filepath, 'rb') as f1:  # file to send
+    if os.path.isfile(get_config_path(filepath)):
+        with open(get_config_path(filepath), 'rb') as f1:  # file to send
             ftp.storbinary('STOR ' + dest_name, f1)  # send the file
     else:
         message = filepath + " not found"
@@ -276,10 +276,10 @@ class Idefix:
                     ftp.cwd("..")
 
                 # make a local copy for debug purpose
-                f1 = open("./tmp/firewall-ports.ini", "w", encoding="utf-8-sig")
+                f1 = open(get_config_path("./tmp/firewall-ports.ini"), "w", encoding="utf-8-sig")
                 f1.write("\n".join(data1))
                 f1.close()
-                f1 = open("./tmp/proxy-groups.ini", "w", encoding="utf-8-sig")
+                f1 = open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig")
                 f1.write("\n".join(data2))
                 f1.close()
 
@@ -308,8 +308,8 @@ class Idefix:
                 self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
         else:   # development environment
-            if os.path.isfile("./idefix-config.json") :           # disabled
-                data_str = open("./idefix-config.json", "r").read()
+            if os.path.isfile(get_config_path("idefix-config.json")):
+                data_str = open(get_config_path("idefix-config.json"), "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
             else:
                 self.config = parser.read("./tmp/users.ini", "users", merge=self.config, comments=True)
@@ -818,13 +818,13 @@ class Idefix:
         ftp.cwd("..")
         ftp.cwd("var")
         ftp.cwd("log")
-        f1 = open("./tmp/syslog", "wb")
+        f1 = open(get_config_path("./tmp/syslog"), "wb")
         filename = "syslog"
         ftp.retrbinary('RETR ' + filename, f1.write)  # get the file
         self.inifiles_store.append([filename, "./tmp/syslog"])
 
         ftp.cwd("squid")
-        self.f1 = open("./tmp/squid.log", "w")
+        self.f1 = open(get_config_path("./tmp/squid.log"), "w")
         filename = "access.log"
         ftp.retrlines('RETR ' + filename, self.filter_squid_log)  # get the file
         self.inifiles_store.append([filename, "./tmp/squid.log"])
@@ -850,7 +850,7 @@ class Idefix:
             return
         iter1 = self.inifiles_store.get_iter(pos[0])
         path = self.inifiles_store[iter1][1]
-        f1 = open(path, "r", encoding="utf-8-sig")
+        f1 = open(get_config_path(path), "r", encoding="utf-8-sig")
         text = f1.read()
         f1.close()
         self.arw["inifiles_view"].get_buffer().set_text(text)
@@ -862,7 +862,7 @@ class Idefix:
         self.proxy_users.build_proxy_ini()
         self.firewall.build_firewall_ini()
         self.rebuild_config()
-        f1 = open("idefix-config.json", "w")
+        f1 = open(get_config_path("idefix-config.json"), "w")
         config2 = self.rebuild_config()
         f1.write(json.dumps(config2, indent = 3))
         f1.close()
@@ -870,7 +870,7 @@ class Idefix:
         if not load_locale:  # send the files bt FTP
             self.ftp_upload()
         if self.local_control:  # if connected to Idefix, send the update signal
-            f1 = open("./tmp/update", "w")
+            f1 = open(get_config_path("./tmp/update"), "w")
             f1.close()
             self.ftp_upload(["./tmp/update"], message=False)
 
@@ -925,7 +925,7 @@ class Idefix:
                             print(address)
                         out += user + " = " + address + "\n"
 
-        with open("./tmp/users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
+        with open(get_config_path("./tmp/users.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(out)
 
     def format_row(self, row) :
