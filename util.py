@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 import traceback
@@ -300,8 +301,25 @@ EMPTY_STORE = gtk.ListStore(str)
 
 
 def get_config_path(filename):
-    """Return the full path for the configuration"""
-    return filename
+    """Return the full path for the configuration (if it exists)"""
+
+    # fallback = local directory
+    path = ''
+
+    if sys.platform.startswith('win'):
+        # step 1: roaming
+        roaming = os.path.join(os.getenv('APPDATA'), 'Idefix')
+        if os.path.exists(os.path.join(roaming, filename)):
+            path = roaming
+    else:
+        # step 1: ~/.local/share/idefix/
+        possible_path = os.path.expanduser('~/.local/idefix')
+        if os.path.exists(os.path.join(possible_path, filename)):
+            path = possible_path
+        elif os.path.exists(os.path.join('/etc/idefix/', filename)):
+            path = '/etc/idefix/'
+
+    return os.path.join(path, filename)
 
 
 CONFIG_FILE = get_config_path('idefix-config.cfg')
