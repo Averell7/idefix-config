@@ -34,7 +34,7 @@ from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
-    EMPTY_STORE, SignalHandler, _, PasswordDialog,
+    EMPTY_STORE, SignalHandler, PasswordDialog,
     CONFIG_FILE
 )
 from icons import (
@@ -81,25 +81,37 @@ def ftp_connect(server, login, password):
         print("Unable to connect to ftp server with : %s / %s. Error: %s" % (login, password, e))
 
 
-def ftp_get(ftp, filename,required=True, json = False):
+def ftp_get(ftp, filename, directory="", required=True, json=False):
+    if not ftp:
+        print(_("No ftp connection"))
+        return False
 
+    # verify that the file exists on the server
     try:
-        ftp.sendcmd('MDTM ' + filename)  # verify that the file exists on the server
-    except FTPError:
-        if required:
-            print("We got an error with %s. Is it present on the server?" % filename)
+        x = ftp.mlsd(directory)
+        if not filename in ([n[0] for n in x]):
+            if required:
+                print(_("We got an error with %s. Is it present on the server?" % filename))
+            return False
+    except:
+        if not filename in ftp.nlst(directory):  # deprecated, but vsftpd does non support mlsd (used in idefix.py)
+            if required:
+                print(_("We got an error with %s. Is it present on the server?" % filename))
+            return False
+
+
     try:
         f1 = io.BytesIO()
         ftp.retrbinary('RETR ' + filename, f1.write)  # get the file
         data1 = f1.getvalue()
         f1.close()
-        print(filename, "received OK.")
+        print(filename, _("received OK."))
         if json :           # returns string
             return data1.decode("ascii")
         else :              # returns list
             return data1.decode("utf-8-sig").split("\n")
     except FTPError:
-        print("could not get " + filename)
+        print(_("could not get ") + filename)
 
 
 def ftp_send(ftp, filepath, directory=None, dest_name=None):
@@ -965,6 +977,9 @@ class Idefix:
             config2["proxy"][row[0]]["dest_group"] = self.format_row(row[7])
             config2["proxy"][row[0]]["dest_domain"] = self.format_row(row[8])
             config2["proxy"][row[0]]["dest_ip"] = self.format_row(row[9])
+            config2["proxy"][row[0]]["any_user"] = row[11]
+            config2["proxy"][row[0]]["any_destination"] = row[12]
+            config2["proxy"][row[0]]["allow_deny"] = row[13]
 
         for row in self.firewall_store:
             config2["firewall"][row[0]] = OrderedDict()
