@@ -34,7 +34,8 @@ from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
-    EMPTY_STORE, SignalHandler,
+    EMPTY_STORE, SignalHandler, PasswordDialog,
+    CONFIG_FILE, get_config_path
 )
 from icons import (
     internet_full_icon, internet_filtered_icon,
@@ -44,17 +45,7 @@ from proxy_users import ProxyUsers
 from proxy_group import ProxyGroup
 from firewall import Firewall
 from users import Users
-from config_profile import ConfigProfile
-
-###########################################################################
-# LOCALISATION ############################################################
-###########################################################################
-
-import gettext
-import locale
-import elib_intl3
-elib_intl3.install("idefix-config", "share/locale")
-#print(_("No user data"))
+from config_profile import ConfigProfile, DEFAULT_CONFIG
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -90,20 +81,20 @@ def ftp_connect(server, login, password):
         print("Unable to connect to ftp server with : %s / %s. Error: %s" % (login, password, e))
 
 
-def ftp_get(ftp, filename, directory = "", required=True, json = False):
-    if not ftp :
+def ftp_get(ftp, filename, directory="", required=True, json=False):
+    if not ftp:
         print(_("No ftp connection"))
         return False
 
     # verify that the file exists on the server
-    try :
+    try:
         x = ftp.mlsd(directory)
         if not filename in ([n[0] for n in x]):
             if required:
                 print(_("We got an error with %s. Is it present on the server?" % filename))
             return False
-    except :
-        if not filename in ftp.nlst(directory):            # deprecated, but vsftpd does non support mlsd (used in idefix.py)
+    except:
+        if not filename in ftp.nlst(directory):  # deprecated, but vsftpd does non support mlsd (used in idefix.py)
             if required:
                 print(_("We got an error with %s. Is it present on the server?" % filename))
             return False
@@ -129,8 +120,8 @@ def ftp_send(ftp, filepath, directory=None, dest_name=None):
     if not dest_name:
         dest_name = os.path.split(filepath)[1]
 
-    if os.path.isfile(filepath):
-        with open(filepath, 'rb') as f1:  # file to send
+    if os.path.isfile(get_config_path(filepath)):
+        with open(get_config_path(filepath), 'rb') as f1:  # file to send
             ftp.storbinary('STOR ' + dest_name, f1)  # send the file
     else:
         message = filepath + " not found"
@@ -156,10 +147,11 @@ class Idefix:
     iter_firewall = None
     iter_proxy = None
 
-    def __init__(self, ftp_config):
+    def __init__(self, active_config, config_password):
 
         global ftp1, load_locale, configname
-        self.ftp_config = ftp_config
+
+        # self.ftp_config = ftp_config
         self.mem_text = ""
         self.mem_time = 0
         self.block_signals = False
@@ -226,7 +218,14 @@ class Idefix:
         self.proxy_group = ProxyGroup(self.arw, self)
         self.firewall = Firewall(self.arw, self)
         self.users = Users(self.arw, self)
-        self.profiles = ConfigProfile(self.arw, self)
+
+        if config_password:
+            kargs = {'password': config_password}
+        else:
+            kargs = {}
+        self.profiles = ConfigProfile(self.arw, self, **kargs)
+        self.idefix_config = self.profiles.config
+        self.ftp_config = self.idefix_config['conf'][active_config]
 
         self.users_store = self.users.users_store
         self.proxy_store = self.proxy_users.proxy_store
@@ -246,14 +245,14 @@ class Idefix:
             # self.arw[textView].connect("drag-end", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
 
-        # load configuration
         self.config = OrderedDict()
-        self.idefix_config = parser.read("./idefix-config.cfg", "conf")
 
+        # load configuration
         if not load_locale:
+
             # ftp connect
 
-            ftp1 = ftp_config
+            ftp1 = self.ftp_config
             if ftp1['mode'][0] == 'local':
                 self.local_control = True
             ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
@@ -277,10 +276,10 @@ class Idefix:
                     ftp.cwd("..")
 
                 # make a local copy for debug purpose
-                f1 = open("./tmp/firewall-ports.ini", "w", encoding="utf-8-sig")
+                f1 = open(get_config_path("./tmp/firewall-ports.ini"), "w", encoding="utf-8-sig")
                 f1.write("\n".join(data1))
                 f1.close()
-                f1 = open("./tmp/proxy-groups.ini", "w", encoding="utf-8-sig")
+                f1 = open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig")
                 f1.write("\n".join(data2))
                 f1.close()
 
@@ -309,8 +308,8 @@ class Idefix:
                 self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
         else:   # development environment
-            if os.path.isfile("./idefix-config.json") :
-                data_str = open("./idefix-config.json", "r").read()
+            if os.path.isfile(get_config_path("idefix-config.json")):
+                data_str = open(get_config_path("idefix-config.json"), "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
             else:
                 self.config = parser.read("./tmp/users.ini", "users", merge=self.config, comments=True)
@@ -819,13 +818,13 @@ class Idefix:
         ftp.cwd("..")
         ftp.cwd("var")
         ftp.cwd("log")
-        f1 = open("./tmp/syslog", "wb")
+        f1 = open(get_config_path("./tmp/syslog"), "wb")
         filename = "syslog"
         ftp.retrbinary('RETR ' + filename, f1.write)  # get the file
         self.inifiles_store.append([filename, "./tmp/syslog"])
 
         ftp.cwd("squid")
-        self.f1 = open("./tmp/squid.log", "w")
+        self.f1 = open(get_config_path("./tmp/squid.log"), "w")
         filename = "access.log"
         ftp.retrlines('RETR ' + filename, self.filter_squid_log)  # get the file
         self.inifiles_store.append([filename, "./tmp/squid.log"])
@@ -851,7 +850,7 @@ class Idefix:
             return
         iter1 = self.inifiles_store.get_iter(pos[0])
         path = self.inifiles_store[iter1][1]
-        f1 = open(path, "r", encoding="utf-8-sig")
+        f1 = open(get_config_path(path), "r", encoding="utf-8-sig")
         text = f1.read()
         f1.close()
         self.arw["inifiles_view"].get_buffer().set_text(text)
@@ -863,7 +862,7 @@ class Idefix:
         self.proxy_users.build_proxy_ini()
         self.firewall.build_firewall_ini()
         self.rebuild_config()
-        f1 = open("idefix-config.json", "w")
+        f1 = open(get_config_path("idefix-config.json"), "w")
         config2 = self.rebuild_config()
         f1.write(json.dumps(config2, indent = 3))
         f1.close()
@@ -871,7 +870,7 @@ class Idefix:
         if not load_locale:  # send the files bt FTP
             self.ftp_upload()
         if self.local_control:  # if connected to Idefix, send the update signal
-            f1 = open("./tmp/update", "w")
+            f1 = open(get_config_path("./tmp/update"), "w")
             f1.close()
             self.ftp_upload(["./tmp/update"], message=False)
 
@@ -926,7 +925,7 @@ class Idefix:
                             print(address)
                         out += user + " = " + address + "\n"
 
-        with open("./tmp/users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
+        with open(get_config_path("./tmp/users.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(out)
 
     def format_row(self, row) :
@@ -1028,19 +1027,26 @@ if __name__ == "__main__":
     # When set to true (see below), the configuration is loaded and written from and to local files (development mode)
     load_locale = False
     parser = myConfigParser()
-    idefix_config = parser.read("./idefix-config.cfg", "conf")
 
-    # Get the configuration
+    idefix_config = parser.read(CONFIG_FILE, "conf")
 
-    if len(sys.argv) > 1:  # if the config is indicated on the command line
-        if len(sys.argv[1].strip()) > 0:
-            configname = sys.argv[1]
-    else:  # ask for config
-        config_dialog = AskForConfig(idefix_config)
-        configname = config_dialog.run()
+    if not idefix_config:
+        idefix_config = DEFAULT_CONFIG
+        configname = 'default'
+    else:
+        # Get the configuration
+        if len(sys.argv) > 1:  # if the config is indicated on the command line
+            if len(sys.argv[1].strip()) > 0:
+                configname = sys.argv[1]
+        else:  # ask for config
+            config_dialog = AskForConfig(idefix_config)
+            configname = config_dialog.run()
 
-    if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
-        load_locale = True
+        if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
+            load_locale = True
 
-    win = Idefix(idefix_config["conf"][configname])
+    dialog = PasswordDialog()
+    password = dialog.run()
+
+    win = Idefix(configname, password)
     gtk.main()

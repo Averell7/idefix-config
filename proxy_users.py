@@ -79,11 +79,11 @@ class ProxyUsers:
     def toggle_col5(self, widget):
         """Toggle any user or specific users"""
         if self.proxy_store.get_value(self.controller.iter_proxy, 11) == 0:
-             self.proxy_store.set_value(self.controller.iter_proxy, 11, 1)
-             self.arw["proxy_users"].hide()
-        else :
-             self.proxy_store.set_value(self.controller.iter_proxy, 11, 0)
-             self.arw["proxy_users"].show()
+            self.proxy_store.set_value(self.controller.iter_proxy, 11, 1)
+            self.arw["proxy_users"].hide()
+        else:
+            self.proxy_store.set_value(self.controller.iter_proxy, 11, 0)
+            self.arw["proxy_users"].show()
         self.update_proxy_user_list()
 
         self.load_proxy_user2()
@@ -382,9 +382,9 @@ class ProxyUsers:
                 else:
                     out.append("")
             # check boxes and ToggleButtons
-            if "anyuser" in data1[section] :
+            if "anyuser" in data1[section]:
                 anyuser = data1[section]["anyuser"]
-            else :
+            else:
                 anyuser = 0
             out += [anyuser, 1, 1, 1, "#009900", "#ffffff"]
 

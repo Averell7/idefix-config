@@ -128,7 +128,8 @@ class Users:
     def load_user(self, widget, event, iternew=None):
         """ loads data in right pane when a category or a user is selected in the tree"""
 
-        self.controller.block_signals = True  # to prevent the execution of update_check wich causes errors
+        self.controller.block_signals = True
+        self.block_signals = True  # to prevent the execution of update_check wich causes errors
 
         if iternew:
             iter1 = iternew
@@ -238,6 +239,7 @@ class Users:
             self.user_summary(username)
 
             # get data in lists for this user
+        self.block_signals = False
         self.controller.block_signals = False
 
     def manage_users(self, widget, event=None):

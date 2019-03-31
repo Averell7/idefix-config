@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 import traceback
@@ -41,6 +42,24 @@ class AskForConfig:
         configname = self.combo.get_active_text()
         self.dialog.destroy()
         return configname
+
+
+class PasswordDialog:
+    def __init__(self):
+        # dialog = gtk.Dialog(title=None, parent=None, flags=0, buttons=None)
+        self.dialog = gtk.Dialog(title='Config Password', parent=None, flags=gtk.DialogFlags.MODAL,
+                                 buttons=("OK", 1, "Cancel", 0))
+        self.entry = gtk.Entry()
+        self.entry.set_visibility(False)
+        # self.entry.set_invisible_char('*')
+        self.dialog.vbox.pack_start(self.entry, 0, 0, 0)
+        self.dialog.show_all()
+
+    def run(self):
+        self.dialog.run()
+        data = self.entry.get_text()
+        self.dialog.destroy()
+        return data
 
 
 def print_except():
@@ -280,7 +299,32 @@ def format_name(name):
 
 EMPTY_STORE = gtk.ListStore(str)
 
+
+def get_config_path(filename):
+    """Return the full path for the configuration (if it exists)"""
+
+    # fallback = local directory
+    path = ''
+
+    if sys.platform.startswith('win'):
+        # step 1: roaming
+        roaming = os.path.join(os.getenv('APPDATA'), 'Idefix')
+        if os.path.exists(os.path.join(roaming, filename)):
+            path = roaming
+    else:
+        # step 1: ~/.local/share/idefix/
+        possible_path = os.path.expanduser('~/.local/idefix')
+        if os.path.exists(os.path.join(possible_path, filename)):
+            path = possible_path
+        elif os.path.exists(os.path.join('/etc/idefix/', filename)):
+            path = '/etc/idefix/'
+
+    return os.path.join(path, filename)
+
+
+CONFIG_FILE = get_config_path('idefix-config.cfg')
+
 ###########################################################################
 # LOCALISATION ############################################################
 ###########################################################################
-#_ = elib_intl3.install_module("idefix-config", "share/locale")
+elib_intl3.install("idefix-config", "share/locale")
