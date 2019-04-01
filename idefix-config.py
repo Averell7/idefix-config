@@ -245,6 +245,10 @@ class Idefix:
             # self.arw[textView].connect("drag-end", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
 
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+
+
         self.config = OrderedDict()
 
         # load configuration
