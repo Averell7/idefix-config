@@ -382,8 +382,8 @@ class ProxyUsers:
                 else:
                     out.append("")
             # check boxes and ToggleButtons
-            if "anyuser" in data1[section]:
-                anyuser = data1[section]["anyuser"]
+            if "any_user" in data1[section]:
+                anyuser = data1[section]["any_user"]
             else:
                 anyuser = 0
             out += [anyuser, 1, 1, 1, "#009900", "#ffffff"]

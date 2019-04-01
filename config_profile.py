@@ -1,6 +1,7 @@
 import configparser
 
 import pyaes
+import binascii
 from gi.repository import Gdk
 
 from myconfigparser import myConfigParser
@@ -62,7 +63,7 @@ def encrypt_password(password, key=DEFAULT_KEY):
     if len(password) % 16 != 0:
         # Pad with \0
         password += '\0' * (16 - (len(password) % 16))
-    return '$aes$' + ctx.encrypt(password.encode('utf-8')).hex()
+    return '$aes$' + binascii.hexlify(ctx.encrypt(password.encode('utf-8'))).decode("ascii")
 
 
 def decrypt_config(cfg, password):

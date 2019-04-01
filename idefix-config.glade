@@ -1329,7 +1329,7 @@
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="invisible_char">●</property>
-                                            <property name="placeholder_text">inutilisé pour l'instant</property>
+                                            <property name="placeholder_text">1234567</property>
                                             <signal name="key-release-event" handler="update_time" swapped="no"/>
                                           </object>
                                           <packing>
@@ -1447,7 +1447,7 @@
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="invisible_char">●</property>
-                                            <property name="placeholder_text">inutilisé pour l'instant</property>
+                                            <property name="placeholder_text">1234567</property>
                                             <signal name="key-release-event" handler="update_time" swapped="no"/>
                                           </object>
                                           <packing>
@@ -2480,6 +2480,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="invisible_char">●</property>
+                            <property name="placeholder_text" translatable="yes">1234567</property>
                             <signal name="key-release-event" handler="update_time" swapped="no"/>
                           </object>
                           <packing>

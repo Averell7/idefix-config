@@ -21,7 +21,7 @@ import os
 import sys
 import time
 from collections import OrderedDict
-from ftplib import FTP, Error as FTPError
+from ftplib import FTP, all_errors as FTPError
 
 import gi
 
@@ -78,7 +78,7 @@ def ftp_connect(server, login, password):
             ftp.cwd("idefix")
         return ftp
     except FTPError as e:
-        print("Unable to connect to ftp server with : %s / %s. Error: %s" % (login, password, e))
+        print("Unable to connect to ftp server with : %s / %s. \nError: %s" % (login, password, e))
 
 
 def ftp_get(ftp, filename, directory="", required=True, json=False):
@@ -257,55 +257,61 @@ class Idefix:
                 self.local_control = True
             ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
 
-            # retrieve files by ftp
+            if not ftp:
+                x = ConfigProfile(self.arw, self)
+                x.profile_open_window()
+                print("restart system")
+            else:
 
-            data0 = ftp_get(ftp, "idefix-config.json", json  = True)
-            if data0 :
-                self.config = json.loads(data0, object_pairs_hook=OrderedDict)
-                print("json file loaded")
-                ftp.close()
-            else :
-                print("WARNING ! unable to get idefix-config.json.\n Loading ini files")
+                # retrieve files by ftp
 
-                # retrieve common files by ftp
-                if ftp1['mode'][0] != 'local':
-                    ftp.cwd("common")
-                data1 = ftp_get(ftp, "firewall-ports.ini")
-                data2 = ftp_get(ftp, "proxy-groups.ini")
-                if ftp1['mode'][0] != 'local':
-                    ftp.cwd("..")
+                data0 = ftp_get(ftp, "idefix-config.json", json  = True)
+                if data0 :
+                    self.config = json.loads(data0, object_pairs_hook=OrderedDict)
+                    print("json file loaded")
+                    ftp.close()
+                else :
+                    print("WARNING ! unable to get idefix-config.json.\n Loading ini files")
 
-                # make a local copy for debug purpose
-                f1 = open(get_config_path("./tmp/firewall-ports.ini"), "w", encoding="utf-8-sig")
-                f1.write("\n".join(data1))
-                f1.close()
-                f1 = open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig")
-                f1.write("\n".join(data2))
-                f1.close()
+                    # retrieve common files by ftp
+                    if ftp1['mode'][0] != 'local':
+                        ftp.cwd("common")
+                    data1 = ftp_get(ftp, "firewall-ports.ini")
+                    data2 = ftp_get(ftp, "proxy-groups.ini")
+                    if ftp1['mode'][0] != 'local':
+                        ftp.cwd("..")
 
-                # retrieve perso files by ftp
-                data3 = ftp_get(ftp, "users.ini")
-                data4 = ftp_get(ftp, "firewall-users.ini")
-                data5 = ftp_get(ftp, "proxy-users.ini")
+                    # make a local copy for debug purpose
+                    f1 = open(get_config_path("./tmp/firewall-ports.ini"), "w", encoding="utf-8-sig")
+                    f1.write("\n".join(data1))
+                    f1.close()
+                    f1 = open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig")
+                    f1.write("\n".join(data2))
+                    f1.close()
 
-                ftp.close()
+                    # retrieve perso files by ftp
+                    data3 = ftp_get(ftp, "users.ini")
+                    data4 = ftp_get(ftp, "firewall-users.ini")
+                    data5 = ftp_get(ftp, "proxy-users.ini")
 
-                if data1 is None:
-                    print("WARNING ! unable to get firewall-ports.ini.")
-                if data2 is None:
-                    print("WARNING ! unable to get proxy-groups.ini.")
-                if data3 is None:
-                    print("WARNING ! unable to get users.ini.")
-                if data4 is None:
-                    print("WARNING ! unable to get users.ini.")
-                if data5 is None:
-                    print("WARNING ! unable to get proxy-users.ini.")
+                    ftp.close()
 
-                self.config = parser.read(data3, "users", comments=True, isdata=True)
-                self.config = parser.read(data4, "firewall", merge=self.config, comments=True, isdata=True)
-                self.config = parser.read(data5, "proxy", merge=self.config, comments=True, isdata=True)
-                self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
-                self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
+                    if data1 is None:
+                        print("WARNING ! unable to get firewall-ports.ini.")
+                    if data2 is None:
+                        print("WARNING ! unable to get proxy-groups.ini.")
+                    if data3 is None:
+                        print("WARNING ! unable to get users.ini.")
+                    if data4 is None:
+                        print("WARNING ! unable to get users.ini.")
+                    if data5 is None:
+                        print("WARNING ! unable to get proxy-users.ini.")
+
+                    self.config = parser.read(data3, "users", comments=True, isdata=True)
+                    self.config = parser.read(data4, "firewall", merge=self.config, comments=True, isdata=True)
+                    self.config = parser.read(data5, "proxy", merge=self.config, comments=True, isdata=True)
+                    self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
+                    self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
         else:   # development environment
             if os.path.isfile(get_config_path("idefix-config.json")):
@@ -322,7 +328,7 @@ class Idefix:
             if category not in self.config:
                 self.config[category] = OrderedDict()
 
-        if "users" not in self.config:
+        if "users" not in self.config:        # if system not yet configured
             response = askyesno(_("No user data"),
                                 _("There is no user data present. \nDo you want to create standard categories ?"))
             print(response)
