@@ -322,11 +322,21 @@ class Idefix:
                 data_str = open(get_config_path("idefix-config.json"), "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
             else:
-                self.config = parser.read("./tmp/users.ini", "users", merge=self.config, comments=True)
-                self.config = parser.read("./tmp/firewall-users.ini", "firewall", merge=self.config, comments=True)
-                self.config = parser.read("./tmp/proxy-users.ini", "proxy", merge=self.config, comments=True)
-                self.config = parser.read("./tmp/firewall-ports.ini", "ports", merge=self.config, comments=True)
-                self.config = parser.read("./tmp/proxy-groups.ini", "groups", merge=self.config, comments=True)
+                self.config = parser.read(
+                    get_config_path("./tmp/users.ini"), "users", merge=self.config, comments=True
+                )
+                self.config = parser.read(
+                    get_config_path("./tmp/firewall-users.ini"), "firewall", merge=self.config, comments=True
+                )
+                self.config = parser.read(
+                    get_config_path("./tmp/proxy-users.ini"), "proxy", merge=self.config, comments=True
+                )
+                self.config = parser.read(
+                    get_config_path("./tmp/firewall-ports.ini"), "ports", merge=self.config, comments=True
+                )
+                self.config = parser.read(
+                    get_config_path("./tmp/proxy-groups.ini"), "groups", merge=self.config, comments=True
+                )
 
         for category in ["firewall", "proxy", "ports", "groups"]:
             if category not in self.config:
@@ -814,7 +824,7 @@ class Idefix:
             data.set_text(text, -1)
 
     def load_ini_files(self):
-        for path in glob.glob("./tmp/*.ini"):
+        for path in glob.glob(get_config_path("./tmp/") + "*.ini"):
             filename = os.path.split(path)[1]
             self.inifiles_store.append([filename, path])
         #self.load_log_files()
@@ -831,13 +841,13 @@ class Idefix:
         f1 = open(get_config_path("./tmp/syslog"), "wb")
         filename = "syslog"
         ftp.retrbinary('RETR ' + filename, f1.write)  # get the file
-        self.inifiles_store.append([filename, "./tmp/syslog"])
+        self.inifiles_store.append([filename, get_config_path("./tmp/syslog")])
 
         ftp.cwd("squid")
         self.f1 = open(get_config_path("./tmp/squid.log"), "w")
         filename = "access.log"
         ftp.retrlines('RETR ' + filename, self.filter_squid_log)  # get the file
-        self.inifiles_store.append([filename, "./tmp/squid.log"])
+        self.inifiles_store.append([filename, get_config_path("./tmp/squid.log")])
         self.f1.close()
 
     def filter_squid_log(self, line1):
@@ -882,7 +892,7 @@ class Idefix:
         if self.local_control:  # if connected to Idefix, send the update signal
             f1 = open(get_config_path("./tmp/update"), "w")
             f1.close()
-            self.ftp_upload(["./tmp/update"], message=False)
+            self.ftp_upload([get_config_path("./tmp/update")], message=False)
 
     def build_users(self):
         out = ""
@@ -1005,9 +1015,11 @@ class Idefix:
             msg += _("No FTP connexion")
             return
         if uploadlist is None:
-            uploadlist = ["./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini", "./idefix-config.json"]
+            uploadlist = [
+                "./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini", "./idefix-config.json"
+            ]
         for file1 in uploadlist:
-            ret = ftp_send(ftp, file1)
+            ret = ftp_send(ftp, get_config_path(file1))
             if ret == True :
                 msg += file1 + _(" sent\n")
             else :
