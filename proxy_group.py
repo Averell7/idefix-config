@@ -3,11 +3,12 @@ import time
 from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
-from util import askyesno
+from util import askyesno, ask_text
 
 
 class ProxyGroup:
     mem_time = 0
+    editing_iter = None
 
     def __init__(self, arw, controller):
         self.arw = arw
@@ -19,6 +20,15 @@ class ProxyGroup:
         self.arw['proxy_group'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
         self.arw['proxy_group'].drag_dest_add_text_targets()
         self.arw['proxy_group'].connect("drag-data-received", self.update_proxy_group_list_view)
+        self.proxy_group_domain_store = self.arw['proxy_group_domain_store']
+
+        # The store for the proxy_groups in a particular proxy
+        self.proxy_group_store = self.arw['proxy_groups_store']
+
+        # The store for each proxy group
+        self.groups_store = Gtk.ListStore(str, str)
+
+        self.proxy_group_window = self.arw['proxy_group_window']
 
     def proxy_group_data_get(self, treeview, drag_context, data, info, time):
 
@@ -37,16 +47,22 @@ class ProxyGroup:
         if not proxy_iter:
             proxy_iter = self.controller.iter_proxy
 
-        self.arw['proxy_groups_store'].clear()
+        domains = {}
+        for row in self.groups_store:
+            domains[row[0]] = row[1]
+
+        self.proxy_group_store.clear()
         for name in self.controller.proxy_store[proxy_iter][7].split('\n'):
             if name:
-                iter = self.arw['proxy_groups_store'].append()
-                self.arw['proxy_groups_store'].set_value(iter, 0, name)
-                try:
-                    tooltip = "\n".join(self.controller.config['groups'][name].get('dest_domain', ''))
-                except:
+                iter = self.proxy_group_store.append()
+                self.proxy_group_store.set_value(iter, 0, name)
+
+                if name in domains:
+                    tooltip = domains[name]
+                else:
                     tooltip = _("(error)")
-                self.arw['proxy_groups_store'].set_value(iter, 1, tooltip)
+
+                self.proxy_group_store.set_value(iter, 1, tooltip)
 
     def delete_proxy_group(self, widget):
         model, iter = self.arw['proxy_group'].get_selection().get_selected()
@@ -113,3 +129,66 @@ class ProxyGroup:
         names.append(new_name)
         self.controller.proxy_users.proxy_store.set_value(self.controller.iter_proxy, 7, '\n'.join(names))
         self.update_proxy_group_list(self.controller.iter_proxy)
+
+    def edit_proxy_group(self, widget):
+        """Edit proxy group selected in proxy_group or chooser tree"""
+        model, iter = widget.get_selection().get_selected()
+        name = model.get_value(iter, 0)
+
+        # Find the name in the proxy_group_store
+        for proxy_row in self.groups_store:
+            if proxy_row[0] == name:
+                self.edit_group(proxy_row.iter)
+
+    def edit_group(self, iter):
+        """Open the proxy_window for editing with the given iter"""
+        self.editing_iter = iter
+        self.proxy_group_domain_store.clear()
+        for domain in self.groups_store.get_value(iter, 1).split('\n'):
+            if domain.startswith('('):
+                continue
+            new_iter = self.proxy_group_domain_store.append()
+            self.proxy_group_domain_store.set_value(new_iter, 0, domain)
+        self.proxy_group_window.show_all()
+        self.arw['proxy_group_message_label'].set_label(_("Editing %s") % self.groups_store.get_value(iter, 0))
+
+    def proxy_group_add_item(self, widget):
+        """Add a new domain to the list"""
+        text = ask_text(self.proxy_group_window, _("Enter a domain name"))
+        if not text:
+            return
+        iter = self.proxy_group_domain_store.append()
+        self.proxy_group_domain_store.set_value(iter, 0, text)
+
+    def proxy_group_remove_item(self, widget):
+        """When right clicked, Remove the selected item from the list"""
+        model, iter = self.arw['proxy_group_domain_tree'].get_selection().get_selected()
+        if not iter:
+            return
+        domain = model.get_value(iter, 0)
+        if askyesno(_("Remove domain?"), _("Remove domain: %s") % domain):
+            model.remove(iter)
+
+    def proxy_group_edit_item(self, widget):
+        """When right clicked, Edit the selected item from the list"""
+        model, iter = self.arw['proxy_group_domain_tree'].get_selection().get_selected()
+        domain = model.get_value(iter, 0)
+        domain = ask_text(self.proxy_group_window, _("Edit domain name"), domain)
+        model.set_value(iter, 0, domain)
+
+    def proxy_group_finished(self, widget):
+        """Finish editing the proxy group"""
+        self.proxy_group_window.hide()
+        self.groups_store.set_value(
+            self.editing_iter, 1, '\n'.join(row[0] for row in self.proxy_group_domain_store)
+        )
+        if not len(self.groups_store.get_value(self.editing_iter, 0).split('\n')):
+            self.groups_store.set_value(self.editing_iter, 0, _("(error)"))
+        self.proxy_group_domain_store.clear()
+        self.update_proxy_group_list()
+
+    def proxy_group_domain_show_context(self, widget, event):
+        """Show the context menu on right click"""
+        if event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 3:  # right click, runs the context menu
+                self.arw["proxy_group_domain_edit_menu"].popup(None, None, None, None, event.button, event.time)

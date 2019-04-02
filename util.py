@@ -1,3 +1,4 @@
+import configparser
 import os
 import re
 import sys
@@ -303,26 +304,51 @@ EMPTY_STORE = gtk.ListStore(str)
 def get_config_path(filename):
     """Return the full path for the configuration (if it exists)"""
 
-    # fallback = local directory
-    path = ''
+    directory, filename = os.path.split(filename)
 
     if sys.platform.startswith('win'):
         # step 1: roaming
-        roaming = os.path.join(os.getenv('APPDATA'), 'Idefix')
-        if os.path.exists(os.path.join(roaming, filename)):
-            path = roaming
+        roaming = os.path.join(os.getenv('APPDATA'), 'Idefix', directory)
+        if not os.path.exists(os.path.join(roaming, filename)):
+            os.makedirs(roaming, exist_ok=True)
+        path = roaming
     else:
         # step 1: ~/.local/share/idefix/
-        possible_path = os.path.expanduser('~/.local/idefix')
-        if os.path.exists(os.path.join(possible_path, filename)):
-            path = possible_path
-        elif os.path.exists(os.path.join('/etc/idefix/', filename)):
-            path = '/etc/idefix/'
+        roaming = os.path.join(os.path.expanduser('~/.local/idefix'), directory)
+        if os.path.exists(os.path.join(roaming, filename)):
+            path = roaming
+        elif os.path.exists(os.path.join('/etc/idefix/', directory, filename)):
+            path = os.path.join('/etc/idefix/', directory)
+        else:
+            os.makedirs(roaming, exist_ok=True)
+            path = roaming
 
     return os.path.join(path, filename)
 
 
-CONFIG_FILE = get_config_path('idefix-config.cfg')
+def write_default_config():
+    """Write the default configuration to the roaming directory"""
+
+    if sys.platform.startswith('win'):
+        roaming = os.path.join(os.getenv('APPDATA'), 'Idefix')
+    else:
+        roaming = os.path.expanduser('~/.local/idefix')
+
+    # Create the directory structure
+    os.makedirs(roaming, exist_ok=True)
+
+    with open(os.path.join(roaming, 'idefix-config.cfg'), 'w') as f:
+        config = configparser.ConfigParser(interpolation=None)
+        config['default'] = {
+            'mode': 'local',
+            'server': '192.168.84.184',
+            'login': 'rock64',
+            'pass': 'rock64'
+        }
+        config.write(f)
+
+    return os.path.join(roaming, 'idefix-config.cfg')
+
 
 ###########################################################################
 # LOCALISATION ############################################################

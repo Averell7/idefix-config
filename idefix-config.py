@@ -35,7 +35,7 @@ from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
     EMPTY_STORE, SignalHandler, PasswordDialog,
-    CONFIG_FILE, get_config_path
+    get_config_path, write_default_config
 )
 from icons import (
     internet_full_icon, internet_filtered_icon,
@@ -45,7 +45,7 @@ from proxy_users import ProxyUsers
 from proxy_group import ProxyGroup
 from firewall import Firewall
 from users import Users
-from config_profile import ConfigProfile, DEFAULT_CONFIG
+from config_profile import ConfigProfile
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -72,13 +72,14 @@ def ftp_connect(server, login, password):
         password = hysteresis
 
     try:
-        ftp = FTP(server)  # connect to host, default port
+        ftp = FTP(server, timeout=15)  # connect to host, default port
         ftp.login(login, password)
         if ftp1['mode'][0] == 'local':
             ftp.cwd("idefix")
         return ftp
     except FTPError as e:
         print("Unable to connect to ftp server with : %s / %s. \nError: %s" % (login, password, e))
+
 
 
 def ftp_get(ftp, filename, directory="", required=True, json=False):
@@ -146,6 +147,7 @@ class Idefix:
     iter_user = None
     iter_firewall = None
     iter_proxy = None
+    active_chooser = None
 
     def __init__(self, active_config, config_password):
 
@@ -176,6 +178,8 @@ class Idefix:
         window1.show_all()
         window1.set_title(_("Idefix admin"))
         window1.connect("destroy", self.destroy)
+
+        self.arw['loading_window'].show_all()
 
         if not future:
             for widget in ["scrolledwindow2", "toolbar3", "paned3", "box2", "frame6", "inifiles_list", "inifiles_view"]:
@@ -229,6 +233,7 @@ class Idefix:
 
         self.users_store = self.users.users_store
         self.proxy_store = self.proxy_users.proxy_store
+        self.groups_store = self.proxy_group.groups_store
         self.firewall_store = self.firewall.firewall_store
 
         self.signal_handler = SignalHandler([
@@ -245,11 +250,10 @@ class Idefix:
             # self.arw[textView].connect("drag-end", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
 
+        self.config = OrderedDict()
+
         while Gtk.events_pending():
             Gtk.main_iteration()
-
-
-        self.config = OrderedDict()
 
         # load configuration
         if not load_locale:
@@ -259,16 +263,29 @@ class Idefix:
             ftp1 = self.ftp_config
             if ftp1['mode'][0] == 'local':
                 self.local_control = True
+
             ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+            self.arw['loading_window'].hide()
 
             if not ftp:
-                x = ConfigProfile(self.arw, self)
-                x.profile_open_window()
-                print("restart system")
+                # x = ConfigProfile(self.arw, self)
+                # x.profile_open_window()
+
+                if askyesno(_("Update Configuration"), _("Could not connect to FTP. Edit Configuration?")):
+                    self.profiles.profile_open_window()
+
+                    def restart(*args):
+                        askyesno(_("Restart"), _("Please restart idefix to use new configuration"))
+                        sys.exit(0)
+
+                    self.profiles.window.connect('hide', restart)
+                    print("restart system")
+                    self.profiles.list_configuration_profiles()
+                    return
+                else:
+                    sys.exit(1)
             else:
-
                 # retrieve files by ftp
-
                 data0 = ftp_get(ftp, "idefix-config.json", json  = True)
                 if data0 :
                     self.config = json.loads(data0, object_pairs_hook=OrderedDict)
@@ -318,15 +335,26 @@ class Idefix:
                     self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
         else:   # development environment
+            self.arw['loading_window'].hide()
             if os.path.isfile(get_config_path("idefix-config.json")):
                 data_str = open(get_config_path("idefix-config.json"), "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
             else:
-                self.config = parser.read("./tmp/users.ini", "users", merge=self.config, comments=True)
-                self.config = parser.read("./tmp/firewall-users.ini", "firewall", merge=self.config, comments=True)
-                self.config = parser.read("./tmp/proxy-users.ini", "proxy", merge=self.config, comments=True)
-                self.config = parser.read("./tmp/firewall-ports.ini", "ports", merge=self.config, comments=True)
-                self.config = parser.read("./tmp/proxy-groups.ini", "groups", merge=self.config, comments=True)
+                self.config = parser.read(
+                    get_config_path("./tmp/users.ini"), "users", merge=self.config, comments=True
+                )
+                self.config = parser.read(
+                    get_config_path("./tmp/firewall-users.ini"), "firewall", merge=self.config, comments=True
+                )
+                self.config = parser.read(
+                    get_config_path("./tmp/proxy-users.ini"), "proxy", merge=self.config, comments=True
+                )
+                self.config = parser.read(
+                    get_config_path("./tmp/firewall-ports.ini"), "ports", merge=self.config, comments=True
+                )
+                self.config = parser.read(
+                    get_config_path("./tmp/proxy-groups.ini"), "groups", merge=self.config, comments=True
+                )
 
         for category in ["firewall", "proxy", "ports", "groups"]:
             if category not in self.config:
@@ -385,7 +413,6 @@ class Idefix:
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         self.ports_store = gtk.ListStore(str)  #
-        self.groups_store = gtk.ListStore(str, str)  #
         self.empty_store = EMPTY_STORE
 
         for chooser in ["chooser", "chooser2"]:
@@ -703,6 +730,7 @@ class Idefix:
 
         if data is None:  # TODO is this useful ???
             if widget.name in ["proxy_users"]:
+                self.active_chooser = 'proxy_users'
                 self.arw["chooser"].set_model(self.chooser_users_store)
                 ctx = self.arw['proxy_users_scroll_window'].get_style_context()
                 ctx.add_class('chosen_list')
@@ -712,6 +740,7 @@ class Idefix:
             elif widget.name == "firewall_users":
                 self.arw["chooser2"].set_model(self.users_store)
             elif widget.name in ["proxy_group"]:
+                self.active_chooser = 'proxy_group'
                 self.arw["chooser"].set_model(self.groups_store)
                 ctx = self.arw['proxy_group_scroll_window'].get_style_context()
                 ctx.add_class('chosen_list')
@@ -724,6 +753,7 @@ class Idefix:
             else:
                 self.arw["chooser"].set_model(self.empty_store)
                 self.arw["chooser2"].set_model(self.empty_store)
+                self.active_chooser = None
         else:
             print("===>", repr(data))
 
@@ -732,8 +762,10 @@ class Idefix:
         #
         if page == 0:
             self.arw["chooser"].set_model(self.groups_store)
+            self.active_chooser = 'proxy_group'
         else:
             self.arw["chooser"].set_model(self.empty_store)
+            self.active_chooser = None
 
     def general_chooser_answer(self, *params):
 
@@ -813,8 +845,16 @@ class Idefix:
             text = model.get_value(node, 0) + "\n"
             data.set_text(text, -1)
 
+    def chooser_show_context(self, widget, event):
+        """Show the context menu on right click (if applicable)"""
+        if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:
+            return
+
+        if self.active_chooser == 'proxy_group':
+            self.arw["chooser_proxy_groups_menu"].popup(None, None, None, None, event.button, event.time)
+
     def load_ini_files(self):
-        for path in glob.glob("./tmp/*.ini"):
+        for path in glob.glob(get_config_path("./tmp/") + "*.ini"):
             filename = os.path.split(path)[1]
             self.inifiles_store.append([filename, path])
         #self.load_log_files()
@@ -831,13 +871,13 @@ class Idefix:
         f1 = open(get_config_path("./tmp/syslog"), "wb")
         filename = "syslog"
         ftp.retrbinary('RETR ' + filename, f1.write)  # get the file
-        self.inifiles_store.append([filename, "./tmp/syslog"])
+        self.inifiles_store.append([filename, get_config_path("./tmp/syslog")])
 
         ftp.cwd("squid")
         self.f1 = open(get_config_path("./tmp/squid.log"), "w")
         filename = "access.log"
         ftp.retrlines('RETR ' + filename, self.filter_squid_log)  # get the file
-        self.inifiles_store.append([filename, "./tmp/squid.log"])
+        self.inifiles_store.append([filename, get_config_path("./tmp/squid.log")])
         self.f1.close()
 
     def filter_squid_log(self, line1):
@@ -882,7 +922,7 @@ class Idefix:
         if self.local_control:  # if connected to Idefix, send the update signal
             f1 = open(get_config_path("./tmp/update"), "w")
             f1.close()
-            self.ftp_upload(["./tmp/update"], message=False)
+            self.ftp_upload([get_config_path("./tmp/update")], message=False)
 
     def build_users(self):
         out = ""
@@ -1005,9 +1045,11 @@ class Idefix:
             msg += _("No FTP connexion")
             return
         if uploadlist is None:
-            uploadlist = ["./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini", "./idefix-config.json"]
+            uploadlist = [
+                "./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini", "./idefix-config.json"
+            ]
         for file1 in uploadlist:
-            ret = ftp_send(ftp, file1)
+            ret = ftp_send(ftp, get_config_path(file1))
             if ret == True :
                 msg += file1 + _(" sent\n")
             else :
@@ -1038,10 +1080,12 @@ if __name__ == "__main__":
     load_locale = False
     parser = myConfigParser()
 
-    idefix_config = parser.read(CONFIG_FILE, "conf")
+    idefix_config = parser.read(get_config_path('idefix-config.cfg'), "conf")
 
     if not idefix_config:
-        idefix_config = DEFAULT_CONFIG
+        # Try write the default configuration
+        path = write_default_config()
+        idefix_config = parser.read(path, "conf")
         configname = 'default'
     else:
         # Get the configuration
@@ -1052,8 +1096,8 @@ if __name__ == "__main__":
             config_dialog = AskForConfig(idefix_config)
             configname = config_dialog.run()
 
-        if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
-            load_locale = True
+    if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
+        load_locale = True
 
     dialog = PasswordDialog()
     password = dialog.run()

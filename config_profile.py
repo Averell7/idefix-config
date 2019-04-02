@@ -1,11 +1,11 @@
+import binascii
 import configparser
 
 import pyaes
-import binascii
 from gi.repository import Gdk
 
 from myconfigparser import myConfigParser
-from util import askyesno, ask_text, CONFIG_FILE
+from util import askyesno, ask_text, get_config_path
 
 COLUMN_NAME = 0
 COLUMN_MODE = 1
@@ -14,16 +14,6 @@ COLUMN_PASSWORD = 3
 COLUMN_SERVER = 4
 
 DEFAULT_KEY = "idefix-config"
-DEFAULT_CONFIG = {
-    'conf': {
-        'default': {
-            'mode': ['local'],
-            'server': ['192.168.84.184'],
-            'login': ['rock64'],
-            'pass': ['rock64']
-        }
-    }
-}
 
 
 # AES CTR encryption using user supplied password or default password
@@ -81,7 +71,7 @@ def get_config(filename, password=DEFAULT_KEY):
 
     data = parser.read(filename, "conf")
     if not data:
-        return DEFAULT_CONFIG
+        return {}
     else:
         return decrypt_config(data, password)
 
@@ -92,11 +82,14 @@ class ConfigProfile:
     mode_iters = {}
     block_signals = False
 
-    def __init__(self, arw, controller, filename=CONFIG_FILE, password=DEFAULT_KEY):
+    def __init__(self, arw, controller, filename=None, password=DEFAULT_KEY):
         self.arw = arw
         self.controller = controller
         self.password = password
+        if not filename:
+            filename = get_config_path('idefix-config.cfg')
         self.filename = filename
+
         self.window = self.arw['profiles_window']
         self.profiles_store = self.arw['profiles_store']
 
