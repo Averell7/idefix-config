@@ -369,6 +369,18 @@
       </object>
     </child>
   </object>
+  <object class="GtkMenu" id="chooser_proxy_groups_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">edit</property>
+        <signal name="activate" handler="edit_proxy_group" object="chooser" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkDialog" id="dialog1">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
@@ -595,6 +607,24 @@
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkMenu" id="proxy_group_domain_edit_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">delete</property>
+        <signal name="activate" handler="proxy_group_remove_item" swapped="no"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="proxy_group_domain_store">
+    <columns>
+      <!-- column-name domain -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkMenu" id="proxy_groups_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -604,6 +634,15 @@
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">delete</property>
         <signal name="activate" handler="delete_proxy_group" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">edit</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="edit_proxy_group" object="proxy_group" swapped="no"/>
       </object>
     </child>
   </object>
@@ -2508,6 +2547,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip_column">1</property>
+                            <signal name="button-release-event" handler="chooser_show_context" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection" id="treeview-selection5"/>
                             </child>
@@ -2767,6 +2807,101 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
             <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="proxy_group_window">
+    <property name="can_focus">False</property>
+    <property name="default_width">440</property>
+    <property name="default_height">250</property>
+    <property name="transient_for">window1</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="proxy_group_message_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTreeView" id="proxy_group_domain_tree">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="model">proxy_group_domain_store</property>
+            <property name="headers_visible">False</property>
+            <signal name="button-release-event" handler="proxy_group_domain_show_context" swapped="no"/>
+            <child internal-child="selection">
+              <object class="GtkTreeSelection"/>
+            </child>
+            <child>
+              <object class="GtkTreeViewColumn">
+                <property name="title" translatable="yes">column</property>
+                <child>
+                  <object class="GtkCellRendererText"/>
+                  <attributes>
+                    <attribute name="text">0</attribute>
+                  </attributes>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButtonBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">spread</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">Add</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="proxy_group_add_item" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">Finished</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="proxy_group_finished" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

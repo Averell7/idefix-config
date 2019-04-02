@@ -146,6 +146,7 @@ class Idefix:
     iter_user = None
     iter_firewall = None
     iter_proxy = None
+    active_chooser = None
 
     def __init__(self, active_config, config_password):
 
@@ -229,6 +230,7 @@ class Idefix:
 
         self.users_store = self.users.users_store
         self.proxy_store = self.proxy_users.proxy_store
+        self.groups_store = self.proxy_group.groups_store
         self.firewall_store = self.firewall.firewall_store
 
         self.signal_handler = SignalHandler([
@@ -395,7 +397,6 @@ class Idefix:
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         self.ports_store = gtk.ListStore(str)  #
-        self.groups_store = gtk.ListStore(str, str)  #
         self.empty_store = EMPTY_STORE
 
         for chooser in ["chooser", "chooser2"]:
@@ -713,6 +714,7 @@ class Idefix:
 
         if data is None:  # TODO is this useful ???
             if widget.name in ["proxy_users"]:
+                self.active_chooser = 'proxy_users'
                 self.arw["chooser"].set_model(self.chooser_users_store)
                 ctx = self.arw['proxy_users_scroll_window'].get_style_context()
                 ctx.add_class('chosen_list')
@@ -722,6 +724,7 @@ class Idefix:
             elif widget.name == "firewall_users":
                 self.arw["chooser2"].set_model(self.users_store)
             elif widget.name in ["proxy_group"]:
+                self.active_chooser = 'proxy_group'
                 self.arw["chooser"].set_model(self.groups_store)
                 ctx = self.arw['proxy_group_scroll_window'].get_style_context()
                 ctx.add_class('chosen_list')
@@ -734,6 +737,7 @@ class Idefix:
             else:
                 self.arw["chooser"].set_model(self.empty_store)
                 self.arw["chooser2"].set_model(self.empty_store)
+                self.active_chooser = None
         else:
             print("===>", repr(data))
 
@@ -742,8 +746,10 @@ class Idefix:
         #
         if page == 0:
             self.arw["chooser"].set_model(self.groups_store)
+            self.active_chooser = 'proxy_group'
         else:
             self.arw["chooser"].set_model(self.empty_store)
+            self.active_chooser = None
 
     def general_chooser_answer(self, *params):
 
@@ -822,6 +828,14 @@ class Idefix:
         if node:
             text = model.get_value(node, 0) + "\n"
             data.set_text(text, -1)
+
+    def chooser_show_context(self, widget, event):
+        """Show the context menu on right click (if applicable)"""
+        if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:
+            return
+
+        if self.active_chooser == 'proxy_group':
+            self.arw["chooser_proxy_groups_menu"].popup(None, None, None, None, event.button, event.time)
 
     def load_ini_files(self):
         for path in glob.glob(get_config_path("./tmp/") + "*.ini"):
