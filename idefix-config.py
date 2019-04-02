@@ -35,7 +35,7 @@ from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
     EMPTY_STORE, SignalHandler, PasswordDialog,
-    CONFIG_FILE, get_config_path
+    get_config_path, write_default_config
 )
 from icons import (
     internet_full_icon, internet_filtered_icon,
@@ -45,7 +45,7 @@ from proxy_users import ProxyUsers
 from proxy_group import ProxyGroup
 from firewall import Firewall
 from users import Users
-from config_profile import ConfigProfile, DEFAULT_CONFIG
+from config_profile import ConfigProfile
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -72,13 +72,14 @@ def ftp_connect(server, login, password):
         password = hysteresis
 
     try:
-        ftp = FTP(server)  # connect to host, default port
+        ftp = FTP(server, timeout=15)  # connect to host, default port
         ftp.login(login, password)
         if ftp1['mode'][0] == 'local':
             ftp.cwd("idefix")
         return ftp
     except FTPError as e:
         print("Unable to connect to ftp server with : %s / %s. \nError: %s" % (login, password, e))
+
 
 
 def ftp_get(ftp, filename, directory="", required=True, json=False):
@@ -178,6 +179,8 @@ class Idefix:
         window1.set_title(_("Idefix admin"))
         window1.connect("destroy", self.destroy)
 
+        self.arw['loading_window'].show_all()
+
         if not future:
             for widget in ["scrolledwindow2", "toolbar3", "paned3", "box2", "frame6", "inifiles_list", "inifiles_view"]:
                 self.arw[widget].hide()
@@ -247,11 +250,10 @@ class Idefix:
             # self.arw[textView].connect("drag-end", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
 
+        self.config = OrderedDict()
+
         while Gtk.events_pending():
             Gtk.main_iteration()
-
-
-        self.config = OrderedDict()
 
         # load configuration
         if not load_locale:
@@ -261,16 +263,29 @@ class Idefix:
             ftp1 = self.ftp_config
             if ftp1['mode'][0] == 'local':
                 self.local_control = True
+
             ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+            self.arw['loading_window'].hide()
 
             if not ftp:
-                x = ConfigProfile(self.arw, self)
-                x.profile_open_window()
-                print("restart system")
+                # x = ConfigProfile(self.arw, self)
+                # x.profile_open_window()
+
+                if askyesno(_("Update Configuration"), _("Could not connect to FTP. Edit Configuration?")):
+                    self.profiles.profile_open_window()
+
+                    def restart(*args):
+                        askyesno(_("Restart"), _("Please restart idefix to use new configuration"))
+                        sys.exit(0)
+
+                    self.profiles.window.connect('hide', restart)
+                    print("restart system")
+                    self.profiles.list_configuration_profiles()
+                    return
+                else:
+                    sys.exit(1)
             else:
-
                 # retrieve files by ftp
-
                 data0 = ftp_get(ftp, "idefix-config.json", json  = True)
                 if data0 :
                     self.config = json.loads(data0, object_pairs_hook=OrderedDict)
@@ -320,6 +335,7 @@ class Idefix:
                     self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
 
         else:   # development environment
+            self.arw['loading_window'].hide()
             if os.path.isfile(get_config_path("idefix-config.json")):
                 data_str = open(get_config_path("idefix-config.json"), "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
@@ -1064,10 +1080,12 @@ if __name__ == "__main__":
     load_locale = False
     parser = myConfigParser()
 
-    idefix_config = parser.read(CONFIG_FILE, "conf")
+    idefix_config = parser.read(get_config_path('idefix-config.cfg'), "conf")
 
     if not idefix_config:
-        idefix_config = DEFAULT_CONFIG
+        # Try write the default configuration
+        path = write_default_config()
+        idefix_config = parser.read(path, "conf")
         configname = 'default'
     else:
         # Get the configuration
@@ -1078,8 +1096,8 @@ if __name__ == "__main__":
             config_dialog = AskForConfig(idefix_config)
             configname = config_dialog.run()
 
-        if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
-            load_locale = True
+    if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
+        load_locale = True
 
     dialog = PasswordDialog()
     password = dialog.run()
