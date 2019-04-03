@@ -3,7 +3,10 @@ import time
 from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
-from util import askyesno, EMPTY_STORE, format_comment, format_line, format_time, format_userline, format_domainline
+from util import (
+        askyesno, ask_text, EMPTY_STORE, get_config_path,
+        format_comment, format_line, format_time, format_userline, format_domainline, format_name
+)
 
 
 # 3 - proxy
@@ -104,6 +107,36 @@ class ProxyUsers:
             self.arw["notebook2"].hide()
             treestore.set_value(self.controller.iter_proxy, 15, "#f00000")
         self.load_proxy_user2()
+
+
+    def add_rule_below(self, widget):
+        # add rule in the proxy tab
+        (model, node) = self.arw["treeview3"].get_selection().get_selected()
+        x = ask_text(self.arw["window1"], "Name of the new rule :", "")
+        if x is None:
+            return
+        else:
+            name = format_name(x)
+            iter1 = self.controller.proxy_store.insert_after(node,
+                                                             [name, "on", "allow", "", "", "", "", "", "", "", "", 0,
+                                                              0, 1, 1, "#009900", "#ffffff"])
+
+    def delete_rule(self, widget):
+        (model, node) = self.arw["treeview3"].get_selection().get_selected()
+        name = model.get_value(node, 0)
+        if askyesno("Remove filter rule", "Do you want to remove %s?" % name):
+            self.controller.proxy_store.remove(node)
+
+    def edit_rule(self, widget):
+        (model, node) = self.arw["treeview3"].get_selection().get_selected()
+        name = model.get_value(node, 0)
+        x = ask_text(self.arw["window1"], "Name of the rule :", name)
+        if x is None:
+            return
+        else:
+            x = format_name(x)
+            self.controller.proxy_store.set(node, [0], [x])
+
 
     def proxy_user_has_any(self):
         """Return True if the proxy user has any"""
@@ -414,17 +447,32 @@ class ProxyUsers:
                     out += format_userline("user", row[5])
                 out += format_line("time_condition", time_condition2)
                 if format_line("destination", row[10]) == "":
-                    out += format_line("dest_group", row[7])
+                    #convert groups in domains
+                    data1 = row[7].strip().split('\n')
+                    data2 = []
+                    for group in data1:
+                        if group == "":
+                            continue
+                        else :
+                            for key in ["dest_domain", "dest_ip"]:
+                                if self.controller.config["groups"][group].get(key):
+                                    data2 += self.controller.config["groups"][group].get(key)
+                    out += format_domainline("dest_domain", "\n".join(data2))
                     out += format_domainline("dest_domain", row[8])
                 else:
                     out += format_line("destination", row[10])
 
         # add default permissions
-        out += "\n[@_antivirus]\n"
-        out += "active = on \n"
-        out += "action = allow \n"
-        out += "user = any \n"
-        out += "dest_group = antivirus \n"
+        if self.controller.config["groups"].get("antivirus"):
+            antivirus_group = []
+            for key in ["dest_domain", "dest_ip"]:
+                if self.controller.config["groups"]["antivirus"].get(key):
+                    antivirus_group += self.controller.config["groups"]["antivirus"].get(key)
+            out += "\n[@_antivirus]\n"
+            out += "active = on \n"
+            out += "action = allow \n"
+            out += "user = any \n"
+            out += format_domainline("dest_domain", "\n".join(antivirus_group))
 
-        with open("./tmp/proxy-users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
+        with open(get_config_path("./tmp/proxy-users.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(out)

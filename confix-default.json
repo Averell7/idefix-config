@@ -1,0 +1,64 @@
+{
+   "users": {
+      "Aucun acc\u00e8s": {
+         "@_internet": [
+            "none"
+         ],
+         "@_email": [
+            "0"
+         ],
+         "@_email_time_condition": [
+            ""
+         ],
+         "@_internet_time_condition": [
+            ""
+         ]
+      },
+      "email uniquement": {
+         "@_internet": [
+            "none"
+         ],
+         "@_email": [
+            "1"
+         ],
+         "@_email_time_condition": [
+            ""
+         ],
+         "@_internet_time_condition": [
+            ""
+         ]
+      },
+      "Acc\u00e8s Internet filtr\u00e9": {
+         "@_internet": [
+            "filtered"
+         ],
+         "@_email": [
+            "1"
+         ],
+         "@_email_time_condition": [
+            ""
+         ],
+         "@_internet_time_condition": [
+            ""
+         ]
+      },
+      "Acc\u00e8s Internet ouvert": {
+         "@_internet": [
+            "open"
+         ],
+         "@_email": [
+            "1"
+         ],
+         "@_email_time_condition": [
+            ""
+         ],
+         "@_internet_time_condition": [
+            ""
+         ]
+      }
+   },
+   "proxy": {},
+   "firewall": {},
+   "groups": {},
+   "ports": {}
+}

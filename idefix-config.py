@@ -1,6 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 0.30.0 : Chris : right click menu for proxy_groups
+# version 0.29.0 : Chris : encrypt passwords 
 # version 0.28.0 : Chris (4) = gui reorganization
 # version 0.27.1 : lots of little fixes
 # version 0.27.0 : json config
@@ -51,8 +53,8 @@ from config_profile import ConfigProfile
 # CONFIGURATION ###########################################################
 ###########################################################################
 global version, future
-future = True  # activate beta functions
-version = "0.28.0"
+future = False  # activate beta functions
+version = "0.30.0"
 
 
 gtk = Gtk
@@ -173,16 +175,16 @@ class Idefix:
                 pass
 
         self.arw["configname"].set_text(configname)
-        self.arw["program_title"].set_text("Idefix Admin - Version " + version)
+        self.arw["program_title"].set_text("Confix - Version " + version)
         window1 = self.arw["window1"]
         window1.show_all()
-        window1.set_title(_("Idefix admin"))
+        window1.set_title(_("Confix"))
         window1.connect("destroy", self.destroy)
 
         self.arw['loading_window'].show_all()
 
         if not future:
-            for widget in ["scrolledwindow2", "toolbar3", "paned3", "box2", "frame6", "inifiles_list", "inifiles_view"]:
+            for widget in ["scrolledwindow2", "toolbar3", "paned3", "box2", "menu_debug", "inifiles_list", "inifiles_view"]:
                 self.arw[widget].hide()
             self.arw["firewall_disabled"].show()
         else :
@@ -292,6 +294,8 @@ class Idefix:
                     print("json file loaded")
                     ftp.close()
                 else :
+                    pass
+                """
                     print("WARNING ! unable to get idefix-config.json.\n Loading ini files")
 
                     # retrieve common files by ftp
@@ -333,6 +337,7 @@ class Idefix:
                     self.config = parser.read(data5, "proxy", merge=self.config, comments=True, isdata=True)
                     self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
                     self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
+                """
 
         else:   # development environment
             self.arw['loading_window'].hide()
@@ -365,13 +370,10 @@ class Idefix:
                                 _("There is no user data present. \nDo you want to create standard categories ?"))
             print(response)
             if response == 1:
-                self.config["users"] = OrderedDict([(_('No access'), OrderedDict()),
-                                                    (_('email only'), OrderedDict([('option', ['email'])])),
-                                                    (_('Filtered Internet access'), OrderedDict(
-                                                        [('option', ['email', 'internet access', 'filtered'])])),
-                                                    (_('Open Internet access'),
-                                                     OrderedDict([('option', ['email', 'internet access', 'open'])]))
-                                                    ])
+                if os.path.isfile("./confix-default.json"):
+                    data_str = open("./confix-default.json", "r").read()
+                    self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
+                    self.set_colors()
             else:
                 self.config["users"] = OrderedDict()
 
@@ -928,40 +930,10 @@ class Idefix:
         out = ""
         for row in self.users_store:
             out += "\n[%s]\n" % row[0]  # section
-            # write options
 
-##            email_time_condition = row[2].strip()
-##            if email_time_condition != "":
-##                days = email_time_condition.split(' ')[0]
-##                days = parse_date_format_to_squid(days)
-##                if len(email_time_condition.split(' ')) > 1:
-##                    email_time_condition = days + ' ' + email_time_condition.split(' ', 1)[1]
-##                else:
-##                    email_time_condition = days
-##                out += "@_email_time_condition = " + email_time_condition + "\n"
-##
-##            internet_time_condition = row[3].strip()
-##            if internet_time_condition != "":
-##                days = internet_time_condition.split(' ')[0]
-##                days = parse_date_format_to_squid(days)
-##                if len(internet_time_condition.split(' ')) > 1:
-##                    internet_time_condition = days + ' ' + internet_time_condition.split(' ', 1)[1]
-##                else:
-##                    internet_time_condition = days
-##                out += "@_internet_time_condition = " + internet_time_condition + "\n"
-##
-##            # email - 4, internet - 5, filtered - 6, open - 7
-##
-##            out += '@_email = %s\n' % row[4]
-##            if row[5]:
-##                if row[6]:
-##                    out += '@_internet = filtered\n'
-##                elif row[7]:
-##                    out += '@_internet = open\n'
-##            else:
-##                out += '@_internet = none\n'
+            # write users and macaddress
 
-            for child in row.iterchildren():  # write users and macaddress
+            for child in row.iterchildren():
                 user = child[0]
                 if user not in self.maclist:
                     alert("User %s has no mac address !" % user)

@@ -1,7 +1,7 @@
 from gi.repository import Gtk
 
 from util import (
-    askyesno, ask_text, ip_address_test, mac_address_test, format_comment, format_line, format_directive
+    askyesno, ask_text, ip_address_test, mac_address_test, format_comment, format_line, format_directive, get_config_path
 )
 
 
@@ -214,7 +214,7 @@ class Firewall:
             # set the command lines for the categories
             option = row[1].split("|")
 
-            myoptions = ["ACCEPT"]
+            myoptions = []
             if row[4] == 1:  # email
                 myoptions.append("email")
                 myoptions.append("ports_techniques")  # TODO problème de traduction
@@ -224,10 +224,17 @@ class Firewall:
                 if row[6] == 1:
                     myoptions.append("ftp")
                 elif row[7] == 1:
-                    myoptions = ["ACCEPT", "any"]
+                    myoptions = "any"
 
-            if len(myoptions) > 1:
-                tmp2 += format_directive(myoptions)
+            if len(myoptions) > 0:
+                ports = []
+                if myoptions == "any":
+                    ports = ["any"]
+                else :
+                    for group in myoptions:
+                        if self.controller.config["ports"][group].get("port"):
+                            ports += self.controller.config["ports"][group].get("port")
+                tmp2 += format_directive(["ACCEPT"] + ports)
             else:
                 tmp2 += format_directive(["DROP", "any"])
 
@@ -241,5 +248,5 @@ class Firewall:
         for section in sections:
             output += out[section]
 
-        with open("./tmp/firewall-users.ini", "w", encoding="utf-8-sig", newline="\n") as f1:
+        with open(get_config_path("./tmp/firewall-users.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(output)

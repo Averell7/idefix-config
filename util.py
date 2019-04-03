@@ -285,8 +285,7 @@ def format_domainline(dummy, line1):
     text = ""
     for value in line1.split("\n"):
         if value.strip() != "":
-            if len(re.findall("[a-zA-Z]", value)) == 0:  # no alphabetical characters, it is an IP address
-                # TODO  check that the ip address is valid
+            if ip_address_test(value):
                 key = "dest_ip"
             else:
                 key = "dest_domain"

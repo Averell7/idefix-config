@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.22.1 -->
 <interface>
-  <requires lib="gtk+" version="3.14"/>
+  <requires lib="gtk+" version="3.18"/>
   <object class="GtkWindow">
     <property name="can_focus">False</property>
     <child>
@@ -661,27 +661,27 @@
       <object class="GtkMenuItem">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="label" translatable="yes">add profile</property>
+        <property name="label" translatable="yes">add rule</property>
         <property name="use_underline">True</property>
-        <signal name="activate" handler="add_user_below2" swapped="no"/>
+        <signal name="activate" handler="add_rule_below" swapped="no"/>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="label" translatable="yes">delete profile</property>
+        <property name="label" translatable="yes">delete rule</property>
         <property name="use_underline">True</property>
-        <signal name="activate" handler="delete_user2" swapped="no"/>
+        <signal name="activate" handler="delete_rule" swapped="no"/>
       </object>
     </child>
     <child>
       <object class="GtkMenuItem">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="label" translatable="yes">rename profile</property>
+        <property name="label" translatable="yes">rename rule</property>
         <property name="use_underline">True</property>
-        <signal name="activate" handler="edit_user2" swapped="no"/>
+        <signal name="activate" handler="edit_rule" swapped="no"/>
       </object>
     </child>
   </object>
@@ -934,14 +934,6 @@
                           <object class="GtkMenuItem">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Connexions</property>
-                            <property name="use_underline">True</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkMenuItem">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Profiles</property>
                             <property name="use_underline">True</property>
                             <signal name="activate" handler="profile_open_window" swapped="no"/>
@@ -952,7 +944,7 @@
                   </object>
                 </child>
                 <child>
-                  <object class="GtkMenuItem">
+                  <object class="GtkMenuItem" id="menu_debug">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Debug</property>
@@ -2594,10 +2586,12 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
     </child>
   </object>
   <object class="GtkWindow" id="loading_window">
+    <property name="width_request">440</property>
+    <property name="height_request">120</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Loading</property>
     <property name="resizable">False</property>
-    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">440</property>
     <property name="default_height">120</property>
     <property name="type_hint">dialog</property>
@@ -2608,6 +2602,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
     </child>
     <child>
       <object class="GtkLabel">
+        <property name="width_request">-1</property>
+        <property name="height_request">-1</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">Loading remote configuration. Please wait</property>
@@ -2617,6 +2613,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
   <object class="GtkWindow" id="profiles_window">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Edit Profiles</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">440</property>
     <property name="default_height">250</property>
     <property name="destroy_with_parent">True</property>
@@ -2837,6 +2834,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
   <object class="GtkWindow" id="proxy_group_window">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Edit Proxy Group</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">440</property>
     <property name="default_height">250</property>
     <property name="type_hint">dialog</property>
@@ -2866,6 +2864,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
             <property name="can_focus">True</property>
             <property name="model">proxy_group_domain_store</property>
             <property name="headers_visible">False</property>
+            <property name="reorderable">True</property>
             <signal name="button-release-event" handler="proxy_group_domain_show_context" swapped="no"/>
             <child internal-child="selection">
               <object class="GtkTreeSelection"/>
@@ -2951,20 +2950,12 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
       </object>
     </child>
     <child>
-      <object class="GtkMenuItem" id="menuitem15">
+      <object class="GtkMenuItem" id="menu_rename_user">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="label" translatable="yes">delete</property>
-        <signal name="activate" handler="delete_user" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem" id="menu_add_user">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">add new user</property>
+        <property name="label" translatable="yes">rename user</property>
         <property name="use_underline">True</property>
-        <signal name="activate" handler="add_new_user" swapped="no"/>
+        <signal name="activate" handler="rename_user" swapped="no"/>
       </object>
     </child>
     <child>
@@ -2977,6 +2968,32 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
       </object>
     </child>
     <child>
+      <object class="GtkMenuItem" id="menu_add_user">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">add new user</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="add_new_user" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menu_rename_cat">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">rename category</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="rename_category" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menuitem15">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">delete</property>
+        <signal name="activate" handler="delete_user" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkMenuItem" id="menu_move_user">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -2985,7 +3002,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
       </object>
     </child>
     <child>
-      <object class="GtkCheckMenuItem">
+      <object class="GtkCheckMenuItem" id="simulate_user">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">Simulate user</property>

@@ -163,6 +163,9 @@ class Users:
             self.arw["menu_add_user"].show()
             self.arw["menu_add_cat"].show()
             self.arw["menu_move_user"].hide()
+            self.arw["menu_rename_user"].hide()
+            self.arw["menu_rename_cat"].show()
+            self.arw["simulate_user"].hide()
 
             self.arw['email_time_condition'].set_sensitive(
                 self.users_store[self.controller.iter_user][4] or self.users_store[self.controller.iter_user][7]
@@ -224,6 +227,9 @@ class Users:
             self.arw["menu_add_user"].hide()
             self.arw["menu_add_cat"].hide()
             self.arw["menu_move_user"].show()
+            self.arw["menu_rename_user"].show()
+            self.arw["menu_rename_cat"].hide()
+            self.arw["simulate_user"].show()
 
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
@@ -260,13 +266,13 @@ class Users:
                 self.arw["users_menu"].popup(None, None, None, None, event.button, event.time)
         return
 
-    def ask_user_dialog(self, level):
+    def ask_user_dialog(self, level, text = ""):
         if level == 1:
             new = _("Name of the new category")
         else:
             new = _("Name of the new user")
 
-        return ask_text(self.arw["window1"], new, "")
+        return ask_text(self.arw["window1"], new, text)
 
     def does_user_exist(self, name):
         """Check if the user exists or not"""
@@ -351,7 +357,7 @@ class Users:
         if res:
             self.users_store.remove(node)
 
-    def edit_user(self, widget):
+    def rename_user(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
         name = model.get_value(node, 0)
         x = ask_text(self.arw["window1"], "Name of the user :", name)
@@ -365,8 +371,21 @@ class Users:
                     i = users.index(name)
                     users[i] = x
                 self.controller.proxy_store.set_value(item.iter, 5, '\n'.join(users))
-                self.controller.load_proxy_user(self.arw['treeview3'], event=None)
+                #self.controller.load_proxy_user(self.arw['treeview3'], event=None)
+            # update the mac list
+            self.controller.maclist[x] = self.controller.maclist[name]
+            del self.controller.maclist[name]
 
+            self.users_store.set(node, [0], [x])
+
+    def rename_category(self, widget):
+        (model, node) = self.arw["treeview1"].get_selection().get_selected()
+        name = model.get_value(node, 0)
+        x = self.ask_user_dialog(1, name)
+
+        if x is None:
+            return
+        else:
             self.users_store.set(node, [0], [x])
 
     def change_category(self, widget, void, cat):
@@ -382,33 +401,7 @@ class Users:
 
         # self.users_store.move_after(self.controller.iter_user, node)       # serait plus élégant mais ne marche pas
 
-    def add_user_below2(self, widget):
-        # add rule in the proxy tab
-        (model, node) = self.arw["treeview3"].get_selection().get_selected()
-        x = ask_text(self.arw["window1"], "Name of the new rule :", "")
-        if x is None:
-            return
-        else:
-            name = format_name(x)
-            iter1 = self.controller.proxy_store.insert_after(node,
-                                                             [name, "on", "allow", "", "", "", "", "", "", "", "", "",
-                                                              0, 1, 1, "#009900", "#ffffff"])
 
-    def delete_user2(self, widget):
-        (model, node) = self.arw["treeview3"].get_selection().get_selected()
-        name = model.get_value(node, 0)
-        if askyesno("Remove filter rule", "Do you want to remove %s?" % name):
-            self.controller.proxy_store.remove(node)
-
-    def edit_user2(self, widget):
-        (model, node) = self.arw["treeview3"].get_selection().get_selected()
-        name = model.get_value(node, 0)
-        x = ask_text(self.arw["window1"], "Name of the rule :", name)
-        if x is None:
-            return
-        else:
-            x = format_name(x)
-            self.controller.proxy_store.set(node, [0], [x])
 
     def check_addresses(self, widget):
         buffer = self.arw['maclist'].get_buffer()
