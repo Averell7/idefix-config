@@ -357,11 +357,22 @@ class ProxyUsers:
             self.arw["notebook2"].set_current_page(0)
             current_page = 0
 
-        # load the chooser if the "groups" tab is active.
-        if current_page == 0:
+        # Try to load the right chooser
+        # If the users list is active (red frame)
+        if self.arw['proxy_users_scroll_window'].get_style_context().has_class("chosen_list"):
+            self.arw["chooser"].set_model(self.controller.chooser_users_store)
+
+        # For destination
+        # Do not load the chooser if destination set to full access
+        elif self.proxy_store[self.controller.iter_proxy][12] == 1:
+            self.arw["chooser"].set_model(EMPTY_STORE)
+
+        # load the groups chooser if the "groups" tab is active.
+        elif current_page == 0:
             self.arw["chooser"].set_model(self.controller.groups_store)
         else:
             self.arw["chooser"].set_model(EMPTY_STORE)
+
 
     def proxy_profile_select(self, widget, event):
         if event.type == Gdk.EventType.BUTTON_RELEASE:

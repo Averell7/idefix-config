@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # version 0.30.0 : Chris : right click menu for proxy_groups
-# version 0.29.0 : Chris : encrypt passwords 
+# version 0.29.0 : Chris : encrypt passwords
 # version 0.28.0 : Chris (4) = gui reorganization
 # version 0.27.1 : lots of little fixes
 # version 0.27.0 : json config
@@ -728,36 +728,33 @@ class Idefix:
     def test1(self, widget, a=""):
         print("test1", repr(a))
 
-    def load_chooser(self, widget, event=None, data=None):
+    def load_chooser(self, widget, event=None):
 
-        if data is None:  # TODO is this useful ???
-            if widget.name in ["proxy_users"]:
-                self.active_chooser = 'proxy_users'
-                self.arw["chooser"].set_model(self.chooser_users_store)
-                ctx = self.arw['proxy_users_scroll_window'].get_style_context()
-                ctx.add_class('chosen_list')
+        if widget.name in ["proxy_users"]:
+            self.active_chooser = 'proxy_users'
+            self.arw["chooser"].set_model(self.chooser_users_store)
+            ctx = self.arw['proxy_users_scroll_window'].get_style_context()
+            ctx.add_class('chosen_list')
 
-                ctx = self.arw['proxy_group_scroll_window'].get_style_context()
-                ctx.remove_class('chosen_list')
-            elif widget.name == "firewall_users":
-                self.arw["chooser2"].set_model(self.users_store)
-            elif widget.name in ["proxy_group"]:
-                self.active_chooser = 'proxy_group'
-                self.arw["chooser"].set_model(self.groups_store)
-                ctx = self.arw['proxy_group_scroll_window'].get_style_context()
-                ctx.add_class('chosen_list')
+            ctx = self.arw['proxy_group_scroll_window'].get_style_context()
+            ctx.remove_class('chosen_list')
+        elif widget.name == "firewall_users":
+            self.arw["chooser2"].set_model(self.users_store)
+        elif widget.name in ["proxy_group"]:
+            self.active_chooser = 'proxy_group'
+            self.arw["chooser"].set_model(self.groups_store)
+            ctx = self.arw['proxy_group_scroll_window'].get_style_context()
+            ctx.add_class('chosen_list')
 
-                ctx = self.arw['proxy_users_scroll_window'].get_style_context()
-                ctx.remove_class('chosen_list')
-            elif widget.name in ["firewall_ports"]:
-                self.arw["chooser2"].set_model(self.ports_store)
+            ctx = self.arw['proxy_users_scroll_window'].get_style_context()
+            ctx.remove_class('chosen_list')
+        elif widget.name in ["firewall_ports"]:
+            self.arw["chooser2"].set_model(self.ports_store)
 
-            else:
-                self.arw["chooser"].set_model(self.empty_store)
-                self.arw["chooser2"].set_model(self.empty_store)
-                self.active_chooser = None
         else:
-            print("===>", repr(data))
+            self.arw["chooser"].set_model(self.empty_store)
+            self.arw["chooser2"].set_model(self.empty_store)
+            self.active_chooser = None
 
     def on_permissions_tab_change(self, widget, a, page):
         # launched by the switch page signal of notebook2
@@ -1071,8 +1068,9 @@ if __name__ == "__main__":
     if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
         load_locale = True
 
-    dialog = PasswordDialog()
-    password = dialog.run()
+    #dialog = PasswordDialog()
+    #password = dialog.run()
+    password = ""
 
     win = Idefix(configname, password)
     gtk.main()
