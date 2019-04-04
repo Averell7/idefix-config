@@ -1,14 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
+
+import os
+import sys
+from collections import OrderedDict
+
 
 # version 0.16.2 bug fix
 # version 0.16.1  # isdata parameter added
-
-import os, sys, codecs
-from collections import OrderedDict
 
 
 class myConfigParser() :
@@ -103,7 +104,12 @@ class myConfigParser() :
                 record_data = record_s.split("=")
                 if len(record_data) > 1 :
                     key = record_data[0].strip()
-                    linedata = record_data[1].strip()
+                    if ' #' in record_data[1]:
+                        # Contains a comment
+                        data, comment = record_data[1].split(' #')
+                        linedata = data.strip()
+                    else:
+                        linedata = record_data[1].strip()
                     if linedata == "False" :
                         linedata = False
                     if linedata == "True" :

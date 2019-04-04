@@ -3,6 +3,7 @@ import time
 from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
+from myconfigparser import myConfigParser
 from util import askyesno, ask_text
 
 
@@ -63,6 +64,46 @@ class ProxyGroup:
                     tooltip = _("(error)")
 
                 self.proxy_group_store.set_value(iter, 1, tooltip)
+
+    def show_import_proxy_group_window(self, widget):
+        """Opens a dialog to import the proxy group"""
+
+        # Clear the import buffer
+        buf = self.arw['proxy_group_import_view'].get_buffer()
+        buf.set_text('')
+
+        self.arw['import_proxy_group_dialog'].show_all()
+        if not self.arw['import_proxy_group_dialog'].run():
+            self.arw['import_proxy_group_dialog'].hide()
+            return
+
+        # Start Importing
+        parser = myConfigParser()
+        data = parser.read(
+            buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False).split('\n'),
+            'groups',
+            isdata=True
+        )
+        if not data:
+            print("Error parsing data")
+
+        for key in data['groups']:
+            tooltip = '\n'.join(data['groups'][key].get('dest_domain', ''))
+            if data['groups'][key].get('dest_ip', ''):
+                if tooltip:
+                    tooltip += '\n'
+                tooltip += '\n'.join(data['groups'][key].get('dest_ip', ''))
+
+            if 'lines' in data['groups'][key]:
+                if tooltip:
+                    tooltip += '\n'
+                tooltip += data['groups'][key]['lines']
+
+            new_iter = self.groups_store.append()
+            self.groups_store.set_value(new_iter, 0, key)
+            self.groups_store.set_value(new_iter, 1, tooltip)
+
+        self.arw['import_proxy_group_dialog'].hide()
 
     def delete_proxy_group(self, widget):
         model, iter = self.arw['proxy_group'].get_selection().get_selected()

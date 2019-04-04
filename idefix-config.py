@@ -36,7 +36,8 @@ from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
-    EMPTY_STORE, SignalHandler, get_config_path, write_default_config
+    EMPTY_STORE, SignalHandler, get_config_path, write_default_config,
+    ip_address_test
 )
 from icons import (
     internet_full_icon, internet_filtered_icon,
@@ -459,6 +460,10 @@ class Idefix:
         data1 = self.config["groups"]
         for key in data1:
             tooltip = "\n".join(data1[key].get('dest_domain', ''))
+            if data1[key].get('dest_ip', ''):
+                if tooltip:
+                    tooltip += '\n'
+                tooltip += "\n".join(data1[key].get('dest_ip', ''))
             self.groups_store.append([key, tooltip])
 
     def populate_users_chooser(self) :
@@ -1004,9 +1009,20 @@ class Idefix:
 
         # groups store
         for row in self.groups_store:
-            config2['groups'][row[0]] = {
-                'dest_domain': row[1].split('\n')
-            }
+            config2['groups'][row[0]] = {}
+            domains = []
+            ip = []
+            for line in row[1].split('\n'):
+                if ip_address_test(line):
+                    ip.append(line)
+                else:
+                    domains.append(line)
+
+            if domains:
+                config2['groups'][row[0]]['dest_domain'] = domains
+
+            if ip:
+                config2['groups'][row[0]]['dest_ip'] = ip
 
         return config2
 
