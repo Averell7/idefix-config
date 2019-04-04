@@ -36,8 +36,7 @@ from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
-    EMPTY_STORE, SignalHandler, PasswordDialog,
-    get_config_path, write_default_config
+    EMPTY_STORE, SignalHandler, get_config_path, write_default_config
 )
 from icons import (
     internet_full_icon, internet_filtered_icon,
@@ -1002,6 +1001,12 @@ class Idefix:
 
         for row in self.firewall_store:
             config2["firewall"][row[0]] = OrderedDict()
+
+        # groups store
+        for row in self.groups_store:
+            config2['groups'][row[0]] = {
+                'dest_domain': row[1].split('\n')
+            }
 
         return config2
 
