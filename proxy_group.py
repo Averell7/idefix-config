@@ -145,12 +145,22 @@ class ProxyGroup:
         self.editing_iter = iter
         self.proxy_group_domain_store.clear()
         for domain in self.groups_store.get_value(iter, 1).split('\n'):
-            if domain.startswith('('):
+            if not domain or domain.startswith('('):
                 continue
             new_iter = self.proxy_group_domain_store.append()
             self.proxy_group_domain_store.set_value(new_iter, 0, domain)
         self.proxy_group_window.show_all()
         self.arw['proxy_group_message_label'].set_label(_("Editing %s") % self.groups_store.get_value(iter, 0))
+
+    def new_proxy_group(self, widget):
+        """Create a new proxy group and open it for editing"""
+        name = ask_text(self.arw['window1'], _("New group name"))
+        if not name:
+            return
+        new_iter = self.groups_store.append()
+        self.groups_store.set_value(new_iter, 0, name)
+        self.groups_store.set_value(new_iter, 1, '')
+        self.edit_group(new_iter)
 
     def proxy_group_add_item(self, widget):
         """Add a new domain to the list"""
