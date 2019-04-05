@@ -380,6 +380,14 @@
         <signal name="activate" handler="edit_proxy_group" object="chooser" swapped="no"/>
       </object>
     </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">new</property>
+        <signal name="activate" handler="new_proxy_group" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkDialog" id="dialog1">
     <property name="can_focus">False</property>
@@ -625,6 +633,78 @@
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkTextBuffer" id="proxy_group_import_buffer"/>
+  <object class="GtkDialog" id="import_proxy_group_dialog">
+    <property name="can_focus">False</property>
+    <property name="default_width">320</property>
+    <property name="default_height">260</property>
+    <property name="type_hint">dialog</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button2">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkTextView" id="proxy_group_import_view">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="buffer">proxy_group_import_buffer</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="0">button1</action-widget>
+      <action-widget response="1">button2</action-widget>
+    </action-widgets>
+  </object>
   <object class="GtkMenu" id="proxy_groups_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -643,6 +723,14 @@
         <property name="label" translatable="yes">edit</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="edit_proxy_group" object="proxy_group" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">new</property>
+        <signal name="activate" handler="new_proxy_group" swapped="no"/>
       </object>
     </child>
   </object>
@@ -937,6 +1025,14 @@
                             <property name="label" translatable="yes">Profiles</property>
                             <property name="use_underline">True</property>
                             <signal name="activate" handler="profile_open_window" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkMenuItem">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Import Proxy Group</property>
+                            <signal name="activate" handler="show_import_proxy_group_window" swapped="no"/>
                           </object>
                         </child>
                       </object>
