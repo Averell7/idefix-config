@@ -458,32 +458,32 @@ class ProxyUsers:
                     out += format_userline("user", row[5])
                 out += format_line("time_condition", time_condition2)
                 if format_line("destination", row[10]) == "":
-                    #convert groups in domains
-                    data1 = row[7].strip().split('\n')
-                    data2 = []
-                    for group in data1:
-                        if group == "":
-                            continue
-                        else :
-                            for key in ["dest_domain", "dest_ip"]:
-                                if self.controller.config["groups"][group].get(key):
-                                    data2 += self.controller.config["groups"][group].get(key)
-                    out += format_domainline("dest_domain", "\n".join(data2))
+                    out += format_line("dest_group", row[7])
                     out += format_domainline("dest_domain", row[8])
                 else:
                     out += format_line("destination", row[10])
 
         # add default permissions
-        if self.controller.config["groups"].get("antivirus"):
-            antivirus_group = []
-            for key in ["dest_domain", "dest_ip"]:
-                if self.controller.config["groups"]["antivirus"].get(key):
-                    antivirus_group += self.controller.config["groups"]["antivirus"].get(key)
             out += "\n[@_antivirus]\n"
             out += "active = on \n"
             out += "action = allow \n"
             out += "user = any \n"
-            out += format_domainline("dest_domain", "\n".join(antivirus_group))
+        out += "dest_group = antivirus \n"
 
         with open(get_config_path("./tmp/proxy-users.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
+            f1.write(out)
+
+
+    def build_proxy_groups_ini(self):        # TODO Dysmas - add
+
+        out = ""
+        key = self.controller.config["groups"]
+        for group in key:
+            out += "\n[" + group + "]\n"
+            for key2 in ["comments", "dest_domain", "dest_ip"]:
+                if key2 in key[group]:
+                    for line1 in key[group][key2]:
+                        out += key2 + " = " + line1 + "\n"
+
+        with open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(out)

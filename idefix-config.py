@@ -54,7 +54,7 @@ from config_profile import ConfigProfile
 ###########################################################################
 global version, future
 future = False  # activate beta functions
-version = "0.30.0"
+version = "0.31.0"
 
 
 gtk = Gtk
@@ -913,6 +913,7 @@ class Idefix:
         # launched by the GO button
         self.build_users()
         self.proxy_users.build_proxy_ini()
+        self.proxy_users.build_proxy_groups_ini()
         self.firewall.build_firewall_ini()
         self.rebuild_config()
         f1 = open(get_config_path("idefix-config.json"), "w")
@@ -1036,7 +1037,9 @@ class Idefix:
             return
         if uploadlist is None:
             uploadlist = [
-                "./tmp/users.ini", "./tmp/firewall-users.ini", "./tmp/proxy-users.ini", "./idefix-config.json"
+                "./tmp/users.ini", "./tmp/firewall-users.ini",
+                "./tmp/proxy-users.ini", "./tmp/proxy-groups.ini",           # TODO Dysmas - add
+                "./idefix-config.json"
             ]
         for file1 in uploadlist:
             ret = ftp_send(ftp, get_config_path(file1))
