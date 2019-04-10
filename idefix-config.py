@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 0.32.0 : Proxy tab reorganized
 # version 0.30.0 : Chris : right click menu for proxy_groups
 # version 0.29.0 : Chris : encrypt passwords
 # version 0.28.0 : Chris (4) = gui reorganization
@@ -53,8 +54,8 @@ from config_profile import ConfigProfile
 # CONFIGURATION ###########################################################
 ###########################################################################
 global version, future
-future = False  # activate beta functions
-version = "0.31.0"
+future = True  # ctivate beta functions
+version = "0.32.0"
 
 
 gtk = Gtk
@@ -191,18 +192,25 @@ class Idefix:
             self.arw["firewall_disabled"].hide()
 
         # images for buttons
-        # image = Gtk.Image()
-        # image.set_from_file("./data/Bouton bleu.png")
-        # self.blue_button = image
-        # image2 = Gtk.Image()
-        # image2.set_from_file("./data/Bouton rouge.png")
-        # self.red_button = image2
-        # image3 = Gtk.Image()
-        # image3.set_from_file("./data/Bouton jaune.png")
-        # self.yellow_button = image3
-        # image4 = Gtk.Image()
-        # image4.set_from_file("./data/Bouton vert.png")
-        # self.green_button = image4
+        image = Gtk.Image()
+        image.set_from_file("./data/toggle_all.png")
+        self.all_button = image
+        image2 = Gtk.Image()
+        image2.set_from_file("./data/toggle_list.png")
+        self.list_button = image2
+        image3 = Gtk.Image()
+        image3.set_from_file("./data/toggle_allow.png")
+        self.allow_button = image3
+        image4 = Gtk.Image()
+        image4.set_from_file("./data/toggle_deny.png")
+        self.deny_button = image4
+        image5 = Gtk.Image()
+
+        image5.set_from_file("./data/toggle_all.png")
+        self.all2_button = image5
+        image6 = Gtk.Image()
+        image6.set_from_file("./data/toggle_list.png")
+        self.list2_button = image6
 
         # self.arw["button1"].set_image(self.blue_button)
         # self.arw["button1"].set_always_show_image(True)
@@ -404,9 +412,16 @@ class Idefix:
         # create a special store with users who have an Internet access
         self.chooser_users_store = gtk.TreeStore(str, str, str)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('---'), self.users.cell, text=0)
+        self.tvcolumn = gtk.TreeViewColumn(_('Groups Drag and Drop'), self.users.cell, text=0)
         self.arw["chooser"].append_column(self.tvcolumn)
         self.arw["chooser"].get_selection()
+        self.arw["chooser"].set_model(self.groups_store)
+        # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
+
+        self.tvcolumn = gtk.TreeViewColumn(_('Users Drag and Drop'), self.users.cell, text=0)
+        self.arw["chooser1"].append_column(self.tvcolumn)
+        self.arw["chooser1"].get_selection()
+        self.arw["chooser1"].set_model(self.chooser_users_store)
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         self.tvcolumn = gtk.TreeViewColumn(_('---'), self.users.cell, text=0)
@@ -417,7 +432,7 @@ class Idefix:
         self.ports_store = gtk.ListStore(str)  #
         self.empty_store = EMPTY_STORE
 
-        for chooser in ["chooser", "chooser2"]:
+        for chooser in ["chooser", "chooser1", "chooser2"]:
             self.arw[chooser].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [],
                                                        DRAG_ACTION)
             self.arw[chooser].drag_source_add_text_targets()
@@ -732,7 +747,8 @@ class Idefix:
     def test1(self, widget, a=""):
         print("test1", repr(a))
 
-    def load_chooser(self, widget, event=None):
+    def load_chooser(self, widget, event=None):          # TODO no longer used
+        return
 
         if widget.name in ["proxy_users"]:
             self.active_chooser = 'proxy_users'

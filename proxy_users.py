@@ -55,7 +55,7 @@ class ProxyUsers:
         self.treeview3.connect("button-press-event", self.load_proxy_user)
 
         self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell3, text=0, foreground=15, background=16)
-        self.tvcolumn.set_fixed_width(250)
+        #self.tvcolumn.set_fixed_width(200)
         self.treeview3.append_column(self.tvcolumn)
 
         self.tvcolumn = Gtk.TreeViewColumn(_('On/Off'), self.check2, active=14)
@@ -70,13 +70,12 @@ class ProxyUsers:
         if treestore.get_value(self.controller.iter_proxy, 12) == 0:
             treestore.set_value(self.controller.iter_proxy, 12, 1)
             treestore.set_value(self.controller.iter_proxy, 10, "any")
-            self.arw["notebook2"].show()
             treestore.set_value(self.controller.iter_proxy, 16, "#ffff88")
         else:
             treestore.set_value(self.controller.iter_proxy, 12, 0)
             treestore.set_value(self.controller.iter_proxy, 10, "")
-            self.arw["notebook2"].hide()
             treestore.set_value(self.controller.iter_proxy, 16, "#ffffff")
+            #self.arw["toggle_proxy_open_button"].set_image(self.controller.red_button)
         self.load_proxy_user2()
 
     def toggle_col5(self, widget):
@@ -99,13 +98,16 @@ class ProxyUsers:
         if treestore.get_value(self.controller.iter_proxy, 13) == 0:
             treestore.set_value(self.controller.iter_proxy, 13, 1)
             treestore.set_value(self.controller.iter_proxy, 2, "allow")
-            self.arw["notebook2"].show()
             treestore.set_value(self.controller.iter_proxy, 15, "#009900")
+            self.arw["allow_deny_groups"].set_text("Allowed Groups")
+            self.arw["allow_deny_sites"].set_text("Allowed Sites")
         else:
             treestore.set_value(self.controller.iter_proxy, 13, 0)
             treestore.set_value(self.controller.iter_proxy, 2, "deny")
-            self.arw["notebook2"].hide()
             treestore.set_value(self.controller.iter_proxy, 15, "#f00000")
+            self.arw["allow_deny_groups"].set_text("Denied Groups")
+            self.arw["allow_deny_sites"].set_text("Denied Sites")
+
         self.load_proxy_user2()
 
 
@@ -273,6 +275,7 @@ class ProxyUsers:
             self.arw["proxy_time_condition_days"].set_text("")
             self.arw["proxy_time_condition_from"].set_text("")
             self.arw["proxy_time_condition_to"].set_text("")
+            self.arw["time_button_label"].set_text("All day\nand week")
 
         elif len(data1) > 8:
             try:
@@ -281,10 +284,13 @@ class ProxyUsers:
                 days = tmp1[0].strip()
                 time_from = tmp2[0].strip()
                 time_to = tmp2[1].strip()
-
+                button_text ='<span foreground="#008800" weight="bold" size="large">'
+                button_text += days + "\n" + time_from + "-" + time_to + "</span>"
                 self.arw["proxy_time_condition_days"].set_text(days)
                 self.arw["proxy_time_condition_from"].set_text(time_from)
                 self.arw["proxy_time_condition_to"].set_text(time_to)
+                self.arw["time_button_label"].set_markup(button_text)
+
             except:
                 print("Error handling time condition :", data1)
         else:
@@ -307,33 +313,51 @@ class ProxyUsers:
         list_color = Gdk.Color(red=50535, green=50535, blue=60535)
 
         if self.proxy_store[self.controller.iter_proxy][11] == 1:
-            self.arw["proxy_users"].hide()
-            self.arw['toggle_proxy_user_open'].set_label(_("<b>All</b>"))
-            self.arw["toggle_proxy_user_open_button"].modify_bg(Gtk.StateType.NORMAL,
-                                                                Gdk.Color(red=60535, green=60535, blue=0))
+            self.arw["proxy_users_stack"].set_visible_child(self.arw["proxy_users_all"])
+            self.arw["toggle_proxy_user_open_button"].set_image(self.controller.all_button)
+            #self.arw['toggle_proxy_user_open'].set_label(_("<b>All</b>"))
+            #self.arw["toggle_proxy_user_open_button"].modify_bg(Gtk.StateType.NORMAL,
+            #                                                    Gdk.Color(red=60535, green=60535, blue=0))
+
         else:
-            self.arw["proxy_users"].show()
-            self.arw["toggle_proxy_user_open"].set_label(_("<b>List</b>"))
-            self.arw["toggle_proxy_user_open_button"].modify_bg(Gtk.StateType.NORMAL, list_color)
+            self.arw["proxy_users_stack"].set_visible_child(self.arw["proxy_users_scroll_window"])
+            self.arw["toggle_proxy_user_open_button"].set_image(self.controller.list_button)
+            #self.arw["toggle_proxy_user_open"].set_label(_("<b>List</b>"))
+            #self.arw["toggle_proxy_user_open_button"].modify_bg(Gtk.StateType.NORMAL, list_color)
+
+
 
         # set full access
         if self.proxy_store[self.controller.iter_proxy][12] == 1:
-            self.arw["notebook2"].hide()
-            self.arw["toggle_proxy_open"].set_label(_("<b>All</b>"))
-            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL,
-                                                           Gdk.Color(red=60535, green=60535, blue=0))
+            self.arw["proxy_dest_stack"].set_visible_child(self.arw["proxy_dest_all"])
+            self.arw["toggle_proxy_open_button"].set_image(self.controller.all2_button)
+#            self.arw["toggle_proxy_open"].set_label(_("<b>All</b>"))
+#            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL,
+#                                                           Gdk.Color(red=60535, green=60535, blue=0))
         else:
-            self.arw["notebook2"].show()
-            self.arw["toggle_proxy_open"].set_label(_("<b>List</b>"))
-            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL, list_color)
+            self.arw["toggle_proxy_open_button"].set_image(self.controller.list2_button)
+#            self.arw["toggle_proxy_open"].set_label(_("<b>List</b>"))
+#            self.arw["toggle_proxy_open_button"].modify_bg(Gtk.StateType.NORMAL, list_color)
+            self.arw["proxy_dest_stack"].set_visible_child(self.arw["proxy_dest_grid"])
+
 
         # set allow/deny button
         if self.proxy_store[self.controller.iter_proxy][13] == 1:
-            self.arw["toggle_proxy_allow"].set_label(_("<b>Allow</b>"))
-            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=0, green=60535, blue=0))
+            self.arw["toggle_proxy_allow_button"].set_image(self.controller.allow_button)
+            self.arw["proxy_dest_all"].set_text(_("All destinations \nallowed"))
+            self.arw["allow_deny_groups"].set_text("Allowed Groups")
+            self.arw["allow_deny_sites"].set_text("Allowed Sites")
+            #self.arw["toggle_proxy_allow"].set_label(_("<b>Allow</b>"))
+            #self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=0, green=60535, blue=0))
+
         else:
-            self.arw["toggle_proxy_allow"].set_label(_("<b>Deny</b>"))
-            self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60535, green=0, blue=0))
+            self.arw["toggle_proxy_allow_button"].set_image(self.controller.deny_button)
+            self.arw["proxy_dest_all"].set_text(_("All connections\nto Internet\nare prohibited."))
+            self.arw["allow_deny_groups"].set_text("Denied Groups")
+            self.arw["allow_deny_sites"].set_text("Denied Sites")
+            #self.arw["toggle_proxy_allow"].set_label(_("<b>Deny</b>"))
+            #self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60535, green=0, blue=0))
+
 
         # if the first tab of permissions is empty, open the second
         x = self.arw["notebook2"].get_current_page()
@@ -357,22 +381,26 @@ class ProxyUsers:
             self.arw["notebook2"].set_current_page(0)
             current_page = 0
 
-        # Try to load the right chooser
-        # If the users list is active (red frame)
-        if self.arw['proxy_users_scroll_window'].get_style_context().has_class("chosen_list"):
-            self.arw["chooser"].set_model(self.controller.chooser_users_store)
+##        # Try to load the right chooser
+##        # If the users list is active (red frame)
+##        if self.arw['proxy_users_scroll_window'].get_style_context().has_class("chosen_list"):
+##            self.arw["chooser"].set_model(self.controller.chooser_users_store)
+##
+##        # For destination
+##        # Do not load the chooser if destination set to full access
+##        elif self.proxy_store[self.controller.iter_proxy][12] == 1:
+##            self.arw["chooser"].set_model(EMPTY_STORE)
+##
+##        # load the groups chooser if the "groups" tab is active.
+##        elif current_page == 0:
+##            self.arw["chooser"].set_model(self.controller.groups_store)
+##        else:
+##            self.arw["chooser"].set_model(EMPTY_STORE)
 
-        # For destination
-        # Do not load the chooser if destination set to full access
-        elif self.proxy_store[self.controller.iter_proxy][12] == 1:
-            self.arw["chooser"].set_model(EMPTY_STORE)
-
-        # load the groups chooser if the "groups" tab is active.
-        elif current_page == 0:
-            self.arw["chooser"].set_model(self.controller.groups_store)
-        else:
-            self.arw["chooser"].set_model(EMPTY_STORE)
-
+    def show_time_conditions_window(self, widget):
+        self.arw["proxy_time_conditions"].show()
+    def hide_time_conditions_window(self, widget):
+        self.arw["proxy_time_conditions"].hide()
 
     def proxy_profile_select(self, widget, event):
         if event.type == Gdk.EventType.BUTTON_RELEASE:
@@ -464,10 +492,10 @@ class ProxyUsers:
                     out += format_line("destination", row[10])
 
         # add default permissions
-            out += "\n[@_antivirus]\n"
-            out += "active = on \n"
-            out += "action = allow \n"
-            out += "user = any \n"
+        out += "\n[@_antivirus]\n"
+        out += "active = on \n"
+        out += "action = allow \n"
+        out += "user = any \n"
         out += "dest_group = antivirus \n"
 
         with open(get_config_path("./tmp/proxy-users.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:

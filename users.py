@@ -150,7 +150,7 @@ class Users:
         self.controller.iter_user = iter1
 
         if level == 1:  # category level
-            self.arw["notebook5"].set_current_page(0)
+            self.arw["users_stack"].set_visible_child(self.arw["vbox2"])
 
             # set internet rights in the check boxes and radio list
             self.arw["internet_email"].set_active(self.users_store[iter1][4] or self.users_store[iter1][7])
@@ -220,7 +220,8 @@ class Users:
                 print("Invalid time :", data1)
 
         elif level == 2:  # user level
-            self.arw["notebook5"].set_current_page(2)
+            self.arw["notebook5"].set_current_page(0)
+            self.arw["users_stack"].set_visible_child(self.arw["notebook5"])
             # adapt the right click menu
             self.arw["menu_add_above"].show()
             self.arw["menu_add_below"].show()
