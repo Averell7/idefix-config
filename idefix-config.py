@@ -54,8 +54,8 @@ from config_profile import ConfigProfile
 # CONFIGURATION ###########################################################
 ###########################################################################
 global version, future
-future = True  # ctivate beta functions
-version = "0.32.0"
+future = True  # Activate beta functions
+version = "0.34.0"
 
 
 gtk = Gtk

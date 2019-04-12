@@ -220,8 +220,8 @@ class Users:
                 print("Invalid time :", data1)
 
         elif level == 2:  # user level
-            self.arw["notebook5"].set_current_page(0)
-            self.arw["users_stack"].set_visible_child(self.arw["notebook5"])
+
+            self.arw["users_stack"].set_visible_child(self.arw["user_summary_frame"])
             # adapt the right click menu
             self.arw["menu_add_above"].show()
             self.arw["menu_add_below"].show()
@@ -491,42 +491,40 @@ class Users:
         self.arw['user_summary_frame_label'].set_label(_("Summary For ") + user1)
 
         if user1 not in self.controller.maclist:
-            self.arw['user_summary_mac_address'].set_label(_("Number of MAC Addresses: ") + "0")
-        else:
-            self.arw['user_summary_mac_address'].set_label(
-                _("Number of MAC Addresses: ") + str(len(self.controller.maclist[user1]))
+            self.arw['maclist'].get_buffer().set_text(
+                _("# No mac address for this user")
             )
 
-        email_time_conditions = self.users_store.get_value(parent_iter, 2)
-        internet_time_conditions = self.users_store.get_value(parent_iter, 3)
-        email_enabled = self.users_store.get_value(parent_iter, 4)
-        internet_enabled = self.users_store.get_value(parent_iter, 5)
-        internet_filtered = self.users_store.get_value(parent_iter, 6)
-        internet_open = self.users_store.get_value(parent_iter, 7)
-
-        if not email_enabled:
-            self.arw['user_summary_email_icon'].set_from_pixbuf(email_disabled_icon)
-        else:
-            self.arw['user_summary_email_icon'].set_from_pixbuf(email_icon)
-
-        if not internet_enabled:
-            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_disabled_icon)
-        elif internet_filtered:
-            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_filtered_icon)
-        elif internet_open:
-            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_full_icon)
-
-        # internet time conditions
-        if internet_time_conditions:
-            self.arw['user_summary_internet_time_conditions'].set_label(internet_time_conditions)
-        else:
-            self.arw['user_summary_internet_time_conditions'].set_label("")
-
-        # email time conditions
-        if email_time_conditions:
-            self.arw['user_summary_email_time_conditions'].set_label(email_time_conditions)
-        else:
-            self.arw['user_summary_email_time_conditions'].set_label("")
+##        email_time_conditions = self.users_store.get_value(parent_iter, 2)
+##        internet_time_conditions = self.users_store.get_value(parent_iter, 3)
+##        email_enabled = self.users_store.get_value(parent_iter, 4)
+##        internet_enabled = self.users_store.get_value(parent_iter, 5)
+##        internet_filtered = self.users_store.get_value(parent_iter, 6)
+##        internet_open = self.users_store.get_value(parent_iter, 7)
+##
+##        if not email_enabled:
+##            self.arw['user_summary_email_icon'].set_from_pixbuf(email_disabled_icon)
+##        else:
+##            self.arw['user_summary_email_icon'].set_from_pixbuf(email_icon)
+##
+##        if not internet_enabled:
+##            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_disabled_icon)
+##        elif internet_filtered:
+##            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_filtered_icon)
+##        elif internet_open:
+##            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_full_icon)
+##
+##        # internet time conditions
+##        if internet_time_conditions:
+##            self.arw['user_summary_internet_time_conditions'].set_label(internet_time_conditions)
+##        else:
+##            self.arw['user_summary_internet_time_conditions'].set_label("")
+##
+##        # email time conditions
+##        if email_time_conditions:
+##            self.arw['user_summary_email_time_conditions'].set_label(email_time_conditions)
+##        else:
+##            self.arw['user_summary_email_time_conditions'].set_label("")
 
         store = self.arw['user_summary_tree_store']
         store.clear()
@@ -537,6 +535,7 @@ class Users:
         # 3 - icon2
         # 4 - text colour
         # 5 - strikethrough
+        # 6 - proxy row reference
         for row in self.controller.firewall_store:
             users = row[6].split("\n")
             for userx in users:
@@ -556,6 +555,7 @@ class Users:
                         child_iter = store.append(parent_iter)
                         store.set_value(child_iter, 0, port)
 
+        i = 0
         for row in self.controller.proxy_store:
             users = row[5].split("\n")
             for userx in users:
@@ -579,6 +579,11 @@ class Users:
                     for domain in row[8].split('\n'):
                         child_iter = store.append(parent_iter)
                         store.set_value(child_iter, 0, domain)
+                        store.set_value(child_iter, 6, i)
+
+                    store.set_value(parent_iter, 6, i)
+
+            i += 1
 
     def summary_warning(self, widget=None, event=None):
 
@@ -586,6 +591,30 @@ class Users:
             return
         message = _("The user summary is not editable. \n See the Internet Filter tab.")
         showwarning(_("Not editable"), message, 2)
+
+
+    def load_user_config(self, widget, event, iternew=None):
+        """ When user clicks on a line of the summary, selects the right rule in proxy tab, and displays this tab"""
+
+        if event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 3:  # right click, runs the context menu
+                store = self.arw['user_summary_tree_store']
+                if iternew:
+                    iter1 = iternew
+                    level = 2
+                else:
+                    path = widget.get_path_at_pos(event.x, event.y)
+                    if path is None:  # click outside a valid line
+                        return
+                    iter1 = store.get_iter(path[0])
+                    text = store[iter1][6]
+                    print(text)
+                    sel = self.arw["treeview3"].get_selection()
+                    sel.select_path(int(text))
+                    self.arw["notebook3"].set_current_page(1)
+                    self.controller.proxy_users.load_proxy_user(None, None)
+
+
 
     """ Drag and Drop """
 

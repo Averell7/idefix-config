@@ -49,20 +49,67 @@ class ProxyUsers:
         self.cell3 = Gtk.CellRendererText()
         self.check2 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
         self.check2.connect('toggled', self.controller.toggle_col14, self.proxy_store)
+        # Test pour Daniel
+        self.check3 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
+        self.check3.connect('toggled', self.toggle_col5, self.proxy_store)
+        self.check4 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
+        self.check4.connect('toggled', self.toggle_col12, self.proxy_store)
+        self.check5 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
+        self.check5.connect('toggled', self.toggle_col13_proxy, self.proxy_store)
 
         self.treeview3 = self.arw["treeview3"]
         self.treeview3.set_model(self.proxy_store)
         self.treeview3.connect("button-press-event", self.load_proxy_user)
 
         self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell3, text=0, foreground=15, background=16)
-        #self.tvcolumn.set_fixed_width(200)
+        self.tvcolumn.set_fixed_width(220)
         self.treeview3.append_column(self.tvcolumn)
 
+        self.tvcolumn = Gtk.TreeViewColumn(_('Users\nList/All'), self.check3, active=11)
+        self.treeview3.append_column(self.tvcolumn)
+        self.tvcolumn = Gtk.TreeViewColumn(_('Dest.\nList/All'), self.check4, active=12)
+        self.treeview3.append_column(self.tvcolumn)
+        self.tvcolumn = Gtk.TreeViewColumn(_('Allow/\nDeny'), self.check5, active=13)
+        self.treeview3.append_column(self.tvcolumn)
         self.tvcolumn = Gtk.TreeViewColumn(_('On/Off'), self.check2, active=14)
         self.treeview3.append_column(self.tvcolumn)
 
+        self.switch_gui()
 
-    def toggle_col12(self, widget):
+
+    def switch_gui(self,widget = None):
+
+        if widget == None:
+            gui = "buttons"
+        else:
+            if self.arw["switch_gui"].get_active() == 0 :
+                gui = "buttons"
+            else:
+                gui ="check"
+
+
+        # button interface
+        if gui == "buttons":
+            for col in (1,2,3):
+                self.arw["treeview3"].get_column(col).set_visible(False)
+            for button in ["toggle_proxy_user_open_button", "toggle_proxy_open_button", "toggle_proxy_allow_button"]:
+                self.arw[button].show()
+            self.arw["proxy_users_box"].set_size_request(300,100)
+        else:
+            # checkboxes interface
+            for col in (1,2,3):
+                self.arw["treeview3"].get_column(col).set_visible(True)
+            for button in ["toggle_proxy_user_open_button", "toggle_proxy_open_button", "toggle_proxy_allow_button"]:
+                self.arw[button].hide()
+            self.arw["proxy_users_box"].set_size_request(470,100)
+
+
+
+
+
+
+
+    def toggle_col12(self, widget, a=0, b= 0):              # TODO test Daniel, et aussi les autres dessous
         # callback of the open access button in proxy tab.
         # col 12 = open access state; col 16 = background color
 
@@ -78,7 +125,7 @@ class ProxyUsers:
             #self.arw["toggle_proxy_open_button"].set_image(self.controller.red_button)
         self.load_proxy_user2()
 
-    def toggle_col5(self, widget):
+    def toggle_col5(self, widget, a=0, b= 0):
         """Toggle any user or specific users"""
         if self.proxy_store.get_value(self.controller.iter_proxy, 11) == 0:
             self.proxy_store.set_value(self.controller.iter_proxy, 11, 1)
@@ -90,7 +137,7 @@ class ProxyUsers:
 
         self.load_proxy_user2()
 
-    def toggle_col13_proxy(self, widget):
+    def toggle_col13_proxy(self, widget, a=0, b= 0):
         # callback of the allow/deny button in proxy tab.
         # col 13 = allow/deny state; col 15 = text color
 
@@ -314,6 +361,7 @@ class ProxyUsers:
 
         if self.proxy_store[self.controller.iter_proxy][11] == 1:
             self.arw["proxy_users_stack"].set_visible_child(self.arw["proxy_users_all"])
+            x = self.arw["toggle_proxy_user_open_button"]
             self.arw["toggle_proxy_user_open_button"].set_image(self.controller.all_button)
             #self.arw['toggle_proxy_user_open'].set_label(_("<b>All</b>"))
             #self.arw["toggle_proxy_user_open_button"].modify_bg(Gtk.StateType.NORMAL,
@@ -342,19 +390,21 @@ class ProxyUsers:
 
 
         # set allow/deny button
-        if self.proxy_store[self.controller.iter_proxy][13] == 1:
+        if self.proxy_store[self.controller.iter_proxy][13] == 1:                             # TODO Chris : it would be better for translators to use properties,instead of markup, but I don't know how to do that in css.
             self.arw["toggle_proxy_allow_button"].set_image(self.controller.allow_button)
-            self.arw["proxy_dest_all"].set_text(_("All destinations \nallowed"))
-            self.arw["allow_deny_groups"].set_text("Allowed Groups")
-            self.arw["allow_deny_sites"].set_text("Allowed Sites")
+            message = _('<span foreground="#00aa00">All destinations \nallowed. </span>')
+            self.arw["proxy_dest_all"].set_markup(message)
+            self.arw["allow_deny_groups"].set_markup(_('<span foreground="#00aa00">Allowed Groups</span>'))
+            self.arw["allow_deny_sites"].set_markup(_('<span foreground="#00aa00">Allowed Sites</span>'))
             #self.arw["toggle_proxy_allow"].set_label(_("<b>Allow</b>"))
             #self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=0, green=60535, blue=0))
 
         else:
             self.arw["toggle_proxy_allow_button"].set_image(self.controller.deny_button)
-            self.arw["proxy_dest_all"].set_text(_("All connections\nto Internet\nare prohibited."))
-            self.arw["allow_deny_groups"].set_text("Denied Groups")
-            self.arw["allow_deny_sites"].set_text("Denied Sites")
+            message = _('<span foreground="#ff0000"> All connections\nto Internet\nare prohibited. </span>')
+            self.arw["proxy_dest_all"].set_markup(message)
+            self.arw["allow_deny_groups"].set_markup(_('<span foreground="#ff0000">Denied Groups</span>'))
+            self.arw["allow_deny_sites"].set_markup(_('<span foreground="#ff0000">Denied Sites</span>'))
             #self.arw["toggle_proxy_allow"].set_label(_("<b>Deny</b>"))
             #self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60535, green=0, blue=0))
 
