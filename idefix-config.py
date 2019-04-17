@@ -49,6 +49,7 @@ from proxy_group import ProxyGroup
 from firewall import Firewall
 from users import Users
 from config_profile import ConfigProfile
+from assistant import Assistant
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -175,12 +176,28 @@ class Idefix:
             except:
                 pass
 
+        # Assistant
+        self.widgets2 = gtk.Builder()
+        self.widgets2.add_from_file('./assistant.glade')
+        # create an array of all objects with their name as key
+        ar_widgets = self.widgets2.get_objects()
+        self.arw2 = {}
+        for z in ar_widgets:
+            try:
+                name = gtk.Buildable.get_name(z)
+                self.arw2[name] = z
+                z.name = name
+            except:
+                pass
+
         self.arw["configname"].set_text(configname)
         self.arw["program_title"].set_text("Confix - Version " + version)
         window1 = self.arw["window1"]
         window1.show_all()
         window1.set_title(_("Confix"))
         window1.connect("destroy", self.destroy)
+
+        window2 = self.arw2["assistant1"]
 
         self.arw['loading_window'].show_all()
 
@@ -232,6 +249,7 @@ class Idefix:
         self.proxy_group = ProxyGroup(self.arw, self)
         self.firewall = Firewall(self.arw, self)
         self.users = Users(self.arw, self)
+        self.assistant = Assistant(self.arw2, self)
 
         if config_password:
             kargs = {'password': config_password}
@@ -247,9 +265,10 @@ class Idefix:
         self.firewall_store = self.firewall.firewall_store
 
         self.signal_handler = SignalHandler([
-            self, self.proxy_users, self.proxy_group, self.firewall, self.users, self.profiles
+            self, self.proxy_users, self.proxy_group, self.firewall, self.users, self.profiles, self.assistant
         ])
         self.widgets.connect_signals(self.signal_handler)
+        self.widgets2.connect_signals(self.signal_handler)
 
         # autosave textview buffers when typing (see also drag and drop below)
         # and when drag is received

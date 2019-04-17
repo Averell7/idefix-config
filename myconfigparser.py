@@ -8,8 +8,9 @@ import sys
 from collections import OrderedDict
 
 
-# version 0.16.2 bug fix
-# version 0.16.1  # isdata parameter added
+# version 0.17.0 - mytextParser added
+# version 0.16.2 - bug fix
+# version 0.16.1 - isdata parameter added
 
 
 class myConfigParser() :
@@ -64,6 +65,7 @@ class myConfigParser() :
         else :
             fileIni = open(iniFile_s, "r", encoding = "utf-8-sig")
             data1 = fileIni.readlines()
+            fileIni.close()
 
         section_s = ""
 
@@ -177,9 +179,47 @@ class mySimpleParser() :
                     config[key] = linedata
 
         return config
+        
+class myTextParser() :
+    def __init__(self) :
+        pass
+    def read(self,
+            iniFile_s) :
 
+        # read txt file and creates a dictionary
+        # @param iniFile_s : ini file path
 
+        if not os.path.isfile(iniFile_s) :
+            print("fichier non trouvé " + iniFile_s)
+            return False
 
+        
+        fileIni = open(iniFile_s, "r", encoding = "utf-8-sig")
+        data1 = fileIni.readlines()
+
+        mytext = {}
+        section_s = ""
+
+        for record_s in data1 :
+          
+            record_s = record_s.strip()
+            
+            # If the  line is a section
+            if record_s.startswith("[") and record_s.endswith("]"):      # section
+                section_s = record_s[1:-1]
+                mytext[section_s] = ""
+            else :
+                # Skip useless lines
+                if section_s == "" :            # comment in the beginning of the file
+                    continue                
+                if record_s[0:1] == "#" :       # comment
+                    continue
+                else:
+                    mytext[section_s] += record_s +"\n"
+                   
+        return mytext
+        
+        
 def main() :
     pass
 

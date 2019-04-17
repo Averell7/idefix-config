@@ -241,7 +241,6 @@ class Users:
                 buffer.set_text("")
                 if not iternew:
                     alert("No mac address for this user !")
-                self.arw["notebook5"].set_current_page(1)
 
             self.user_summary(username)
 
