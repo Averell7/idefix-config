@@ -276,7 +276,6 @@ class Idefix:
                          "proxy_dest", "proxy_#comments",
                          "firewall_ports", "firewall_users", "firewall_comments"]:
             self.arw[textView].connect("key-release-event", self.update_tv)
-            # self.arw[textView].connect("drag-end", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
 
         self.config = OrderedDict()
@@ -443,7 +442,7 @@ class Idefix:
         self.arw["chooser1"].set_model(self.chooser_users_store)
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('---'), self.users.cell, text=0)
+        self.tvcolumn = gtk.TreeViewColumn(_('Firewall'), self.users.cell, text=0)
         self.arw["chooser2"].append_column(self.tvcolumn)
         self.arw["chooser2"].get_selection()
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
@@ -763,8 +762,6 @@ class Idefix:
         else:
             self.arw["treeview1"].collapse_all()
 
-    def test1(self, widget, a=""):
-        print("test1", repr(a))
 
     def load_chooser(self, widget, event=None):          # TODO no longer used
         return
@@ -869,18 +866,17 @@ class Idefix:
     """ View """
 
     def on_drag_data_received(self, widget, drag_context, x, y, data, info, etime):
+        # Used in TextViews for Drag and Drop
         text1 = data.get_text()
-        #        if time.time() - self.mem_time < 1 :  # dirty workaround to prevent two drags
-        #            return
         self.mem_time = time.time()
         self.update_tv(widget, text=text1)
-        print("drag received", text1)
 
     def chooser_drag_data_get(self, treeview, drag_context, data, info, time):
 
         (model, node) = treeview.get_selection().get_selected()
         if node:
-            text = model.get_value(node, 0) + "\n"
+            text = model.get_path(node).to_string()
+            #text = model.get_value(node, 0) + "\n"
             data.set_text(text, -1)
 
     def chooser_show_context(self, widget, event):

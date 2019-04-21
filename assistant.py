@@ -13,6 +13,7 @@ class Assistant:
     def __init__(self, arw2, controller):
         self.arw2 = arw2
         self.controller = controller
+        self.block_signals = False
         self.arw2["assistant1"].set_forward_page_func(self.forward_func)
         # open file with long texts for the assistant
         parser = myTextParser()
@@ -23,6 +24,18 @@ class Assistant:
             label1 = label + ".fr"
             if label1 in self.longtexts:
                 self.arw2[label].set_text(self.longtexts[label1])
+        # Listview
+        self.arw2["assistant_proxy_rules"].set_model(self.controller.proxy_users.proxy_store)
+
+        self.cell = Gtk.CellRendererText()
+        self.check = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
+        self.check.connect('toggled', self.choose_rules)
+
+        self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell, text=0, foreground=15, background=16)
+        self.tvcolumn.set_fixed_width(220)
+        self.arw2["assistant_proxy_rules"].append_column(self.tvcolumn)
+        self.tvcolumn = Gtk.TreeViewColumn(_('---'), self.check, active=19)
+        self.arw2["assistant_proxy_rules"].append_column(self.tvcolumn)
 
 
 
@@ -35,7 +48,51 @@ class Assistant:
         self.arw2["assistant1"].hide()
 
     def forward_func(self, page):
-        return page + 1
+        """ manage the page flow, depending of the choices made by the user """
+        if page == 0 :       # useful for development, to go easily to the developped page
+            return page + 1
+        elif (  page == 2    # if no proxy rules are necessary
+                and self.arw2["check_filter"].get_active() == 0
+             ):
+            return 5   # summary page
+        elif ( page == 3     # if a rule specific for this user is choosed, skip existent rules page
+               and self.arw2["radio_specific_rule"].get_active() == 1
+              ):
+            return 5  # summary page
+        else:
+            return page + 1
+
+    def assistant_check_nothing(self, widget):
+        self.block_signals = True
+        if self.arw2["check_nothing"].get_active() == 1:
+            for check in ["email", "filter", "full"]:
+                self.arw2["check_" + check].set_active(False)
+                self.arw2["check_" + check].set_sensitive(False)
+        else:
+            for check in ["email", "filter", "full"]:
+                self.arw2["check_" + check].set_sensitive(True)
+        self.block_signals = False
+
+    def assistant_check_filter(self, widget):
+        if self.block_signals:
+            return
+        if self.arw2["check_filter"].get_active() == 1:
+            self.arw2["check_full"].set_active(False)
+            self.arw2["check_full"].set_sensitive(False)
+        else:
+            self.arw2["check_full"].set_sensitive(True)
+
+    def assistant_check_full(self, widget):
+        if self.block_signals:
+            return
+        if self.arw2["check_full"].get_active() == 1:
+            self.arw2["check_filter"].set_active(False)
+            self.arw2["check_filter"].set_sensitive(False)
+        else:
+            self.arw2["check_filter"].set_sensitive(True)
+
+
+
 
     def add_address(self, widget = None):
         return
@@ -43,8 +100,11 @@ class Assistant:
     def ass_new_user(self, widget, a = None):
         self.arw2["assistant1"].set_page_complete(self.arw2["new_user"], True)
 
-    def ass_firewalll_permissions(self, widget, event = None):
+    def ass_firewall_permissions(self, widget, event = None):
         self.arw2["assistant1"].set_page_complete(self.arw2["firewall_permissions"], True)
+
+    def ass_firewalll_permissions(self, widget, event = None):
+        pass
 
     def ass_new_user_rules(self, widget, event = None):
         self.arw2["assistant1"].set_page_complete(self.arw2["proxy_rules"], True)
@@ -63,6 +123,13 @@ class Assistant:
         print(x)
 
 
+    def choose_rules(self, widget, row):
+
+        self.controller.proxy_store[row][19] = not self.controller.proxy_store[row][19]
+##        if self.controller.proxy_store[row][19] == 0:
+##            self.controller.proxy_store[row][19] = 1
+##        else:
+##            self.controller.proxy_store[row][19] = 0
 
 
 
@@ -135,7 +202,25 @@ class Assistant:
         if self.arw2["radio_specific_rule"].get_active() == 1:
             # create rule
             iter1 = self.controller.proxy_store.insert(-1,
-                        [username, "on", "allow", "", "", username, "", "", "", "", "", 0, 0, 1, 1, "#009900", "#ffffff"])
+                        [username, "on", "allow", "", "", username, "", "", "", "", "", 0, 0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
+            # select rule
+            sel = self.controller.arw["treeview3"].get_selection()
+            sel.select_iter(iter1)
+            self.controller.proxy_users.load_proxy_user(None, None)
+            self.controller.arw["notebook3"].set_current_page(1)
+            # add user
+            #iter1 = self.controller.arw['proxy_users_store'].append()
+            #self.controller.arw['proxy_users_store'].set_value(iter1, 0, username)
+            #self.controller.update_tv(self.arw[")
+            # show page
+
+
+            self.arw2["assistant1"].hide()
+
+        if self.arw2["radio_existent_rule"].get_active() == 1:
+            # create rule
+            iter1 = self.controller.proxy_store.insert(-1,
+                        [username, "on", "allow", "", "", username, "", "", "", "", "", 0, 0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
             # select rule
             sel = self.controller.arw["treeview3"].get_selection()
             sel.select_iter(iter1)

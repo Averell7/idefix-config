@@ -18,8 +18,8 @@ class ProxyUsers:
         self.controller = controller
 
         self.arw["proxy_users"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
-        self.arw['proxy_users'].drag_source_add_text_targets()
-        self.arw['proxy_users'].connect("drag-data-get", self.proxy_users_data_get)
+        #self.arw['proxy_users'].drag_source_add_text_targets()
+        #self.arw['proxy_users'].connect("drag-data-get", self.proxy_users_data_get)
         self.arw['proxy_users'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
         self.arw['proxy_users'].drag_dest_add_text_targets()
         self.arw['proxy_users'].connect("drag-data-received", self.update_proxy_user_list_view)
@@ -42,10 +42,14 @@ class ProxyUsers:
         14 : checkbox    (0/1)  [off/on]
         15 : color1      (foreground)
         16 : color2      (background)
+        17 : reserved (str)
+        18 : reserved (str)
+        19 : chekbox assistant (0/1)
+        20 : reserved (0/1)
         """
 
         self.proxy_store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, int, int, int, int, str,
-                                         str)  #
+                                         str, str, str, int, int)  #
         self.cell3 = Gtk.CellRendererText()
         self.check2 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
         self.check2.connect('toggled', self.controller.toggle_col14, self.proxy_store)
@@ -168,7 +172,7 @@ class ProxyUsers:
             name = format_name(x)
             iter1 = self.controller.proxy_store.insert_after(node,
                                                              [name, "on", "allow", "", "", "", "", "", "", "", "", 0,
-                                                              0, 1, 1, "#009900", "#ffffff"])
+                                                              0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
 
     def delete_rule(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
@@ -210,6 +214,9 @@ class ProxyUsers:
 
     def update_proxy_user_list_view(self, widget, ctx, x, y, data, info, etime):
         """Add a user or a group to the list"""
+        # called by the drag_data_received signal
+        # TODO name should be changed, because it is not clear
+
         new_name = data.get_text().strip()
 
         if self.proxy_user_has_any():
@@ -222,11 +229,13 @@ class ProxyUsers:
         self.mem_time = time.time()
 
         model = widget.get_model()
+        source_model = self.arw["chooser1"].get_model()
 
         path = data.get_text()
+
         try:
-            iter_source = model.get_iter(path)
-            values = [model.get_value(iter_source, i) for i in range(model.get_n_columns())]
+            iter_source = source_model.get_iter(path)
+            values = [source_model.get_value(iter_source, i) for i in range(model.get_n_columns())]
         except TypeError:
             iter_source = None
             values = None
@@ -246,8 +255,8 @@ class ProxyUsers:
 
         if iter_source:
             for i in range(model.get_n_columns()):
-                model.set_value(iter_dest, i, model.get_value(iter_source, i))
-            model.remove(iter_source)
+                model.set_value(iter_dest, i, values[i])
+            #model.remove(iter_source)
             names = [name[0] for name in model]
             self.proxy_store.set_value(self.controller.iter_proxy, 5, '\n'.join(names))
             return
@@ -265,6 +274,8 @@ class ProxyUsers:
                 self.arw["proxy_users_menu"].popup(None, None, None, None, event.button, event.time)
 
     def update_proxy_user_list(self, proxy_iter=None):
+        """ (re)create the users list from the store """
+        # called when something is changed in the store
         if not proxy_iter:
             proxy_iter = self.controller.iter_proxy
 
@@ -390,21 +401,21 @@ class ProxyUsers:
 
 
         # set allow/deny button
-        if self.proxy_store[self.controller.iter_proxy][13] == 1:                             # TODO Chris : it would be better for translators to use properties,instead of markup, but I don't know how to do that in css.
+        if self.proxy_store[self.controller.iter_proxy][13] == 1:
             self.arw["toggle_proxy_allow_button"].set_image(self.controller.allow_button)
-            message = _('<span foreground="#00aa00">All destinations \nallowed. </span>')
+            message = '<span foreground="#00aa00">' + _("All destinations \nallowed.") +  '</span>'
             self.arw["proxy_dest_all"].set_markup(message)
-            self.arw["allow_deny_groups"].set_markup(_('<span foreground="#00aa00">Allowed Groups</span>'))
-            self.arw["allow_deny_sites"].set_markup(_('<span foreground="#00aa00">Allowed Sites</span>'))
+            self.arw["allow_deny_groups"].set_markup('<span foreground="#00aa00">' + _("Allowed Groups") +  '</span>')
+            self.arw["allow_deny_sites"].set_markup('<span foreground="#00aa00">' + _("Allowed Sites") +  '</span>')
             #self.arw["toggle_proxy_allow"].set_label(_("<b>Allow</b>"))
             #self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=0, green=60535, blue=0))
 
         else:
             self.arw["toggle_proxy_allow_button"].set_image(self.controller.deny_button)
-            message = _('<span foreground="#ff0000"> All connections\nto Internet\nare prohibited. </span>')
+            message = '<span foreground="#ff0000">' + _("All connections\nto Internet\nare prohibited.") +  '</span>'
             self.arw["proxy_dest_all"].set_markup(message)
-            self.arw["allow_deny_groups"].set_markup(_('<span foreground="#ff0000">Denied Groups</span>'))
-            self.arw["allow_deny_sites"].set_markup(_('<span foreground="#ff0000">Denied Sites</span>'))
+            self.arw["allow_deny_groups"].set_markup('<span foreground="#ff0000">' + _("Denied Groups") +  '</span>')
+            self.arw["allow_deny_sites"].set_markup('<span foreground="#ff0000">' + _("Denied Sites") +  '</span>')
             #self.arw["toggle_proxy_allow"].set_label(_("<b>Deny</b>"))
             #self.arw["toggle_proxy_allow_button"].modify_bg(Gtk.StateType.NORMAL, Gdk.Color(red=60535, green=0, blue=0))
 
@@ -508,7 +519,7 @@ class ProxyUsers:
                 anyuser = data1[section]["any_user"]
             else:
                 anyuser = 0
-            out += [anyuser, 1, 1, 1, "#009900", "#ffffff"]
+            out += [anyuser, 1, 1, 1, "#009900", "#ffffff", "", "", 0, 0]
 
             self.proxy_store.append(out)
 

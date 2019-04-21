@@ -1141,9 +1141,18 @@
                           <object class="GtkCheckMenuItem" id="switch_gui">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">interface cases</property>
+                            <property name="label" translatable="yes">switch interface</property>
                             <property name="use_underline">True</property>
                             <signal name="toggled" handler="switch_gui" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkMenuItem">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Assistant</property>
+                            <property name="use_underline">True</property>
+                            <signal name="activate" handler="show_assistant" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -1306,6 +1315,20 @@
                           </object>
                           <packing>
                             <property name="expand">True</property>
+                            <property name="homogeneous">True</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToolButton" id="toolbutton1">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">Save configuration on the server</property>
+                            <property name="use_underline">True</property>
+                            <property name="stock_id">gtk-help</property>
+                            <signal name="clicked" handler="show_assistant" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
                             <property name="homogeneous">True</property>
                           </packing>
                         </child>

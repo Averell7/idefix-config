@@ -15,10 +15,11 @@ class ProxyGroup:
         self.arw = arw
         self.controller = controller
 
-        self.arw["proxy_group"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
-        self.arw['proxy_group'].drag_source_add_text_targets()
-        self.arw['proxy_group'].connect("drag-data-get", self.proxy_group_data_get)
-        self.arw['proxy_group'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
+        #self.arw["proxy_group"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
+        #self.arw['proxy_group'].drag_source_add_text_targets()
+        #self.arw['proxy_group'].connect("drag-data-get", self.proxy_group_data_get)
+        self.arw["proxy_group"].enable_model_drag_dest([], DRAG_ACTION)
+        #self.arw['proxy_group'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
         self.arw['proxy_group'].drag_dest_add_text_targets()
         self.arw['proxy_group'].connect("drag-data-received", self.update_proxy_group_list_view)
         self.proxy_group_domain_store = self.arw['proxy_group_domain_store']
@@ -124,7 +125,7 @@ class ProxyGroup:
 
     def update_proxy_group_list_view(self, widget, ctx, x, y, data, info, etime):
         """Add a proxy group to the list"""
-
+        print("===>", widget.name, ctx, x, y, data, info, etime)
         position = None
 
         if time.time() - self.mem_time < 1:  # dirty workaround to prevent two drags
@@ -132,11 +133,12 @@ class ProxyGroup:
         self.mem_time = time.time()
 
         model = widget.get_model()
+        source_model = self.arw["chooser"].get_model()
 
         path = data.get_text()
         try:
-            iter_source = model.get_iter(path)
-            values = [model.get_value(iter_source, i) for i in range(model.get_n_columns())]
+            iter_source = source_model.get_iter(path)
+            values = [source_model.get_value(iter_source, i) for i in range(model.get_n_columns())]
         except TypeError:
             iter_source = None
             values = None
