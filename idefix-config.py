@@ -876,8 +876,10 @@ class Idefix:
         (model, node) = treeview.get_selection().get_selected()
         if node:
             text = model.get_path(node).to_string()
-            #text = model.get_value(node, 0) + "\n"
+            text += "#" + treeview.name
             data.set_text(text, -1)
+            #sel = treeview.get_selection()
+            #treeview.set_row_drag_data(sel, model, node)  Not a treeview function
 
     def chooser_show_context(self, widget, event):
         """Show the context menu on right click (if applicable)"""

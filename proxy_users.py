@@ -18,8 +18,8 @@ class ProxyUsers:
         self.controller = controller
 
         self.arw["proxy_users"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
-        #self.arw['proxy_users'].drag_source_add_text_targets()
-        #self.arw['proxy_users'].connect("drag-data-get", self.proxy_users_data_get)
+        self.arw['proxy_users'].drag_source_add_text_targets()
+        self.arw['proxy_users'].connect("drag-data-get", self.proxy_users_data_get)
         self.arw['proxy_users'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
         self.arw['proxy_users'].drag_dest_add_text_targets()
         self.arw['proxy_users'].connect("drag-data-received", self.update_proxy_user_list_view)
@@ -229,9 +229,12 @@ class ProxyUsers:
         self.mem_time = time.time()
 
         model = widget.get_model()
-        source_model = self.arw["chooser1"].get_model()
-
-        path = data.get_text()
+        data1 = data.get_text().split("#")
+        path = data1[0]
+        if len(data1) == 2 :
+            source_model = self.arw[data1[1]].get_model()
+        else:
+            source_model = model
 
         try:
             iter_source = source_model.get_iter(path)
@@ -256,7 +259,8 @@ class ProxyUsers:
         if iter_source:
             for i in range(model.get_n_columns()):
                 model.set_value(iter_dest, i, values[i])
-            #model.remove(iter_source)
+            if source_model == model:       # move row in the list
+                model.remove(iter_source)
             names = [name[0] for name in model]
             self.proxy_store.set_value(self.controller.iter_proxy, 5, '\n'.join(names))
             return
