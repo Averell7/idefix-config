@@ -582,11 +582,20 @@ class Users:
                         store.set_value(parent_iter, 4, 'green')
                         colour = 'green'
 
-                    if row[8] == 'any':
+                    if row[10] == 'any':
                         store.set_value(parent_iter, 2, internet_full_icon)
-                        colour = 'blue'
+                        if colour != 'red':
+                            store.set_value(parent_iter, 4, 'blue')
+                            colour = 'blue'
                     else:
                         store.set_value(parent_iter, 2, internet_filtered_icon)
+
+                    if row[1] == 'on':
+                        store.set_value(parent_iter, 5, False)
+                    else:
+                        store.set_value(parent_iter, 4, 'gray')
+                        store.set_value(parent_iter, 5, True)
+                        colour = 'gray'
 
                     for domain in row[8].split('\n'):
                         child_iter = store.append(parent_iter)
