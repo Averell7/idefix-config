@@ -5,10 +5,9 @@ from gi.repository.GdkPixbuf import Pixbuf
 
 from actions import DRAG_ACTION
 from icons import (
-    internet_filtered_icon, internet_full_icon, internet_disabled_icon,
-    email_disabled_icon, email_icon
+    internet_filtered_icon, internet_full_icon
 )
-from util import alert, ask_text, showwarning, askyesno, format_name, mac_address_test, ip_address_test
+from util import alert, ask_text, showwarning, askyesno, mac_address_test, ip_address_test
 
 
 class Users:
@@ -537,6 +536,7 @@ class Users:
         # 6 - proxy row reference
         for row in self.controller.firewall_store:
             users = row[6].split("\n")
+            print(users)
             for userx in users:
                 if userx.strip() == user1:
                     parent_iter = store.append(None)
@@ -547,12 +547,15 @@ class Users:
 
                     if row[2] == 'deny':
                         store.set_value(parent_iter, 4, 'red')
+                        colour = 'red'
                     else:
                         store.set_value(parent_iter, 4, 'green')
+                        colour = 'green'
 
                     for port in row[3].split('\n'):
                         child_iter = store.append(parent_iter)
                         store.set_value(child_iter, 0, port)
+                        store.set_value(child_iter, 4, colour)
 
         i = 0
         for row in self.controller.proxy_store:
@@ -567,11 +570,14 @@ class Users:
 
                     if row[2] == 'deny':
                         store.set_value(parent_iter, 4, 'red')
+                        colour = 'red'
                     else:
                         store.set_value(parent_iter, 4, 'green')
+                        colour = 'green'
 
-                    if row[10] == 'any':
+                    if row[8] == 'any':
                         store.set_value(parent_iter, 2, internet_full_icon)
+                        colour = 'blue'
                     else:
                         store.set_value(parent_iter, 2, internet_filtered_icon)
 
@@ -579,6 +585,7 @@ class Users:
                         child_iter = store.append(parent_iter)
                         store.set_value(child_iter, 0, domain)
                         store.set_value(child_iter, 6, i)
+                        store.set_value(child_iter, 4, colour)
 
                     store.set_value(parent_iter, 6, i)
 
