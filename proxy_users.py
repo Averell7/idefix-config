@@ -4,8 +4,8 @@ from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
 from util import (
-        askyesno, ask_text, EMPTY_STORE, get_config_path,
-        format_comment, format_line, format_time, format_userline, format_domainline, format_name
+    askyesno, ask_text, get_config_path,
+    format_comment, format_line, format_time, format_userline, format_domainline, format_name
 )
 
 
@@ -461,6 +461,20 @@ class ProxyUsers:
 ##            self.arw["chooser"].set_model(self.controller.groups_store)
 ##        else:
 ##            self.arw["chooser"].set_model(EMPTY_STORE)
+
+    def expand_users_view(self, widget):
+        if widget.get_active():
+            self.arw['expand_permissions_toggle'].set_active(False)
+            self.arw['internet_filter_paned'].set_position(10000)
+        else:
+            self.arw['internet_filter_paned'].set_position(self.arw['internet_filter_paned'].get_allocated_height() / 2)
+
+    def expand_permissions_view(self, widget):
+        if widget.get_active():
+            self.arw['expand_users_toggle'].set_active(False)
+            self.arw['internet_filter_paned'].set_position(1)
+        else:
+            self.arw['internet_filter_paned'].set_position(self.arw['internet_filter_paned'].get_allocated_height() / 2)
 
     def show_time_conditions_window(self, widget):
         self.arw["proxy_time_conditions"].show()

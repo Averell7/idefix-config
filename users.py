@@ -400,7 +400,14 @@ class Users:
 
         # self.users_store.move_after(self.controller.iter_user, node)       # serait plus élégant mais ne marche pas
 
-
+    def mac_address_fullscreen(self, widget):
+        if widget.get_active():
+            # value doesn't really matter, it will be limited by the Height request property in Glade of the Gtk Box
+            # for the filters
+            self.arw['user_summary_paned'].set_position(800)
+        else:
+            # resets it back to original position
+            self.arw['user_summary_paned'].set_position(-1)
 
     def check_addresses(self, widget):
         buffer = self.arw['maclist'].get_buffer()
