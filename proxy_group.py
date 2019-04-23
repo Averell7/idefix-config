@@ -124,7 +124,6 @@ class ProxyGroup:
 
     def update_proxy_group_list_view(self, widget, ctx, x, y, data, info, etime):
         """Add a proxy group to the list"""
-        print("===>", widget.name, ctx, x, y, data, info, etime)
         position = None
 
         if time.time() - self.mem_time < 1:  # dirty workaround to prevent two drags

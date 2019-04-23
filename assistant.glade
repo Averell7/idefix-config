@@ -409,7 +409,7 @@ If not, the user should be able to correct. </property>
               <object class="GtkGrid">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="row_spacing">5</property>
+                <property name="row_spacing">13</property>
                 <property name="column_spacing">10</property>
                 <child>
                   <object class="GtkCheckButton" id="check_email">
@@ -446,8 +446,8 @@ If not, the user should be able to correct. </property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="margin_left">12</property>
-                    <property name="label" translatable="yes">This option includes the permissions 
-necessary for antivirus update</property>
+                    <property name="label" translatable="yes">This option includes the permissions necessary 
+for antivirus update</property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -460,9 +460,8 @@ necessary for antivirus update</property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="margin_left">12</property>
-                    <property name="label" translatable="yes">This option gives access\n
-to a limited list of websites\n
-which you will define later. </property>
+                    <property name="label" translatable="yes">This option gives access to a limited list 
+of websites which you will define later. </property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -490,11 +489,9 @@ which you will define later. </property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
                     <property name="margin_left">12</property>
-                    <property name="label" translatable="yes">This option gives acces\n
-to all Internet ressources\n
-without limitations. \n
-Nevertheless, time conditions \n
-can be added later. </property>
+                    <property name="label" translatable="yes">This option gives access to all Internet ressources
+without limitations. 
+Nevertheless, time conditions can be added later. </property>
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
@@ -524,6 +521,29 @@ can be added later. </property>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow" id="assistant_sw_categories">
+                <property name="height_request">150</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="vexpand">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTreeView" id="assistant_categories">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection"/>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -608,11 +628,30 @@ Do you want to :</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkScrolledWindow">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTreeView" id="assistant_proxy_rules">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <child internal-child="selection">
+                  <object class="GtkTreeSelection"/>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
         </child>
       </object>
       <packing>
         <property name="title" translatable="yes">Filtered Web access</property>
+        <property name="complete">True</property>
         <property name="has_padding">False</property>
       </packing>
     </child>
@@ -645,25 +684,7 @@ The chosen categories will appear in the summary, and it is possible to edit the
           <placeholder/>
         </child>
         <child>
-          <object class="GtkScrolledWindow">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
-            <child>
-              <object class="GtkTreeView" id="assistant_proxy_rules">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection"/>
-                </child>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
+          <placeholder/>
         </child>
         <child>
           <placeholder/>
@@ -784,8 +805,8 @@ et expliquer  la  suite. </property>
                 <property name="receives_default">False</property>
                 <property name="xalign">0</property>
                 <property name="draw_indicator">True</property>
-                <signal name="clicked" handler="ass_firewalll_permissions" swapped="no"/>
-                <signal name="toggled" handler="ass_firewalll_permissions" swapped="no"/>
+                <signal name="clicked" handler="ass_firewall_permissions" swapped="no"/>
+                <signal name="toggled" handler="ass_firewall_permissions" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
