@@ -389,6 +389,11 @@
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="image3">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="pixbuf">data\assistant-32.png</property>
+  </object>
   <object class="GtkMenu" id="profile_context_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1324,7 +1329,7 @@
                             <property name="can_focus">False</property>
                             <property name="tooltip_text" translatable="yes">Save configuration on the server</property>
                             <property name="use_underline">True</property>
-                            <property name="stock_id">gtk-help</property>
+                            <property name="icon_widget">image3</property>
                             <signal name="clicked" handler="show_assistant" swapped="no"/>
                           </object>
                           <packing>
@@ -1422,9 +1427,6 @@
                                     <property name="left_attach">0</property>
                                     <property name="top_attach">2</property>
                                   </packing>
-                                </child>
-                                <child>
-                                  <placeholder/>
                                 </child>
                                 <child>
                                   <placeholder/>
