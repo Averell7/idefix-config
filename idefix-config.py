@@ -56,7 +56,7 @@ from assistant import Assistant
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "0.34.0"
+version = "0.35.0"
 
 
 gtk = Gtk
@@ -319,73 +319,16 @@ class Idefix:
                     self.config = json.loads(data0, object_pairs_hook=OrderedDict)
                     print("json file loaded")
                     ftp.close()
-                else :
-                    pass
-                """
-                    print("WARNING ! unable to get idefix-config.json.\n Loading ini files")
 
-                    # retrieve common files by ftp
-                    if ftp1['mode'][0] != 'local':
-                        ftp.cwd("common")
-                    data1 = ftp_get(ftp, "firewall-ports.ini")
-                    data2 = ftp_get(ftp, "proxy-groups.ini")
-                    if ftp1['mode'][0] != 'local':
-                        ftp.cwd("..")
 
-                    # make a local copy for debug purpose
-                    f1 = open(get_config_path("./tmp/firewall-ports.ini"), "w", encoding="utf-8-sig")
-                    f1.write("\n".join(data1))
-                    f1.close()
-                    f1 = open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig")
-                    f1.write("\n".join(data2))
-                    f1.close()
-
-                    # retrieve perso files by ftp
-                    data3 = ftp_get(ftp, "users.ini")
-                    data4 = ftp_get(ftp, "firewall-users.ini")
-                    data5 = ftp_get(ftp, "proxy-users.ini")
-
-                    ftp.close()
-
-                    if data1 is None:
-                        print("WARNING ! unable to get firewall-ports.ini.")
-                    if data2 is None:
-                        print("WARNING ! unable to get proxy-groups.ini.")
-                    if data3 is None:
-                        print("WARNING ! unable to get users.ini.")
-                    if data4 is None:
-                        print("WARNING ! unable to get users.ini.")
-                    if data5 is None:
-                        print("WARNING ! unable to get proxy-users.ini.")
-
-                    self.config = parser.read(data3, "users", comments=True, isdata=True)
-                    self.config = parser.read(data4, "firewall", merge=self.config, comments=True, isdata=True)
-                    self.config = parser.read(data5, "proxy", merge=self.config, comments=True, isdata=True)
-                    self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
-                    self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
-                """
 
         else:   # development environment
             self.arw['loading_window'].hide()
             if os.path.isfile(get_config_path("idefix-config.json")):
                 data_str = open(get_config_path("idefix-config.json"), "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
-            else:
-                self.config = parser.read(
-                    get_config_path("./tmp/users.ini"), "users", merge=self.config, comments=True
-                )
-                self.config = parser.read(
-                    get_config_path("./tmp/firewall-users.ini"), "firewall", merge=self.config, comments=True
-                )
-                self.config = parser.read(
-                    get_config_path("./tmp/proxy-users.ini"), "proxy", merge=self.config, comments=True
-                )
-                self.config = parser.read(
-                    get_config_path("./tmp/firewall-ports.ini"), "ports", merge=self.config, comments=True
-                )
-                self.config = parser.read(
-                    get_config_path("./tmp/proxy-groups.ini"), "groups", merge=self.config, comments=True
-                )
+
+
 
         for category in ["firewall", "proxy", "ports", "groups"]:
             if category not in self.config:
@@ -394,7 +337,6 @@ class Idefix:
         if "users" not in self.config:        # if system not yet configured
             response = askyesno(_("No user data"),
                                 _("There is no user data present. \nDo you want to create standard categories ?"))
-            print(response)
             if response == 1:
                 if os.path.isfile("./confix-default.json"):
                     data_str = open("./confix-default.json", "r").read()
@@ -479,6 +421,72 @@ class Idefix:
         self.set_colors()
         self.load_ini_files()
         self.profiles.list_configuration_profiles()
+
+
+    def import_ini_files(self):
+        # This function is presently unused
+
+        if not load_locale:
+            print("WARNING ! unable to get idefix-config.json.\n Loading ini files")
+
+            # retrieve common files by ftp
+            if ftp1['mode'][0] != 'local':
+                ftp.cwd("common")
+            data1 = ftp_get(ftp, "firewall-ports.ini")
+            data2 = ftp_get(ftp, "proxy-groups.ini")
+            if ftp1['mode'][0] != 'local':
+                ftp.cwd("..")
+
+            # make a local copy for debug purpose
+            f1 = open(get_config_path("./tmp/firewall-ports.ini"), "w", encoding="utf-8-sig")
+            f1.write("\n".join(data1))
+            f1.close()
+            f1 = open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig")
+            f1.write("\n".join(data2))
+            f1.close()
+
+            # retrieve perso files by ftp
+            data3 = ftp_get(ftp, "users.ini")
+            data4 = ftp_get(ftp, "firewall-users.ini")
+            data5 = ftp_get(ftp, "proxy-users.ini")
+
+            ftp.close()
+
+            if data1 is None:
+                print("WARNING ! unable to get firewall-ports.ini.")
+            if data2 is None:
+                print("WARNING ! unable to get proxy-groups.ini.")
+            if data3 is None:
+                print("WARNING ! unable to get users.ini.")
+            if data4 is None:
+                print("WARNING ! unable to get users.ini.")
+            if data5 is None:
+                print("WARNING ! unable to get proxy-users.ini.")
+
+            self.config = parser.read(data3, "users", comments=True, isdata=True)
+            self.config = parser.read(data4, "firewall", merge=self.config, comments=True, isdata=True)
+            self.config = parser.read(data5, "proxy", merge=self.config, comments=True, isdata=True)
+            self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
+            self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
+        else:
+
+            self.config = parser.read(
+                get_config_path("./tmp/users.ini"), "users", merge=self.config, comments=True
+            )
+            self.config = parser.read(
+                get_config_path("./tmp/firewall-users.ini"), "firewall", merge=self.config, comments=True
+            )
+            self.config = parser.read(
+                get_config_path("./tmp/proxy-users.ini"), "proxy", merge=self.config, comments=True
+            )
+            self.config = parser.read(
+                get_config_path("./tmp/firewall-ports.ini"), "ports", merge=self.config, comments=True
+            )
+            self.config = parser.read(
+                get_config_path("./tmp/proxy-groups.ini"), "groups", merge=self.config, comments=True
+            )
+
+
 
     """ Load interface """
 
@@ -574,15 +582,13 @@ class Idefix:
                 row[10] = "#ffffff"
 
             # icons for email and Internet access
-            if row[5]:
-                if row[3]:
-                    row[12] = internet_timed_icon
-                elif row[7]:
-                    row[12] = internet_full_icon
-                elif row[6]:
-                    row[12] = internet_filtered_icon
-                else:
-                    row[12] = None
+
+            if row[3]:
+                row[12] = internet_timed_icon
+            elif row[7]:
+                row[12] = internet_full_icon
+            elif row[6]:
+                row[12] = internet_filtered_icon
             else:
                 row[12] = None
 
@@ -675,31 +681,36 @@ class Idefix:
                 self.users_store[self.iter_user][4] = 1
             else:
                 self.users_store[self.iter_user][4] = 0
-        elif widget.name == "internet_access":
-            if widget.get_active():
-                self.users_store[self.iter_user][5] = 1
-                if self.arw["internet_filtered"].get_active():
-                    self.users_store[self.iter_user][6] = 1
-                else:
-                    self.users_store[self.iter_user][6] = 0
-                if self.arw["internet_open"].get_active():
-                    self.users_store[self.iter_user][7] = 1
-                    self.arw["internet_email"].set_active(True)
-                else:
-                    self.users_store[self.iter_user][7] = 0
-                self.arw["box_internet"].show()
-            else:
-                self.users_store[self.iter_user][5] = 0
-                self.arw["box_internet"].hide()
+##        elif widget.name == "internet_access":
+##            if widget.get_active():
+##                self.users_store[self.iter_user][5] = 1
+##                if self.arw["internet_filtered"].get_active():
+##                    self.users_store[self.iter_user][6] = 1
+##                else:
+##                    self.users_store[self.iter_user][6] = 0
+##                if self.arw["internet_open"].get_active():
+##                    self.users_store[self.iter_user][7] = 1
+##                    self.arw["internet_email"].set_active(True)
+##                else:
+##                    self.users_store[self.iter_user][7] = 0
+##            else:
+##                self.users_store[self.iter_user][5] = 0
+
         elif widget.name == "internet_filtered":
             if widget.get_active():
                 self.users_store[self.iter_user][6] = 1
+                self.arw["internet_open"].set_active(False)
+                self.users_store[self.iter_user][7] = 0
             else:
                 self.users_store[self.iter_user][6] = 0
 
         elif widget.name == "internet_open":
             if widget.get_active():
                 self.users_store[self.iter_user][7] = 1
+                self.arw["internet_filtered"].set_active(False)
+                self.users_store[self.iter_user][6] = 0     # internet filtered disabled
+                self.users_store[self.iter_user][4] = 1     # email enabled
+                self.arw["internet_email"].set_active(True)
             else:
                 self.users_store[self.iter_user][7] = 0
 
@@ -710,9 +721,7 @@ class Idefix:
         self.arw['email_time_condition'].set_sensitive(
             self.users_store[self.iter_user][4] or self.users_store[self.iter_user][7]
             )
-        self.arw['internet_time_condition'].set_sensitive(
-            self.users_store[self.iter_user][5] and self.users_store[self.iter_user][7]
-            )
+        self.arw['internet_time_condition'].set_sensitive(self.users_store[self.iter_user][7])
 
     def update_time(self, widget, x=None):
         # TODO  this function is not very well written.
@@ -942,6 +951,7 @@ class Idefix:
         self.arw["inifiles_view"].get_buffer().set_text(text)
 
     """ Output """
+
     def build_files(self, widget):
         # launched by the GO button
         self.build_users()
@@ -1092,6 +1102,10 @@ class Idefix:
 
         if message:
             showwarning(title, msg, 1)
+
+    def save_json_file(self, widget):
+        x = self.arw["file_chooser"].show()
+
 
     def destroy(self, widget=None, donnees=None):
         print("Évènement destroy survenu.")

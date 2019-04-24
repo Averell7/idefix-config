@@ -27,7 +27,7 @@ class Users:
         2 : email time condition
         3 : internet time condition
         4 : email (1/0)
-        5 : internet access (1/0)
+        5 : internet access (1/0)  # no longer used
         6 : filtered (1/0)
         7 : open (1/0)
         8 :
@@ -153,7 +153,6 @@ class Users:
 
             # set internet rights in the check boxes and radio list
             self.arw["internet_email"].set_active(self.users_store[iter1][4] or self.users_store[iter1][7])
-            self.arw["internet_access"].set_active(self.users_store[iter1][5])
             self.arw["internet_filtered"].set_active(self.users_store[iter1][6])
             self.arw["internet_open"].set_active(self.users_store[iter1][7])
             # adapt the right click menu
@@ -503,7 +502,6 @@ class Users:
 ##        email_time_conditions = self.users_store.get_value(parent_iter, 2)
 ##        internet_time_conditions = self.users_store.get_value(parent_iter, 3)
 ##        email_enabled = self.users_store.get_value(parent_iter, 4)
-##        internet_enabled = self.users_store.get_value(parent_iter, 5)
 ##        internet_filtered = self.users_store.get_value(parent_iter, 6)
 ##        internet_open = self.users_store.get_value(parent_iter, 7)
 ##

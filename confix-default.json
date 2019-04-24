@@ -13,7 +13,7 @@
          "@_internet_time_condition": [
             ""
          ],
-         "Hector": [
+         "#Hector": [
             "00:40:CA:3C:5F:33"
          ]
       },
@@ -30,12 +30,26 @@
          "@_internet_time_condition": [
             ""
          ],
-         "Etienne": [
+         "#Etienne": [
             "00:21:70:F8:58:F1",
             "98:3b:16:13:d9:9b\t#\t  tablette"
          ]
       },
-      "Internet filtr\u00e9": {
+      "Internet filtr\u00e9 uniquement": {
+         "@_internet": [
+            "filtered"
+         ],
+         "@_email": [
+            "0"
+         ],
+         "@_email_time_condition": [
+            ""
+         ],
+         "@_internet_time_condition": [
+            ""
+         ]
+      },
+      "Internet filtr\u00e9 + email": {
          "@_internet": [
             "filtered"
          ],
@@ -48,7 +62,7 @@
          "@_internet_time_condition": [
             ""
          ],
-         "Louis": [
+         "#Louis": [
             "00:17:A4:FC:5A:15",
             "d8:50:e6:84:a2:b1\t#\t  Tablette",
             "08:60:6e:b6:9c:cb    #      Tablette 2",
@@ -72,7 +86,7 @@
          "@_internet_time_condition": [
             ""
          ],
-         "Nicolas": [
+         "#Nicolas": [
             "08:60:6E:89:A8:01",
             "20:68:9d:ee:45:7a\t#\t  WIFI",
             "00:0e:c6:a4:0b:85\t#\t  adapt. Ethernet"
@@ -94,7 +108,7 @@
             ""
          ],
          "user": [
-            "Nicolas"
+            "#Nicolas"
          ],
          "destination": [
             "any"
@@ -164,33 +178,19 @@
             ""
          ],
          "dest_group": [
-            "antivirus",
-            "mozilla",
             "technique",
-            "meteo",
-            "poste",
-            "transports",
-            "transfert_fichiers",
-            "bible",
-            "traduction",
-            "chartreuse"
+            "antivirus",
+            "mozilla"
          ],
          "dest_domain": [
             ".mailshell.net",
             ".mon-ip.com",
             "svrsecure-g3-crl.verisign.com",
-            ".ipc-coaching.com",
             ".ntp.org",
             ".mappy.com",
-            "latin.cactus2000.de",
-            "conjit.cactus2000.de",
-            ".ogone.com",
             "www.adobe.com",
             ".java.com",
-            ".jsdelivr.net",
-            ".clz.com",
-            ".collectorz.net",
-            ".ownpage.fr"
+            ".jsdelivr.net"
          ],
          "dest_ip": [
             ""
@@ -219,47 +219,15 @@
             ""
          ],
          "dest_group": [
-            "transports"
+            ""
          ],
          "dest_domain": [
-            ".privink.com"
+            ""
          ],
          "dest_ip": [
             ""
          ],
          "any_user": 1,
-         "any_destination": 0,
-         "allow_deny": 1
-      },
-      "acc\u00e8s_ouvert_temporaire": {
-         "active": [
-            "off"
-         ],
-         "action": [
-            "allow"
-         ],
-         "time_condition": [
-            ""
-         ],
-         "comments": [
-            ""
-         ],
-         "user": [
-            "Louis"
-         ],
-         "destination": [
-            ""
-         ],
-         "dest_group": [
-            ""
-         ],
-         "dest_domain": [
-            ""
-         ],
-         "dest_ip": [
-            ""
-         ],
-         "any_user": 0,
          "any_destination": 0,
          "allow_deny": 1
       },
@@ -277,7 +245,7 @@
             ""
          ],
          "user": [
-            "Louis"
+            "#Louis"
          ],
          "destination": [
             ""
