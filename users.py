@@ -566,9 +566,10 @@ class Users:
 
         i = 0
         for row in self.controller.proxy_store:
-            users = row[5].split("\n")
+            users = row[5].strip().split("\n")
             for userx in users:
-                if userx.strip() == user1:
+                if (userx.strip() == user1
+                   or row[11] == 1):
                     parent_iter = store.append(None)
                     store.set_value(parent_iter, 0, row[0])
                     store.set_value(parent_iter, 1, row[3])
