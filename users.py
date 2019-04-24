@@ -575,14 +575,14 @@ class Users:
 
                     store.set_value(parent_iter, 5, row[1] == 'no')
 
-                    if row[2] == 'deny':
+                    if row[2].strip() == 'deny':
                         store.set_value(parent_iter, 4, 'red')
                         colour = 'red'
                     else:
                         store.set_value(parent_iter, 4, 'green')
                         colour = 'green'
 
-                    if row[10] == 'any':
+                    if row[10].strip() == 'any':
                         store.set_value(parent_iter, 2, internet_full_icon)
                         if colour != 'red':
                             store.set_value(parent_iter, 4, 'blue')
@@ -590,14 +590,14 @@ class Users:
                     else:
                         store.set_value(parent_iter, 2, internet_filtered_icon)
 
-                    if row[1] == 'on':
+                    if row[1].strip() == 'on':
                         store.set_value(parent_iter, 5, False)
                     else:
                         store.set_value(parent_iter, 4, 'gray')
                         store.set_value(parent_iter, 5, True)
                         colour = 'gray'
 
-                    for domain in row[8].split('\n'):
+                    for domain in row[8].strip().split('\n'):
                         child_iter = store.append(parent_iter)
                         store.set_value(child_iter, 0, domain)
                         store.set_value(child_iter, 6, i)
