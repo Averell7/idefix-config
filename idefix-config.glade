@@ -1786,124 +1786,117 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                         <property name="can_focus">False</property>
                         <property name="label_xalign">0</property>
                         <child>
-                          <object class="GtkPaned">
+                          <object class="GtkPaned" id="user_summary_paned">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="orientation">vertical</property>
                             <property name="wide_handle">True</property>
                             <child>
-                              <object class="GtkScrolledWindow" id="scrolledwindow11">
-                                <property name="height_request">5</property>
+                              <object class="GtkBox">
+                                <property name="height_request">80</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkViewport">
+                                  <object class="GtkFrame">
+                                    <property name="height_request">75</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="hexpand">True</property>
+                                    <property name="label_xalign">0</property>
+                                    <property name="shadow_type">in</property>
                                     <child>
-                                      <object class="GtkBox">
+                                      <object class="GtkScrolledWindow">
                                         <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
+                                        <property name="can_focus">True</property>
                                         <child>
-                                          <object class="GtkFrame">
+                                          <object class="GtkTextView" id="maclist">
+                                            <property name="height_request">100</property>
                                             <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="hexpand">True</property>
-                                            <property name="label_xalign">0</property>
-                                            <property name="shadow_type">in</property>
-                                            <child>
-                                              <object class="GtkScrolledWindow">
-                                                <property name="height_request">100</property>
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">True</property>
-                                                <child>
-                                                  <object class="GtkTextView" id="maclist">
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">True</property>
-                                                  </object>
-                                                </child>
-                                              </object>
-                                            </child>
-                                            <child type="label">
-                                              <object class="GtkLabel">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="label" translatable="yes">Mac Addresses</property>
-                                              </object>
-                                            </child>
+                                            <property name="can_focus">True</property>
+                                            <property name="vexpand">True</property>
                                           </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">True</property>
-                                            <property name="position">0</property>
-                                          </packing>
-                                        </child>
-                                        <child>
-                                          <object class="GtkBox">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">False</property>
-                                            <property name="orientation">vertical</property>
-                                            <child>
-                                              <object class="GtkButton">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">True</property>
-                                                <property name="receives_default">True</property>
-                                                <signal name="clicked" handler="check_addresses" swapped="no"/>
-                                                <child>
-                                                  <object class="GtkImage">
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">False</property>
-                                                    <property name="stock">gtk-apply</property>
-                                                  </object>
-                                                </child>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="pack_type">end</property>
-                                                <property name="position">0</property>
-                                              </packing>
-                                            </child>
-                                            <child>
-                                              <object class="GtkButton">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">True</property>
-                                                <property name="receives_default">True</property>
-                                                <property name="always_show_image">True</property>
-                                                <child>
-                                                  <object class="GtkImage">
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">False</property>
-                                                    <property name="stock">gtk-fullscreen</property>
-                                                  </object>
-                                                </child>
-                                              </object>
-                                              <packing>
-                                                <property name="expand">False</property>
-                                                <property name="fill">True</property>
-                                                <property name="pack_type">end</property>
-                                                <property name="position">1</property>
-                                              </packing>
-                                            </child>
-                                          </object>
-                                          <packing>
-                                            <property name="expand">False</property>
-                                            <property name="fill">False</property>
-                                            <property name="position">1</property>
-                                          </packing>
                                         </child>
                                       </object>
                                     </child>
+                                    <child type="label">
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Mac Addresses</property>
+                                      </object>
+                                    </child>
                                   </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="orientation">vertical</property>
+                                    <child>
+                                      <object class="GtkButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <signal name="clicked" handler="check_addresses" swapped="no"/>
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="stock">gtk-apply</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="pack_type">end</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkToggleButton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="halign">start</property>
+                                        <property name="valign">start</property>
+                                        <signal name="toggled" handler="mac_address_fullscreen" swapped="no"/>
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="stock">gtk-fullscreen</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="pack_type">end</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
                                 </child>
                               </object>
                               <packing>
-                                <property name="resize">True</property>
-                                <property name="shrink">True</property>
+                                <property name="resize">False</property>
+                                <property name="shrink">False</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkBox">
+                                <property name="height_request">200</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="orientation">vertical</property>
@@ -1989,7 +1982,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                               </object>
                               <packing>
                                 <property name="resize">True</property>
-                                <property name="shrink">True</property>
+                                <property name="shrink">False</property>
                               </packing>
                             </child>
                           </object>
@@ -2101,7 +2094,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkPaned" id="paned1">
+                  <object class="GtkPaned" id="internet_filter_paned">
                     <property name="width_request">400</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2111,6 +2104,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                     <property name="wide_handle">True</property>
                     <child>
                       <object class="GtkBox" id="box5">
+                        <property name="height_request">100</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
@@ -2129,26 +2123,84 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                     <property name="can_focus">False</property>
                                     <property name="orientation">vertical</property>
                                     <child>
-                                      <object class="GtkBox" id="box13">
+                                      <object class="GtkBox">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
-                                        <property name="halign">start</property>
-                                        <property name="valign">start</property>
-                                        <property name="homogeneous">True</property>
                                         <child>
-                                          <object class="GtkButton" id="toggle_proxy_user_open_button">
-                                            <property name="name">toggle_proxy_user_open_button</property>
+                                          <object class="GtkBox" id="box13">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="receives_default">True</property>
-                                            <signal name="clicked" handler="toggle_col5" swapped="no"/>
+                                            <property name="can_focus">False</property>
+                                            <property name="halign">start</property>
+                                            <property name="valign">start</property>
+                                            <property name="homogeneous">True</property>
                                             <child>
-                                              <object class="GtkLabel">
+                                              <object class="GtkButton" id="toggle_proxy_user_open_button">
+                                                <property name="name">toggle_proxy_user_open_button</property>
                                                 <property name="visible">True</property>
-                                                <property name="can_focus">False</property>
-                                                <property name="label" translatable="yes">List / All</property>
-                                                <property name="use_markup">True</property>
+                                                <property name="can_focus">True</property>
+                                                <property name="receives_default">True</property>
+                                                <signal name="clicked" handler="toggle_col5" swapped="no"/>
+                                                <child>
+                                                  <object class="GtkLabel">
+                                                    <property name="visible">True</property>
+                                                    <property name="can_focus">False</property>
+                                                    <property name="label" translatable="yes">List / All</property>
+                                                    <property name="use_markup">True</property>
+                                                  </object>
+                                                </child>
                                               </object>
+                                              <packing>
+                                                <property name="expand">True</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">0</property>
+                                              </packing>
+                                            </child>
+                                            <child>
+                                              <object class="GtkButton">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">True</property>
+                                                <property name="receives_default">True</property>
+                                                <signal name="clicked" handler="show_time_conditions_window" swapped="no"/>
+                                                <child>
+                                                  <object class="GtkBox">
+                                                    <property name="visible">True</property>
+                                                    <property name="can_focus">False</property>
+                                                    <child>
+                                                      <object class="GtkImage">
+                                                        <property name="visible">True</property>
+                                                        <property name="can_focus">False</property>
+                                                        <property name="pixbuf">data\clock-32.png</property>
+                                                        <property name="icon_size">6</property>
+                                                      </object>
+                                                      <packing>
+                                                        <property name="expand">True</property>
+                                                        <property name="fill">True</property>
+                                                        <property name="position">0</property>
+                                                      </packing>
+                                                    </child>
+                                                    <child>
+                                                      <object class="GtkLabel" id="time_button_label">
+                                                        <property name="visible">True</property>
+                                                        <property name="can_focus">False</property>
+                                                        <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;L M M J V S D&lt;/b&gt;&lt;/big&gt;
+&lt;big&gt;&lt;b&gt;11:00-22:00&lt;/b&gt;&lt;/big&gt;</property>
+                                                        <property name="use_markup">True</property>
+                                                        <property name="justify">center</property>
+                                                      </object>
+                                                      <packing>
+                                                        <property name="expand">True</property>
+                                                        <property name="fill">True</property>
+                                                        <property name="position">1</property>
+                                                      </packing>
+                                                    </child>
+                                                  </object>
+                                                </child>
+                                              </object>
+                                              <packing>
+                                                <property name="expand">True</property>
+                                                <property name="fill">True</property>
+                                                <property name="position">1</property>
+                                              </packing>
                                             </child>
                                           </object>
                                           <packing>
@@ -2158,56 +2210,32 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkButton">
+                                          <object class="GtkToggleButton" id="expand_users_toggle">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">True</property>
-                                            <signal name="clicked" handler="show_time_conditions_window" swapped="no"/>
+                                            <property name="halign">start</property>
+                                            <property name="valign">end</property>
+                                            <signal name="toggled" handler="expand_users_view" swapped="no"/>
                                             <child>
-                                              <object class="GtkBox">
+                                              <object class="GtkImage">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
-                                                <child>
-                                                  <object class="GtkImage">
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">False</property>
-                                                    <property name="pixbuf">data\clock-32.png</property>
-                                                    <property name="icon_size">6</property>
-                                                  </object>
-                                                  <packing>
-                                                    <property name="expand">True</property>
-                                                    <property name="fill">True</property>
-                                                    <property name="position">0</property>
-                                                  </packing>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkLabel" id="time_button_label">
-                                                    <property name="visible">True</property>
-                                                    <property name="can_focus">False</property>
-                                                    <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;L M M J V S D&lt;/b&gt;&lt;/big&gt;
-&lt;big&gt;&lt;b&gt;11:00-22:00&lt;/b&gt;&lt;/big&gt;</property>
-                                                    <property name="use_markup">True</property>
-                                                    <property name="justify">center</property>
-                                                  </object>
-                                                  <packing>
-                                                    <property name="expand">True</property>
-                                                    <property name="fill">True</property>
-                                                    <property name="position">1</property>
-                                                  </packing>
-                                                </child>
+                                                <property name="stock">gtk-fullscreen</property>
                                               </object>
                                             </child>
                                           </object>
                                           <packing>
-                                            <property name="expand">True</property>
+                                            <property name="expand">False</property>
                                             <property name="fill">True</property>
+                                            <property name="pack_type">end</property>
                                             <property name="position">1</property>
                                           </packing>
                                         </child>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
-                                        <property name="fill">False</property>
+                                        <property name="fill">True</property>
                                         <property name="position">0</property>
                                       </packing>
                                     </child>
@@ -2331,11 +2359,12 @@ to all users</property>
                       </object>
                       <packing>
                         <property name="resize">False</property>
-                        <property name="shrink">True</property>
+                        <property name="shrink">False</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkFrame" id="permissions">
+                        <property name="height_request">100</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label_xalign">0</property>
@@ -2398,10 +2427,33 @@ to all users</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
+                                    <child>
+                                      <object class="GtkToggleButton" id="expand_permissions_toggle">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="receives_default">True</property>
+                                        <property name="halign">end</property>
+                                        <property name="valign">end</property>
+                                        <signal name="toggled" handler="expand_permissions_view" swapped="no"/>
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="stock">gtk-fullscreen</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="pack_type">end</property>
+                                        <property name="position">2</property>
+                                      </packing>
+                                    </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">False</property>
+                                    <property name="fill">True</property>
                                     <property name="position">0</property>
                                   </packing>
                                 </child>
@@ -2604,7 +2656,7 @@ allowed</property>
                       </object>
                       <packing>
                         <property name="resize">True</property>
-                        <property name="shrink">True</property>
+                        <property name="shrink">False</property>
                       </packing>
                     </child>
                   </object>
