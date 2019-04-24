@@ -54,6 +54,7 @@ class Assistant:
         self.arw2["assistant_proxy_rules"].append_column(self.tvcolumn)
         self.tvcolumn = Gtk.TreeViewColumn(_('---'), self.check, active=19)
         self.arw2["assistant_proxy_rules"].append_column(self.tvcolumn)
+        self.arw2["assistant_proxy_rules"].hide()
 
 
 
@@ -72,11 +73,11 @@ class Assistant:
         elif (  page == 2    # if no proxy rules are necessary
                 and self.arw2["check_filter"].get_active() == 0
              ):
-            return 5   # summary page
+            return 4   # summary page
         elif ( page == 3     # if a rule specific for this user is choosed, skip existent rules page
                and self.arw2["radio_specific_rule"].get_active() == 1
               ):
-            return 5  # summary page
+            return 4  # summary page
         else:
             return page + 1
 
@@ -149,7 +150,13 @@ class Assistant:
         self.categories_store[row][3] = 1
 
     def ass_new_user_rules(self, widget, event = None):
+        # activated when the user changes the radio buttons of the page 4 of the assistant
         self.arw2["assistant1"].set_page_complete(self.arw2["proxy_rules"], True)
+        # hide the list, if useless
+        if self.arw2["radio_specific_rule"].get_active():
+            self.arw2["assistant_proxy_rules"].hide()
+        else:
+            self.arw2["assistant_proxy_rules"].show()
 
     def get_mac_address(self):
         mac = []
@@ -171,7 +178,6 @@ class Assistant:
 
     def check_mac_address(self, widget, a = None):
         mac = self.get_mac_address()
-        print(mac)
         x = mac_address_test(mac)
         print(x)
 
@@ -267,6 +273,19 @@ class Assistant:
 
 
             self.arw2["assistant1"].hide()
+        self.reset_assistant()
+
+
+    def reset_assistant(self, widget = None):
+        self.reset_mac_address()
+        for entry in ["new_user_entry"]:
+            self.arw2[entry].set_text("")
+        for textview in ["new_user_mac"]:
+            self.arw2[textview].get_buffer().set_text("")
+        for checkbox in ["check_nothing", "check_email", "check_filter", "check_full"]:
+            self.arw2[checkbox].set_active(False)
+        for page in ["new_user", "firewall_permissions"]:
+            self.arw2["assistant1"].set_page_complete(self.arw2[page], False)
 
 
 
