@@ -135,6 +135,7 @@ def bool_test(value):
 def alert(message, type_=0):
     dialog = Gtk.MessageDialog(None, Gtk.DialogFlags.MODAL, Gtk.MessageType.WARNING,
                                Gtk.ButtonsType.CLOSE, message)
+    dialog.set_keep_above(True)
     dialog.run()
     dialog.destroy()
 

@@ -56,7 +56,7 @@ from assistant import Assistant
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "0.35.0"
+version = "0.35.1"
 
 
 gtk = Gtk

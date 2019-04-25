@@ -233,12 +233,16 @@ class Users:
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
             if username in self.controller.maclist:
-                data1 = "\n".join(self.controller.maclist[username])
-                buffer.set_text(data1)
+                macaddr =  self.controller.maclist[username]
+                if (macaddr[0] == False) or (macaddr[0] == ""):
+                    alert(_("No valid mac address for this user !"))
+                else :
+                    data1 = "\n".join(macaddr)
+                    buffer.set_text(data1)
             else:
                 buffer.set_text("")
                 if not iternew:
-                    alert("No mac address for this user !")
+                    alert(_("No mac address for this user !"))
 
             self.user_summary(username)
 
