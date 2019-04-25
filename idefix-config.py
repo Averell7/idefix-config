@@ -511,7 +511,7 @@ class Idefix:
         self.chooser_users_store.clear()
         for row in self.users_store:
             category = row[0]
-            if row[5]:  # Add category only if Internet access is enabled
+            if row[6]:  # Add category only if Internet access is enabled
                 iter1 = self.chooser_users_store.append(None, [category, "", ""])
                 for child in row.iterchildren():  # write users
                     user = child[0]

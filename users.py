@@ -566,10 +566,13 @@ class Users:
         for row in self.controller.proxy_store:
             users = row[5].strip().split("\n")
             for userx in users:
-                if (userx.strip() == user1
-                   or row[11] == 1):
+                if userx.strip() == user1 or row[11] == 1:
                     parent_iter = store.append(None)
-                    store.set_value(parent_iter, 0, row[0])
+                    if row[11]:
+                        name = '<i>' + row[0] + '</i>'
+                    else:
+                        name = row[0]
+                    store.set_value(parent_iter, 0, name)
                     store.set_value(parent_iter, 1, row[3])
 
                     store.set_value(parent_iter, 5, row[1] == 'no')
@@ -598,6 +601,8 @@ class Users:
 
                     for domain in row[8].strip().split('\n'):
                         child_iter = store.append(parent_iter)
+                        if row[11]:
+                            domain = '<i>' + domain + '</i>'
                         store.set_value(child_iter, 0, domain)
                         store.set_value(child_iter, 6, i)
                         store.set_value(child_iter, 4, colour)
