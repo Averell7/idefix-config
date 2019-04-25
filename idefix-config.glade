@@ -1895,8 +1895,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                               <object class="GtkCellRendererText"/>
                                               <attributes>
                                                 <attribute name="foreground">4</attribute>
+                                                <attribute name="markup">0</attribute>
                                                 <attribute name="strikethrough">5</attribute>
-                                                <attribute name="text">0</attribute>
                                               </attributes>
                                             </child>
                                             <child>
