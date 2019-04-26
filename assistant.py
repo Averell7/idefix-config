@@ -15,7 +15,7 @@ class Assistant:
         self.arw2 = arw2
         self.controller = controller
         self.block_signals = False
-        self.arw2["assistant1"].set_forward_page_func(self.forward_func)        
+        self.arw2["assistant1"].set_forward_page_func(self.forward_func)
 
         # Listview
         self.categories_store = Gtk.ListStore(str,Gtk.TreeIter,str,int)
@@ -145,17 +145,22 @@ class Assistant:
         else:
             self.arw2["assistant_proxy_rules"].show()
 
-    def get_mac_address(self):
+    def get_mac_address(self, allowempty = False):
         mac = []
+        MacError = False
         for index in["A", "B", "C", "D", "E", "F"]:
             value = self.arw2["mac_" + index].get_text().lower()
             x = re.search("[0-9a-f]{2}", value)
             if not x:
-                showwarning(_("Error"), _("Invalid Mac address, please correct and retry"))
-                return False
-
+                MacError = True
             mac.append(value)
         mac = ":".join(mac)
+        if mac == ":::::":       # empty address
+            if allowempty:
+                return ""
+        if MacError:
+            showwarning(_("Error"), _("Invalid Mac address, please correct and retry"))
+            return False
         return mac
 
     def reset_mac_address(self):
@@ -182,8 +187,13 @@ class Assistant:
 
     def summary(self, widget):
         username = self.arw2["new_user_entry"].get_text()
-        mac_address = self.get_mac_address()
-
+        mac_address = self.get_mac_address(True)        # True will prevent an error message if the six entries are empty
+                                                        # because user has clicked on "Add another address"
+        text_buffer = self.arw2["new_user_mac"].get_buffer()
+        (start_iter, end_iter) = text_buffer.get_bounds()
+        text2 = text_buffer.get_text(start_iter, end_iter, False)
+        if len(text2) > 10:
+            mac_address += text2
 
 
         # TODO : create category if needed

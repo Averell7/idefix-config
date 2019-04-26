@@ -443,6 +443,7 @@ class ProxyUsers:
         self.arw["proxy_time_conditions"].show()
     def hide_time_conditions_window(self, widget):
         self.arw["proxy_time_conditions"].hide()
+        self.load_proxy_user("","")
 
     def proxy_profile_select(self, widget, event):
         if event.type == Gdk.EventType.BUTTON_RELEASE:

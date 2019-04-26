@@ -338,14 +338,19 @@ def write_default_config():
     os.makedirs(roaming, exist_ok=True)
 
     with open(os.path.join(roaming, 'idefix-config.cfg'), 'w') as f:
-        config = configparser.ConfigParser(interpolation=None)
-        config['default'] = {
-            'mode': 'local',
-            'server': '192.168.84.184',
-            'login': 'rock64',
-            'pass': 'rock64'
-        }
-        config.write(f)
+        if os.path.isfile('./idefix-config.cfg') :
+            with open('./idefix-config.cfg', 'r') as f2:
+                data1 = f2.read()
+                f.write(data1)
+        else:
+            config = configparser.ConfigParser(interpolation=None)
+            config['default'] = {
+                'mode': 'local',
+                'server': '192.168.84.184',
+                'login': 'rock64',
+                'pass': 'rock64'
+            }
+            config.write(f)
 
     return os.path.join(roaming, 'idefix-config.cfg')
 
