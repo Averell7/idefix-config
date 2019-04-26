@@ -132,6 +132,8 @@ class ProxyGroup:
 
         model = widget.get_model()
         data1 = data.get_text().split("#")
+        if not data1[1] == "chooser":      # if data does not come from the right chooser, return
+            return
         path = data1[0]
         if len(data1) == 2 :
             source_model = self.arw[data1[1]].get_model()

@@ -2284,20 +2284,33 @@ to all users</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkScrolledWindow" id="scrolledwindow5">
-                                    <property name="width_request">120</property>
+                                  <object class="GtkFrame" id="chooser1_frame">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="label_xalign">0</property>
                                     <property name="shadow_type">in</property>
                                     <child>
-                                      <object class="GtkTreeView" id="chooser1">
-                                        <property name="width_request">180</property>
+                                      <object class="GtkScrolledWindow" id="chooser1_scroll_window">
+                                        <property name="width_request">120</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="tooltip_column">1</property>
-                                        <child internal-child="selection">
-                                          <object class="GtkTreeSelection"/>
+                                        <child>
+                                          <object class="GtkTreeView" id="chooser1">
+                                            <property name="width_request">180</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="tooltip_column">1</property>
+                                            <child internal-child="selection">
+                                              <object class="GtkTreeSelection"/>
+                                            </child>
+                                          </object>
                                         </child>
+                                      </object>
+                                    </child>
+                                    <child type="label">
+                                      <object class="GtkLabel">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
                                       </object>
                                     </child>
                                   </object>
@@ -2447,45 +2460,6 @@ to all users</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <child>
-                                          <object class="GtkScrolledWindow" id="proxy_group_scroll_window">
-                                            <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="hexpand">True</property>
-                                            <property name="vexpand">True</property>
-                                            <property name="shadow_type">in</property>
-                                            <child>
-                                              <object class="GtkTreeView" id="proxy_group">
-                                                <property name="visible">True</property>
-                                                <property name="can_focus">True</property>
-                                                <property name="model">proxy_groups_store</property>
-                                                <property name="headers_visible">False</property>
-                                                <property name="search_column">0</property>
-                                                <property name="tooltip_column">1</property>
-                                                <signal name="button-press-event" handler="load_chooser" swapped="no"/>
-                                                <signal name="button-release-event" handler="proxy_group_select" swapped="no"/>
-                                                <child internal-child="selection">
-                                                  <object class="GtkTreeSelection"/>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkTreeViewColumn">
-                                                    <property name="title" translatable="yes">Users</property>
-                                                    <child>
-                                                      <object class="GtkCellRendererText"/>
-                                                      <attributes>
-                                                        <attribute name="text">0</attribute>
-                                                      </attributes>
-                                                    </child>
-                                                  </object>
-                                                </child>
-                                              </object>
-                                            </child>
-                                          </object>
-                                          <packing>
-                                            <property name="left_attach">1</property>
-                                            <property name="top_attach">1</property>
-                                          </packing>
-                                        </child>
-                                        <child>
                                           <object class="GtkScrolledWindow" id="scrolledwindow6">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
@@ -2535,6 +2509,45 @@ to all users</property>
                                             <property name="top_attach">0</property>
                                           </packing>
                                         </child>
+                                        <child>
+                                          <object class="GtkScrolledWindow" id="proxy_group_scroll_window">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="hexpand">True</property>
+                                            <property name="vexpand">True</property>
+                                            <property name="shadow_type">in</property>
+                                            <child>
+                                              <object class="GtkTreeView" id="proxy_group">
+                                                <property name="visible">True</property>
+                                                <property name="can_focus">True</property>
+                                                <property name="model">proxy_groups_store</property>
+                                                <property name="headers_visible">False</property>
+                                                <property name="search_column">0</property>
+                                                <property name="tooltip_column">1</property>
+                                                <signal name="button-press-event" handler="load_chooser" swapped="no"/>
+                                                <signal name="button-release-event" handler="proxy_group_select" swapped="no"/>
+                                                <child internal-child="selection">
+                                                  <object class="GtkTreeSelection"/>
+                                                </child>
+                                                <child>
+                                                  <object class="GtkTreeViewColumn">
+                                                    <property name="title" translatable="yes">Users</property>
+                                                    <child>
+                                                      <object class="GtkCellRendererText"/>
+                                                      <attributes>
+                                                        <attribute name="text">0</attribute>
+                                                      </attributes>
+                                                    </child>
+                                                  </object>
+                                                </child>
+                                              </object>
+                                            </child>
+                                          </object>
+                                          <packing>
+                                            <property name="left_attach">1</property>
+                                            <property name="top_attach">1</property>
+                                          </packing>
+                                        </child>
                                       </object>
                                       <packing>
                                         <property name="name">page0</property>
@@ -2559,30 +2572,6 @@ allowed</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
-                                    <child>
-                                      <object class="GtkNotebook" id="notebook2">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <signal name="switch-page" handler="on_permissions_tab_change" swapped="no"/>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child type="tab">
-                                          <placeholder/>
-                                        </child>
-                                        <child>
-                                          <placeholder/>
-                                        </child>
-                                        <child type="tab">
-                                          <placeholder/>
-                                        </child>
-                                      </object>
-                                      <packing>
-                                        <property name="name">page2</property>
-                                        <property name="title" translatable="yes">page2</property>
-                                        <property name="position">2</property>
-                                      </packing>
-                                    </child>
                                   </object>
                                   <packing>
                                     <property name="expand">True</property>
@@ -2598,21 +2587,35 @@ allowed</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkScrolledWindow" id="scrolledwindow9">
-                                <property name="width_request">120</property>
+                              <object class="GtkFrame" id="chooser_frame">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label_xalign">0</property>
                                 <property name="shadow_type">in</property>
                                 <child>
-                                  <object class="GtkTreeView" id="chooser">
-                                    <property name="width_request">180</property>
+                                  <object class="GtkScrolledWindow" id="chooser_scroll_window">
+                                    <property name="width_request">120</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="tooltip_column">1</property>
-                                    <signal name="button-release-event" handler="chooser_show_context" swapped="no"/>
-                                    <child internal-child="selection">
-                                      <object class="GtkTreeSelection"/>
+                                    <property name="shadow_type">in</property>
+                                    <child>
+                                      <object class="GtkTreeView" id="chooser">
+                                        <property name="width_request">180</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="tooltip_column">1</property>
+                                        <signal name="button-release-event" handler="chooser_show_context" swapped="no"/>
+                                        <child internal-child="selection">
+                                          <object class="GtkTreeSelection"/>
+                                        </child>
+                                      </object>
                                     </child>
+                                  </object>
+                                </child>
+                                <child type="label">
+                                  <object class="GtkLabel">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
                                   </object>
                                 </child>
                               </object>

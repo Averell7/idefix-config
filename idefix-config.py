@@ -421,6 +421,7 @@ class Idefix:
         self.set_colors()
         self.load_ini_files()
         self.profiles.list_configuration_profiles()
+        self.load_chooser("")
 
 
     def import_ini_files(self):
@@ -773,6 +774,14 @@ class Idefix:
 
 
     def load_chooser(self, widget, event=None):          # TODO no longer used
+        for scroll in ['proxy_users_scroll_window', 'chooser1_frame'] :
+            ctx = self.arw[scroll].get_style_context()
+            ctx.add_class('chosen_list1')
+
+        for scroll in ['proxy_group_scroll_window', 'chooser_frame'] :
+            ctx = self.arw[scroll].get_style_context()
+            ctx.add_class('chosen_list')
+
         return
 
         if widget.name in ["proxy_users"]:
