@@ -18,11 +18,16 @@
    background: #00ff00;
 }
 */
-/*
+
 .chosen_list {
-    border: 2px #FF0000 solid;
+    border: 2px #880000 solid;
+    
 }
 
+.chosen_list1 {
+    border: 2px #000099 solid;
+}
+/*
 #toggle_proxy_user_open_button,
 #toggle_proxy_open_button,
 #toggle_proxy_allow_button
