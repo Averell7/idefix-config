@@ -56,7 +56,7 @@ from assistant import Assistant
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "0.35.2"
+version = "0.35.3"
 
 
 gtk = Gtk
@@ -903,9 +903,7 @@ class Idefix:
         """Show the context menu on right click (if applicable)"""
         if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:
             return
-
-        if self.active_chooser == 'proxy_group':
-            self.arw["chooser_proxy_groups_menu"].popup(None, None, None, None, event.button, event.time)
+        self.arw["chooser_proxy_groups_menu"].popup(None, None, None, None, event.button, event.time)
 
     def load_ini_files(self):
         for path in glob.glob(get_config_path("./tmp/") + "*.ini"):

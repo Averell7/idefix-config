@@ -54,17 +54,11 @@ class Users:
         self.tvcolumn.pack_start(self.cellpb, False)
         self.tvcolumn.pack_start(self.cellpb2, False)
         self.tvcolumn.add_attribute(self.cell, "background", 10)
-        # self.tvcolumn.add_attribute(self.cell, "foreground", 9)
-        # self.tvcolumn.add_attribute(self.cell, "weight", 8)
         self.tvcolumn.add_attribute(self.cell, "text", 0)
         self.tvcolumn.add_attribute(self.cellpb, "pixbuf", 11)
         self.tvcolumn.add_attribute(self.cellpb2, "pixbuf", 12)
 
-        # self.tvcolumn1 = gtk.TreeViewColumn(_('Restore'), self.check, active=3)
-        # self.tvcolumn2 = gtk.TreeViewColumn(_('Test'), self.test, text=3)
-        # self.tvcolumn = gtk.TreeViewColumn(_('Yes'), self.cell, text=0, background=2)
         self.treeview1.append_column(self.tvcolumn)
-        # self.treeview1.append_column(self.tvcolumn1)
 
         # drag and drop for users tree
         self.arw["treeview1"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [],

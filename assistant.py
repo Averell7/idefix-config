@@ -64,6 +64,21 @@ class Assistant:
         self.arw2["assistant_proxy_rules"].hide()
 
 
+        # Treeview for experiment user permissions
+
+        for tree in ["experiment_source", "experiment_dest"]:
+            self.treeview1 = self.arw2[tree]
+            self.treeview1.set_model(self.controller.users.users_store)
+
+        self.cell = Gtk.CellRendererText()
+        self.tvcolumn = Gtk.TreeViewColumn(_('You'), self.cell, text=0)
+        self.arw2["experiment_source"].append_column(self.tvcolumn)
+        self.tvcolumn = Gtk.TreeViewColumn(_('User'), self.cell, text=0)
+        self.arw2["experiment_dest"].append_column(self.tvcolumn)
+
+
+
+
 
 
     def show_assistant(self, widget = None):
@@ -297,6 +312,14 @@ class Assistant:
             self.arw2[checkbox].set_active(False)
         for page in ["new_user", "firewall_permissions"]:
             self.arw2["assistant1"].set_page_complete(self.arw2[page], False)
+
+
+    """ Experiment user prmissions """
+
+    def experiment_user_permissions(self, widget):
+
+                self.arw2["assistant1"].set_current_page(5)
+
 
 
 
