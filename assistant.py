@@ -1,10 +1,10 @@
-import time
+from gi.repository import Gtk
 
-from gi.repository import Gdk, Gtk
-
-from myconfigparser import myConfigParser,myTextParser
-from util import askyesno, ask_text, mac_address_test, showwarning
 import re
+
+from gi.repository import Gtk
+
+from util import mac_address_test, showwarning
 
 
 class Assistant:
@@ -36,13 +36,30 @@ class Assistant:
         self.arw2["assistant_proxy_rules"].set_model(self.controller.proxy_users.proxy_store)
 
         self.cell = Gtk.CellRendererText()
-        self.check = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
+        self.check = Gtk.CellRendererToggle(xalign=0.5)
         self.check.connect('toggled', self.choose_rules)
 
-        self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell, text=0, foreground=15, background=16)
+        def render_name(col, cell, model, iter, *args):
+            cell.set_property('foreground', model.get_value(iter, 15))
+            cell.set_property('background', model.get_value(iter, 16))
+            text = model.get_value(iter, 0)
+            if model.get_value(iter, 11):
+                text = '<i>' + text + '</i>'
+            cell.set_property('markup', text)
+
+        def render_check(col, cell, model, iter, *args):
+            all_rule = model.get_value(iter, 11)
+            cell.set_active(True if all_rule else model.get_value(iter, 19))
+            cell.set_activatable(not all_rule)
+
+        self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell)
+        self.tvcolumn.set_cell_data_func(self.cell, render_name)
         self.tvcolumn.set_fixed_width(220)
         self.arw2["assistant_proxy_rules"].append_column(self.tvcolumn)
-        self.tvcolumn = Gtk.TreeViewColumn(_('---'), self.check, active=19)
+
+        self.tvcolumn = Gtk.TreeViewColumn(_('---'), self.check)
+        self.tvcolumn.set_cell_data_func(self.check, render_check)
+
         self.arw2["assistant_proxy_rules"].append_column(self.tvcolumn)
         self.arw2["assistant_proxy_rules"].hide()
 
