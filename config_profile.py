@@ -87,7 +87,7 @@ class ConfigProfile:
         self.controller = controller
         self.password = password
         if not filename:
-            filename = get_config_path('idefix-config.cfg')
+            filename = get_config_path('confix.cfg')
         self.filename = filename
 
         self.window = self.arw['profiles_window']

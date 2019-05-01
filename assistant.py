@@ -4,7 +4,7 @@ import re
 
 from gi.repository import Gtk
 
-from util import mac_address_test, showwarning
+from util import mac_address_test, ip_address_test, showwarning
 
 
 class Assistant:
@@ -61,7 +61,6 @@ class Assistant:
         self.tvcolumn.set_cell_data_func(self.check, render_check)
 
         self.arw2["assistant_proxy_rules"].append_column(self.tvcolumn)
-        self.arw2["assistant_proxy_rules"].hide()
 
 
         # Treeview for experiment user permissions
@@ -90,12 +89,17 @@ class Assistant:
 
     def forward_func(self, page):
         """ manage the page flow, depending of the choices made by the user """
-        if page == 0 :       # useful for development, to go easily to the developped page
-            return page + 1
+        if page == 0 :
+            if self.arw2["ass_create_user_check"].get_active():
+                return 1
+            elif self.arw2["ass_experiment_check"].get_active():
+                return 5
         elif (  page == 2    # if no proxy rules are necessary
                 and self.arw2["check_filter"].get_active() == 0
              ):
             return 4   # summary page
+        elif page == 4:
+            self.summary("")
 
         else:
             return page + 1
@@ -124,10 +128,6 @@ class Assistant:
             self.arw2["check_filter"].set_active(False)
             self.arw2["check_email"].set_active(True)
 
-
-
-    def ass_new_user(self, widget, a = None):
-        self.arw2["assistant1"].set_page_complete(self.arw2["new_user"], True)
 
     def ass_firewall_permissions(self, widget, event = None):
         self.arw2["assistant1"].set_page_complete(self.arw2["firewall_permissions"], True)
@@ -171,11 +171,6 @@ class Assistant:
     def ass_new_user_rules(self, widget, event = None):
         # activated when the user changes the radio buttons of the page 4 of the assistant
         self.arw2["assistant1"].set_page_complete(self.arw2["proxy_rules"], True)
-        # hide the list, if useless
-        if not self.arw2["check_existent_rule"].get_active():
-            self.arw2["assistant_proxy_rules"].hide()
-        else:
-            self.arw2["assistant_proxy_rules"].show()
 
     def get_mac_address(self, allowempty = False):
         mac = []
@@ -199,18 +194,48 @@ class Assistant:
         for index in["A", "B", "C", "D", "E", "F"]:
             self.arw2["mac_" + index].set_text("")
 
-
-    def check_mac_address(self, widget, a = None):
-        # started by the button in the assistant
-        mac = self.get_mac_address()
-        x = mac_address_test(mac)
-        print(x)  # TODO message to indicate it is correct
-
     def add_address(self, widget = None):
         address = self.get_mac_address()
         if address:
             self.reset_mac_address()
             self.arw2["new_user_mac"].get_buffer().insert_at_cursor(address + "\n")
+
+    def check_addresses(self, widget):
+        buffer = self.arw2['new_user_mac'].get_buffer()
+        (start_iter, end_iter) = buffer.get_bounds()
+        value = buffer.get_text(start_iter, end_iter, False)
+
+        OK = True
+        for v in value.split('\n'):
+            if v.strip() == "":
+                continue
+            if v.startswith("#"):
+                continue
+            if not mac_address_test(v) and not ip_address_test(v):
+                showwarning(_("Address Invalid"), _("The address \n%s\n entered is not valid") % v)
+                OK = False
+        if OK:
+            showwarning(_("Addresses OK"), _("All addresses are valid"))
+            return True
+
+    def check_user_data(self, widget, a = None):
+        # started by the button in the assistant
+
+        self.username = self.arw2["new_user_entry"].get_text()
+        self.mac_address = self.get_mac_address(True)        # True will prevent an error message if the six entries are empty
+                                                        # because user has clicked on "Add another address"
+        if self.mac_address == False:                             # If address invalid let user correct
+            return
+
+        x = self.check_addresses("")
+        if x == False:
+            return
+
+        x = self.controller.users.does_user_exist(self.username)
+        if x == True:
+            showwarning(_("Name already used"), _("The name %s is already in use.\nPlease choose another one.") % self.username)
+            return
+        self.arw2["assistant1"].set_page_complete(self.arw2["new_user"], True)
 
 
     def choose_rules(self, widget, row):
@@ -218,14 +243,6 @@ class Assistant:
         self.controller.proxy_store[row][19] = not self.controller.proxy_store[row][19]
 
     def summary(self, widget):
-        username = self.arw2["new_user_entry"].get_text()
-        mac_address = self.get_mac_address(True)        # True will prevent an error message if the six entries are empty
-                                                        # because user has clicked on "Add another address"
-        text_buffer = self.arw2["new_user_mac"].get_buffer()
-        (start_iter, end_iter) = text_buffer.get_bounds()
-        text2 = text_buffer.get_text(start_iter, end_iter, False)
-        if len(text2) > 10:
-            mac_address += text2
 
 
         # TODO : create category if needed
@@ -255,8 +272,8 @@ class Assistant:
                 break
         iter1 = self.controller.users_store.get_iter_from_string(string1)
         iternew = self.controller.users_store.insert(iter1, 1,
-                        [username, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
-        self.controller.maclist[username] = [mac_address]
+                        [self.username, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
+        self.controller.maclist[self.username] = [self.mac_address]
         self.controller.set_colors()
 
         # if Web filter is not selected, show the first tab with the new user selected and close the assistant
@@ -274,30 +291,30 @@ class Assistant:
 
 
         # Proxy config
+        iter1 = None
+        memiter = None
+
+        # create rule
         if self.arw2["check_specific_rule"].get_active() == 1:
-            # create rule
             iter1 = self.controller.proxy_store.insert(-1,
-                        [username, "on", "allow", "", "", username, "", "", "", "", "", 0, 0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
-            # select rule
-            sel = self.controller.arw["treeview3"].get_selection()
+                        [self.username, "on", "allow", "", "", self.username, "", "", "", "", "", 0, 0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
+
+        # Add the user to the chosen rules
+        for row in self.controller.proxy_store:
+            if row[19] and (not row[11]):       # if selected, but is not a general rule (all users)
+                # add user to users list
+                row[5] += "\n" + self.username
+                memiter= row.iter
+
+        # select rule
+        if not iter1:           # if no new rule was created, we will open the last general rule applied to this user
+            iter1 = memiter
+
+        sel = self.controller.arw["treeview3"].get_selection()
+        if iter1:
             sel.select_iter(iter1)
-            self.controller.proxy_users.load_proxy_user(None, None)
-            self.controller.arw["notebook3"].set_current_page(1)
-
-        if self.arw2["check_existent_rule"].get_active() == 1:
-            # Add the user to the chosen rules
-            for row in self.controller.proxy_store:
-                if row[19] == 1:
-                    # add user to users list
-                    row[5] += "\n" + username
-
-            # show the categories tab, and select the new user
-            sel = self.controller.arw["treeview1"].get_selection()
-            sel.select_iter(iter1)
-            self.controller.arw["notebook3"].set_current_page(0)
-
-
-
+        self.controller.proxy_users.load_proxy_user(None, None)
+        self.controller.arw["notebook3"].set_current_page(1)
         self.arw2["assistant1"].hide()
         self.reset_assistant()
 
@@ -314,11 +331,66 @@ class Assistant:
             self.arw2["assistant1"].set_page_complete(self.arw2[page], False)
 
 
-    """ Experiment user prmissions """
+    """ Experiment user permissions """
 
-    def experiment_user_permissions(self, widget):
+    def get_current_user(self,widget, event = None):
+        path = widget.get_path_at_pos(event.x, event.y)
+        iter1 = self.controller.users.users_store.get_iter(path[0])
+        self.current_name = self.controller.users.users_store[iter1][0]
+        self.arw2["current_name"].set_text(self.current_name)
 
-                self.arw2["assistant1"].set_current_page(5)
+    def get_target_user(self,widget, event = None):
+        path = widget.get_path_at_pos(event.x, event.y)
+        iter1 = self.controller.users.users_store.get_iter(path[0])
+        self.target_name = self.controller.users.users_store[iter1][0]
+        self.arw2["target_name"].set_text(self.target_name)
+
+    def simulate_user_toggled(self, widget):
+        if widget.get_active():
+            self.enable_simulated_user(self.current_name, self.target_name)
+            print("Simulation On")
+        else:
+            self.disable_simulated_user(self.current_name)
+            print("simulation Off")
+
+    def enable_simulated_user(self, user, target_user):
+        """Add -@ to user and add +@ to target_user"""
+
+        mac_list = []
+
+        for mac in self.controller.maclist[user]:
+            mac_list.append(mac)
+
+        # Update the user to ignore previous set addresses
+        self.controller.maclist[user] = ['-@' + mac for mac in mac_list]
+        self.controller.maclist[user].append(
+            "+@11:11:11:11:11:11")  # add a dummy address, to prevent errors created by a user without a valid address
+
+        self.controller.maclist[target_user].extend(['+@' + mac for mac in mac_list])
+        self.controller.arw["maclist"].get_buffer().set_text('\n'.join(self.controller.maclist[user]))
+        #self.controller.users.user_summary(user)
+
+    def disable_simulated_user(self, current_user):
+        """Remove -@ and +@ prefixes from all users"""
+        user = None
+        for user in self.controller.maclist:
+            maclist = self.controller.maclist[user]
+            updated_macs = []
+            for mac in maclist:
+                if mac.startswith('-@'):  # Enable old addresses
+                    updated_macs.append(mac[2:])
+                elif not mac.startswith('+@'):  # Remove added addresses completely
+                    updated_macs.append(mac)
+            self.controller.maclist[user] = updated_macs
+
+        self.controller.arw["maclist"].get_buffer().set_text(
+            '\n'.join(self.controller.maclist[current_user])
+        )
+        #if user:
+        #    self.controller.users.user_summary(user)
+
+
+
 
 
 

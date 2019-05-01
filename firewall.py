@@ -41,7 +41,7 @@ class Firewall:
         # self.check.set_property('xalign', 0.0)
         self.check3.connect('toggled', self.controller.toggle_col13, self.firewall_store, "firewall")
         self.check4 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
-        self.check4.connect('toggled', self.controller.toggle_col14, self.firewall_store)
+        self.check4.connect('toggled', self.toggle_col14, self.firewall_store)
         # self.check6 = gtk.CellRendererToggle(activatable = True, xalign = 0.5)
         # self.check6.connect( 'toggled', self.toggle_col12_firewall, self.firewall_store )
 
@@ -71,6 +71,21 @@ class Firewall:
             treestore[row][12] = 0
             treestore[row][3] = ""
             treestore[row][16] = "#ffffff"
+
+    def toggle_col14(self, cellrenderer, row, treestore):
+        # callback of the on/off checkbox in proxy tab.
+        # col 14 = on/off state; col 15 = text color
+        if treestore[row][14] == 0:
+            treestore[row][14] = 1
+            treestore[row][1] = "on"
+            if treestore[row][13] == 1:
+                treestore[row][15] = "#009900"
+            else:
+                treestore[row][15] = "#ff0000"
+        else:
+            treestore[row][14] = 0
+            treestore[row][1] = "off"
+            treestore[row][15] = "#bbbbbb"
 
     def firewall_user(self, widget, event):
         # Loads user data when a user is selected in the list

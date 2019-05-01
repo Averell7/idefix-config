@@ -337,9 +337,9 @@ def write_default_config():
     # Create the directory structure
     os.makedirs(roaming, exist_ok=True)
 
-    with open(os.path.join(roaming, 'idefix-config.cfg'), 'w') as f:
-        if os.path.isfile('./idefix-config.cfg') :
-            with open('./idefix-config.cfg', 'r') as f2:
+    with open(os.path.join(roaming, 'confix.cfg'), 'w') as f:
+        if os.path.isfile('./confix.cfg') :
+            with open('./confix.cfg', 'r') as f2:
                 data1 = f2.read()
                 f.write(data1)
         else:
@@ -352,10 +352,10 @@ def write_default_config():
             }
             config.write(f)
 
-    return os.path.join(roaming, 'idefix-config.cfg')
+    return os.path.join(roaming, 'confix.cfg')
 
 
 ###########################################################################
 # LOCALISATION ############################################################
 ###########################################################################
-elib_intl3.install("idefix-config", "share/locale")
+elib_intl3.install("confix", "share/locale")

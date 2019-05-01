@@ -52,7 +52,7 @@ class ProxyUsers:
                                          str, str, str, int, int)  #
         self.cell3 = Gtk.CellRendererText()
         self.check2 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
-        self.check2.connect('toggled', self.controller.toggle_col14, self.proxy_store)
+        self.check2.connect('toggled', self.toggle_col14, self.proxy_store)
         # Test pour Daniel
         self.check3 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
         self.check3.connect('toggled', self.toggle_col5, self.proxy_store)
@@ -65,7 +65,7 @@ class ProxyUsers:
         self.treeview3.set_model(self.proxy_store)
         self.treeview3.connect("button-press-event", self.load_proxy_user)
 
-        self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell3, text=0, foreground=15, background=16)
+        self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell3, markup=0, foreground=15, background=16)
         self.tvcolumn.set_fixed_width(220)
         self.treeview3.append_column(self.tvcolumn)
 
@@ -157,9 +157,33 @@ class ProxyUsers:
             treestore.set_value(self.controller.iter_proxy, 2, "deny")
             treestore.set_value(self.controller.iter_proxy, 15, "#f00000")
             self.arw["allow_deny_groups"].set_text("Denied Groups")
-            self.arw["allow_deny_sites"].set_text("Denied Sites")
+            self.arw["allow_deny_sites"].set_t
 
         self.load_proxy_user2()
+
+
+    def toggle_col14(self, cellrenderer, row, treestore):
+        # callback of the on/off checkbox in proxy tab.
+        # col 14 = on/off state; col 15 = text color
+        if treestore[row][14] == 0:
+            treestore[row][14] = 1
+            treestore[row][1] = "on"
+            markup = treestore[row][0]
+            markup = markup.replace("<s>", "")
+            treestore[row][0] = markup.replace("</s>", "")
+
+            if treestore[row][13] == 1:
+                treestore[row][15] = "#009900"
+            else:
+                treestore[row][15] = "#ff0000"
+        else:
+            treestore[row][14] = 0
+            treestore[row][1] = "off"
+            treestore[row][15] = "#bbbbbb"
+            markup = treestore[row][0]
+            treestore[row][0] = "<s>" + markup + "</s>"
+
+        #self.populate_proxy()
 
 
     def add_rule_below(self, widget):
@@ -464,8 +488,16 @@ class ProxyUsers:
         for section in data1:
             if section[0:2] == "@_":  # generated sections must not be loaded
                 continue
-            out = [section]
+
             data2 = data1[section]
+            if data2.get("any_user"):
+                name = '<i>' + section + '</i>'
+            else:
+                name = section
+            if data2.get("active") == ['off']:
+                 name = "<s>" + name + "</s>"
+            out = [name]
+
             # merge user and mac
             if "user" not in data2:
                 if "users" in data2:

@@ -34,15 +34,18 @@ Cet assistant vous aidera à réaliser les tâches suivantes :
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="padding">9</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkRadioButton" id="ass_create_user_check">
             <property name="label" translatable="yes">Create a new user</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
+            <property name="receives_default">False</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -51,12 +54,14 @@ Cet assistant vous aidera à réaliser les tâches suivantes :
           </packing>
         </child>
         <child>
-          <object class="GtkButton">
+          <object class="GtkRadioButton" id="ass_experiment_check">
             <property name="label" translatable="yes">Experiment the permissions of another user</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <signal name="clicked" handler="experiment_user_permissions" swapped="no"/>
+            <property name="receives_default">False</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">ass_create_user_check</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -65,21 +70,24 @@ Cet assistant vous aidera à réaliser les tâches suivantes :
           </packing>
         </child>
         <child>
+          <placeholder/>
+        </child>
+        <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">- Ajouter une adresse mac à un utilisateur existant [futur]
-- Déplacer un utilisateur vers une catégorie différente [futur]
-</property>
+            <property name="label" translatable="yes">Choose an option and click "Next"</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+              <attribute name="foreground" value="#a4a400000000"/>
+            </attributes>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="padding">15</property>
+            <property name="position">4</property>
           </packing>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
       <packing>
@@ -132,8 +140,11 @@ Cet assistant vous aidera à réaliser les tâches suivantes :
               <object class="GtkEntry" id="new_user_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
+                <property name="is_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
                 <property name="invisible_char">●</property>
-                <signal name="key-release-event" handler="ass_new_user" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -161,7 +172,6 @@ If you don't know it, it is possible to add it later  in the "Users and categori
                 <property name="can_focus">False</property>
                 <child>
                   <object class="GtkEntry" id="mac_A">
-                    <property name="width_request">25</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="halign">start</property>
@@ -313,10 +323,25 @@ If you don't know it, it is possible to add it later  in the "Users and categori
                 </child>
                 <child>
                   <object class="GtkButton">
+                    <property name="label" translatable="yes">Add another address</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <signal name="clicked" handler="check_mac_address" swapped="no"/>
+                    <signal name="clicked" handler="add_address" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">10</property>
+                    <property name="position">11</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <signal name="clicked" handler="check_user_data" swapped="no"/>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>
@@ -328,21 +353,7 @@ If you don't know it, it is possible to add it later  in the "Users and categori
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="padding">10</property>
-                    <property name="position">11</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton">
-                    <property name="label" translatable="yes">Add another address</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <signal name="clicked" handler="add_address" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
+                    <property name="pack_type">end</property>
                     <property name="position">12</property>
                   </packing>
                 </child>
@@ -374,19 +385,59 @@ If you don't know it, it is possible to add it later  in the "Users and categori
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Now the program should check if the mac addresses are valid, 
-and if the username is not already used. 
-If not, the user should be able to correct. </property>
-                <attributes>
-                  <attribute name="foreground" value="#cccc00000000"/>
-                </attributes>
+                <property name="spacing">5</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Click on the </property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                      <attribute name="foreground" value="#cccc00000000"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-apply</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">button to validate your data, and then click "Next"</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                      <attribute name="foreground" value="#a4a400000000"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="padding">11</property>
                 <property name="position">6</property>
               </packing>
             </child>
@@ -608,7 +659,7 @@ without limitations, e-mail, Web, etc.</property>
             <property name="label" translatable="yes">(This page will appear only if Filtered Internet access was chosen)
 
 This user will have a limited Web access. 
-Do you want to :</property>
+You can :</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -632,13 +683,11 @@ Do you want to :</property>
           </packing>
         </child>
         <child>
-          <object class="GtkCheckButton" id="check_existent_rule">
-            <property name="label" translatable="yes">Join him to a existent rules</property>
+          <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="draw_indicator">True</property>
-            <signal name="toggled" handler="ass_new_user_rules" after="yes" swapped="no"/>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">You can join him to existent rules in the list below.
+Lines in italics cannot be unselected, because they are defined for all users. </property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -715,36 +764,42 @@ Do you want to :</property>
             <property name="can_focus">False</property>
             <property name="margin_left">6</property>
             <property name="margin_right">6</property>
-            <property name="label" translatable="yes">Ce label devrait changer en fonction des choix faits
-et expliquer  la  suite. </property>
+            <property name="label" translatable="yes">This page is unfinished. The message below should be adapted
+to the choices made by the user.</property>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
+            <property name="padding">10</property>
             <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">You will be redirected to the Internet Filter page,
+where you will have to add the permissions given to the new user. 
+Click on "Apply" to apply your choices. </property>
+            <attributes>
+              <attribute name="weight" value="semibold"/>
+              <attribute name="foreground" value="#a4a400000000"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
           <placeholder/>
         </child>
-        <child>
-          <object class="GtkButton">
-            <property name="label" translatable="yes">Finish</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <signal name="clicked" handler="summary" swapped="no"/>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
       </object>
       <packing>
         <property name="page_type">confirm</property>
         <property name="title" translatable="yes">confirmation</property>
+        <property name="complete">True</property>
         <property name="has_padding">False</property>
       </packing>
     </child>
@@ -812,6 +867,7 @@ Then select the user you want to test in the right list</property>
                   <object class="GtkTreeView" id="experiment_source">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <signal name="button-release-event" handler="get_current_user" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
                     </child>
@@ -825,18 +881,63 @@ Then select the user you want to test in the right list</property>
               </packing>
             </child>
             <child>
-              <object class="GtkLabel">
+              <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">will experiment 
+                <property name="valign">center</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel" id="current_name">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">5</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">will experiment 
 the permissions 
 of ---&gt;</property>
-                <property name="justify">center</property>
+                    <property name="justify">center</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="target_name">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">7</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="padding">6</property>
+                <property name="padding">8</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -849,6 +950,7 @@ of ---&gt;</property>
                   <object class="GtkTreeView" id="experiment_dest">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <signal name="button-release-event" handler="get_target_user" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
                     </child>
@@ -894,13 +996,12 @@ Don't forget to do this before you close the program ! </property>
               <placeholder/>
             </child>
             <child>
-              <object class="GtkButton">
-                <property name="label">gtk-apply</property>
+              <object class="GtkToggleButton" id="experiment_button">
+                <property name="label" translatable="yes">togglebutton</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <property name="always_show_image">True</property>
+                <signal name="toggled" handler="simulate_user_toggled" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -955,6 +1056,212 @@ Don't forget to do this before you close the program ! </property>
     </child>
     <child>
       <placeholder/>
+    </child>
+  </object>
+  <object class="GtkWindow" id="help_window">
+    <property name="can_focus">False</property>
+    <property name="accept_focus">False</property>
+    <property name="deletable">False</property>
+    <property name="has_resize_grip">True</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Help system</property>
+            <attributes>
+              <attribute name="weight" value="semibold"/>
+              <attribute name="size" value="15000"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStack">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkGrid">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="pixbuf">data\email-32.png</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="pixbuf">data\internet-32.gif</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="pixbuf">data\internet-filtered-32.gif</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="margin_left">8</property>
+                        <property name="label" translatable="yes">e-mail</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="valign">center</property>
+                        <property name="margin_left">8</property>
+                        <property name="label" translatable="yes">full Internet access (includes e-mail and Web)</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="margin_left">8</property>
+                        <property name="label" translatable="yes">Filtered Web access</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="margin_left">50</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Colors legend :&lt;/b&gt;
+
+&lt;span foreground="green"&gt;green : the rule gives access to... &lt;/span&gt;
+&lt;span foreground="red"&gt;red : the rule denies access to...&lt;/span&gt;
+&lt;span background="yellow"&gt;yellow background : open access to the Web&lt;/span&gt;
+&lt;i&gt;italics : This rule applies to all users&lt;/i&gt;
+&lt;span foreground="gray" strikethrough="true" &gt;This rule is inactive&lt;/span&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="name">page0</property>
+                <property name="title" translatable="yes">page0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">label page2</property>
+              </object>
+              <packing>
+                <property name="name">page1</property>
+                <property name="title" translatable="yes">page1</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButtonBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">Close the window</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="hide_help" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
     </child>
   </object>
 </interface>

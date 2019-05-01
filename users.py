@@ -157,7 +157,6 @@ class Users:
             self.arw["menu_move_user"].hide()
             self.arw["menu_rename_user"].hide()
             self.arw["menu_rename_cat"].show()
-            self.arw["simulate_user"].hide()
 
             self.arw['email_time_condition'].set_sensitive(
                 self.users_store[self.controller.iter_user][4] or self.users_store[self.controller.iter_user][7]
@@ -222,7 +221,6 @@ class Users:
             self.arw["menu_move_user"].show()
             self.arw["menu_rename_user"].show()
             self.arw["menu_rename_cat"].hide()
-            self.arw["simulate_user"].show()
 
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
@@ -433,54 +431,54 @@ class Users:
 
         self.enable_simulated_user(current_user, target_user)
 
-    def cancel_select_user_popup(self, widget):
-        self.arw['select_user_popup'].hide()
+##    def cancel_select_user_popup(self, widget):
+##        self.arw['select_user_popup'].hide()
+##
+##    def simulate_user_toggled(self, widget):
+##        if self.block_signals:
+##            return
+##
+##        if widget.get_active():
+##            self.arw['select_user_popup'].show()
+##        else:
+##            self.disable_simulated_user()
 
-    def simulate_user_toggled(self, widget):
-        if self.block_signals:
-            return
-
-        if widget.get_active():
-            self.arw['select_user_popup'].show()
-        else:
-            self.disable_simulated_user()
-
-    def enable_simulated_user(self, user, target_user):
-        """Add -@ to user and add +@ to target_user"""
-
-        mac_list = []
-
-        for mac in self.controller.maclist[user]:
-            mac_list.append(mac)
-
-        # Update the user to ignore previous set addresses
-        self.controller.maclist[user] = ['-@' + mac for mac in mac_list]
-        self.controller.maclist[user].append(
-            "+@11:11:11:11:11:11")  # add a dummy address, to prevent errors created by a user without a valid address
-
-        self.controller.maclist[target_user].extend(['+@' + mac for mac in mac_list])
-        self.arw["maclist"].get_buffer().set_text('\n'.join(self.controller.maclist[user]))
-        self.user_summary(user)
-
-    def disable_simulated_user(self):
-        """Remove -@ and +@ prefixes from all users"""
-        user = None
-        for user in self.controller.maclist:
-            maclist = self.controller.maclist[user]
-            updated_macs = []
-            for mac in maclist:
-                if mac.startswith('-@'):  # Enable old addresses
-                    updated_macs.append(mac[2:])
-                elif not mac.startswith('+@'):  # Remove added addresses completely
-                    updated_macs.append(mac)
-            self.controller.maclist[user] = updated_macs
-
-        current_user = self.users_store.get_value(self.controller.iter_user, 0).strip()
-        self.arw["maclist"].get_buffer().set_text(
-            '\n'.join(self.controller.maclist[current_user])
-        )
-        if user:
-            self.user_summary(user)
+##    def enable_simulated_user(self, user, target_user):
+##        """Add -@ to user and add +@ to target_user"""
+##
+##        mac_list = []
+##
+##        for mac in self.controller.maclist[user]:
+##            mac_list.append(mac)
+##
+##        # Update the user to ignore previous set addresses
+##        self.controller.maclist[user] = ['-@' + mac for mac in mac_list]
+##        self.controller.maclist[user].append(
+##            "+@11:11:11:11:11:11")  # add a dummy address, to prevent errors created by a user without a valid address
+##
+##        self.controller.maclist[target_user].extend(['+@' + mac for mac in mac_list])
+##        self.arw["maclist"].get_buffer().set_text('\n'.join(self.controller.maclist[user]))
+##        self.user_summary(user)
+##
+##    def disable_simulated_user(self):
+##        """Remove -@ and +@ prefixes from all users"""
+##        user = None
+##        for user in self.controller.maclist:
+##            maclist = self.controller.maclist[user]
+##            updated_macs = []
+##            for mac in maclist:
+##                if mac.startswith('-@'):  # Enable old addresses
+##                    updated_macs.append(mac[2:])
+##                elif not mac.startswith('+@'):  # Remove added addresses completely
+##                    updated_macs.append(mac)
+##            self.controller.maclist[user] = updated_macs
+##
+##        current_user = self.users_store.get_value(self.controller.iter_user, 0).strip()
+##        self.arw["maclist"].get_buffer().set_text(
+##            '\n'.join(self.controller.maclist[current_user])
+##        )
+##        if user:
+##            self.user_summary(user)
 
     """ User Summary """
 
