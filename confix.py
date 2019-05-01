@@ -56,7 +56,7 @@ from assistant import Assistant
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "0.37"
+version = "0.37.1"
 
 
 gtk = Gtk
@@ -249,7 +249,7 @@ class Confix:
         self.proxy_group = ProxyGroup(self.arw, self)
         self.firewall = Firewall(self.arw, self)
         self.users = Users(self.arw, self)
-        self.assistant = Assistant(self.arw2, self)
+        self.assistant = Assistant(self.arw, self.arw2, self)
 
         if config_password:
             kargs = {'password': config_password}
@@ -355,7 +355,7 @@ class Confix:
                 for macs in self.maclist[user]:
                     if macs.startswith('-@') or macs.startswith('+@'):
                         self.block_signals = True
-                        self.arw['simulate_user_toggle'].set_active(True)
+                        self.arw['experiment_user_toggle'].set_active(True)
                         self.block_signals = False
 
         if not future:

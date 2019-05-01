@@ -996,12 +996,12 @@ Don't forget to do this before you close the program ! </property>
               <placeholder/>
             </child>
             <child>
-              <object class="GtkToggleButton" id="experiment_button">
-                <property name="label" translatable="yes">togglebutton</property>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">start experimentation</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="toggled" handler="simulate_user_toggled" swapped="no"/>
+                <signal name="clicked" handler="start_simulate_user" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>

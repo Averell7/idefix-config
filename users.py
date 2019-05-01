@@ -30,9 +30,9 @@ class Users:
         5 : internet access (1/0)  # no longer used
         6 : filtered (1/0)
         7 : open (1/0)
-        8 :
-        9 : color 1
-        10 : color 2
+        8 : reserved (int)
+        9 :  reserved (str)
+        10 : background color
         11 : icon 1
         12 : icon 2
         """
@@ -41,7 +41,6 @@ class Users:
 
         self.treeview1 = self.arw["treeview1"]
         self.treeview1.set_model(self.users_store)
-        self.arw['select_user_tree_view'].set_model(self.users_store)
 
         self.cell = Gtk.CellRendererText()
         self.cellpb = Gtk.CellRendererPixbuf(xalign=0.0)
@@ -419,66 +418,7 @@ class Users:
         if OK:
             showwarning(_("Addresses OK"), _("All addresses are valid"))
 
-    def confirm_select_user_popup(self, widget):
-        self.arw['select_user_popup'].hide()
 
-        model, iter = self.arw['select_user_tree_view'].get_selection().get_selected()
-        target_user = model.get_value(iter, 0).strip()
-        current_user = model.get_value(self.controller.iter_user, 0).strip()
-
-        if target_user == current_user:
-            return
-
-        self.enable_simulated_user(current_user, target_user)
-
-##    def cancel_select_user_popup(self, widget):
-##        self.arw['select_user_popup'].hide()
-##
-##    def simulate_user_toggled(self, widget):
-##        if self.block_signals:
-##            return
-##
-##        if widget.get_active():
-##            self.arw['select_user_popup'].show()
-##        else:
-##            self.disable_simulated_user()
-
-##    def enable_simulated_user(self, user, target_user):
-##        """Add -@ to user and add +@ to target_user"""
-##
-##        mac_list = []
-##
-##        for mac in self.controller.maclist[user]:
-##            mac_list.append(mac)
-##
-##        # Update the user to ignore previous set addresses
-##        self.controller.maclist[user] = ['-@' + mac for mac in mac_list]
-##        self.controller.maclist[user].append(
-##            "+@11:11:11:11:11:11")  # add a dummy address, to prevent errors created by a user without a valid address
-##
-##        self.controller.maclist[target_user].extend(['+@' + mac for mac in mac_list])
-##        self.arw["maclist"].get_buffer().set_text('\n'.join(self.controller.maclist[user]))
-##        self.user_summary(user)
-##
-##    def disable_simulated_user(self):
-##        """Remove -@ and +@ prefixes from all users"""
-##        user = None
-##        for user in self.controller.maclist:
-##            maclist = self.controller.maclist[user]
-##            updated_macs = []
-##            for mac in maclist:
-##                if mac.startswith('-@'):  # Enable old addresses
-##                    updated_macs.append(mac[2:])
-##                elif not mac.startswith('+@'):  # Remove added addresses completely
-##                    updated_macs.append(mac)
-##            self.controller.maclist[user] = updated_macs
-##
-##        current_user = self.users_store.get_value(self.controller.iter_user, 0).strip()
-##        self.arw["maclist"].get_buffer().set_text(
-##            '\n'.join(self.controller.maclist[current_user])
-##        )
-##        if user:
-##            self.user_summary(user)
 
     """ User Summary """
 

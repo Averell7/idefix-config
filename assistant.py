@@ -11,7 +11,8 @@ class Assistant:
     mem_time = 0
     editing_iter = None
 
-    def __init__(self, arw2, controller):
+    def __init__(self, arw, arw2, controller):
+        self.arw = arw
         self.arw2 = arw2
         self.controller = controller
         self.block_signals = False
@@ -25,7 +26,7 @@ class Assistant:
         self.radio = Gtk.CellRendererToggle(activatable=True, radio = True, xalign=0.5)
         self.radio.connect('toggled', self.categories_radio_toggle)
 
-        self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell, text=0, foreground=15, background=16)
+        self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell, text=0)
         self.tvcolumn.set_fixed_width(220)
         self.arw2["assistant_categories"].append_column(self.tvcolumn)
         self.tvcolumn = Gtk.TreeViewColumn(_('---'), self.radio, active=3)
@@ -100,6 +101,7 @@ class Assistant:
             return 4   # summary page
         elif page == 4:
             self.summary("")
+            return page + 1
 
         else:
             return page + 1
@@ -256,8 +258,8 @@ class Assistant:
         6 : filtered (1/0)
         7 : open (1/0)
         8 :
-        9 : color 1
-        10 : color 2
+        9 :
+        10 : background color
         11 : icon 1
         12 : icon 2
         """
@@ -266,13 +268,11 @@ class Assistant:
         for row1 in self.categories_store:
             if row1[3] == 1:
                 category = row1[0]
-                print(category)
                 string1 = row1[2]
-                print(string1)
                 break
         iter1 = self.controller.users_store.get_iter_from_string(string1)
         iternew = self.controller.users_store.insert(iter1, 1,
-                        [self.username, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
+                        [self.username, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None])
         self.controller.maclist[self.username] = [self.mac_address]
         self.controller.set_colors()
 
@@ -281,10 +281,10 @@ class Assistant:
             model = self.controller.users_store
             iterparent = model.iter_parent(iternew)
             path1 = model.get_path(iterparent)
-            self.controller.arw["treeview1"].expand_row(path1, True)
-            sel = self.controller.arw["treeview1"].get_selection()
+            self.arw["treeview1"].expand_row(path1, True)
+            sel = self.arw["treeview1"].get_selection()
             sel.select_iter(iternew)
-            self.controller.arw["notebook3"].set_current_page(0)
+            self.arw["notebook3"].set_current_page(0)
             self.controller.users.load_user("","", iternew)
             self.arw2["assistant1"].hide()
             return
@@ -310,11 +310,11 @@ class Assistant:
         if not iter1:           # if no new rule was created, we will open the last general rule applied to this user
             iter1 = memiter
 
-        sel = self.controller.arw["treeview3"].get_selection()
+        sel = self.arw["treeview3"].get_selection()
         if iter1:
             sel.select_iter(iter1)
         self.controller.proxy_users.load_proxy_user(None, None)
-        self.controller.arw["notebook3"].set_current_page(1)
+        self.arw["notebook3"].set_current_page(1)
         self.arw2["assistant1"].hide()
         self.reset_assistant()
 
@@ -345,13 +345,22 @@ class Assistant:
         self.target_name = self.controller.users.users_store[iter1][0]
         self.arw2["target_name"].set_text(self.target_name)
 
-    def simulate_user_toggled(self, widget):
-        if widget.get_active():
-            self.enable_simulated_user(self.current_name, self.target_name)
-            print("Simulation On")
-        else:
+    def start_simulate_user(self, widget):
+        """ called by the toggle button in the Asssistant """
+        if self.current_name == self.target_name:
+            showwarning(_("Incvalid configuration"), _("You cannot experiment yourself! \n Please choose another user."))
+            widget.set_active(False)
+            return
+        self.enable_simulated_user(self.current_name, self.target_name)
+
+
+    def simulate_user_titlebar_toggled(self,widget):
+        """ called by the toggle button in the title bar. Disables experimentation, and show the normal status bar """
+        if not self.arw["experiment_user_toggle"].get_active():
             self.disable_simulated_user(self.current_name)
-            print("simulation Off")
+            # Toggle the indicator in the title bar
+            self.arw["titlebar_stack"].set_visible_child(self.arw["titlebar_standard"])
+            self.arw["experiment_user_toggle"].set_active(False)
 
     def enable_simulated_user(self, user, target_user):
         """Add -@ to user and add +@ to target_user"""
@@ -367,7 +376,13 @@ class Assistant:
             "+@11:11:11:11:11:11")  # add a dummy address, to prevent errors created by a user without a valid address
 
         self.controller.maclist[target_user].extend(['+@' + mac for mac in mac_list])
-        self.controller.arw["maclist"].get_buffer().set_text('\n'.join(self.controller.maclist[user]))
+        self.arw["maclist"].get_buffer().set_text('\n'.join(self.controller.maclist[user]))
+
+        # Toggle the indicator in the title bar
+        self.arw["titlebar_stack"].set_visible_child(self.arw["titlebar_experiment"])
+        self.arw["experiment_user_toggle"].set_active(True)
+        self.arw["experiment_username"].set_text(target_user)
+        self.arw2["assistant1"].hide()
         #self.controller.users.user_summary(user)
 
     def disable_simulated_user(self, current_user):
@@ -383,7 +398,7 @@ class Assistant:
                     updated_macs.append(mac)
             self.controller.maclist[user] = updated_macs
 
-        self.controller.arw["maclist"].get_buffer().set_text(
+        self.arw["maclist"].get_buffer().set_text(
             '\n'.join(self.controller.maclist[current_user])
         )
         #if user:
