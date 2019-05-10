@@ -134,14 +134,14 @@ class ProxyUsers:
         if self.proxy_store.get_value(self.controller.iter_proxy, 11) == 0:
             self.proxy_store.set_value(self.controller.iter_proxy, 11, 1)
             markup = self.proxy_store.get_value(self.controller.iter_proxy, 0)
-            markup = markup.replace("<i>", "")
-            markup = markup.replace("</i>", "")
-            self.proxy_store.set_value(self.controller.iter_proxy, 0, markup)
+            self.proxy_store.set_value(self.controller.iter_proxy, 0, "<i>" + markup + "</i>")
             self.arw["proxy_users"].hide()
         else:
             self.proxy_store.set_value(self.controller.iter_proxy, 11, 0)
             markup = self.proxy_store.get_value(self.controller.iter_proxy, 0)
-            self.proxy_store.set_value(self.controller.iter_proxy, 0, "<i>" + markup + "</i>")
+            markup = markup.replace("<i>", "")
+            markup = markup.replace("</i>", "")
+            self.proxy_store.set_value(self.controller.iter_proxy, 0, markup)
             self.arw["proxy_users"].show()
         self.update_proxy_user_list()
 
@@ -555,6 +555,12 @@ class ProxyUsers:
     def build_proxy_ini(self):
 
         out = ""
+        # add default permissions
+        out += "\n[@_antivirus]\n"
+        out += "active = on \n"
+        out += "action = allow \n"
+        out += "user = any \n"
+        out += "dest_group = antivirus \n"
         for row in self.proxy_store:
             # add support for a time condition from evening to morning.
             # This requires to create two configurations.
