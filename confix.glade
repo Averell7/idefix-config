@@ -463,8 +463,8 @@
   <object class="GtkTextBuffer" id="proxy_group_import_buffer"/>
   <object class="GtkDialog" id="import_proxy_group_dialog">
     <property name="can_focus">False</property>
-    <property name="default_width">320</property>
-    <property name="default_height">260</property>
+    <property name="default_width">640</property>
+    <property name="default_height">480</property>
     <property name="type_hint">dialog</property>
     <child>
       <placeholder/>
@@ -514,15 +514,170 @@
           </packing>
         </child>
         <child>
-          <object class="GtkTextView" id="proxy_group_import_view">
+          <object class="GtkLabel">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="buffer">proxy_group_import_buffer</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Groups Manager</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkButtonBox">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="layout_style">start</property>
+                <child>
+                  <object class="GtkButton">
+                    <property name="label" translatable="yes">Edit groups</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="label" translatable="yes">Import File...</property>
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="label" translatable="yes">Import from
+repository</property>
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="label" translatable="yes">Update from
+repository</property>
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTreeView" id="proxy_group_import_list">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection"/>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTextView" id="proxy_group_import_view">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="buffer">proxy_group_import_buffer</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">TreeView</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">TextView</property>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">label</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
@@ -1343,7 +1498,7 @@
                               <object class="GtkImage" id="image4">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="pixbuf">data\assistant-32.png</property>
+                                <property name="pixbuf">data/assistant-32.png</property>
                               </object>
                             </child>
                           </object>
@@ -1592,7 +1747,7 @@
                                           <object class="GtkImage" id="image2">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="pixbuf">data\email-32.png</property>
+                                            <property name="pixbuf">data/email-32.png</property>
                                           </object>
                                           <packing>
                                             <property name="bottom_attach">2</property>
@@ -1731,7 +1886,7 @@
                                           <object class="GtkImage" id="image1">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
-                                            <property name="pixbuf">data\internet-32.gif</property>
+                                            <property name="pixbuf">data/internet-32.gif</property>
                                           </object>
                                           <packing>
                                             <property name="bottom_attach">2</property>
@@ -2205,7 +2360,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                                       <object class="GtkImage">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">False</property>
-                                                        <property name="pixbuf">data\clock-32.png</property>
+                                                        <property name="pixbuf">data/clock-32.png</property>
                                                         <property name="icon_size">6</property>
                                                       </object>
                                                       <packing>
@@ -2218,8 +2373,8 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                                       <object class="GtkLabel" id="time_button_label">
                                                         <property name="visible">True</property>
                                                         <property name="can_focus">False</property>
-                                                        <property name="label" translatable="yes">&lt;big&gt;&lt;b&gt;L M M J V S D&lt;/b&gt;&lt;/big&gt;
-&lt;big&gt;&lt;b&gt;11:00-22:00&lt;/b&gt;&lt;/big&gt;</property>
+                                                        <property name="label" translatable="yes">All day
+and week</property>
                                                         <property name="use_markup">True</property>
                                                         <property name="justify">center</property>
                                                       </object>

@@ -133,9 +133,15 @@ class ProxyUsers:
         """Toggle any user or specific users"""
         if self.proxy_store.get_value(self.controller.iter_proxy, 11) == 0:
             self.proxy_store.set_value(self.controller.iter_proxy, 11, 1)
+            markup = self.proxy_store.get_value(self.controller.iter_proxy, 0)
+            markup = markup.replace("<i>", "")
+            markup = markup.replace("</i>", "")
+            self.proxy_store.set_value(self.controller.iter_proxy, 0, markup)
             self.arw["proxy_users"].hide()
         else:
             self.proxy_store.set_value(self.controller.iter_proxy, 11, 0)
+            markup = self.proxy_store.get_value(self.controller.iter_proxy, 0)
+            self.proxy_store.set_value(self.controller.iter_proxy, 0, "<i>" + markup + "</i>")
             self.arw["proxy_users"].show()
         self.update_proxy_user_list()
 
@@ -157,7 +163,7 @@ class ProxyUsers:
             treestore.set_value(self.controller.iter_proxy, 2, "deny")
             treestore.set_value(self.controller.iter_proxy, 15, "#f00000")
             self.arw["allow_deny_groups"].set_text("Denied Groups")
-            self.arw["allow_deny_sites"].set_t
+            self.arw["allow_deny_sites"].set_text("Denied Sites")
 
         self.load_proxy_user2()
 
@@ -331,6 +337,7 @@ class ProxyUsers:
 
     def load_proxy_user(self, widget, event):
 
+        human_days = ""
         # Loads user data when a user is selected in the list
         if event:
             path = widget.get_path_at_pos(event.x, event.y)
@@ -364,21 +371,22 @@ class ProxyUsers:
             self.arw["proxy_time_condition_days"].set_text("")
             self.arw["proxy_time_condition_from"].set_text("")
             self.arw["proxy_time_condition_to"].set_text("")
-            self.arw["time_button_label"].set_text("All day\nand week")
+            self.arw["time_button_label"].set_text(_("All day\nand week"))
 
         elif len(data1) > 8:
             try:
                 tmp1 = data1.split()
                 tmp2 = tmp1[1].split("-")
                 days = tmp1[0].strip()
+                human_days = self.convert_days_to_local(days)
                 time_from = tmp2[0].strip()
                 time_to = tmp2[1].strip()
                 if self.proxy_store[self.controller.iter_proxy][13] == 1:      # change colour for deny or allow
                     color =  'foreground="#008800"'
                 else :
                     color = 'foreground="#ee0000"'
-                button_text ='<span ' + color + ' weight="bold" size="large">'
-                button_text += days + "\n" + time_from + "-" + time_to + "</span>"
+                button_text ='<span ' + color + ' weight="bold" >'    # size="large" deleted
+                button_text += human_days + '\n  <span size="large">' + time_from + "-" + time_to + "</span></span>"
                 self.arw["proxy_time_condition_days"].set_text(days)
                 self.arw["proxy_time_condition_from"].set_text(time_from)
                 self.arw["proxy_time_condition_to"].set_text(time_to)
@@ -447,6 +455,13 @@ class ProxyUsers:
         (start_iter, end_iter) = text_buffer.get_bounds()
         dest_text = text_buffer.get_text(start_iter, end_iter, False)
 
+    def convert_days_to_local(self, days):
+        locale = _("Mo,Tu,We,Th,Fr,Sa,Su").split(",")
+        days_locale = []
+        for day in days:
+            days_locale.append(locale[int(day) - 1])
+        days_locale = " ".join(days_locale)
+        return days_locale
 
 
     def expand_users_view(self, widget):
@@ -547,11 +562,15 @@ class ProxyUsers:
             time_condition_list = format_time(time_condition)
             i = 1
             index = ""
+            # remove formatting
+            name = row[0]
+            for code in["<i>", "</i>", "<s>", "</s>"]:
+                name = name.replace(code, "")
             for time_condition2 in time_condition_list:
                 if len(time_condition_list) > 1:  # If the row is duplicated, we must create two different names
                     index = str(i)
                     i += 1
-                out += "\n[%s%s]\n" % (row[0], index)
+                out += "\n[%s%s]\n" % (name, index)
                 out += format_comment(row[4])  # comments
                 out += format_line("active", row[1])
                 out += format_line("action", row[2])

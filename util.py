@@ -313,12 +313,12 @@ def get_config_path(filename):
             os.makedirs(roaming, exist_ok=True)
         path = roaming
     else:
-        # step 1: ~/.local/share/idefix/
-        roaming = os.path.join(os.path.expanduser('~/.local/idefix'), directory)
+        # step 1: ~/.local/share/confix/
+        roaming = os.path.join(os.path.expanduser('~/.local/confix'), directory)
         if os.path.exists(os.path.join(roaming, filename)):
             path = roaming
-        elif os.path.exists(os.path.join('/etc/idefix/', directory, filename)):
-            path = os.path.join('/etc/idefix/', directory)
+        elif os.path.exists(os.path.join('/etc/confix/', directory, filename)):
+            path = os.path.join('/etc/confix/', directory)
         else:
             os.makedirs(roaming, exist_ok=True)
             path = roaming
@@ -330,9 +330,9 @@ def write_default_config():
     """Write the default configuration to the roaming directory"""
 
     if sys.platform.startswith('win'):
-        roaming = os.path.join(os.getenv('APPDATA'), 'Idefix')
+        roaming = os.path.join(os.getenv('APPDATA'), 'confix')
     else:
-        roaming = os.path.expanduser('~/.local/idefix')
+        roaming = os.path.expanduser('~/.local/confix')
 
     # Create the directory structure
     os.makedirs(roaming, exist_ok=True)
@@ -340,6 +340,10 @@ def write_default_config():
     with open(os.path.join(roaming, 'confix.cfg'), 'w') as f:
         if os.path.isfile('./confix.cfg') :
             with open('./confix.cfg', 'r') as f2:
+                data1 = f2.read()
+                f.write(data1)
+        elif os.path.isfile('./idefix-config.cfg') :
+            with open('./idefix-config.cfg', 'r') as f2:
                 data1 = f2.read()
                 f.write(data1)
         else:

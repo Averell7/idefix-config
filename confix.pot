@@ -1,0 +1,832 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-05-02 03:26+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: confix.py:91
+msgid "No ftp connection"
+msgstr ""
+
+#: confix.py:99 confix.py:104
+#, python-format
+msgid "We got an error with %s. Is it present on the server?"
+msgstr ""
+
+#: confix.py:113
+msgid "received OK."
+msgstr ""
+
+#: confix.py:119
+msgid "could not get "
+msgstr ""
+
+#: confix.py:197 confix.glade:1157
+msgid "Confix"
+msgstr ""
+
+#: confix.py:302
+msgid "Update Configuration"
+msgstr ""
+
+#: confix.py:302
+msgid "Could not connect to FTP. Edit Configuration?"
+msgstr ""
+
+#: confix.py:306
+msgid "Restart"
+msgstr ""
+
+#: confix.py:306
+msgid "Please restart idefix to use new configuration"
+msgstr ""
+
+#: confix.py:340
+msgid "No user data"
+msgstr ""
+
+#: confix.py:341
+msgid ""
+"There is no user data present. \n"
+"Do you want to create standard categories ?"
+msgstr ""
+
+#: confix.py:377
+msgid "Groups Drag and Drop"
+msgstr ""
+
+#: confix.py:383
+msgid "Users Drag and Drop"
+msgstr ""
+
+#: confix.py:389
+msgid "Firewall"
+msgstr ""
+
+#: confix.py:406 confix.glade:361 confix.glade:617
+msgid "---"
+msgstr ""
+
+#: confix.py:1082
+msgid "No FTP connexion"
+msgstr ""
+
+#: confix.py:1093
+msgid " sent\n"
+msgstr ""
+
+#: firewall.py:52 proxy_users.py:68
+msgid "Key"
+msgstr ""
+
+#: firewall.py:57
+msgid "Accept/Drop"
+msgstr ""
+
+#: firewall.py:60 proxy_users.py:78
+msgid "On/Off"
+msgstr ""
+
+#: proxy_group.py:64 proxy_group.py:244
+msgid "(error)"
+msgstr ""
+
+#: proxy_group.py:201
+#, python-format
+msgid "Editing %s"
+msgstr ""
+
+#: proxy_group.py:205
+msgid "New group name"
+msgstr ""
+
+#: proxy_group.py:215
+msgid "Enter a domain name"
+msgstr ""
+
+#: proxy_group.py:227
+msgid "Remove domain?"
+msgstr ""
+
+#: proxy_group.py:227
+#, python-format
+msgid "Remove domain: %s"
+msgstr ""
+
+#: proxy_group.py:234
+msgid "Edit domain name"
+msgstr ""
+
+#: proxy_users.py:72
+msgid ""
+"Users\n"
+"List/All"
+msgstr ""
+
+#: proxy_users.py:74
+msgid ""
+"Dest.\n"
+"List/All"
+msgstr ""
+
+#: proxy_users.py:76
+msgid ""
+"Allow/\n"
+"Deny"
+msgstr ""
+
+#: proxy_users.py:368 confix.glade:2221
+msgid ""
+"All day\n"
+"and week"
+msgstr ""
+
+#: proxy_users.py:433
+msgid ""
+"All destinations \n"
+"allowed."
+msgstr ""
+
+#: proxy_users.py:435
+msgid "Allowed Groups"
+msgstr ""
+
+#: proxy_users.py:436
+msgid "Allowed Sites"
+msgstr ""
+
+#: proxy_users.py:440
+msgid ""
+"All connections\n"
+"to Internet\n"
+"are prohibited."
+msgstr ""
+
+#: proxy_users.py:442
+msgid "Denied Groups"
+msgstr ""
+
+#: proxy_users.py:443
+msgid "Denied Sites"
+msgstr ""
+
+#: proxy_users.py:453
+msgid "Mo,Tu,We,Th,Fr,Sa,Su"
+msgstr ""
+
+#: users.py:49
+msgid "Filename"
+msgstr ""
+
+#: users.py:229
+msgid "No valid mac address for this user !"
+msgstr ""
+
+#: users.py:236
+msgid "No mac address for this user !"
+msgstr ""
+
+#: users.py:264
+msgid "Name of the new category"
+msgstr ""
+
+#: users.py:266
+msgid "Name of the new user"
+msgstr ""
+
+#: users.py:299
+msgid "User Exists"
+msgstr ""
+
+#: users.py:299
+msgid "Username exists"
+msgstr ""
+
+#: users.py:319
+msgid "Enter address"
+msgstr ""
+
+#: users.py:319
+msgid "Please, enter the Mac or IP address for this user"
+msgstr ""
+
+#: users.py:339
+msgid "Category Exists"
+msgstr ""
+
+#: users.py:339
+msgid "The category name already exists"
+msgstr ""
+
+#: users.py:416
+msgid "Address Invalid"
+msgstr ""
+
+#: users.py:416
+#, python-format
+msgid ""
+"The address \n"
+"%s\n"
+" entered is not valid"
+msgstr ""
+
+#: users.py:419
+msgid "Addresses OK"
+msgstr ""
+
+#: users.py:419
+msgid "All addresses are valid"
+msgstr ""
+
+#: users.py:431
+msgid "Summary For "
+msgstr ""
+
+#: users.py:435
+msgid "# No mac address for this user"
+msgstr ""
+
+#: users.py:554
+msgid ""
+"The user summary is not editable. \n"
+" See the Internet Filter tab."
+msgstr ""
+
+#: users.py:555
+msgid "Not editable"
+msgstr ""
+
+#: confix.glade:91 confix.glade:2082 confix.glade:2828
+msgid "SAVE"
+msgstr ""
+
+#: confix.glade:111
+msgid "Disabled"
+msgstr ""
+
+#: confix.glade:158
+msgid "<b>Ports</b>"
+msgstr ""
+
+#: confix.glade:192 confix.glade:2397
+msgid "<b>Users</b>"
+msgstr ""
+
+#: confix.glade:222
+msgid "time condition"
+msgstr ""
+
+#: confix.glade:265
+msgid "<b>Comments</b>"
+msgstr ""
+
+#: confix.glade:292
+msgid "from"
+msgstr ""
+
+#: confix.glade:303
+msgid "to"
+msgstr ""
+
+#: confix.glade:314
+msgid "Format 12:00"
+msgstr ""
+
+#: confix.glade:379 confix.glade:550
+msgid "edit"
+msgstr ""
+
+#: confix.glade:387 confix.glade:559
+msgid "new"
+msgstr ""
+
+#: confix.glade:399
+msgid "Add New"
+msgstr ""
+
+#: confix.glade:408
+msgid "Remove"
+msgstr ""
+
+#: confix.glade:452 confix.glade:542 confix.glade:861 confix.glade:3149
+msgid "delete"
+msgstr ""
+
+#: confix.glade:579
+msgid "add rule"
+msgstr ""
+
+#: confix.glade:588
+msgid "delete rule"
+msgstr ""
+
+#: confix.glade:597
+msgid "rename rule"
+msgstr ""
+
+#: confix.glade:653
+msgid "Comments"
+msgstr ""
+
+#: confix.glade:668
+msgid "from :"
+msgstr ""
+
+#: confix.glade:679
+msgid "to :"
+msgstr ""
+
+#: confix.glade:703
+msgid "1234567"
+msgstr ""
+
+#: confix.glade:715
+msgid "Days :"
+msgstr ""
+
+#: confix.glade:724 assistant.glade:1245
+msgid "Close the window"
+msgstr ""
+
+#: confix.glade:739
+msgid "What you type is automatically saved in memory."
+msgstr ""
+
+#: confix.glade:886 confix.glade:1193 assistant.glade:893 assistant.glade:924
+msgid "label"
+msgstr ""
+
+#: confix.glade:947
+msgid "Close"
+msgstr ""
+
+#: confix.glade:1005
+msgid "_File"
+msgstr ""
+
+#: confix.glade:1016
+msgid "_Import..."
+msgstr ""
+
+#: confix.glade:1026
+msgid "_Export..."
+msgstr ""
+
+#: confix.glade:1054
+msgid "System"
+msgstr ""
+
+#: confix.glade:1064
+msgid "Profiles"
+msgstr ""
+
+#: confix.glade:1073
+msgid "switch interface"
+msgstr ""
+
+#: confix.glade:1086
+msgid "Groups"
+msgstr ""
+
+#: confix.glade:1096
+msgid "Import Proxy Group"
+msgstr ""
+
+#: confix.glade:1105
+msgid "Manage groups"
+msgstr ""
+
+#: confix.glade:1117
+msgid "_Help"
+msgstr ""
+
+#: confix.glade:1127
+msgid "Assistant"
+msgstr ""
+
+#: confix.glade:1180
+msgid "Active configuration :"
+msgstr ""
+
+#: confix.glade:1209 confix.glade:1794 confix.glade:2319 confix.glade:2622
+#: assistant.glade:1210
+msgid "page0"
+msgstr ""
+
+#: confix.glade:1226
+msgid "Experimenting..."
+msgstr ""
+
+#: confix.glade:1246
+msgid "User..."
+msgstr ""
+
+#: confix.glade:1263 confix.glade:2017 confix.glade:2336 confix.glade:2639
+#: assistant.glade:1221
+msgid "page1"
+msgstr ""
+
+#: confix.glade:1434
+msgid "email"
+msgstr ""
+
+#: confix.glade:1449
+msgid "open access"
+msgstr ""
+
+#: confix.glade:1463
+msgid "filtered access"
+msgstr ""
+
+#: confix.glade:1481
+msgid "<b>Internet access</b>"
+msgstr ""
+
+#: confix.glade:1538 confix.glade:1665
+msgid "à"
+msgstr ""
+
+#: confix.glade:1570 confix.glade:1696
+msgid "de "
+msgstr ""
+
+#: confix.glade:1584 confix.glade:1710
+msgid "Jours"
+msgstr ""
+
+#: confix.glade:1620
+msgid "<b>for email</b>"
+msgstr ""
+
+#: confix.glade:1746
+msgid "<b>for Internet</b>"
+msgstr ""
+
+#: confix.glade:1761
+msgid ""
+"Date Format: 1 - Monday, 7 - Sunday. Time Format : 18:30\n"
+"Eg: 123 (Monday, Tuesday, Wednesday)"
+msgstr ""
+
+#: confix.glade:1777
+msgid "<b>Time condition</b>"
+msgstr ""
+
+#: confix.glade:1839
+msgid "Mac Addresses"
+msgstr ""
+
+#: confix.glade:1936
+msgid "Filter Name"
+msgstr ""
+
+#: confix.glade:1961
+msgid "Times"
+msgstr ""
+
+#: confix.glade:1983
+msgid "  Right click a line to edit  "
+msgstr ""
+
+#: confix.glade:2037
+msgid "Users and Categories"
+msgstr ""
+
+#: confix.glade:2183 confix.glade:2450
+msgid "List / All"
+msgstr ""
+
+#: confix.glade:2305 confix.glade:2602
+msgid "Users"
+msgstr ""
+
+#: confix.glade:2326
+msgid ""
+"This rule applies\n"
+"to all users"
+msgstr ""
+
+#: confix.glade:2472
+msgid "Allow / Deny"
+msgstr ""
+
+#: confix.glade:2556
+msgid "Allowed groups"
+msgstr ""
+
+#: confix.glade:2570
+msgid "Allowed sites"
+msgstr ""
+
+#: confix.glade:2629
+msgid ""
+"All destinations \n"
+"allowed"
+msgstr ""
+
+#: confix.glade:2702
+msgid "<b>Permissions</b>"
+msgstr ""
+
+#: confix.glade:2728
+msgid "Internet Filter"
+msgstr ""
+
+#: confix.glade:2749
+msgid "Loading"
+msgstr ""
+
+#: confix.glade:2766
+msgid "Loading remote configuration. Please wait"
+msgstr ""
+
+#: confix.glade:2772
+msgid "Edit Profiles"
+msgstr ""
+
+#: confix.glade:2810 confix.glade:2860
+msgid "Name"
+msgstr ""
+
+#: confix.glade:2872
+msgid "Mode"
+msgstr ""
+
+#: confix.glade:2884
+msgid "Username"
+msgstr ""
+
+#: confix.glade:2896
+msgid "Password"
+msgstr ""
+
+#: confix.glade:2962
+msgid "Server"
+msgstr ""
+
+#: confix.glade:2993
+msgid "Edit Proxy Group"
+msgstr ""
+
+#: confix.glade:3031
+msgid "column"
+msgstr ""
+
+#: confix.glade:3054
+msgid "Add"
+msgstr ""
+
+#: confix.glade:3068
+msgid "Finished"
+msgstr ""
+
+#: confix.glade:3097
+msgid "add user above"
+msgstr ""
+
+#: confix.glade:3105
+msgid "add user below"
+msgstr ""
+
+#: confix.glade:3113
+msgid "rename user"
+msgstr ""
+
+#: confix.glade:3122
+msgid "add new category"
+msgstr ""
+
+#: confix.glade:3131
+msgid "add new user"
+msgstr ""
+
+#: confix.glade:3140
+msgid "rename category"
+msgstr ""
+
+#: confix.glade:3157
+msgid "move user to category..."
+msgstr ""
+
+#: assistant.glade:25
+msgid ""
+"\n"
+"Cet assistant vous aidera à réaliser les tâches suivantes :\n"
+msgstr ""
+
+#: assistant.glade:43
+msgid "Create a new user"
+msgstr ""
+
+#: assistant.glade:58
+msgid "Experiment the permissions of another user"
+msgstr ""
+
+#: assistant.glade:79
+msgid "Choose an option and click \"Next\""
+msgstr ""
+
+#: assistant.glade:95
+msgid "Introduction"
+msgstr ""
+
+#: assistant.glade:114
+msgid "Name of the new user (assistant 1)"
+msgstr ""
+
+#: assistant.glade:129
+msgid "Please, enter the name of the new user : "
+msgstr ""
+
+#: assistant.glade:159
+msgid ""
+"Now you must add its Mac address.\n"
+"If you don't know it, it is possible to add it later  in the \"Users and "
+"categories tab."
+msgstr ""
+
+#: assistant.glade:192 assistant.glade:220 assistant.glade:247
+#: assistant.glade:274 assistant.glade:301
+msgid ":"
+msgstr ""
+
+#: assistant.glade:326
+msgid "Add another address"
+msgstr ""
+
+#: assistant.glade:396
+msgid "Click on the "
+msgstr ""
+
+#: assistant.glade:424
+msgid "button to validate your data, and then click \"Next\""
+msgstr ""
+
+#: assistant.glade:453
+msgid "New User"
+msgstr ""
+
+#: assistant.glade:471
+msgid "Choose the services you want to activate for this user  (page 3 V2)"
+msgstr ""
+
+#: assistant.glade:488
+msgid "He will have access to :"
+msgstr ""
+
+#: assistant.glade:504
+msgid "Email"
+msgstr ""
+
+#: assistant.glade:518 assistant.glade:736 assistant.glade:1169
+msgid "Filtered Web access"
+msgstr ""
+
+#: assistant.glade:537
+msgid ""
+"This option gives access for email clients \n"
+"running on the computer.\n"
+"It includes the permissions necessary \n"
+"for antivirus update, but not for Webmail. "
+msgstr ""
+
+#: assistant.glade:553
+msgid ""
+"This option gives access to a limited list \n"
+"of websites which you will define later. "
+msgstr ""
+
+#: assistant.glade:563
+msgid "Full Web access"
+msgstr ""
+
+#: assistant.glade:582
+msgid ""
+"This option gives access to all Internet ressources\n"
+"without limitations, e-mail, Web, etc."
+msgstr ""
+
+#: assistant.glade:592
+msgid "Nothing at all. No email and no Web."
+msgstr ""
+
+#: assistant.glade:659
+msgid ""
+"(This page will appear only if Filtered Internet access was chosen)\n"
+"\n"
+"This user will have a limited Web access. \n"
+"You can :"
+msgstr ""
+
+#: assistant.glade:672
+msgid "Create a specific access rule for him"
+msgstr ""
+
+#: assistant.glade:689
+msgid ""
+"You can join him to existent rules in the list below.\n"
+"Lines in italics cannot be unselected, because they are defined for all "
+"users. "
+msgstr ""
+
+#: assistant.glade:723
+msgid "  "
+msgstr ""
+
+#: assistant.glade:750
+msgid "Confirmation page. "
+msgstr ""
+
+#: assistant.glade:767
+msgid ""
+"This page is unfinished. The message below should be adapted\n"
+"to the choices made by the user."
+msgstr ""
+
+#: assistant.glade:781
+msgid ""
+"You will be redirected to the Internet Filter page,\n"
+"where you will have to add the permissions given to the new user. \n"
+"Click on \"Apply\" to apply your choices. "
+msgstr ""
+
+#: assistant.glade:801
+msgid "confirmation"
+msgstr ""
+
+#: assistant.glade:815
+msgid "User permissions experiment"
+msgstr ""
+
+#: assistant.glade:831
+msgid ""
+"This function will work <b>only</b> if you are connected directly to the "
+"same network \n"
+"than the user whose persmissions you want to experiment. "
+msgstr ""
+
+#: assistant.glade:847
+msgid ""
+"First, select your own account in the left list\n"
+"Then select the user you want to test in the right list"
+msgstr ""
+
+#: assistant.glade:909
+msgid ""
+"will experiment \n"
+"the permissions \n"
+"of --->"
+msgstr ""
+
+#: assistant.glade:977
+msgid ""
+"Once you have applied, a red button will appear in the top of the window. \n"
+"Click on this button to end the experiment and reset the situation to "
+"normal.\n"
+"Don't forget to do this before you close the program ! "
+msgstr ""
+
+#: assistant.glade:1000
+msgid "start experimentation"
+msgstr ""
+
+#: assistant.glade:1078
+msgid "Help system"
+msgstr ""
+
+#: assistant.glade:1142
+msgid "e-mail"
+msgstr ""
+
+#: assistant.glade:1156
+msgid "full Internet access (includes e-mail and Web)"
+msgstr ""
+
+#: assistant.glade:1189
+msgid ""
+"<b>Colors legend :</b>\n"
+"\n"
+"<span foreground=\"green\">green : the rule gives access to... </span>\n"
+"<span foreground=\"red\">red : the rule denies access to...</span>\n"
+"<span background=\"yellow\">yellow background : open access to the Web</"
+"span>\n"
+"<i>italics : This rule applies to all users</i>\n"
+"<span foreground=\"gray\" strikethrough=\"true\" >This rule is inactive</"
+"span>"
+msgstr ""
+
+#: assistant.glade:1217
+msgid "label page2"
+msgstr ""

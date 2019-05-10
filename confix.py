@@ -56,7 +56,7 @@ from assistant import Assistant
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "0.37.1"
+version = "0.37.2"
 
 
 gtk = Gtk
@@ -315,6 +315,8 @@ class Confix:
             else:
                 # retrieve files by ftp
                 data0 = ftp_get(ftp, "confix.json", json  = True)
+                if data0 == False:                                               # TODO - compatibility
+                    data0 = ftp_get(ftp, "idefix-config.json", json  = True)
                 if data0 :
                     self.config = json.loads(data0, object_pairs_hook=OrderedDict)
                     print("json file loaded")
@@ -814,57 +816,6 @@ class Confix:
             self.arw["chooser"].set_model(self.empty_store)
             self.active_chooser = None
 
-    def general_chooser_answer(self, *params):
-
-        # XXX: chooser_widget_source does not exist
-        # XXX: magutils does not exist
-        # XXX: get_sel_row_data does not exist
-        widget = self.chooser_widget_source
-        widget_type = magutils.widget_type(widget)
-
-        if widget_type == "GtkEntry":
-            response = get_sel_row_data(self.arw["treeview8"], 0, 0)
-            widget.set_text(response)
-
-            temp1 = widget.name.split("@")
-            category_s = temp1[0]
-            field_s = temp1[1]
-
-            if category_s in ["central", "peripheral"]:
-                configuration = self.database_structure_active[1]
-                self.config[category_s][configuration][field_s] = response
-                self.load_database_tree()
-
-            elif category_s == "xtabs":
-                configuration = self.search_active
-                self.config["xtabs"][configuration][field_s] = response
-
-            elif category_s == "inversion":
-                configuration = self.inversion_active
-                self.config["inversion"][configuration][field_s] = response
-
-            elif category_s == "combobox":
-                configuration = self.combobox_active
-                self.config["combobox"][configuration][field_s] = response
-
-            elif category_s == "details":
-                configuration = self.details_active
-                self.config["details"][configuration][field_s] = response
-
-            elif category_s == "popup":
-                configuration = self.popup_active
-                self.config["popup"][configuration][field_s] = response
-
-        elif widget_type == "GtkTreeView":
-            if widget.name == "treeview6":  # Search lists
-                (row, col, treeview) = self.search_edit_cell
-                response = get_sel_row_data(self.arw["treeview8"], 0, 0)
-                self.edit_list_search("", row, response, col, treeview)
-
-            elif widget.name == "treeview5":  # Result lists
-                (row, col, treeview) = self.search_edit_cell
-                response = get_sel_row_data(self.arw["treeview8"], 0, 0)
-                self.edit_list_search("", row, response, col, treeview)
 
     """ User Management """
 
