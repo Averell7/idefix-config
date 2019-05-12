@@ -308,7 +308,7 @@ def get_config_path(filename):
 
     if sys.platform.startswith('win'):
         # step 1: roaming
-        roaming = os.path.join(os.getenv('APPDATA'), 'Idefix', directory)
+        roaming = os.path.join(os.getenv('APPDATA'), 'Confix', directory)
         if not os.path.exists(os.path.join(roaming, filename)):
             os.makedirs(roaming, exist_ok=True)
         path = roaming
@@ -317,8 +317,6 @@ def get_config_path(filename):
         roaming = os.path.join(os.path.expanduser('~/.local/confix'), directory)
         if os.path.exists(os.path.join(roaming, filename)):
             path = roaming
-        elif os.path.exists(os.path.join('/etc/confix/', directory, filename)):
-            path = os.path.join('/etc/confix/', directory)
         else:
             os.makedirs(roaming, exist_ok=True)
             path = roaming

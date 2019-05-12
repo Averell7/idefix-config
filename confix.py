@@ -56,7 +56,7 @@ from assistant import Assistant
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "0.37.3"
+version = "0.37.5"
 
 
 gtk = Gtk
@@ -961,11 +961,10 @@ class Confix:
         # users store
         for row in self.users_store :
             config2["users"][row[0]] = OrderedDict()
-            if row[5]:
-                if row[6]:
-                    internet = 'filtered'
-                elif row[7]:
-                    internet = 'open'
+            if row[6]:
+                internet = 'filtered'
+            elif row[7]:
+                internet = 'open'
             else:
                 internet = 'none'
             config2["users"][row[0]]['@_internet'] = [internet]
