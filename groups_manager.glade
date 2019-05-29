@@ -2,6 +2,26 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkMenu" id="context_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Rename</property>
+        <signal name="activate" handler="rename_item" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Delete</property>
+        <signal name="activate" handler="delete_item" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkListStore" id="groups_store">
     <columns>
       <!-- column-name name -->
@@ -104,6 +124,7 @@
                 <property name="vexpand">False</property>
                 <property name="model">groups_store</property>
                 <property name="headers_visible">False</property>
+                <signal name="button-release-event" handler="show_context" swapped="no"/>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection">
                     <signal name="changed" handler="selection_changed" swapped="no"/>

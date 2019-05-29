@@ -1,7 +1,7 @@
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 from myconfigparser import myConfigParser
-from util import showwarning, askyesno
+from util import showwarning, askyesno, ask_text
 
 
 class GroupManager:
@@ -119,3 +119,24 @@ class GroupManager:
 
     def action_export_groups(self, widget):
         pass
+
+    def show_context(self, widget, event):
+        if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:
+            return
+        self.widgets["context_menu"].popup(None, None, None, None, event.button, event.time)
+
+    def rename_item(self, widget):
+        """Rename an entry"""
+        model, iter = self.widgets['groups_tree'].get_selection().get_selected()
+        name = model.get_value(iter, 0)
+        value = ask_text(self.widgets['groups_window'], _("Rename Group"), name)
+        model.set_value(iter, 0, value)
+        self.groups_changed = True
+
+    def delete_item(self, widget):
+        """Delete an entry"""
+        model, iter = self.widgets['groups_tree'].get_selection().get_selected()
+        name = model.get_value(iter, 0)
+        if askyesno(_("Delete Group"), _("Do you want to delete %s?" % name)):
+            model.remove(iter)
+            self.groups_changed = True
