@@ -47,7 +47,6 @@
               <object class="GtkButton">
                 <property name="label" translatable="yes">Import...</property>
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="action_import_groups" swapped="no"/>
@@ -60,12 +59,12 @@
             </child>
             <child>
               <object class="GtkButton">
-                <property name="label" translatable="yes">Update</property>
+                <property name="label" translatable="yes">Export</property>
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="action_update_groups" swapped="no"/>
+                <signal name="clicked" handler="action_export_groups" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -208,7 +207,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="save_groups" swapped="no"/>
+                <signal name="clicked" handler="save" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
