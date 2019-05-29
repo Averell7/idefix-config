@@ -2,8 +2,19 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow">
+  <object class="GtkListStore" id="groups_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name data -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkWindow" id="groups_window">
+    <property name="width_request">640</property>
+    <property name="height_request">480</property>
     <property name="can_focus">False</property>
+    <property name="destroy_with_parent">True</property>
     <child>
       <placeholder/>
     </child>
@@ -15,6 +26,7 @@
           <object class="GtkButtonBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="vexpand">False</property>
             <property name="orientation">vertical</property>
             <property name="layout_style">start</property>
             <child>
@@ -23,6 +35,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="action_edit_groups" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -37,6 +50,7 @@
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="action_import_groups" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -51,6 +65,7 @@
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <signal name="clicked" handler="action_update_groups" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -84,11 +99,27 @@
             <property name="vexpand">True</property>
             <property name="shadow_type">in</property>
             <child>
-              <object class="GtkTreeView">
+              <object class="GtkTreeView" id="groups_tree">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="vexpand">False</property>
+                <property name="model">groups_store</property>
+                <property name="headers_visible">False</property>
                 <child internal-child="selection">
-                  <object class="GtkTreeSelection"/>
+                  <object class="GtkTreeSelection">
+                    <signal name="changed" handler="selection_changed" swapped="no"/>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn">
+                    <property name="title" translatable="yes">column</property>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
                 </child>
               </object>
             </child>
@@ -106,9 +137,10 @@
             <property name="vexpand">True</property>
             <property name="shadow_type">in</property>
             <child>
-              <object class="GtkTextView">
+              <object class="GtkTextView" id="groups_view">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="vexpand">False</property>
               </object>
             </child>
           </object>
@@ -149,6 +181,52 @@
             <property name="left_attach">0</property>
             <property name="top_attach">1</property>
           </packing>
+        </child>
+        <child>
+          <object class="GtkButtonBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="valign">end</property>
+            <property name="layout_style">spread</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">Cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="hide" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="save_button">
+                <property name="label" translatable="yes">Save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="save_groups" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">2</property>
+            <property name="top_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>
