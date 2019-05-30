@@ -1,7 +1,15 @@
+import os
+from urllib.parse import urlparse, urljoin
+
 from gi.repository import Gtk, Gdk
 
 from myconfigparser import myConfigParser
+from repository import fetch_repository_list
 from util import showwarning, askyesno, ask_text, ip_address_test
+
+IMPORT_COLUMN_SELECTED = 0
+IMPORT_COLUMN_NAME = 1
+IMPORT_COLUMN_PATH = 2
 
 
 class GroupManager:
@@ -257,6 +265,70 @@ class GroupManager:
 
         dialog.destroy()
 
+    def action_import_repository(self, widget):
+        if self.imported_groups or self.groups_changed:
+            if askyesno(_("Save Changes"), _("Do you want to save your changes?")):
+                self.save_groups()
+
+        self.imported_groups = False
+        self.groups_changed = False
+
+        # Get repository file from server
+        data = fetch_repository_list()
+        if not data:
+            showwarning(_("Repository"), _("Could not get files from server"))
+            return
+
+        self.widgets['repository_store'].clear()
+
+        path_iters = {
+            '/': None
+        }
+
+        for path, files in data:
+            directory = urlparse(path).path
+            if directory.endswith('/'):
+                directory = directory[:-1]
+
+            parent_path, name = os.path.split(directory)
+            if not name:
+                name = 'all'
+
+            if parent_path not in path_iters:
+                path_iters[parent_path] = self.widgets['repository_store'].append(None)
+                self.widgets['repository_store'].set_value(
+                    path_iters[parent_path],
+                    IMPORT_COLUMN_NAME, os.path.split(parent_path)[1])
+                self.widgets['repository_store'].set_value(
+                    path_iters[parent_path],
+                    IMPORT_COLUMN_PATH, path)
+
+            parent = self.widgets['repository_store'].append(path_iters[parent_path])
+            path_iters[directory] = parent
+
+            self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_NAME, name)
+            self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_PATH, path)
+            for file in files:
+                if file.endswith('.json'):
+                    # Only import ini files for now
+                    continue
+
+                iter = self.widgets['repository_store'].append(parent)
+
+                full_path = urljoin(path, file)
+
+                self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_NAME, file)
+                self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_PATH, full_path)
+
+        self.widgets['import_window'].show_all()
+
+    def action_cancel_repository(self, widget):
+        self.widgets['import_window'].hide()
+
+    def action_start_repository_import(self, widget):
+        """Process the user selection and import the proxy groups"""
+        pass
+
     def show_context(self, widget, event):
         if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:
             return
@@ -277,3 +349,7 @@ class GroupManager:
         if askyesno(_("Delete Group"), _("Do you want to delete %s?" % name)):
             model.remove(iter)
             self.groups_changed = True
+
+    def update_import_selection(self, widget, path):
+        iter = self.widgets['repository_store'].get_iter(path)
+        self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_SELECTED, not widget.get_active())
