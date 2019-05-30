@@ -189,6 +189,7 @@ class GroupManager:
             self.groups_store.append((row[0], row[1]))
 
     def action_import_groups(self, widget):
+        """Imports groups from an ini file, first adds them into the tree view for later merging/replacing"""
         if self.groups_changed:
             if askyesno(_("Save Changes"), _("Do you want to save your changes?")):
                 self.save_groups()
@@ -225,7 +226,33 @@ class GroupManager:
         dialog.destroy()
 
     def action_export_groups(self, widget):
-        pass
+        """Export the groups in the main group store into an ini file"""
+
+        dialog = Gtk.FileChooserDialog(
+            _("Export File"),
+            self.widgets['groups_window'],
+            Gtk.FileChooserAction.SAVE,
+            (_("Export"), Gtk.ResponseType.ACCEPT),
+        )
+        file_filter = Gtk.FileFilter()
+        file_filter.add_pattern('*.ini')
+        dialog.set_filter(file_filter)
+
+        dialog.show_all()
+        response = dialog.run()
+        if response == Gtk.ResponseType.ACCEPT:
+
+            data = ''
+
+            for row in self.controller.groups_store:
+                data += '\n[%s]\n' % row[0]
+                for domain in row[1].split('\n'):
+                    data += 'dest_domain = %s\n' % domain
+
+            with open(dialog.get_filename(), 'w', encoding="utf-8-sig", newline="\n") as f:
+                f.write(data)
+
+        dialog.destroy()
 
     def show_context(self, widget, event):
         if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:
