@@ -11,6 +11,12 @@ class GroupManager:
     widgets = {}
     imported_groups = False
 
+    # If we encounter a group that already exists
+    # if None - ask the user what to do
+    # True - Merge
+    # False - Replace
+    merge_in_group = None
+
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
@@ -35,11 +41,111 @@ class GroupManager:
         self.imported_groups = False
 
     def hide(self, *args):
+        self.groups_changed = False
+        self.imported_groups = False
         self.widgets['groups_window'].hide()
 
     def save(self, *args):
-        self.save_groups()
+        if self.imported_groups:
+            dialog = Gtk.Dialog()
+            dialog.set_transient_for(self.widgets['groups_window'])
+            dialog.add_button(_("Merge"), Gtk.ResponseType.APPLY)
+            dialog.add_button(_("Replace"), Gtk.ResponseType.ACCEPT)
+            dialog.add_button(_("Cancel"), Gtk.ResponseType.CANCEL)
+            label = Gtk.Label(_("Do you want to merge groups or replace existing?"))
+            dialog.get_content_area().add(label)
+            dialog.show_all()
+            result = dialog.run()
+            dialog.hide()
+            if result == Gtk.ResponseType.APPLY:
+                # Merge case
+                if not self.merge():
+                    return
+            elif result == Gtk.ResponseType.ACCEPT:
+                # Replace
+                self.save_groups()
+        else:
+            self.save_groups()
+
         self.hide()
+
+    def ask_merge(self, name):
+        dialog = Gtk.Dialog()
+        dialog.set_transient_for(self.widgets['groups_window'])
+        dialog.add_button(_("Replace"), Gtk.ResponseType.APPLY)
+        dialog.add_button(_("Replace all"), Gtk.ResponseType.ACCEPT)
+        dialog.add_button(_("Merge"), Gtk.ResponseType.OK)
+        dialog.add_button(_("Merge all"), Gtk.ResponseType.YES)
+        dialog.add_button(_("Cancel"), Gtk.ResponseType.CANCEL)
+        dialog.get_content_area().add(Gtk.Label(_("Duplicate group %s found") % name))
+        dialog.show_all()
+        result = dialog.run()
+        dialog.hide()
+        if result == Gtk.ResponseType.APPLY:
+            return False
+        elif result == Gtk.ResponseType.ACCEPT:
+            self.merge_in_group = False
+            return False
+        elif result == Gtk.ResponseType.OK:
+            return True
+        elif result == Gtk.ResponseType.YES:
+            self.merge_in_group = True
+            return True
+        else:
+            return None
+
+    @staticmethod
+    def merge_group(new, original):
+        """Merge contents of new and original"""
+        values = set()
+        values.update(new)
+        values.update(original)
+        return list(values)
+
+    def merge(self):
+        """Go through each item in our store vs the controller store and look for differences"""
+        groups = {}
+
+        original_groups = {}
+        for row in self.controller.groups_store:
+            original_groups[row[0]] = row[1].split('\n')
+
+        new_groups = {}
+        for row in self.groups_store:
+            new_groups[row[0]] = row[1].split('\n')
+
+        for key in new_groups:
+            if key not in original_groups:
+                groups[key] = new_groups[key]
+            else:
+                # What is our merge strategy?
+                if self.merge_in_group is None:
+                    # Ask the user what to do
+                    merge = self.ask_merge(key)
+                    if merge is None:
+                        return
+                else:
+                    merge = self.merge_in_group
+
+                if merge is True:
+                    # Merge within the group
+                    groups[key] = self.merge_group(new_groups[key], original_groups[key])
+                elif merge is False:
+                    # Replace
+                    groups[key] = new_groups[key]
+
+                original_groups.pop(key)
+
+        # Now go through the original group
+        for key in original_groups:
+            groups[key] = original_groups[key]
+
+        # And finally write
+        self.controller.groups_store.clear()
+        for key, value in groups.items():
+            self.controller.groups_store.append((key, '\n'.join(value)))
+
+        return True
 
     def save_groups(self, *args):
         """Update the group"""
@@ -100,6 +206,7 @@ class GroupManager:
         dialog.set_filter(file_filter)
 
         self.groups_store.clear()
+        dialog.show_all()
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
 
