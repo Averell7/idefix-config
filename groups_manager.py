@@ -1,7 +1,7 @@
 from gi.repository import Gtk, Gdk
 
 from myconfigparser import myConfigParser
-from util import showwarning, askyesno, ask_text
+from util import showwarning, askyesno, ask_text, ip_address_test
 
 
 class GroupManager:
@@ -247,7 +247,10 @@ class GroupManager:
             for row in self.controller.groups_store:
                 data += '\n[%s]\n' % row[0]
                 for domain in row[1].split('\n'):
-                    data += 'dest_domain = %s\n' % domain
+                    if ip_address_test(domain):
+                        data += 'dest_ip = %s\n' % domain
+                    else:
+                        data += 'dest_domain = %s\n' % domain
 
             with open(dialog.get_filename(), 'w', encoding="utf-8-sig", newline="\n") as f:
                 f.write(data)
