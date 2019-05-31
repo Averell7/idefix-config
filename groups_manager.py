@@ -178,12 +178,14 @@ class GroupManager:
             showwarning(_("Save"), _("Don't forget to save"), 2)
             self.groups_changed = False
 
-        model, iter = widget.get_selected()
-
         self.buffer = Gtk.TextBuffer()
+        self.widgets['groups_view'].set_buffer(self.buffer)
+        model, iter = widget.get_selected()
+        if not iter:
+            return
+
         self.buffer.set_text(model.get_value(iter, 1))
         self.buffer.connect('changed', self.set_groups_dirty)
-        self.widgets['groups_view'].set_buffer(self.buffer)
 
     def set_groups_dirty(self, widget):
         """Mark that the group entry was edited and update it"""
@@ -205,6 +207,8 @@ class GroupManager:
         self.groups_changed = False
 
         self.groups_store.clear()
+        self.buffer = Gtk.TextBuffer()
+        self.widgets['groups_view'].set_buffer(self.buffer)
         for row in self.controller.groups_store:
             self.groups_store.append((row[0], row[1]))
 
@@ -226,6 +230,8 @@ class GroupManager:
         file_filter.add_pattern('*.ini')
         dialog.set_filter(file_filter)
 
+        self.buffer = Gtk.TextBuffer()
+        self.widgets['groups_view'].set_buffer(self.buffer)
         self.groups_store.clear()
         dialog.show_all()
         response = dialog.run()
@@ -365,6 +371,8 @@ class GroupManager:
             data = parser.read(ini_data.split('\n'), "groups", isdata=True, comments=True)
             groups.update(data['groups'])
 
+        self.buffer = Gtk.TextBuffer()
+        self.widgets['groups_view'].set_buffer(self.buffer)
         self.groups_store.clear()
         self.read_config_data(groups)
         self.imported_groups = True
