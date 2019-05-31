@@ -10,6 +10,7 @@ from util import showwarning, askyesno, ask_text, ip_address_test
 IMPORT_COLUMN_SELECTED = 0
 IMPORT_COLUMN_NAME = 1
 IMPORT_COLUMN_PATH = 2
+IMPORT_COLUMN_INCONSISTENT = 3
 
 
 class GroupManager:
@@ -301,13 +302,13 @@ class GroupManager:
                     IMPORT_COLUMN_NAME, os.path.split(parent_path)[1])
                 self.widgets['repository_store'].set_value(
                     path_iters[parent_path],
-                    IMPORT_COLUMN_PATH, path)
+                    IMPORT_COLUMN_PATH, "")
 
             parent = self.widgets['repository_store'].append(path_iters[parent_path])
             path_iters[directory] = parent
 
             self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_NAME, name)
-            self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_PATH, path)
+            self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_PATH, "")
             for file in files:
                 if file.endswith('.json'):
                     # Only import ini files for now
@@ -350,6 +351,69 @@ class GroupManager:
             model.remove(iter)
             self.groups_changed = True
 
-    def update_import_selection(self, widget, path):
+    def propagate_status(self, iter, value):
+        """Update the value all the way down the children tree"""
+        self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_SELECTED, value)
+        self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_INCONSISTENT, False)
+
+        child = self.widgets['repository_store'].iter_children(iter)
+        while child is not None:
+            self.propagate_status(child, value)
+            child = self.widgets['repository_store'].iter_next(child)
+
+    def check_children_status_same(self, iter, value):
+        """Return if all the children values (all the way down) are the same"""
+        child = self.widgets['repository_store'].iter_children(iter)
+        while child is not None:
+            if self.widgets['repository_store'].get_value(child, IMPORT_COLUMN_INCONSISTENT):
+                return False
+            if self.widgets['repository_store'].get_value(child, IMPORT_COLUMN_SELECTED) != value:
+                return False
+            if not self.check_children_status_same(child, value):
+                return False
+            child = self.widgets['repository_store'].iter_next(child)
+        return True
+
+    def update_import_selection(self, widget: Gtk.CellRendererToggle, path):
+        """Update the checkbox across the whole tree view"""
+
         iter = self.widgets['repository_store'].get_iter(path)
-        self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_SELECTED, not widget.get_active())
+        value = not widget.get_active()
+        self.propagate_status(iter, value)  # Get children and set appropriately
+
+        # Get parents and set appropriately
+        parent = self.widgets['repository_store'].iter_parent(iter)
+
+        inconsistent = False
+        while parent:
+            if inconsistent:
+                self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_INCONSISTENT, True)
+                parent = self.widgets['repository_store'].iter_parent(parent)
+                continue
+
+            child = self.widgets['repository_store'].iter_children(parent)
+            same = True
+            while child:
+                # Some children have differing options
+                if self.widgets['repository_store'].get_value(child, IMPORT_COLUMN_INCONSISTENT):
+                    same = False
+                    break
+
+                # Children have different values
+                if self.widgets['repository_store'].get_value(child, IMPORT_COLUMN_SELECTED) != value:
+                    same = False
+                    break
+
+                child = self.widgets['repository_store'].iter_next(child)
+
+            # All children have the same value
+            if same:
+                self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_SELECTED, value)
+                self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_INCONSISTENT, False)
+            else:
+                parent_value = self.widgets['repository_store'].get_value(parent, IMPORT_COLUMN_SELECTED)
+                # Check if any child != parent_value
+                inconsistent = not self.check_children_status_same(parent, parent_value)
+                self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_INCONSISTENT, inconsistent)
+
+            parent = self.widgets['repository_store'].iter_parent(parent)

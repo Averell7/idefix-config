@@ -272,6 +272,8 @@
       <column type="gchararray"/>
       <!-- column-name path -->
       <column type="gchararray"/>
+      <!-- column-name inconsistent -->
+      <column type="gboolean"/>
     </columns>
   </object>
   <object class="GtkWindow" id="import_window">
@@ -318,6 +320,7 @@
                   </object>
                   <attributes>
                     <attribute name="active">0</attribute>
+                    <attribute name="inconsistent">3</attribute>
                   </attributes>
                 </child>
               </object>
