@@ -1,10 +1,11 @@
 import os
+from collections import OrderedDict
 from urllib.parse import urlparse, urljoin
 
 from gi.repository import Gtk, Gdk
 
 from myconfigparser import myConfigParser
-from repository import fetch_repository_list
+from repository import fetch_repository_list, download_group_file
 from util import showwarning, askyesno, ask_text, ip_address_test
 
 IMPORT_COLUMN_SELECTED = 0
@@ -156,6 +157,16 @@ class GroupManager:
 
         return True
 
+    def read_config_data(self, data):
+        """Read ini config data from an ini file into the group manager's groups store"""
+        for key in data:
+            tooltip = "\n".join(data[key].get('dest_domain', ''))
+            if data[key].get('dest_ip', ''):
+                if tooltip:
+                    tooltip += '\n'
+                tooltip += "\n".join(data[key].get('dest_ip', ''))
+            self.groups_store.append([key, tooltip])
+
     def save_groups(self, *args):
         """Update the group"""
         self.controller.groups_store.clear()
@@ -222,14 +233,7 @@ class GroupManager:
 
             parser = myConfigParser()
             data1 = parser.read(dialog.get_filename(), "groups", comments=True)['groups']
-            for key in data1:
-                tooltip = "\n".join(data1[key].get('dest_domain', ''))
-                if data1[key].get('dest_ip', ''):
-                    if tooltip:
-                        tooltip += '\n'
-                    tooltip += "\n".join(data1[key].get('dest_ip', ''))
-                self.groups_store.append([key, tooltip])
-
+            self.read_config_data(data1)
             self.imported_groups = True
 
         dialog.destroy()
@@ -317,8 +321,9 @@ class GroupManager:
                 iter = self.widgets['repository_store'].append(parent)
 
                 full_path = urljoin(path, file)
+                name, ext = os.path.splitext(file)
 
-                self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_NAME, file)
+                self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_NAME, name)
                 self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_PATH, full_path)
 
         self.widgets['import_window'].show_all()
@@ -326,9 +331,44 @@ class GroupManager:
     def action_cancel_repository(self, widget):
         self.widgets['import_window'].hide()
 
+    def walk_repository_tree(self, iterchildren):
+        """Return the paths of any bottom most children which have been selected"""
+        results = []
+        for child in iterchildren:
+            if not child[IMPORT_COLUMN_SELECTED] and not child[IMPORT_COLUMN_INCONSISTENT]:
+                continue
+            children = child.iterchildren()
+            if children.iter:
+                # Continue walking
+                results.extend(self.walk_repository_tree(children))
+            else:
+                # We are at the base
+                results.append((child[IMPORT_COLUMN_PATH], child[IMPORT_COLUMN_NAME]))
+        return results
+
     def action_start_repository_import(self, widget):
         """Process the user selection and import the proxy groups"""
-        pass
+        download_files = []
+
+        for row in self.widgets['repository_store']:
+            if not row[IMPORT_COLUMN_SELECTED] and not row[IMPORT_COLUMN_INCONSISTENT]:
+                continue
+
+            # Get to the bottom level
+            children = row.iterchildren()
+            download_files = self.walk_repository_tree(children)
+
+        parser = myConfigParser()
+        groups = OrderedDict()
+        for file, name in download_files:
+            ini_data = ('[%s]\n' % name) + download_group_file(file).decode("utf-8-sig")
+            data = parser.read(ini_data.split('\n'), "groups", isdata=True, comments=True)
+            groups.update(data['groups'])
+
+        self.groups_store.clear()
+        self.read_config_data(groups)
+        self.imported_groups = True
+        self.widgets['import_window'].hide()
 
     def show_context(self, widget, event):
         if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:

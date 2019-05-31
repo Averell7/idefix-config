@@ -10,3 +10,9 @@ def fetch_repository_list(url=REPOSITORY_URL):
         return result.json()
     else:
         return None
+
+
+def download_group_file(path):
+    """Download the group ini file"""
+    result = requests.get(path)
+    return result.content
