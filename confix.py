@@ -28,6 +28,8 @@ from ftplib import FTP, all_errors as FTPError
 
 import gi
 
+from groups_manager import GroupManager
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -50,6 +52,7 @@ from firewall import Firewall
 from users import Users
 from config_profile import ConfigProfile
 from assistant import Assistant
+from import_json import ImportJsonDialog
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -190,6 +193,8 @@ class Confix:
             except:
                 pass
 
+        self.import_json = ImportJsonDialog(self.arw, self)
+
         self.arw["configname"].set_text(configname)
         self.arw["program_title"].set_text("Confix - Version " + version)
         window1 = self.arw["window1"]
@@ -198,6 +203,8 @@ class Confix:
         window1.connect("destroy", self.destroy)
 
         window2 = self.arw2["assistant1"]
+
+        self.groups_manager = GroupManager(self.arw, self)
 
         self.arw['loading_window'].show_all()
 
@@ -426,12 +433,16 @@ class Confix:
         self.load_chooser("")
 
     def open_config(self, widget):
-        self.arw["file_chooser"].run()
+        self.import_json.run()
 
     def show_help(self, widget):
         self.arw2["help_window"].show()
+
     def hide_help(self, widget):
         self.arw2["help_window"].hide()
+
+    def show_manage_groups(self, widget):
+        self.groups_manager.show()
 
     def import_ini_files(self):
         # This function is presently unused
