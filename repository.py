@@ -24,6 +24,6 @@ def download_group_file(path):
             if request.status != 200:
                 return None
 
-            return request.read().decode('utf-8')
+            return request.read()
     except HTTPError:
         return None
