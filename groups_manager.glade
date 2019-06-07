@@ -6,6 +6,14 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
+      <object class="GtkMenuItem" id="add_group_menu">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Add</property>
+        <signal name="activate" handler="add_item" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkMenuItem">
         <property name="visible">True</property>
         <property name="can_focus">False</property>

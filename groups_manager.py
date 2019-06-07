@@ -193,6 +193,10 @@ class GroupManager:
         """Mark that the group entry was edited and update it"""
         self.groups_changed = True
         model, iter = self.widgets['groups_tree'].get_selection().get_selected()
+
+        iter = model.convert_iter_to_child_iter(iter)
+        model = model.get_model()  # Get actual model
+
         model.set_value(iter, 1, self.buffer.get_text(
             self.buffer.get_start_iter(),
             self.buffer.get_end_iter(),
@@ -207,6 +211,8 @@ class GroupManager:
 
         self.imported_groups = False
         self.groups_changed = False
+
+        self.widgets['add_group_menu'].show()
 
         self.groups_store.clear()
         self.buffer = Gtk.TextBuffer()
@@ -285,6 +291,8 @@ class GroupManager:
 
         self.imported_groups = False
         self.groups_changed = False
+
+        self.widgets['add_group_menu'].show()
 
         # Get repository file from server
         data = fetch_repository_list()
@@ -384,6 +392,23 @@ class GroupManager:
         if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:
             return
         self.widgets["context_menu"].popup(None, None, None, None, event.button, event.time)
+
+    def add_item(self, widget):
+        """Add a new group"""
+        value = ask_text(self.widgets['groups_window'], _("Add Group"), "")
+        if not value:
+            return
+        iter = self.widgets['groups_store'].append()
+        self.widgets['groups_store'].set_value(iter, 0, value)
+        self.widgets['groups_store'].set_value(iter, 1, '')
+
+        # Select the new group
+        sort_model = self.widgets['groups_tree'].get_model()
+        model, sort_iter = sort_model.convert_child_iter_to_iter(iter)
+        self.widgets['groups_tree'].set_cursor(sort_model.get_path(sort_iter))
+
+        # Set focus to the text area
+        self.widgets['groups_view'].grab_focus()
 
     def rename_item(self, widget):
         """Rename an entry"""
