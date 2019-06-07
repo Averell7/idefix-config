@@ -49,6 +49,8 @@ class GroupManager:
         self.groups_changed = False
         self.buffer = None
         self.imported_groups = False
+        self.widgets['import_tree'].get_model().set_sort_column_id(IMPORT_COLUMN_NAME, Gtk.SortType.ASCENDING)
+        self.widgets['groups_tree'].get_model().set_sort_column_id(0, Gtk.SortType.ASCENDING)
 
     def hide(self, *args):
         self.groups_changed = False
@@ -388,7 +390,9 @@ class GroupManager:
         model, iter = self.widgets['groups_tree'].get_selection().get_selected()
         name = model.get_value(iter, 0)
         value = ask_text(self.widgets['groups_window'], _("Rename Group"), name)
-        model.set_value(iter, 0, value)
+
+        iter = model.convert_iter_to_child_iter(iter)
+        model.get_model().set_value(iter, 0, value)
         self.groups_changed = True
 
     def delete_item(self, widget):
@@ -396,7 +400,8 @@ class GroupManager:
         model, iter = self.widgets['groups_tree'].get_selection().get_selected()
         name = model.get_value(iter, 0)
         if askyesno(_("Delete Group"), _("Do you want to delete %s?" % name)):
-            model.remove(iter)
+            iter = model.convert_iter_to_child_iter(iter)
+            model.get_model().remove(iter)
             self.groups_changed = True
 
     def propagate_status(self, iter, value):
@@ -425,7 +430,10 @@ class GroupManager:
     def update_import_selection(self, widget: Gtk.CellRendererToggle, path):
         """Update the checkbox across the whole tree view"""
 
-        iter = self.widgets['repository_store'].get_iter(path)
+        # Transform from sort path to actual path
+        iter = self.widgets['import_tree'].get_model().get_iter(path)
+        iter = self.widgets['import_tree'].get_model().convert_iter_to_child_iter(iter)
+
         value = not widget.get_active()
         self.propagate_status(iter, value)  # Get children and set appropriately
 
