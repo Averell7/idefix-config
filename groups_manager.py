@@ -292,7 +292,7 @@ class GroupManager:
         self.imported_groups = False
         self.groups_changed = False
 
-        self.widgets['add_group_menu'].show()
+        self.widgets['add_group_menu'].hide()
 
         # Get repository file from server
         data = fetch_repository_list()
