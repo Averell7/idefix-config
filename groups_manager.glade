@@ -6,6 +6,14 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
+      <object class="GtkMenuItem" id="add_group_menu">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Add</property>
+        <signal name="activate" handler="add_item" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkMenuItem">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -29,6 +37,9 @@
       <!-- column-name data -->
       <column type="gchararray"/>
     </columns>
+  </object>
+  <object class="GtkTreeModelSort" id="groups_sort">
+    <property name="model">groups_store</property>
   </object>
   <object class="GtkWindow" id="groups_window">
     <property name="width_request">640</property>
@@ -135,7 +146,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="vexpand">False</property>
-                <property name="model">groups_store</property>
+                <property name="model">groups_sort</property>
                 <property name="headers_visible">False</property>
                 <signal name="button-release-event" handler="show_context" swapped="no"/>
                 <child internal-child="selection">
@@ -264,6 +275,21 @@
       </object>
     </child>
   </object>
+  <object class="GtkTreeStore" id="repository_store">
+    <columns>
+      <!-- column-name import -->
+      <column type="gboolean"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name path -->
+      <column type="gchararray"/>
+      <!-- column-name inconsistent -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
+  <object class="GtkTreeModelSort" id="repository_sort">
+    <property name="model">repository_store</property>
+  </object>
   <object class="GtkWindow" id="import_window">
     <property name="width_request">320</property>
     <property name="height_request">400</property>
@@ -301,7 +327,7 @@
               <object class="GtkTreeView" id="import_tree">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">repository_store</property>
+                <property name="model">repository_sort</property>
                 <property name="search_column">0</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection"/>
@@ -382,17 +408,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkTreeStore" id="repository_store">
-    <columns>
-      <!-- column-name import -->
-      <column type="gboolean"/>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name path -->
-      <column type="gchararray"/>
-      <!-- column-name inconsistent -->
-      <column type="gboolean"/>
-    </columns>
   </object>
 </interface>

@@ -49,6 +49,8 @@ class GroupManager:
         self.groups_changed = False
         self.buffer = None
         self.imported_groups = False
+        self.widgets['import_tree'].get_model().set_sort_column_id(IMPORT_COLUMN_NAME, Gtk.SortType.ASCENDING)
+        self.widgets['groups_tree'].get_model().set_sort_column_id(0, Gtk.SortType.ASCENDING)
 
     def hide(self, *args):
         self.groups_changed = False
@@ -191,6 +193,10 @@ class GroupManager:
         """Mark that the group entry was edited and update it"""
         self.groups_changed = True
         model, iter = self.widgets['groups_tree'].get_selection().get_selected()
+
+        iter = model.convert_iter_to_child_iter(iter)
+        model = model.get_model()  # Get actual model
+
         model.set_value(iter, 1, self.buffer.get_text(
             self.buffer.get_start_iter(),
             self.buffer.get_end_iter(),
@@ -205,6 +211,8 @@ class GroupManager:
 
         self.imported_groups = False
         self.groups_changed = False
+
+        self.widgets['add_group_menu'].show()
 
         self.groups_store.clear()
         self.buffer = Gtk.TextBuffer()
@@ -283,6 +291,8 @@ class GroupManager:
 
         self.imported_groups = False
         self.groups_changed = False
+
+        self.widgets['add_group_menu'].hide()
 
         # Get repository file from server
         data = fetch_repository_list()
@@ -383,12 +393,31 @@ class GroupManager:
             return
         self.widgets["context_menu"].popup(None, None, None, None, event.button, event.time)
 
+    def add_item(self, widget):
+        """Add a new group"""
+        value = ask_text(self.widgets['groups_window'], _("Add Group"), "")
+        if not value:
+            return
+        iter = self.widgets['groups_store'].append()
+        self.widgets['groups_store'].set_value(iter, 0, value)
+        self.widgets['groups_store'].set_value(iter, 1, '')
+
+        # Select the new group
+        sort_model = self.widgets['groups_tree'].get_model()
+        model, sort_iter = sort_model.convert_child_iter_to_iter(iter)
+        self.widgets['groups_tree'].set_cursor(sort_model.get_path(sort_iter))
+
+        # Set focus to the text area
+        self.widgets['groups_view'].grab_focus()
+
     def rename_item(self, widget):
         """Rename an entry"""
         model, iter = self.widgets['groups_tree'].get_selection().get_selected()
         name = model.get_value(iter, 0)
         value = ask_text(self.widgets['groups_window'], _("Rename Group"), name)
-        model.set_value(iter, 0, value)
+
+        iter = model.convert_iter_to_child_iter(iter)
+        model.get_model().set_value(iter, 0, value)
         self.groups_changed = True
 
     def delete_item(self, widget):
@@ -396,7 +425,8 @@ class GroupManager:
         model, iter = self.widgets['groups_tree'].get_selection().get_selected()
         name = model.get_value(iter, 0)
         if askyesno(_("Delete Group"), _("Do you want to delete %s?" % name)):
-            model.remove(iter)
+            iter = model.convert_iter_to_child_iter(iter)
+            model.get_model().remove(iter)
             self.groups_changed = True
 
     def propagate_status(self, iter, value):
@@ -425,7 +455,10 @@ class GroupManager:
     def update_import_selection(self, widget: Gtk.CellRendererToggle, path):
         """Update the checkbox across the whole tree view"""
 
-        iter = self.widgets['repository_store'].get_iter(path)
+        # Transform from sort path to actual path
+        iter = self.widgets['import_tree'].get_model().get_iter(path)
+        iter = self.widgets['import_tree'].get_model().convert_iter_to_child_iter(iter)
+
         value = not widget.get_active()
         self.propagate_status(iter, value)  # Get children and set appropriately
 

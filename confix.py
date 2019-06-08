@@ -966,7 +966,6 @@ class Confix:
         config2 = OrderedDict()
         for section in ["users", "proxy", "firewall", "groups", "ports"] :
             config2[section] = OrderedDict()
-        config2["groups"] = self.config["groups"]
         config2["ports"] = self.config["ports"]
 
         # users store

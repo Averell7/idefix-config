@@ -166,6 +166,8 @@ class ProxyGroup:
             if source_model == model:     # move row in the list
                 model.remove(iter_source)
             names = [name[0] for name in model]
+            if names is None:
+                names = ['']
             self.controller.proxy_users.proxy_store.set_value(self.controller.iter_proxy, 7, '\n'.join(names))
             return
 
