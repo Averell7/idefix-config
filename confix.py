@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 0.38.0 : groups manager 0.1
 # version 0.32.0 : Proxy tab reorganized
 # version 0.30.0 : Chris : right click menu for proxy_groups
 # version 0.29.0 : Chris : encrypt passwords
@@ -59,7 +60,7 @@ from import_json import ImportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "0.37.5"
+version = "0.38.0"
 
 
 gtk = Gtk
