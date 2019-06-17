@@ -63,12 +63,23 @@ class Firewall:
         self.tvcolumn = Gtk.TreeViewColumn(_('On/Off'), self.check4, active=14, visible=11)
         self.treeview2.append_column(self.tvcolumn)
 
+        """
+        def sorter(a, b):
+            return self.arw['ports_list_sort'].get_value(a, 0) > self.arw['ports_list_sort'].get_value(b, 0)
+
+        self.arw['ports_list_sort'].set_default_sort_func(sorter)
+        """
+        self.arw['ports_tree'].get_model().set_sort_column_id(0, Gtk.SortType.ASCENDING)
+
     def ports_open_window(self, widget):
         self.arw['ports_window'].show_all()
         for key, value in self.controller.config['ports'].items():
             iter = self.arw['ports_list'].append()
             self.arw['ports_list'].set_value(iter, 0, key)
             self.arw['ports_list'].set_value(iter, 1, '\n'.join(value['port']))
+        buf = Gtk.TextBuffer()
+        self.arw['ports_buffer'] = buf
+        self.arw['ports_view'].set_buffer(buf)
 
     def cancel_ports_window(self, widget):
         self.arw['ports_window'].hide()
@@ -78,6 +89,12 @@ class Firewall:
 
     def ports_selection_changed(self, widget):
         model, iter = widget.get_selected()
+
+        if not iter:
+            return
+        iter = model.convert_iter_to_child_iter(iter)
+        model = model.get_model()
+
         value = model.get_value(iter, 1)
         buf = Gtk.TextBuffer()
         buf.set_text(value)
@@ -87,6 +104,9 @@ class Firewall:
 
     def update_ports(self, widget):
         model, iter = self.arw['ports_tree'].get_selection().get_selected()
+        iter = model.convert_iter_to_child_iter(iter)
+        model = model.get_model()
+
         model.set_value(iter, 1, self.arw['ports_buffer'].get_text(
             self.arw['ports_buffer'].get_start_iter(),
             self.arw['ports_buffer'].get_end_iter(),

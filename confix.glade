@@ -398,6 +398,9 @@
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkTreeModelSort" id="ports_list_sort">
+    <property name="model">ports_list</property>
+  </object>
   <object class="GtkMenu" id="profile_context_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -2753,12 +2756,6 @@ allowed</property>
                 <property name="top_attach">1</property>
               </packing>
             </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -2859,7 +2856,7 @@ Improper values can ruin your filtering scheme. </property>
                   <object class="GtkTreeView" id="ports_tree">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">ports_list</property>
+                    <property name="model">ports_list_sort</property>
                     <property name="headers_visible">False</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection">
