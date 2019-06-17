@@ -1,6 +1,6 @@
 import requests
 
-REPOSITORY_URL = 'http://proxy-groups.idefix64.fr/proxy-groups2.json'
+REPOSITORY_URL = 'https://proxy-groups.idefix64.fr/proxy-groups2.json'
 
 
 def fetch_repository_list(url=REPOSITORY_URL):
@@ -14,5 +14,8 @@ def fetch_repository_list(url=REPOSITORY_URL):
 
 def download_group_file(path):
     """Download the group ini file"""
+
+    path = path.replace('http://', 'https://')  # Force https
+
     result = requests.get(path)
     return result.content

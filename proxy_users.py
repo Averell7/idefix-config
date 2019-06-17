@@ -80,7 +80,6 @@ class ProxyUsers:
 
         self.switch_gui()
 
-
     def switch_gui(self,widget = None):
 
         if widget == None:
@@ -90,8 +89,9 @@ class ProxyUsers:
                 gui = "buttons"
             else:
                 gui ="check"
+        self.set_gui(gui)
 
-
+    def set_gui(self, gui):
         # button interface
         if gui == "buttons":
             for col in (1,2,3):

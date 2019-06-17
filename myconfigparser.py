@@ -135,14 +135,17 @@ class myConfigParser() :
         for a in myconfig :
             iniFile.write("[" + a + "]\n")
             for b in myconfig[a] :
-                value = myconfig[a][b]
-                if value == True :
-                    value = '1'
-                elif value == False :
-                    value = '0'
-                data1 = (b + " = " + value + "\n").encode("utf8")  # En python 3 cette ligne convertit en bytes !!!
-                data1 = (b + " = " + value + "\n")
-                iniFile.write(data1)
+                values = myconfig[a][b]
+                if not isinstance(values, list):
+                    values = [values]
+                for value in values:
+                    if value == True:
+                        value = '1'
+                    elif value == False:
+                        value = '0'
+                    data1 = (b + " = " + value + "\n").encode("utf8")  # En python 3 cette ligne convertit en bytes !!!
+                    data1 = (b + " = " + value + "\n")
+                    iniFile.write(data1)
             iniFile.write("\n")
         iniFile.close()
         return True

@@ -433,6 +433,14 @@ class Confix:
         self.profiles.list_configuration_profiles()
         self.load_chooser("")
 
+        checkbox_config = idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+        if checkbox_config:
+            self.proxy_users.set_gui('check')
+
+        filter_tab = idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+        if filter_tab:
+            self.arw['notebook3'].set_current_page(1)
+
     def open_config(self, widget):
         self.import_json.run()
 
@@ -828,6 +836,38 @@ class Confix:
             self.arw["chooser"].set_model(self.empty_store)
             self.active_chooser = None
 
+    """ Options Management """
+
+    def cancel_options(self, widget):
+        self.arw['options_window'].hide()
+
+    def save_options(self, widget):
+        gui_check = self.arw['option_checkbox_gui_check'].get_active()
+        filter_tab = self.arw['option_filter_tab_check'].get_active()
+
+        idefix_config['conf']['__options'] = {
+            'checkbox_config': ['1' if gui_check else '0'],
+            'filter_tab': ['1' if filter_tab else '0'],
+        }
+
+        if gui_check:
+            self.proxy_users.set_gui('check')
+        else:
+            self.proxy_users.set_gui('buttons')
+
+        # Save to config
+        parser.write(idefix_config['conf'], get_config_path('confix.cfg'))
+        self.arw['options_window'].hide()
+
+    def show_options(self, widget):
+        # Get options
+        self.arw['option_checkbox_gui_check'].set_active(
+            idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+        )
+        self.arw['option_filter_tab_check'].set_active(
+            idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+        )
+        self.arw['options_window'].show_all()
 
     """ User Management """
 
