@@ -1003,15 +1003,6 @@
                             <signal name="activate" handler="show_options" swapped="no"/>
                           </object>
                         </child>
-                        <child>
-                          <object class="GtkCheckMenuItem" id="switch_gui">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">switch interface</property>
-                            <property name="use_underline">True</property>
-                            <signal name="toggled" handler="switch_gui" swapped="no"/>
-                          </object>
-                        </child>
                       </object>
                     </child>
                   </object>
