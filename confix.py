@@ -435,7 +435,7 @@ class Confix:
 
         checkbox_config = idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
         if checkbox_config:
-            self.arw['switch_gui'].activate()
+            self.proxy_users.set_gui('check')
 
         filter_tab = idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
         if filter_tab:
@@ -846,11 +846,14 @@ class Confix:
         filter_tab = self.arw['option_filter_tab_check'].get_active()
 
         idefix_config['conf']['__options'] = {
-            'checkbox_config': gui_check,
-            'filter_tab': filter_tab
+            'checkbox_config': ['1' if gui_check else '0'],
+            'filter_tab': ['1' if filter_tab else '0'],
         }
 
-        self.arw['switch_gui'].set_active(gui_check)
+        if gui_check:
+            self.proxy_users.set_gui('check')
+        else:
+            self.proxy_users.set_gui('buttons')
 
         # Save to config
         parser.write(idefix_config['conf'], get_config_path('confix.cfg'))
