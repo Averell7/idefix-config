@@ -433,6 +433,14 @@ class Confix:
         self.profiles.list_configuration_profiles()
         self.load_chooser("")
 
+        checkbox_config = idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+        if checkbox_config:
+            self.arw['switch_gui'].activate()
+
+        filter_tab = idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+        if filter_tab:
+            self.arw['notebook3'].set_current_page(1)
+
     def open_config(self, widget):
         self.import_json.run()
 
@@ -828,6 +836,35 @@ class Confix:
             self.arw["chooser"].set_model(self.empty_store)
             self.active_chooser = None
 
+    """ Options Management """
+
+    def cancel_options(self, widget):
+        self.arw['options_window'].hide()
+
+    def save_options(self, widget):
+        gui_check = self.arw['option_checkbox_gui_check'].get_active()
+        filter_tab = self.arw['option_filter_tab_check'].get_active()
+
+        idefix_config['conf']['__options'] = {
+            'checkbox_config': gui_check,
+            'filter_tab': filter_tab
+        }
+
+        self.arw['switch_gui'].set_active(gui_check)
+
+        # Save to config
+        parser.write(idefix_config['conf'], get_config_path('confix.cfg'))
+        self.arw['options_window'].hide()
+
+    def show_options(self, widget):
+        # Get options
+        self.arw['option_checkbox_gui_check'].set_active(
+            idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+        )
+        self.arw['option_filter_tab_check'].set_active(
+            idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+        )
+        self.arw['options_window'].show_all()
 
     """ User Management """
 
