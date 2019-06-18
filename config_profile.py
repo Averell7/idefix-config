@@ -1,9 +1,9 @@
 import binascii
 import configparser
 
-import pyaes
 from gi.repository import Gdk
 
+import pyaes
 from myconfigparser import myConfigParser
 from util import askyesno, ask_text, get_config_path
 
@@ -106,6 +106,8 @@ class ConfigProfile:
         """Update the list view with all the configuration profiles found"""
         self.profiles_store.clear()
         for key, config in self.config['conf'].items():
+            if key.startswith('__'):
+                continue
             new_iter = self.profiles_store.append()
             self.profiles_store.set_value(new_iter, COLUMN_NAME, key)
             if 'mode' in config:

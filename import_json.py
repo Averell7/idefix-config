@@ -11,7 +11,7 @@ class ImportJsonDialog:
         self.controller = controller
 
         self.file_filter = Gtk.FileFilter()
-        self.file_filter.add_mime_type('application/json')
+        self.file_filter.add_pattern('*.json')
 
     def run(self):
         dialog = Gtk.FileChooserDialog(
