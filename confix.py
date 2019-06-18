@@ -53,7 +53,7 @@ from firewall import Firewall
 from users import Users
 from config_profile import ConfigProfile
 from assistant import Assistant
-from import_json import ImportJsonDialog
+from json_config import ImportJsonDialog, ExportJsonDialog
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -195,6 +195,7 @@ class Confix:
                 pass
 
         self.import_json = ImportJsonDialog(self.arw, self)
+        self.export_json = ExportJsonDialog(self.arw, self)
 
         self.arw["configname"].set_text(configname)
         self.arw["program_title"].set_text("Confix - Version " + version)
@@ -443,6 +444,9 @@ class Confix:
 
     def open_config(self, widget):
         self.import_json.run()
+
+    def save_config(self, widget):
+        self.export_json.run()
 
     def show_help(self, widget):
         self.arw2["help_window"].show()

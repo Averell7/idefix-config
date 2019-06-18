@@ -1,7 +1,10 @@
 import json
+import shutil
 from collections import OrderedDict
 
 from gi.repository import Gtk
+
+from util import get_config_path
 
 
 class ImportJsonDialog:
@@ -67,5 +70,29 @@ class ImportJsonDialog:
             self.controller.firewall.populate_firewall()
             self.controller.set_check_boxes()
             self.controller.set_colors()
+
+        dialog.destroy()
+
+
+class ExportJsonDialog:
+    def __init__(self, arw, controller):
+        self.arw = arw
+        self.controller = controller
+
+        self.file_filter = Gtk.FileFilter()
+        self.file_filter.add_pattern('*.json')
+
+    def run(self):
+        dialog = Gtk.FileChooserDialog(
+            _("Export Config"),
+            self.arw['window1'],
+            Gtk.FileChooserAction.SAVE,
+            (_("Export"), Gtk.ResponseType.ACCEPT),
+        )
+        dialog.set_filter(self.file_filter)
+
+        response = dialog.run()
+        if response == Gtk.ResponseType.ACCEPT:
+            shutil.copy(get_config_path("confix.json"), dialog.get_filename())
 
         dialog.destroy()

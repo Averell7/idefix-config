@@ -961,10 +961,10 @@
                         <child>
                           <object class="GtkMenuItem" id="menu_export">
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">_Export json file...</property>
                             <property name="use_underline">True</property>
+                            <signal name="activate" handler="save_config" swapped="no"/>
                           </object>
                         </child>
                         <child>
