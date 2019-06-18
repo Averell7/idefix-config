@@ -1,7 +1,10 @@
+from collections import OrderedDict
+
 from gi.repository import Gtk
 
 from util import (
-    askyesno, ask_text, ip_address_test, mac_address_test, format_comment, format_line, format_directive, get_config_path
+    askyesno, ask_text, ip_address_test, mac_address_test, format_comment, format_line, format_directive,
+    get_config_path
 )
 
 
@@ -59,6 +62,65 @@ class Firewall:
 
         self.tvcolumn = Gtk.TreeViewColumn(_('On/Off'), self.check4, active=14, visible=11)
         self.treeview2.append_column(self.tvcolumn)
+
+        """
+        def sorter(a, b):
+            return self.arw['ports_list_sort'].get_value(a, 0) > self.arw['ports_list_sort'].get_value(b, 0)
+
+        self.arw['ports_list_sort'].set_default_sort_func(sorter)
+        """
+        self.arw['ports_tree'].get_model().set_sort_column_id(0, Gtk.SortType.ASCENDING)
+
+    def ports_open_window(self, widget):
+        self.arw['ports_window'].show_all()
+        for key, value in self.controller.config['ports'].items():
+            iter = self.arw['ports_list'].append()
+            self.arw['ports_list'].set_value(iter, 0, key)
+            self.arw['ports_list'].set_value(iter, 1, '\n'.join(value['port']))
+        buf = Gtk.TextBuffer()
+        self.arw['ports_buffer'] = buf
+        self.arw['ports_view'].set_buffer(buf)
+
+    def cancel_ports_window(self, widget):
+        self.arw['ports_window'].hide()
+        self.arw['ports_buffer'] = Gtk.TextBuffer()
+        self.arw['ports_view'].set_buffer(self.arw['ports_buffer'])
+        self.arw['ports_list'].clear()
+
+    def ports_selection_changed(self, widget):
+        model, iter = widget.get_selected()
+
+        if not iter:
+            return
+        iter = model.convert_iter_to_child_iter(iter)
+        model = model.get_model()
+
+        value = model.get_value(iter, 1)
+        buf = Gtk.TextBuffer()
+        buf.set_text(value)
+        buf.connect('changed', self.update_ports)
+        self.arw['ports_buffer'] = buf
+        self.arw['ports_view'].set_buffer(self.arw['ports_buffer'])
+
+    def update_ports(self, widget):
+        model, iter = self.arw['ports_tree'].get_selection().get_selected()
+        iter = model.convert_iter_to_child_iter(iter)
+        model = model.get_model()
+
+        model.set_value(iter, 1, self.arw['ports_buffer'].get_text(
+            self.arw['ports_buffer'].get_start_iter(),
+            self.arw['ports_buffer'].get_end_iter(),
+            False
+        ))
+
+    def save_ports(self, widget):
+        self.controller.config['ports'] = OrderedDict()
+        for item in self.arw['ports_list']:
+            key, value = item
+            self.controller.config['ports'][key] = {
+                'port': value.split('\n')
+            }
+        self.cancel_ports_window(widget)
 
     def toggle_col12_firewall(self, cellrenderer, row, treestore):  # unused
         # callback of ?
