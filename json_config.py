@@ -9,9 +9,10 @@ from util import get_config_path
 
 class ImportJsonDialog:
 
-    def __init__(self, arw, controller):
+    def __init__(self, arw, controller, merge = False):
         self.arw = arw
         self.controller = controller
+        self.merge = merge
 
         self.file_filter = Gtk.FileFilter()
         self.file_filter.add_pattern('*.json')
@@ -32,35 +33,40 @@ class ImportJsonDialog:
                 object_pairs_hook=OrderedDict
             )
 
-            if 'users' in config:
-                for user in config['users']:
-                    if user not in self.controller.config['users']:
-                        self.controller.config['users'][user] = OrderedDict()
-                    self.controller.config['users'][user].update(config['users'][user])
+            if self.merge :
+                # merge the opened config with the existing one
 
-            if 'proxy' in config:
-                for proxy in config['proxy']:
-                    if proxy not in self.controller.config['proxy']:
-                        self.controller.config['proxy'][proxy] = OrderedDict()
-                    self.controller.config['proxy'][proxy].update(config['proxy'][proxy])
+                if 'users' in config:
+                    for user in config['users']:
+                        if user not in self.controller.config['users']:
+                            self.controller.config['users'][user] = OrderedDict()
+                        self.controller.config['users'][user].update(config['users'][user])
 
-            if 'ports' in config:
-                for port in config['ports']:
-                    if port not in self.controller.config['ports']:
-                        self.controller.config['ports'][port] = OrderedDict()
-                    self.controller.config['ports'][port].update(config['ports'][port])
+                if 'proxy' in config:
+                    for proxy in config['proxy']:
+                        if proxy not in self.controller.config['proxy']:
+                            self.controller.config['proxy'][proxy] = OrderedDict()
+                        self.controller.config['proxy'][proxy].update(config['proxy'][proxy])
 
-            if 'groups' in config:
-                for group in config['groups']:
-                    if group not in self.controller.config['groups']:
-                        self.controller.config['groups'][group] = OrderedDict()
-                    self.controller.config['groups'][group].update(config['groups'][group])
+                if 'ports' in config:
+                    for port in config['ports']:
+                        if port not in self.controller.config['ports']:
+                            self.controller.config['ports'][port] = OrderedDict()
+                        self.controller.config['ports'][port].update(config['ports'][port])
 
-            if 'firewall' in config:
-                for firewall in config['firewall']:
-                    if firewall not in self.controller.config['firewall']:
-                        self.controller.config['firewall'][firewall] = OrderedDict()
-                    self.controller.config['firewall'][firewall].update(config['firewall'][firewall])
+                if 'groups' in config:
+                    for group in config['groups']:
+                        if group not in self.controller.config['groups']:
+                            self.controller.config['groups'][group] = OrderedDict()
+                        self.controller.config['groups'][group].update(config['groups'][group])
+
+                if 'firewall' in config:
+                    for firewall in config['firewall']:
+                        if firewall not in self.controller.config['firewall']:
+                            self.controller.config['firewall'][firewall] = OrderedDict()
+                        self.controller.config['firewall'][firewall].update(config['firewall'][firewall])
+            else :
+                self.controller.config = config
 
             self.controller.users.populate_users()
             self.controller.proxy_users.populate_proxy()

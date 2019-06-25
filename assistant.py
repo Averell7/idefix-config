@@ -366,7 +366,7 @@ class Assistant:
         """Add -@ to user and add +@ to target_user"""
 
         mac_list = []
-
+        self.disable_simulated_user()        # clean up
         for mac in self.controller.maclist[user]:
             mac_list.append(mac)
 
@@ -383,9 +383,8 @@ class Assistant:
         self.arw["experiment_user_toggle"].set_active(True)
         self.arw["experiment_username"].set_text(target_user)
         self.arw2["assistant1"].hide()
-        #self.controller.users.user_summary(user)
 
-    def disable_simulated_user(self, current_user):
+    def disable_simulated_user(self, current_user = None):
         """Remove -@ and +@ prefixes from all users"""
         user = None
         for user in self.controller.maclist:
@@ -398,8 +397,9 @@ class Assistant:
                     updated_macs.append(mac)
             self.controller.maclist[user] = updated_macs
 
-        self.arw["maclist"].get_buffer().set_text(
-            '\n'.join(self.controller.maclist[current_user])
+        if current_user:
+            self.arw["maclist"].get_buffer().set_text(
+                '\n'.join(self.controller.maclist[current_user])
         )
         #if user:
         #    self.controller.users.user_summary(user)

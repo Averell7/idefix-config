@@ -1,6 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 1.0.0 rc 2 : bug fix.
+# version 1.0.0 rc 1 : options and ports dialog, import and export json file menu
 # version 0.38.0 : groups manager 0.1
 # version 0.32.0 : Proxy tab reorganized
 # version 0.30.0 : Chris : right click menu for proxy_groups
@@ -60,7 +62,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "0.38.0"
+version = "1.0.0 RC2"
 
 
 gtk = Gtk
@@ -433,6 +435,7 @@ class Confix:
         self.load_ini_files()
         self.profiles.list_configuration_profiles()
         self.load_chooser("")
+        self.assistant.disable_simulated_user()     # In case the previous user has not disabled simulation before shutting down
 
         checkbox_config = idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
         if checkbox_config:
@@ -545,7 +548,7 @@ class Confix:
         self.chooser_users_store.clear()
         for row in self.users_store:
             category = row[0]
-            if row[6]:  # Add category only if Internet access is enabled
+            if row[6] or row[7]:  # Add category only if Internet access is enabled
                 iter1 = self.chooser_users_store.append(None, [category, "", ""])
                 for child in row.iterchildren():  # write users
                     user = child[0]
@@ -972,7 +975,7 @@ class Confix:
         f1.write(json.dumps(config2, indent = 3))
         f1.close()
 
-        if not load_locale:  # send the files bt FTP
+        if not load_locale:  # send the files by FTP. Load_locale is the development mode, where files are read and written only on the local disk
             self.ftp_upload()
         if self.local_control:  # if connected to Idefix, send the update signal
             f1 = open(get_config_path("./tmp/update"), "w")
@@ -1099,7 +1102,6 @@ class Confix:
                 OK = False
         ftp.close()
 
-        # TODO : message to indicate upload was successful
         if OK :
             title = "Upload OK"
         else :
@@ -1108,9 +1110,6 @@ class Confix:
 
         if message:
             showwarning(title, msg, 1)
-
-    def save_json_file(self, widget):
-        x = self.arw["file_chooser"].show()
 
 
     def destroy(self, widget=None, donnees=None):

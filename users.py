@@ -412,6 +412,8 @@ class Users:
         for v in value.split('\n'):
             if v.startswith("#"):
                 continue
+            if v.strip() == "":
+                continue
             if not mac_address_test(v) and not ip_address_test(v):
                 showwarning(_("Address Invalid"), _("The address \n%s\n entered is not valid") % v)
                 OK = False

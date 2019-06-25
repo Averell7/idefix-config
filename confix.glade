@@ -1001,7 +1001,7 @@
                           <object class="GtkMenuItem">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Profiles</property>
+                            <property name="label" translatable="yes">Connections Profiles</property>
                             <property name="use_underline">True</property>
                             <signal name="activate" handler="profile_open_window" swapped="no"/>
                           </object>
@@ -1260,7 +1260,7 @@
                         <property name="can_focus">False</property>
                         <child>
                           <object class="GtkButton">
-                            <property name="label">gtk-apply</property>
+                            <property name="label">gtk-save</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -1327,7 +1327,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="stock">gtk-dialog-question</property>
-                                <property name="icon_size">3</property>
+                                <property name="icon_size">5</property>
                               </object>
                             </child>
                           </object>
@@ -1803,6 +1803,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="stock">gtk-apply</property>
+                                            <property name="icon_size">5</property>
                                           </object>
                                         </child>
                                       </object>
@@ -1826,6 +1827,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="stock">gtk-fullscreen</property>
+                                            <property name="icon_size">5</property>
                                           </object>
                                         </child>
                                       </object>
@@ -2020,10 +2022,12 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                         <property name="can_focus">False</property>
                         <child>
                           <object class="GtkButton">
-                            <property name="label" translatable="yes">SAVE</property>
+                            <property name="label">gtk-save</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="use_stock">True</property>
+                            <property name="always_show_image">True</property>
                             <signal name="clicked" handler="build_files" swapped="no"/>
                           </object>
                           <packing>
@@ -2046,7 +2050,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="stock">gtk-dialog-question</property>
-                                <property name="icon_size">3</property>
+                                <property name="icon_size">5</property>
                               </object>
                             </child>
                           </object>
@@ -2199,6 +2203,7 @@ and week</property>
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">False</property>
                                                 <property name="stock">gtk-fullscreen</property>
+                                                <property name="icon_size">5</property>
                                               </object>
                                             </child>
                                           </object>
@@ -2441,6 +2446,7 @@ to all users</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="stock">gtk-fullscreen</property>
+                                            <property name="icon_size">5</property>
                                           </object>
                                         </child>
                                       </object>
@@ -2712,6 +2718,7 @@ allowed</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Options</property>
     <property name="resizable">False</property>
+    <property name="window_position">center-on-parent</property>
     <property name="deletable">False</property>
     <property name="transient_for">window1</property>
     <child>
@@ -2808,6 +2815,7 @@ allowed</property>
   </object>
   <object class="GtkWindow" id="ports_window">
     <property name="can_focus">False</property>
+    <property name="window_position">center-on-parent</property>
     <property name="default_width">440</property>
     <property name="default_height">250</property>
     <property name="deletable">False</property>
@@ -2954,7 +2962,7 @@ Improper values can ruin your filtering scheme. </property>
   </object>
   <object class="GtkWindow" id="profiles_window">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">Edit Profiles</property>
+    <property name="title" translatable="yes">Connections : Edit Profiles</property>
     <property name="window_position">center-on-parent</property>
     <property name="default_width">440</property>
     <property name="default_height">250</property>
