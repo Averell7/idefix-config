@@ -5,8 +5,8 @@ from gi.repository import Gdk, Gtk
 from actions import DRAG_ACTION
 from util import (
     askyesno, ask_text, get_config_path,
-    format_comment, format_line, format_time, format_userline, format_domainline, format_name
-)
+    format_comment, format_line, format_time, format_userline, format_domainline, format_name,
+    showwarning)
 
 
 # 3 - proxy
@@ -255,11 +255,18 @@ class ProxyUsers:
         if not data.get_text().split("#")[1] == "chooser1":      # if data does not come from the right chooser, return
             return
 
-        position = None
+        model, iter = self.arw['chooser1'].get_selection().get_selected()
 
         if time.time() - self.mem_time < 1:  # dirty workaround to prevent two drags
             return
         self.mem_time = time.time()
+
+        if model.get_value(iter, 3):
+            # This is a category, not a user so show a warning and do nothing
+            showwarning(_("Not Supported"), _("Choosing a category is not yet supported"))
+            return
+
+        position = None
 
         model = widget.get_model()
         data1 = data.get_text().split("#")
