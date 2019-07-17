@@ -90,6 +90,7 @@ class Assistant:
 
     def forward_func(self, page):
         """ manage the page flow, depending of the choices made by the user """
+
         if page == 0 :
             if self.arw2["ass_create_user_check"].get_active():
                 return 1
@@ -101,7 +102,7 @@ class Assistant:
             return 4   # summary page
         elif page == 4:
             self.summary("")
-            return page + 1
+            return 0
 
         else:
             return page + 1
@@ -238,6 +239,8 @@ class Assistant:
             showwarning(_("Name already used"), _("The name %s is already in use.\nPlease choose another one.") % self.username)
             return
         self.arw2["assistant1"].set_page_complete(self.arw2["new_user"], True)
+        # prepare the following page
+        self.arw2["check_specific_rule"].set_label(_("Create a specific access rule for %s") % self.username)
 
 
     def choose_rules(self, widget, row):

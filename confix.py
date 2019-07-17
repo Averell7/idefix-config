@@ -170,6 +170,7 @@ class Confix:
         self.local_control = False  # will be set to True if the connection with Idefix is direct
         # Load the glade file
         self.widgets = gtk.Builder()
+        self.widgets.set_translation_domain("confix")
         self.widgets.add_from_file('./confix.glade')
         # create an array of all objects with their name as key
         ar_widgets = self.widgets.get_objects()
@@ -184,6 +185,7 @@ class Confix:
 
         # Assistant
         self.widgets2 = gtk.Builder()
+        self.widgets2.set_translation_domain("confix")
         self.widgets2.add_from_file('./assistant.glade')
         # create an array of all objects with their name as key
         ar_widgets = self.widgets2.get_objects()
@@ -213,7 +215,7 @@ class Confix:
         self.arw['loading_window'].show_all()
 
         if not future:
-            for widget in ["scrolledwindow2", "toolbar3", "paned3", "box2", "menu_debug", "inifiles_list", "inifiles_view"]:
+            for widget in ["scrolledwindow2", "toolbar3", "paned3", "box2"]:  # interface prévue pour le firewall
                 self.arw[widget].hide()
             self.arw["firewall_disabled"].show()
         else :
@@ -393,7 +395,9 @@ class Confix:
         self.tvcolumn = gtk.TreeViewColumn(_('Groups Drag and Drop'), self.users.cell, text=0)
         self.arw["chooser"].append_column(self.tvcolumn)
         self.arw["chooser"].get_selection()
-        self.arw["chooser"].set_model(self.groups_store)
+        self.chooser_sort = Gtk.TreeModelSort.sort_new_with_model(self.groups_store)
+        self.chooser_sort.set_sort_column_id(0, Gtk.SortType.ASCENDING)
+        self.arw["chooser"].set_model(self.chooser_sort)
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         self.tvcolumn = gtk.TreeViewColumn(_('Users Drag and Drop'), self.users.cell, text=0)
@@ -464,6 +468,9 @@ class Confix:
 
     def show_manage_groups(self, widget):
         self.groups_manager.show()
+
+    def show_filter_helper(self, widget):
+        self.arw["system_window"].show()
 
     def import_ini_files(self):
         # This function is presently unused
@@ -970,11 +977,12 @@ class Confix:
 
     def build_files(self, widget):
         # launched by the GO button
+        self.rebuild_config()
         self.build_users()
         self.proxy_users.build_proxy_ini()
         self.proxy_users.build_proxy_groups_ini()
         self.firewall.build_firewall_ini()
-        self.rebuild_config()
+
         f1 = open(get_config_path("confix.json"), "w")
         config2 = self.rebuild_config()
         f1.write(json.dumps(config2, indent = 3))
@@ -1039,7 +1047,7 @@ class Confix:
                 user = child[0]
                 mac = []
                 if user not in self.maclist:
-                    alert("User %s has no mac address !" % user)
+                    alert(_("User %s has no mac address !") % user)
                 else:
                     macaddress = self.maclist[user]
                     for address in macaddress:
@@ -1048,19 +1056,22 @@ class Confix:
 
         # proxy store
         for row in self.proxy_store :
-            config2["proxy"][row[0]] = OrderedDict()
-            config2["proxy"][row[0]]["active"] = self.format_row(row[1])
-            config2["proxy"][row[0]]["action"] = self.format_row(row[2])
-            config2["proxy"][row[0]]["time_condition"] = self.format_row(row[3])
-            config2["proxy"][row[0]]["comments"] = self.format_row(row[4])
-            config2["proxy"][row[0]]["user"] = self.format_row(row[5])
-            config2["proxy"][row[0]]["destination"] = self.format_row(row[10])
-            config2["proxy"][row[0]]["dest_group"] = self.format_row(row[7])
-            config2["proxy"][row[0]]["dest_domain"] = self.format_row(row[8])
-            config2["proxy"][row[0]]["dest_ip"] = self.format_row(row[9])
-            config2["proxy"][row[0]]["any_user"] = row[11]
-            config2["proxy"][row[0]]["any_destination"] = row[12]
-            config2["proxy"][row[0]]["allow_deny"] = row[13]
+            name = row[0]
+            for code in["<i>", "</i>", "<s>", "</s>"]:  # remove codes which are only for display
+                name = name.replace(code, "")
+            config2["proxy"][name] = OrderedDict()
+            config2["proxy"][name]["active"] = self.format_row(row[1])
+            config2["proxy"][name]["action"] = self.format_row(row[2])
+            config2["proxy"][name]["time_condition"] = self.format_row(row[3])
+            config2["proxy"][name]["comments"] = self.format_row(row[4])
+            config2["proxy"][name]["user"] = self.format_row(row[5])
+            config2["proxy"][name]["destination"] = self.format_row(row[10])
+            config2["proxy"][name]["dest_group"] = self.format_row(row[7])
+            config2["proxy"][name]["dest_domain"] = self.format_row(row[8])
+            config2["proxy"][name]["dest_ip"] = self.format_row(row[9])
+            config2["proxy"][name]["any_user"] = row[11]
+            config2["proxy"][name]["any_destination"] = row[12]
+            config2["proxy"][name]["allow_deny"] = row[13]
 
         for row in self.firewall_store:
             config2["firewall"][row[0]] = OrderedDict()

@@ -1,16 +1,17 @@
 #!/usr/bin/python3
 # -*- coding: utf8 -*-
 
-from __future__ import print_function, unicode_literals
+from __future__ import print_function
+from __future__ import unicode_literals
 
-import os
-import sys
-from collections import OrderedDict
-
-
+# version 1.1.0 : @optional parameter added in read
+# rc3 
 # version 0.17.0 - mytextParser added
 # version 0.16.2 - bug fix
 # version 0.16.1 - isdata parameter added
+
+import os, sys, codecs
+from collections import OrderedDict
 
 
 class myConfigParser() :
@@ -23,7 +24,8 @@ class myConfigParser() :
             comments = False,
             merge = False,
             encoding = "utf-8-sig",       # utf-8-sig will handle the BOM
-            isdata = False) :
+            isdata = False,
+            optional = False) :
         # ----
         # read ini file and creates a dictionary
         # lines which are not comments (start with #) and don't match the key = value pattern, are stored in a special "lines" entry
@@ -34,6 +36,7 @@ class myConfigParser() :
         # @merge : if True, instead of building a new dictionary, the function adds data to the dictionary passed in parameter
         # @encoding : should be obvious
         # @isdata : if True, @inifile_s contains the full text of the inifile to treat, and not a filename. 
+        # @optional : if True, no error message if the file is not found. 
         # @return : The config dictionary, if successful, False otherwise
         #           But if merge is not False and the function fails, it returns the dictionary which passed in merge.
 
@@ -103,7 +106,7 @@ class myConfigParser() :
                         myconfig[category][section_s]["#comments"] = []
                     myconfig[category][section_s]["#comments"].append(record_s)
                     continue
-                record_data = record_s.split("=")
+                record_data = record_s.split("=",1)
                 if len(record_data) > 1 :
                     key = record_data[0].strip()
                     if ' #' in record_data[1]:
@@ -171,7 +174,7 @@ class mySimpleParser() :
                 record_s = f1.readline()
                 if record_s == "" :   # end of file
                     break
-                record_data = record_s.split("=")
+                record_data = record_s.split("=",1)
                 if len(record_data) > 1 :
                     key = record_data[0].strip()
                     linedata = record_data[1].strip()

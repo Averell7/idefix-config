@@ -33,6 +33,7 @@ class GroupManager:
 
     def show(self):
         widgets = Gtk.Builder()
+        widgets.set_translation_domain("confix")
         widgets.add_from_file('./groups_manager.glade')
         widgets.connect_signals(self)
         self.widgets = {}
