@@ -38,4 +38,7 @@ def search_repository_groups(category_id, query=None):
     url = REPOSITORY_URL + '?' + urlencode(data)
 
     results = requests.get(url)
-    return results.json()
+    try:
+        return results.json()
+    except:
+        return []
