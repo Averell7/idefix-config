@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 
 import requests
 
-REPOSITORY_URL = 'http://127.0.0.1:1025/main.php'  # 'https://proxy-groups.idefix64.fr/proxy-groups2.json'
+REPOSITORY_URL = 'https://proxy-groups.idefix64.fr/main.php'
 
 
 def fetch_repository_list(url=REPOSITORY_URL):
