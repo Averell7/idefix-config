@@ -1,17 +1,16 @@
-import os
 from collections import OrderedDict
-from urllib.parse import urlparse, urljoin
 
 from gi.repository import Gtk, Gdk
 
 from myconfigparser import myConfigParser
-from repository import fetch_repository_list, download_group_file
+from repository import fetch_repository_list, search_repository_groups
 from util import showwarning, askyesno, ask_text, ip_address_test
 
 IMPORT_COLUMN_SELECTED = 0
 IMPORT_COLUMN_NAME = 1
 IMPORT_COLUMN_PATH = 2
 IMPORT_COLUMN_INCONSISTENT = 3
+IMPORT_COLUMN_DOMAINS = 4
 
 
 class GroupManager:
@@ -302,7 +301,15 @@ class GroupManager:
             return
 
         self.widgets['repository_store'].clear()
+        self.widgets['import_category_store'].clear()
+        self.widgets['import_search_entry'].set_text("")
+        for category in data:
+            item_iter = self.widgets['import_category_store'].append()
+            self.widgets['import_category_store'].set_value(item_iter, 0, category['name'])
+            self.widgets['import_category_store'].set_value(item_iter, 1, int(category['id']))
+        self.change_category(self.widgets['import_category_combo'])
 
+        """
         path_iters = {
             '/': None
         }
@@ -342,11 +349,49 @@ class GroupManager:
 
                 self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_NAME, name)
                 self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_PATH, full_path)
+        """
 
         self.widgets['import_window'].show_all()
 
     def action_cancel_repository(self, widget):
         self.widgets['import_window'].hide()
+
+    def change_category(self, widget):
+        """Enable search"""
+        self.widgets['import_search_entry'].set_sensitive(widget.get_active() > -1)
+
+        self.widgets['import_search_button'].set_sensitive(
+            widget.get_active() > -1 and self.widgets['import_search_entry'].get_text()
+        )
+        self.search_groups()
+
+    def update_search_text(self, widget):
+        self.widgets['import_search_button'].set_sensitive(self.widgets['import_search_entry'].get_text())
+
+    def search_groups(self, *args):
+        """Query the database for results"""
+        if self.widgets['import_search_entry'].get_text():
+            query = self.widgets['import_search_entry'].get_text()
+        else:
+            query = None
+
+        self.widgets['repository_store'].clear()
+
+        category_iter = self.widgets['import_category_combo'].get_active_iter()
+        if category_iter:
+            category_id = self.widgets['import_category_store'].get_value(category_iter, 1)
+        else:
+            return
+
+        for result in search_repository_groups(category_id, query):
+            item_iter = self.widgets['repository_store'].append(None)
+            self.widgets['repository_store'].set_value(item_iter, IMPORT_COLUMN_NAME, result['name'])
+
+            domains = ''
+            for domain in result['domains']:
+                domains += 'dest_domain = %s\n' % domain
+
+            self.widgets['repository_store'].set_value(item_iter, IMPORT_COLUMN_DOMAINS, domains)
 
     def walk_repository_tree(self, iterchildren):
         """Return the paths of any bottom most children which have been selected"""
@@ -365,6 +410,26 @@ class GroupManager:
 
     def action_start_repository_import(self, widget):
         """Process the user selection and import the proxy groups"""
+
+        parser = myConfigParser()
+        groups = OrderedDict()
+
+        for row in self.widgets['repository_store']:
+            if not row[IMPORT_COLUMN_SELECTED] and not row[IMPORT_COLUMN_INCONSISTENT]:
+                continue
+
+            content = ('[%s]\n' % row[IMPORT_COLUMN_NAME]) + row[IMPORT_COLUMN_DOMAINS]
+            data = parser.read(content.split('\n'), 'groups', isdata=True, comments=True)
+            groups.update(data['groups'])
+
+        self.buffer = Gtk.TextBuffer()
+        self.widgets['groups_view'].set_buffer(self.buffer)
+        self.groups_store.clear()
+        self.read_config_data(groups)
+        self.imported_groups = True
+        self.widgets['import_window'].hide()
+
+        """
         download_files = []
 
         for row in self.widgets['repository_store']:
@@ -388,6 +453,7 @@ class GroupManager:
         self.read_config_data(groups)
         self.imported_groups = True
         self.widgets['import_window'].hide()
+        """
 
     def show_context(self, widget, event):
         if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:
@@ -453,7 +519,7 @@ class GroupManager:
             child = self.widgets['repository_store'].iter_next(child)
         return True
 
-    def update_import_selection(self, widget: Gtk.CellRendererToggle, path):
+    def update_import_selection(self, widget, path):
         """Update the checkbox across the whole tree view"""
 
         # Transform from sort path to actual path
