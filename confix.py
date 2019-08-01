@@ -62,7 +62,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "1.0.0 RC2"
+version = "1.0.0 RC3"
 
 
 gtk = Gtk
@@ -341,7 +341,11 @@ class Confix:
             self.arw['loading_window'].hide()
             if os.path.isfile(get_config_path("confix.json")):
                 data_str = open(get_config_path("confix.json"), "r").read()
-                self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
+                try:
+                    self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
+                except:
+                    alert("Unable to load configuration. Please import another one.")
+
 
 
 
@@ -360,18 +364,18 @@ class Confix:
             else:
                 self.config["users"] = OrderedDict()
 
-        self.maclist = {}
-        data1 = self.config["users"]
-        for section in data1:
-            for user in data1[section]:
-                if user.startswith("@_"):
-                    continue
-                self.maclist[user] = data1[section][user]
-                for macs in self.maclist[user]:
-                    if macs.startswith('-@') or macs.startswith('+@'):
-                        self.block_signals = True
-                        self.arw['experiment_user_toggle'].set_active(True)
-                        self.block_signals = False
+##        self.maclist = {}
+##        data1 = self.config["users"]
+##        for section in data1:
+##            for user in data1[section]:
+##                if user.startswith("@_"):
+##                    continue
+##                self.maclist[user] = data1[section][user]
+##                for macs in self.maclist[user]:
+##                    if macs.startswith('-@') or macs.startswith('+@'):
+##                        self.block_signals = True
+##                        self.arw['experiment_user_toggle'].set_active(True)
+##                        self.block_signals = False
 
         if not future:
             # delete from config["firewall"] the generated lines
@@ -433,6 +437,7 @@ class Confix:
 
         # icons for users list
 
+        self.maclist = self.users.create_maclist()
         self.users.populate_users()
         self.proxy_users.populate_proxy()
         self.populate_ports()

@@ -67,7 +67,8 @@ class ImportJsonDialog:
                         self.controller.config['firewall'][firewall].update(config['firewall'][firewall])
             else :
                 self.controller.config = config
-
+                
+            self.controller.maclist = self.controller.users.create_maclist()
             self.controller.users.populate_users()
             self.controller.proxy_users.populate_proxy()
             self.controller.populate_ports()

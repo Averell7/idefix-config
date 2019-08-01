@@ -378,6 +378,7 @@ class GroupManager:
         parser = myConfigParser()
         groups = OrderedDict()
         for file, name in download_files:
+            #file = file.replace("http://", "https://")
             ini_data = ('[%s]\n' % name) + download_group_file(file).decode("utf-8-sig")
             data = parser.read(ini_data.split('\n'), "groups", isdata=True, comments=True)
             groups.update(data['groups'])
