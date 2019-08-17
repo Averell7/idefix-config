@@ -369,6 +369,48 @@
       </object>
     </child>
   </object>
+  <object class="GtkAboutDialog" id="about_window">
+    <property name="can_focus">False</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="program_name">Confix</property>
+    <property name="version">1.0</property>
+    <property name="comments" translatable="yes">August 2019</property>
+    <property name="website">http://idefix64.fr</property>
+    <property name="website_label" translatable="yes">Website (presently in French)</property>
+    <property name="authors">Daniel Pot
+Serge Pichon
+Bertrand Thomas
+Chris Stranek
+Vincent Denizot
+and others</property>
+    <property name="logo_icon_name">help-about</property>
+    <property name="license_type">gpl-3-0</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkMenu" id="chooser_proxy_groups_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -950,27 +992,27 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkMenuItem" id="menu_import">
+                          <object class="GtkMenuItem" id="menu_connexion">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">_Import json file...</property>
+                            <property name="label" translatable="yes">_open connexion</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="open_config" swapped="no"/>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkMenuItem" id="menu_export">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">_Export json file...</property>
-                            <property name="use_underline">True</property>
-                            <signal name="activate" handler="save_config" swapped="no"/>
+                            <signal name="activate" handler="ask_for_profile" swapped="no"/>
                           </object>
                         </child>
                         <child>
                           <object class="GtkSeparatorMenuItem" id="separatormenuitem1">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkMenuItem">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Options</property>
+                            <property name="use_underline">True</property>
+                            <signal name="activate" handler="show_options" swapped="no"/>
                           </object>
                         </child>
                         <child>
@@ -1007,21 +1049,21 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkMenuItem">
+                          <object class="GtkMenuItem" id="menu_import">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Ports</property>
+                            <property name="label" translatable="yes">_Import json file...</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="ports_open_window" swapped="no"/>
+                            <signal name="activate" handler="open_config" swapped="no"/>
                           </object>
                         </child>
                         <child>
-                          <object class="GtkMenuItem">
+                          <object class="GtkMenuItem" id="menu_export">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Options</property>
+                            <property name="label" translatable="yes">_Export json file...</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="show_options" swapped="no"/>
+                            <signal name="activate" handler="save_config" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -1048,21 +1090,12 @@
                           </object>
                         </child>
                         <child>
-                          <object class="GtkMenuItem">
+                          <object class="GtkMenuItem" id="menu_assistant">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Assistant</property>
                             <property name="use_underline">True</property>
                             <signal name="activate" handler="show_assistant" swapped="no"/>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkMenuItem">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">filter helper</property>
-                            <property name="use_underline">True</property>
-                            <signal name="activate" handler="show_filter_helper" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -1083,10 +1116,10 @@
                           <object class="GtkImageMenuItem" id="imagemenuitem10">
                             <property name="label">gtk-about</property>
                             <property name="visible">True</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
                             <property name="use_underline">True</property>
                             <property name="use_stock">True</property>
+                            <signal name="activate" handler="show_about" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -2770,6 +2803,19 @@ allowed</property>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="option_autoload_check">
+                <property name="label" translatable="yes">Load automatically the last configuration used</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">2</property>
               </packing>
             </child>
           </object>

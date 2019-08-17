@@ -67,18 +67,21 @@ class ImportJsonDialog:
                         self.controller.config['firewall'][firewall].update(config['firewall'][firewall])
             else :
                 self.controller.config = config
-                
-            self.controller.maclist = self.controller.users.create_maclist()
-            self.controller.users.populate_users()
-            self.controller.proxy_users.populate_proxy()
-            self.controller.populate_ports()
-            self.controller.populate_groups()
-            self.controller.populate_users_chooser()
-            self.controller.firewall.populate_firewall()
-            self.controller.set_check_boxes()
-            self.controller.set_colors()
-
+            self.update_gui()
         dialog.destroy()
+
+    def update_gui(self):
+        self.controller.maclist = self.controller.users.create_maclist()
+        self.controller.users.populate_users()
+        self.controller.proxy_users.populate_proxy()
+        self.controller.populate_ports()
+        self.controller.populate_groups()
+        self.controller.populate_users_chooser()
+        self.controller.firewall.populate_firewall()
+        self.controller.set_check_boxes()
+        self.controller.set_colors()
+
+
 
 
 class ExportJsonDialog:

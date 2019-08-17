@@ -62,7 +62,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "1.0.0 RC3"
+version = "1.0"
 
 
 gtk = Gtk
@@ -85,7 +85,7 @@ def ftp_connect(server, login, password):
         ftp = FTP(server, timeout=15)  # connect to host, default port
         ftp.login(login, password)
         if ftp1['mode'][0] == 'local':
-            ftp.cwd("idefix")
+                ftp.cwd("idefix")
         return ftp
     except FTPError as e:
         print("Unable to connect to ftp server with : %s / %s. \nError: %s" % (login, password, e))
@@ -159,11 +159,11 @@ class Confix:
     iter_proxy = None
     active_chooser = None
 
-    def __init__(self, active_config, config_password):
-
-        global ftp1, load_locale, configname
+    def __init__(self, configname, config_password):
 
         # self.ftp_config = ftp_config
+        # When set to true, the configuration is loaded and written from and to local files (development mode)
+        self.load_locale = False
         self.mem_text = ""
         self.mem_time = 0
         self.block_signals = False
@@ -201,7 +201,6 @@ class Confix:
         self.import_json = ImportJsonDialog(self.arw, self)
         self.export_json = ExportJsonDialog(self.arw, self)
 
-        self.arw["configname"].set_text(configname)
         self.arw["program_title"].set_text("Confix - Version " + version)
         window1 = self.arw["window1"]
         window1.show_all()
@@ -212,7 +211,6 @@ class Confix:
 
         self.groups_manager = GroupManager(self.arw, self)
 
-        self.arw['loading_window'].show_all()
 
         if not future:
             for widget in ["scrolledwindow2", "toolbar3", "paned3", "box2"]:  # interface prévue pour le firewall
@@ -244,10 +242,6 @@ class Confix:
 
         # self.arw["button1"].set_image(self.blue_button)
         # self.arw["button1"].set_always_show_image(True)
-        # self.arw["toggle_proxy_open_button"].set_image(self.yellow_button)
-        # self.arw["toggle_proxy_open_button"].set_always_show_image(True)
-        # self.arw["toggle_proxy_allow_button"].set_image(self.green_button)
-        # self.arw["toggle_proxy_allow_button"].set_always_show_image(True)
 
         # get the style from the css file and apply it
         css_provider = Gtk.CssProvider()
@@ -270,7 +264,7 @@ class Confix:
             kargs = {}
         self.profiles = ConfigProfile(self.arw, self, **kargs)
         self.idefix_config = self.profiles.config
-        self.ftp_config = self.idefix_config['conf'][active_config]
+        # à garder $$ self.ftp_config = self.idefix_config['conf'][active_config]
 
         self.users_store = self.users.users_store
         self.proxy_store = self.proxy_users.proxy_store
@@ -297,85 +291,32 @@ class Confix:
             Gtk.main_iteration()
 
         # load configuration
-        if not load_locale:
+        if configname == "":                            # No connexion profile chosen
+            self.ftp_config = None
+        else:
+            self.ftp_config = self.idefix_config['conf'][configname]
+            ftp = self.open_connexion_profile()
+        self.arw["configname"].set_text(configname)
 
-            # ftp connect
 
-            ftp1 = self.ftp_config
-            if ftp1['mode'][0] == 'local':
-                self.local_control = True
 
-            ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        if self.load_locale:         # development environment
             self.arw['loading_window'].hide()
-
-            if not ftp:
-                # x = ConfigProfile(self.arw, self)
-                # x.profile_open_window()
-
-                if askyesno(_("Update Configuration"), _("Could not connect to FTP. Edit Configuration?")):
-                    self.profiles.profile_open_window()
-
-                    def restart(*args):
-                        askyesno(_("Restart"), _("Please restart idefix to use new configuration"))
-                        sys.exit(0)
-
-                    self.profiles.window.connect('hide', restart)
-                    print("restart system")
-                    self.profiles.list_configuration_profiles()
-                    return
-                else:
-                    sys.exit(1)
-            else:
-                # retrieve files by ftp
-                data0 = ftp_get(ftp, "confix.json", json  = True)
-                if data0 == False:                                               # TODO - compatibility
-                    data0 = ftp_get(ftp, "idefix-config.json", json  = True)
-                if data0 :
-                    self.config = json.loads(data0, object_pairs_hook=OrderedDict)
-                    print("json file loaded")
-                    ftp.close()
-
-
-
-        else:   # development environment
-            self.arw['loading_window'].hide()
-            if os.path.isfile(get_config_path("confix.json")):
-                data_str = open(get_config_path("confix.json"), "r").read()
+            if os.path.isfile(get_config_path("dev\confix.json")):
+                data_str = open(get_config_path("dev\confix.json"), "r").read()
                 try:
                     self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
                 except:
                     alert("Unable to load configuration. Please import another one.")
 
 
-
-
         for category in ["firewall", "proxy", "ports", "groups"]:
             if category not in self.config:
                 self.config[category] = OrderedDict()
 
-        if "users" not in self.config:        # if system not yet configured
-            response = askyesno(_("No user data"),
-                                _("There is no user data present. \nDo you want to create standard categories ?"))
-            if response == 1:
-                if os.path.isfile("./confix-default.json"):
-                    data_str = open("./confix-default.json", "r").read()
-                    self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
-                    self.set_colors()
-            else:
-                self.config["users"] = OrderedDict()
+        if "users" not in self.config:
+            self.config["users"] = OrderedDict()
 
-##        self.maclist = {}
-##        data1 = self.config["users"]
-##        for section in data1:
-##            for user in data1[section]:
-##                if user.startswith("@_"):
-##                    continue
-##                self.maclist[user] = data1[section][user]
-##                for macs in self.maclist[user]:
-##                    if macs.startswith('-@') or macs.startswith('+@'):
-##                        self.block_signals = True
-##                        self.arw['experiment_user_toggle'].set_active(True)
-##                        self.block_signals = False
 
         if not future:
             # delete from config["firewall"] the generated lines
@@ -451,6 +392,8 @@ class Confix:
         self.load_chooser("")
         self.assistant.disable_simulated_user()     # In case the previous user has not disabled simulation before shutting down
 
+
+        # user defined options
         checkbox_config = idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
         if checkbox_config:
             self.proxy_users.set_gui('check')
@@ -458,6 +401,104 @@ class Confix:
         filter_tab = idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
         if filter_tab:
             self.arw['notebook3'].set_current_page(1)
+
+        auto_load = idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
+        if auto_load:
+            configname = idefix_config['conf'].get('__options', {}).get('last_config')[0]
+            if configname:
+                self.ftp_config = self.idefix_config['conf'][configname]
+                self.open_connexion_profile()
+                self.arw["configname"].set_text(configname)
+
+    def ask_for_profile(self, widget = None):
+        config_dialog = AskForConfig(idefix_config)
+        configname = config_dialog.run()
+        self.arw["configname"].set_text(configname)
+        self.ftp_config = self.idefix_config['conf'][configname]
+        idefix_config['conf']['__options']["last_config"] = configname
+        parser.write(idefix_config['conf'], get_config_path('confix.cfg'))
+        try:
+            self.open_connexion_profile()
+        except:
+            print("échec")
+
+    def open_connexion_profile(self):
+
+        ftp1 = self.ftp_config
+        if ftp1['mode'][0] == 'dev':          # development mode - no ftp connection
+            self.load_locale = True
+            config_file = get_config_path("dev/confix.json")
+            if os.path.isfile(config_file):
+                with open(config_file) as f1:
+                    self.config = json.loads(f1.read(), object_pairs_hook=OrderedDict)
+                    self.update_gui()
+            else:
+                self.load_defaults()
+
+            return
+
+        # ftp connect
+        if ftp1['mode'][0] == 'local':
+            self.local_control = True
+
+        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        #self.arw['loading_window'].hide()
+        if self.ftp_config['mode'][0] == 'local':
+            ftp.cwd("idefix")
+
+        if not ftp:
+            # x = ConfigProfile(self.arw, self)
+            # x.profile_open_window()
+
+            if askyesno(_("Update Configuration"), _("Could not connect to FTP. Edit Configuration?")):
+                self.profiles.profile_open_window()
+
+                def restart(*args):
+                    askyesno(_("Restart"), _("Please restart idefix to use new configuration"))
+                    sys.exit(0)
+
+                self.profiles.window.connect('hide', restart)
+                print("restart system")
+                self.profiles.list_configuration_profiles()
+                return
+            else:
+                sys.exit(1)
+        else:
+            # retrieve files by ftp
+            data0 = ftp_get(ftp, "confix.json", json  = True)
+            if data0 == False:                                               # TODO - compatibility
+                data0 = ftp_get(ftp, "idefix-config.json", json  = True)
+            if data0 :
+                try:
+                    self.config = json.loads(data0, object_pairs_hook=OrderedDict)
+                    self.update_gui()
+                except:
+                    alert("Unable to load configuration. Please import another one.")
+                ftp.close()
+
+    def update_gui(self):
+        self.maclist = self.users.create_maclist()
+        self.users.populate_users()
+        self.proxy_users.populate_proxy()
+        self.populate_ports()
+        self.populate_groups()
+        self.populate_users_chooser()
+        self.firewall.populate_firewall()
+        self.set_check_boxes()
+        self.set_colors()
+
+    def load_defaults(self, widget = None):
+        response = askyesno(_("No user data"),
+                            _("There is no user data present. \nDo you want to create standard categories ?"))
+        if response == 1:
+            if os.path.isfile("./confix-default.json"):
+                data_str = open("./confix-default.json", "r").read()
+                self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
+                self.update_gui()
+                self.set_colors()
+
+
+
 
     def open_config(self, widget):
         self.import_json.run()
@@ -477,10 +518,13 @@ class Confix:
     def show_filter_helper(self, widget):
         self.arw["system_window"].show()
 
+    def show_about(self, widget):
+        self.arw["about_window"].show()
+
     def import_ini_files(self):
         # This function is presently unused
 
-        if not load_locale:
+        if not self.load_locale:
             print("WARNING ! unable to get confix.json.\n Loading ini files")
 
             # retrieve common files by ftp
@@ -868,10 +912,12 @@ class Confix:
     def save_options(self, widget):
         gui_check = self.arw['option_checkbox_gui_check'].get_active()
         filter_tab = self.arw['option_filter_tab_check'].get_active()
+        auto_load = self.arw['option_autoload_check'].get_active()
 
         idefix_config['conf']['__options'] = {
             'checkbox_config': ['1' if gui_check else '0'],
             'filter_tab': ['1' if filter_tab else '0'],
+            'auto_load': ['1' if auto_load else '0'],
         }
 
         if gui_check:
@@ -890,6 +936,9 @@ class Confix:
         )
         self.arw['option_filter_tab_check'].set_active(
             idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+        )
+        self.arw['option_autoload_check'].set_active(
+            idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
         )
         self.arw['options_window'].show_all()
 
@@ -993,8 +1042,13 @@ class Confix:
         f1.write(json.dumps(config2, indent = 3))
         f1.close()
 
-        if not load_locale:  # send the files by FTP. Load_locale is the development mode, where files are read and written only on the local disk
+        if not self.load_locale:  # send the files by FTP. Load_locale is the development mode, where files are read and written only on the local disk
             self.ftp_upload()
+        else:
+            f1 = open(get_config_path("dev/confix.json"), "w")
+            f1.write(json.dumps(config2, indent = 3))
+            f1.close()
+
         if self.local_control:  # if connected to Idefix, send the update signal
             f1 = open(get_config_path("./tmp/update"), "w")
             f1.close()
@@ -1142,10 +1196,7 @@ class Confix:
 if __name__ == "__main__":
     global win, parser, configname, load_locale
 
-    # When set to true (see below), the configuration is loaded and written from and to local files (development mode)
-    load_locale = False
     parser = myConfigParser()
-
     idefix_config = parser.read(get_config_path('confix.cfg'), "conf")
 
     if not idefix_config:
@@ -1153,17 +1204,19 @@ if __name__ == "__main__":
         path = write_default_config()
         idefix_config = parser.read(path, "conf")
         configname = 'default'
-    else:
-        # Get the configuration
-        if len(sys.argv) > 1:  # if the config is indicated on the command line
-            if len(sys.argv[1].strip()) > 0:
-                configname = sys.argv[1]
-        else:  # ask for config
-            config_dialog = AskForConfig(idefix_config)
-            configname = config_dialog.run()
 
-    if idefix_config['conf'][configname].get('mode', [''])[0] == 'dev':
-        load_locale = True
+    # Get the configuration
+    if len(sys.argv) > 1:  # if the config is indicated on the command line
+        if len(sys.argv[1].strip()) > 0:
+            configname = sys.argv[1]
+    else:
+        configname = ""
+##    else:  # ask for config
+##        config_dialog = AskForConfig(idefix_config)
+##        configname = config_dialog.run()
+##        #if not configname:
+##        #    sys.exit()
+
 
     #dialog = PasswordDialog()
     #password = dialog.run()
