@@ -423,6 +423,7 @@ class Confix:
             print("échec")
 
     def open_connexion_profile(self):
+        global ftp1
 
         ftp1 = self.ftp_config
         if ftp1['mode'][0] == 'dev':          # development mode - no ftp connection
@@ -442,9 +443,7 @@ class Confix:
             self.local_control = True
 
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
-        #self.arw['loading_window'].hide()
-        if self.ftp_config['mode'][0] == 'local':
-            ftp.cwd("idefix")
+
 
         if not ftp:
             # x = ConfigProfile(self.arw, self)
@@ -462,7 +461,7 @@ class Confix:
                 self.profiles.list_configuration_profiles()
                 return
             else:
-                sys.exit(1)
+                return
         else:
             # retrieve files by ftp
             data0 = ftp_get(ftp, "confix.json", json  = True)
@@ -1082,6 +1081,17 @@ class Confix:
         # used by rebuild_config
         return row.strip().split("\n")
 
+    def format_domain_row(self, row) :
+        # used by rebuild_config
+        x = row.strip().split("\n")
+        y = []
+        for domain in x:
+            if domain.startswith("*."):
+                #domain = "*" + domain
+                domain = domain[1:]
+            y.append(domain)
+        return y
+
     def rebuild_config(self) :
         config2 = OrderedDict()
         for section in ["users", "proxy", "firewall", "groups", "ports"] :
@@ -1126,7 +1136,7 @@ class Confix:
             config2["proxy"][name]["user"] = self.format_row(row[5])
             config2["proxy"][name]["destination"] = self.format_row(row[10])
             config2["proxy"][name]["dest_group"] = self.format_row(row[7])
-            config2["proxy"][name]["dest_domain"] = self.format_row(row[8])
+            config2["proxy"][name]["dest_domain"] = self.format_domain_row(row[8])
             config2["proxy"][name]["dest_ip"] = self.format_row(row[9])
             config2["proxy"][name]["any_user"] = row[11]
             config2["proxy"][name]["any_destination"] = row[12]
@@ -1140,7 +1150,8 @@ class Confix:
             config2['groups'][row[0]] = {}
             domains = []
             ip = []
-            for line in row[1].split('\n'):
+
+            for line in self.format_domain_row(row[1]):
                 if ip_address_test(line):
                     ip.append(line)
                 else:
