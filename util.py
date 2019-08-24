@@ -31,18 +31,31 @@ class AskForConfig:
         self.dialog = gtk.Dialog(title='Configuration choice', parent=None, flags=gtk.DialogFlags.MODAL,
                                  buttons=("OK", 1, "Cancel", 0))
         self.combo = gtk.ComboBoxText()
+        self.label = gtk.Label()
+        message =  "Please, choose the <b>Idefix module</b> or the <b>FTP site</b>\n"
+        message += "to which you want to be connected\nand press OK\n"
+        message += "or Cancel to close the program"
+        self.label.set_markup(message)
+        alignment = gtk.Align(1)
+        self.label.set_halign(alignment)
 
         for key in idefix_config["conf"]:
+            if key.startswith('__'):
+                continue
             self.combo.append_text(key)
         self.combo.set_active(0)
+        self.dialog.vbox.pack_start(self.label, 0, 0, 0)
         self.dialog.vbox.pack_start(self.combo, 0, 0, 0)
         self.dialog.show_all()
 
     def run(self):
-        self.dialog.run()
+        x = self.dialog.run()
         configname = self.combo.get_active_text()
         self.dialog.destroy()
-        return configname
+        if x == 1:
+            return configname
+        else:
+            return ""
 
 
 class PasswordDialog:
@@ -311,6 +324,9 @@ def get_config_path(filename):
         roaming = os.path.join(os.getenv('APPDATA'), 'Confix', directory)
         if not os.path.exists(os.path.join(roaming, filename)):
             os.makedirs(roaming, exist_ok=True)
+        # for dev mode
+        if not os.path.isdir(os.path.join(roaming, "dev")):
+            os.makedirs(roaming + "/dev", exist_ok=True)
         path = roaming
     else:
         # step 1: ~/.local/share/confix/

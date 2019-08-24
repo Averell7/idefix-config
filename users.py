@@ -69,6 +69,23 @@ class Users:
         self.arw["treeview1"].drag_dest_add_text_targets()
         self.arw["treeview1"].connect("drag-data-received", self.users_drag_data_received)
 
+
+    def create_maclist(self):
+        maclist = {}
+        data1 = self.controller.config["users"]
+        for section in data1:
+            for user in data1[section]:
+                if user.startswith("@_"):
+                    continue
+                maclist[user] = data1[section][user]
+                for macs in maclist[user]:
+                    if macs.startswith('-@') or macs.startswith('+@'):
+                        self.block_signals = True
+                        self.arw['experiment_user_toggle'].set_active(True)
+                        self.block_signals = False
+        return maclist
+
+
     def populate_users(self):
         self.users_store.clear()
         data1 = self.controller.config["users"]

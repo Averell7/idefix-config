@@ -455,12 +455,14 @@ class ProxyUsers:
             self.arw["allow_deny_groups"].set_markup('<span foreground="#ff0000">' + _("Denied Groups") +  '</span>')
             self.arw["allow_deny_sites"].set_markup('<span foreground="#ff0000">' + _("Denied Sites") +  '</span>')
 
+        # TODO : what is the use of the following code, which does nothing ?
         groups_iter = self.arw['proxy_groups_store'].get_iter_first()
         has_groups = groups_iter is not None
 
         text_buffer = self.arw["proxy_dest"].get_buffer()
         (start_iter, end_iter) = text_buffer.get_bounds()
         dest_text = text_buffer.get_text(start_iter, end_iter, False)
+        pass
 
     def convert_days_to_local(self, days):
         locale = _("Mo,Tu,We,Th,Fr,Sa,Su").split(",")
@@ -568,6 +570,24 @@ class ProxyUsers:
         out += "action = allow \n"
         out += "user = any \n"
         out += "dest_group = antivirus \n"
+
+        # add permissions for users with open access defined in users tab
+        users = self.controller.config["users"]
+        for section in users:
+            if users[section].get("@_internet")[0] != "open":
+                continue
+            # section header
+            tmp1 = "\n[%s]\n" % section.replace(" ", "_")   # Squid does not support spaces in acl names.
+            tmp1 += "active = on\n"
+            tmp1 += "action = allow\n"
+            tmp1 += "destination = any\n"
+
+            for key in users[section]:
+                if key[0:2] == "@_":  # Technical data, skip
+                    continue
+                tmp1 += "user = " + key + "\n"
+            out += tmp1 + "\n"
+
         for row in self.proxy_store:
             # add support for a time condition from evening to morning.
             # This requires to create two configurations.
@@ -579,6 +599,7 @@ class ProxyUsers:
             name = row[0]
             for code in["<i>", "</i>", "<s>", "</s>"]:
                 name = name.replace(code, "")
+                name = name.replace(" ", "_")           # Squid does not support spaces in acl names.
             for time_condition2 in time_condition_list:
                 if len(time_condition_list) > 1:  # If the row is duplicated, we must create two different names
                     index = str(i)
@@ -598,12 +619,7 @@ class ProxyUsers:
                 else:
                     out += format_line("destination", row[10])
 
-        # add default permissions
-        out += "\n[@_antivirus]\n"
-        out += "active = on \n"
-        out += "action = allow \n"
-        out += "user = any \n"
-        out += "dest_group = antivirus \n"
+
 
         with open(get_config_path("./tmp/proxy-users.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
             f1.write(out)

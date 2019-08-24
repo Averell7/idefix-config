@@ -5,7 +5,7 @@ from gi.repository import Gdk
 
 import pyaes
 from myconfigparser import myConfigParser
-from util import askyesno, ask_text, get_config_path
+from util import askyesno, ask_text, get_config_path, alert
 
 COLUMN_NAME = 0
 COLUMN_MODE = 1
@@ -132,7 +132,8 @@ class ConfigProfile:
         """Update the text entries when the selection changes"""
         self.block_signals = True
         model, selected_iter = widget.get_selected()
-
+        if not selected_iter:
+            alert("There is no configuration selected. \nPlease, select a configuration before editing.")
         self.arw['profile_name_entry'].set_text(model.get_value(selected_iter, COLUMN_NAME))
         self.arw['profile_username_entry'].set_text(model.get_value(selected_iter, COLUMN_USERNAME) or '')
         self.arw['profile_password_entry'].set_text(model.get_value(selected_iter, COLUMN_PASSWORD) or '')
