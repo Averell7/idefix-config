@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 
 from gi.repository import Gtk, Gdk
 
@@ -26,6 +26,8 @@ class GroupManager:
     # False - Replace
     merge_in_group = None
 
+    subcategories = defaultdict(list)
+
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
@@ -51,6 +53,7 @@ class GroupManager:
         self.imported_groups = False
         self.widgets['import_tree'].get_model().set_sort_column_id(IMPORT_COLUMN_NAME, Gtk.SortType.ASCENDING)
         self.widgets['groups_tree'].get_model().set_sort_column_id(0, Gtk.SortType.ASCENDING)
+        self.subcategories = defaultdict(list)
 
     def hide(self, *args):
         self.groups_changed = False
@@ -304,9 +307,13 @@ class GroupManager:
         self.widgets['import_category_store'].clear()
         self.widgets['import_search_entry'].set_text("")
         for category in data:
-            item_iter = self.widgets['import_category_store'].append()
-            self.widgets['import_category_store'].set_value(item_iter, 0, category['name'])
-            self.widgets['import_category_store'].set_value(item_iter, 1, int(category['id']))
+            if 'parent_id' in category and category['parent_id']:
+                # Store this for later
+                self.subcategories[int(category['parent_id'])].append((category['name'], int(category['id'])))
+            else:
+                item_iter = self.widgets['import_category_store'].append()
+                self.widgets['import_category_store'].set_value(item_iter, 0, category['name'])
+                self.widgets['import_category_store'].set_value(item_iter, 1, int(category['id']))
         self.change_category(self.widgets['import_category_combo'])
 
         """
@@ -357,12 +364,36 @@ class GroupManager:
         self.widgets['import_window'].hide()
 
     def change_category(self, widget):
-        """Enable search"""
-        self.widgets['import_search_entry'].set_sensitive(widget.get_active() > -1)
+        """Load sub categories"""
+        # Clear sub categories
+        self.widgets['import_subcategory_store'].clear()
+        self.widgets['import_subcategory_combo'].set_sensitive(False)
 
-        self.widgets['import_search_button'].set_sensitive(
-            widget.get_active() > -1 and self.widgets['import_search_entry'].get_text()
-        )
+        if widget.get_active() > -1:
+            # Load sub categories (if any)
+            category_iter = self.widgets['import_category_combo'].get_active_iter()
+            if category_iter:
+                category_id = self.widgets['import_category_store'].get_value(category_iter, 1)
+                if category_id in self.subcategories:
+                    for name, id in self.subcategories[category_id]:
+                        item_iter = self.widgets['import_subcategory_store'].append(None)
+                        self.widgets['import_subcategory_store'].set_value(item_iter, 0, name)
+                        self.widgets['import_subcategory_store'].set_value(item_iter, 1, id)
+                self.widgets['import_subcategory_combo'].set_sensitive(True)
+
+            self.toggle_search(True)
+        else:
+            self.widgets['import_subcategory_combo'].set_active(-1)
+            self.widgets['import_subcategory_combo'].set_sensitive(False)
+            self.toggle_search(False)
+
+    def change_subcategory(self, widget):
+        """Change sub category (if any)"""
+        self.toggle_search(True)
+
+    def toggle_search(self, enabled=True):
+        self.widgets['import_search_entry'].set_sensitive(enabled)
+        self.widgets['import_search_button'].set_sensitive(enabled and self.widgets['import_search_entry'].get_text())
         self.search_groups()
 
     def update_search_text(self, widget):
@@ -382,6 +413,11 @@ class GroupManager:
             category_id = self.widgets['import_category_store'].get_value(category_iter, 1)
         else:
             return
+
+        # Check for sub-category
+        subcat_iter = self.widgets['import_subcategory_combo'].get_active_iter()
+        if subcat_iter:
+            category_id = self.widgets['import_subcategory_store'].get_value(subcat_iter, 1)
 
         for result in search_repository_groups(category_id, query):
             if not result['name']:
