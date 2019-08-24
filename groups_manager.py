@@ -384,6 +384,8 @@ class GroupManager:
             return
 
         for result in search_repository_groups(category_id, query):
+            if not result['name']:
+                continue
             item_iter = self.widgets['repository_store'].append(None)
             self.widgets['repository_store'].set_value(item_iter, IMPORT_COLUMN_NAME, result['name'])
 
