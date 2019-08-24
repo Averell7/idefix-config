@@ -283,6 +283,31 @@
       <column type="gint"/>
     </columns>
   </object>
+  <object class="GtkListStore" id="import_subcategory_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="gint"/>
+    </columns>
+  </object>
+  <object class="GtkTreeStore" id="repository_store">
+    <columns>
+      <!-- column-name import -->
+      <column type="gboolean"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name path -->
+      <column type="gchararray"/>
+      <!-- column-name inconsistent -->
+      <column type="gboolean"/>
+      <!-- column-name domains -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkTreeModelSort" id="repository_sort">
+    <property name="model">repository_store</property>
+  </object>
   <object class="GtkWindow" id="import_window">
     <property name="width_request">320</property>
     <property name="height_request">400</property>
@@ -352,6 +377,39 @@
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Subcategory:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBox" id="import_subcategory_combo">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">import_subcategory_store</property>
+                    <property name="active">1</property>
+                    <property name="id_column">1</property>
+                    <signal name="changed" handler="change_subcategory" swapped="no"/>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="text">0</attribute>
+                      </attributes>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
               </object>
@@ -508,22 +566,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkTreeStore" id="repository_store">
-    <columns>
-      <!-- column-name import -->
-      <column type="gboolean"/>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name path -->
-      <column type="gchararray"/>
-      <!-- column-name inconsistent -->
-      <column type="gboolean"/>
-      <!-- column-name domains -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkTreeModelSort" id="repository_sort">
-    <property name="model">repository_store</property>
   </object>
 </interface>
