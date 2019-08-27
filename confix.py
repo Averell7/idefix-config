@@ -398,6 +398,8 @@ class Confix:
         configname = config_dialog.run()
         self.arw["configname"].set_text(configname)
         self.ftp_config = self.idefix_config['conf'][configname]
+        if not idefix_config['conf'].get('__options'):
+            idefix_config['conf']['__options'] = {}
         idefix_config['conf']['__options']["last_config"] = configname
         parser.write(idefix_config['conf'], get_config_path('confix.cfg'))
         try:
