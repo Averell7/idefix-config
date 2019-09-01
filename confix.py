@@ -646,7 +646,7 @@ class Confix:
 
         for row in self.users_store:
             """
-            0 : section (level 1)  - user (level 2)
+            0 : section (level 1)  - user (level 2) - sub user (level 3)
             1 : options (text)
             2 : reserved [email time conditions]
             3 : reserved [internet time conditions]
@@ -1109,6 +1109,18 @@ class Confix:
                     macaddress = self.maclist[user]
                     for address in macaddress:
                         mac.append(address)
+
+                subusers = {}
+
+                for subchild in child.iterchildren():
+                    submac = []
+                    if subchild[0] in self.maclist:
+                        submac = self.maclist[subchild[0]]
+                    subusers[subchild[0]] = submac
+
+                if subusers:
+                    mac.append({'subusers': subusers})
+
                 config2["users"][row[0]][user] = mac
 
         # proxy store

@@ -22,7 +22,7 @@ class Users:
 
         # 1 - users
         """
-        0 : section (level 1)  - user (level 2)
+        0 : section (level 1)  - user (level 2)  - sub user (level 3)
         1 : options (text)    TODO : probably no longer used, verify
         2 : email time condition
         3 : internet time condition
@@ -77,9 +77,14 @@ class Users:
             for user in data1[section]:
                 if user.startswith("@_"):
                     continue
-                maclist[user] = data1[section][user]
-                for macs in maclist[user]:
-                    if macs.startswith('-@') or macs.startswith('+@'):
+
+                maclist[user] = list(filter(lambda d: not isinstance(d, dict), data1[section][user]))
+
+                for macs in data1[section][user]:
+                    if isinstance(macs, dict):
+                        for subuser in macs.get('subusers', {}).keys():
+                            maclist[subuser] = macs['subusers'][subuser]
+                    elif macs.startswith('-@') or macs.startswith('+@'):
                         self.block_signals = True
                         self.arw['experiment_user_toggle'].set_active(True)
                         self.block_signals = False
@@ -132,7 +137,19 @@ class Users:
             # add users for this section
             for user in data1[section]:
                 if not user.startswith('@_'):
-                    self.users_store.append(node, [user, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None])
+                    user_iter = self.users_store.append(
+                        node,
+                        [user, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None]
+                    )
+
+                    # check if any sub users have been defined
+                    for mac in data1[section][user]:
+                        if isinstance(mac, dict):
+                            for subuser in mac.get('subusers').keys():
+                                self.users_store.append(
+                                    user_iter,
+                                    [subuser, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None]
+                                )
 
     def load_user(self, widget, event, iternew=None):
         """ loads data in right pane when a category or a user is selected in the tree"""
@@ -243,8 +260,8 @@ class Users:
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
             if username in self.controller.maclist:
-                macaddr =  self.controller.maclist[username]
-                if (macaddr[0] == False) or (macaddr[0] == ""):
+                macaddr = self.controller.maclist[username]
+                if not macaddr or (macaddr[0] == False) or (macaddr[0] == ""):
                     alert(_("No valid mac address for this user !"))
                 else :
                     data1 = "\n".join(macaddr)
