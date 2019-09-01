@@ -172,6 +172,7 @@ class Users:
             self.arw["menu_add_cat"].show()
             self.arw["menu_move_user"].hide()
             self.arw["menu_rename_user"].hide()
+            self.arw["menu_add_subuser"].hide()
             self.arw["menu_rename_cat"].show()
 
             self.arw['email_time_condition'].set_sensitive(
@@ -226,7 +227,7 @@ class Users:
             else:
                 print("Invalid time :", data1)
 
-        elif level == 2:  # user level
+        elif level in (2, 3):  # user / sub user level
 
             self.arw["users_stack"].set_visible_child(self.arw["user_summary_frame"])
             # adapt the right click menu
@@ -237,6 +238,7 @@ class Users:
             self.arw["menu_move_user"].show()
             self.arw["menu_rename_user"].show()
             self.arw["menu_rename_cat"].hide()
+            self.arw["menu_add_subuser"].show()
 
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
@@ -292,7 +294,35 @@ class Users:
                 existing_name = child[0].strip().lower()
                 if existing_name == name:
                     return True
+                for subchild in child.iterchildren():
+                    existing_name = subchild[0].strip().lower()
+                    if existing_name == name:
+                        return True
         return False
+
+    def add_subuser(self, widget):
+        """Adds a new sub user to the selected user"""
+        (model, node) = self.arw["treeview1"].get_selection().get_selected()
+        level = model.get_path(node).get_depth()
+        if level == 1:  # category selected
+            return
+        elif level == 3:  # sub user selected, get parent
+            node = model.iter_parent(node)
+
+        name = self.ask_user_dialog(2)
+        if name:
+            if self.does_user_exist(name):
+                showwarning(_("User Exists"), _("Username exists"))
+                return
+
+        iternew = self.users_store.insert(node, 1, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
+
+        self.controller.populate_users_chooser()
+        # open the right tab to allow entering the address
+        self.arw["treeview1"].expand_row(model.get_path(iternew), True)
+        sel = self.arw["treeview1"].get_selection()
+        sel.select_iter(iternew)
+        self.load_user("", "", iternew)
 
     def add_user_above(self, widget):
         self.add_new_user(widget, "above")
@@ -306,7 +336,7 @@ class Users:
         else:
             self.add_new_user(widget)
 
-    def add_new_user(self, widget, mode=None):
+    def add_new_user(self, widget, mode=None, parent=None):
         """ adds a new user under the category selected, or below the user selected """
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
         level = model.get_path(node).get_depth()
@@ -320,13 +350,16 @@ class Users:
                 iternew = self.users_store.insert(node, 1, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
                 path = model.get_path(node)
                 self.arw["treeview1"].expand_row(path, True)  # open the path to allow entering the adress
-            else:
+            elif level == 2:  # A user is selected
                 if mode == "above":
                     iternew = self.users_store.insert_before(None, node,
                                                              [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
                 else:
                     iternew = self.users_store.insert_after(None, node,
                                                             [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
+            else:
+                return
+
             self.controller.populate_users_chooser()
             # open the right tab to allow entering the address
             sel = self.arw["treeview1"].get_selection()

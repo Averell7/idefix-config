@@ -3355,6 +3355,15 @@ Improper values can ruin your filtering scheme. </property>
       </object>
     </child>
     <child>
+      <object class="GtkMenuItem" id="menu_add_subuser">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">add sub user</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="add_subuser" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkMenuItem" id="menu_rename_user">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
