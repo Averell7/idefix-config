@@ -680,6 +680,17 @@ class Users:
         for i in range(model.get_n_columns()):
             row.append(model.get_value(iter_source, i))
 
+        sub_users = []
+
+        if source_level == 2:  # user
+            child = model.iter_children(iter_source)
+            while child:
+                childrow = []
+                for i in range(model.get_n_columns()):
+                    childrow.append(model.get_value(child, i))
+                sub_users.append(childrow)
+                child = model.iter_next(child)
+
         drop_info = treeview.get_dest_row_at_pos(x, y)
 
         if source_level == 1:
@@ -704,7 +715,6 @@ class Users:
                 child_row = []
                 for i in range(model.get_n_columns()):
                     child_row.append(model.get_value(child_iter, i))
-                model.insert_after(iter_dest, None, child_row)
                 child_iter = model.iter_next(child_iter)
 
             model.remove(iter_source)
@@ -716,16 +726,19 @@ class Users:
 
                 if dest_level == 1:
                     # print("drop on category")
-                    model.append(iter1, row)
+                    new_iter = model.append(iter1, row)
                     model.remove(iter_source)
                 elif (position == Gtk.TreeViewDropPosition.BEFORE
                       or position == Gtk.TreeViewDropPosition.BEFORE):
-                    model.insert_before(None, iter1, row)
+                    new_iter = model.insert_before(None, iter1, row)
                     model.remove(iter_source)
                     print("BEFORE")
                 else:
-                    model.insert_after(None, iter1, row)
+                    new_iter = model.insert_after(None, iter1, row)
                     model.remove(iter_source)
+
+                for subuser in sub_users:
+                    model.append(new_iter, subuser)
             else:
                 model.append([data])
 
