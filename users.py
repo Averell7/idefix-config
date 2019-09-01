@@ -271,6 +271,11 @@ class Users:
                 if not iternew:
                     alert(_("No mac address for this user !"))
 
+            if level == 3:
+                self.arw['user_summary_label'].set_label(_("Passwords"))
+            else:
+                self.arw['user_summary_label'].set_label(_("Mac Addresses"))
+
             self.user_summary(username)
 
             # get data in lists for this user
