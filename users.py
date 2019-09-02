@@ -22,7 +22,7 @@ class Users:
 
         # 1 - users
         """
-        0 : section (level 1)  - user (level 2)
+        0 : section (level 1)  - user (level 2)  - sub user (level 3)
         1 : options (text)    TODO : probably no longer used, verify
         2 : email time condition
         3 : internet time condition
@@ -77,9 +77,14 @@ class Users:
             for user in data1[section]:
                 if user.startswith("@_"):
                     continue
-                maclist[user] = data1[section][user]
-                for macs in maclist[user]:
-                    if macs.startswith('-@') or macs.startswith('+@'):
+
+                maclist[user] = list(filter(lambda d: not isinstance(d, dict), data1[section][user]))
+
+                for macs in data1[section][user]:
+                    if isinstance(macs, dict):
+                        for subuser in macs.get('subusers', {}).keys():
+                            maclist[subuser] = macs['subusers'][subuser]
+                    elif macs.startswith('-@') or macs.startswith('+@'):
                         self.block_signals = True
                         self.arw['experiment_user_toggle'].set_active(True)
                         self.block_signals = False
@@ -132,7 +137,19 @@ class Users:
             # add users for this section
             for user in data1[section]:
                 if not user.startswith('@_'):
-                    self.users_store.append(node, [user, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None])
+                    user_iter = self.users_store.append(
+                        node,
+                        [user, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None]
+                    )
+
+                    # check if any sub users have been defined
+                    for mac in data1[section][user]:
+                        if isinstance(mac, dict):
+                            for subuser in mac.get('subusers').keys():
+                                self.users_store.append(
+                                    user_iter,
+                                    [subuser, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None]
+                                )
 
     def load_user(self, widget, event, iternew=None):
         """ loads data in right pane when a category or a user is selected in the tree"""
@@ -172,6 +189,7 @@ class Users:
             self.arw["menu_add_cat"].show()
             self.arw["menu_move_user"].hide()
             self.arw["menu_rename_user"].hide()
+            self.arw["menu_add_subuser"].hide()
             self.arw["menu_rename_cat"].show()
 
             self.arw['email_time_condition'].set_sensitive(
@@ -226,7 +244,7 @@ class Users:
             else:
                 print("Invalid time :", data1)
 
-        elif level == 2:  # user level
+        elif level in (2, 3):  # user / sub user level
 
             self.arw["users_stack"].set_visible_child(self.arw["user_summary_frame"])
             # adapt the right click menu
@@ -237,12 +255,13 @@ class Users:
             self.arw["menu_move_user"].show()
             self.arw["menu_rename_user"].show()
             self.arw["menu_rename_cat"].hide()
+            self.arw["menu_add_subuser"].show()
 
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
             if username in self.controller.maclist:
-                macaddr =  self.controller.maclist[username]
-                if (macaddr[0] == False) or (macaddr[0] == ""):
+                macaddr = self.controller.maclist[username]
+                if not macaddr or (macaddr[0] == False) or (macaddr[0] == ""):
                     alert(_("No valid mac address for this user !"))
                 else :
                     data1 = "\n".join(macaddr)
@@ -251,6 +270,11 @@ class Users:
                 buffer.set_text("")
                 if not iternew:
                     alert(_("No mac address for this user !"))
+
+            if level == 3:
+                self.arw['user_summary_label'].set_label(_("Passwords"))
+            else:
+                self.arw['user_summary_label'].set_label(_("Mac Addresses"))
 
             self.user_summary(username)
 
@@ -292,7 +316,35 @@ class Users:
                 existing_name = child[0].strip().lower()
                 if existing_name == name:
                     return True
+                for subchild in child.iterchildren():
+                    existing_name = subchild[0].strip().lower()
+                    if existing_name == name:
+                        return True
         return False
+
+    def add_subuser(self, widget):
+        """Adds a new sub user to the selected user"""
+        (model, node) = self.arw["treeview1"].get_selection().get_selected()
+        level = model.get_path(node).get_depth()
+        if level == 1:  # category selected
+            return
+        elif level == 3:  # sub user selected, get parent
+            node = model.iter_parent(node)
+
+        name = self.ask_user_dialog(2)
+        if name:
+            if self.does_user_exist(name):
+                showwarning(_("User Exists"), _("Username exists"))
+                return
+
+        iternew = self.users_store.insert(node, 1, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
+
+        self.controller.populate_users_chooser()
+        # open the right tab to allow entering the address
+        self.arw["treeview1"].expand_row(model.get_path(iternew), True)
+        sel = self.arw["treeview1"].get_selection()
+        sel.select_iter(iternew)
+        self.load_user("", "", iternew)
 
     def add_user_above(self, widget):
         self.add_new_user(widget, "above")
@@ -306,7 +358,7 @@ class Users:
         else:
             self.add_new_user(widget)
 
-    def add_new_user(self, widget, mode=None):
+    def add_new_user(self, widget, mode=None, parent=None):
         """ adds a new user under the category selected, or below the user selected """
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
         level = model.get_path(node).get_depth()
@@ -320,13 +372,16 @@ class Users:
                 iternew = self.users_store.insert(node, 1, [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
                 path = model.get_path(node)
                 self.arw["treeview1"].expand_row(path, True)  # open the path to allow entering the adress
-            else:
+            elif level == 2:  # A user is selected
                 if mode == "above":
                     iternew = self.users_store.insert_before(None, node,
                                                              [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
                 else:
                     iternew = self.users_store.insert_after(None, node,
                                                             [name, "", "", "", 0, 0, 0, 0, 0, "", "", None, None])
+            else:
+                return
+
             self.controller.populate_users_chooser()
             # open the right tab to allow entering the address
             sel = self.arw["treeview1"].get_selection()
@@ -625,6 +680,17 @@ class Users:
         for i in range(model.get_n_columns()):
             row.append(model.get_value(iter_source, i))
 
+        sub_users = []
+
+        if source_level == 2:  # user
+            child = model.iter_children(iter_source)
+            while child:
+                childrow = []
+                for i in range(model.get_n_columns()):
+                    childrow.append(model.get_value(child, i))
+                sub_users.append(childrow)
+                child = model.iter_next(child)
+
         drop_info = treeview.get_dest_row_at_pos(x, y)
 
         if source_level == 1:
@@ -649,7 +715,6 @@ class Users:
                 child_row = []
                 for i in range(model.get_n_columns()):
                     child_row.append(model.get_value(child_iter, i))
-                model.insert_after(iter_dest, None, child_row)
                 child_iter = model.iter_next(child_iter)
 
             model.remove(iter_source)
@@ -661,16 +726,19 @@ class Users:
 
                 if dest_level == 1:
                     # print("drop on category")
-                    model.append(iter1, row)
+                    new_iter = model.append(iter1, row)
                     model.remove(iter_source)
                 elif (position == Gtk.TreeViewDropPosition.BEFORE
                       or position == Gtk.TreeViewDropPosition.BEFORE):
-                    model.insert_before(None, iter1, row)
+                    new_iter = model.insert_before(None, iter1, row)
                     model.remove(iter_source)
                     print("BEFORE")
                 else:
-                    model.insert_after(None, iter1, row)
+                    new_iter = model.insert_after(None, iter1, row)
                     model.remove(iter_source)
+
+                for subuser in sub_users:
+                    model.append(new_iter, subuser)
             else:
                 model.append([data])
 

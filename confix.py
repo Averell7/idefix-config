@@ -316,9 +316,9 @@ class Confix:
         # 0 - Name
         # 1 - Unused
         # 2 - Unused
-        # 3 - Unused
+        # 3 - True if sub user, False is user
         # 4 - True if category, False is user
-        self.chooser_users_store = gtk.TreeStore(str, str, str, bool)
+        self.chooser_users_store = gtk.TreeStore(str, str, bool, bool)
 
         self.tvcolumn = gtk.TreeViewColumn(_('Groups Drag and Drop'), self.users.cell, text=0)
         self.arw["chooser"].append_column(self.tvcolumn)
@@ -594,10 +594,13 @@ class Confix:
         for row in self.users_store:
             category = row[0]
             if row[6] or row[7]:  # Add category only if Internet access is enabled
-                iter1 = self.chooser_users_store.append(None, [category, "", "", True])
+                iter1 = self.chooser_users_store.append(None, [category, "", False, True])
                 for child in row.iterchildren():  # write users
                     user = child[0]
-                    self.chooser_users_store.append(iter1, [user, "", "", False])
+                    child_iter = self.chooser_users_store.append(iter1, [user, "", False, False])
+                    for subchild in child.iterchildren():
+                        subuser = subchild[0]
+                        self.chooser_users_store.append(child_iter, [subuser, "", True, False])
 
     def set_check_boxes(self):
         for row in self.proxy_store:
@@ -643,7 +646,7 @@ class Confix:
 
         for row in self.users_store:
             """
-            0 : section (level 1)  - user (level 2)
+            0 : section (level 1)  - user (level 2) - sub user (level 3)
             1 : options (text)
             2 : reserved [email time conditions]
             3 : reserved [internet time conditions]
@@ -1106,6 +1109,18 @@ class Confix:
                     macaddress = self.maclist[user]
                     for address in macaddress:
                         mac.append(address)
+
+                subusers = {}
+
+                for subchild in child.iterchildren():
+                    submac = []
+                    if subchild[0] in self.maclist:
+                        submac = self.maclist[subchild[0]]
+                    subusers[subchild[0]] = submac
+
+                if subusers:
+                    mac.append({'subusers': subusers})
+
                 config2["users"][row[0]][user] = mac
 
         # proxy store

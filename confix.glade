@@ -1816,7 +1816,7 @@ Eg: 123 (Monday, Tuesday, Wednesday)</property>
                                       </object>
                                     </child>
                                     <child type="label">
-                                      <object class="GtkLabel">
+                                      <object class="GtkLabel" id="user_summary_label">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Mac Addresses</property>
@@ -3352,6 +3352,15 @@ Improper values can ruin your filtering scheme. </property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">add user below</property>
         <signal name="activate" handler="add_user_below" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menu_add_subuser">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">add sub user</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="add_subuser" swapped="no"/>
       </object>
     </child>
     <child>
