@@ -412,7 +412,7 @@ class Confix:
     cat_list = {}
     iter_user = None
     iter_firewall = None
-    iter_proxy = None
+    iter_filter = None
     active_chooser = None
 
     def __init__(self, configname, config_password):
@@ -523,7 +523,7 @@ class Confix:
         # à garder $$ self.ftp_config = self.idefix_config['conf'][active_config]
 
         self.users_store = self.users.users_store
-        self.proxy_store = self.proxy_users.proxy_store
+        self.filter_store = self.proxy_users.filter_store
         self.groups_store = self.proxy_group.groups_store
         self.firewall_store = self.firewall.firewall_store
 
@@ -883,7 +883,7 @@ class Confix:
                         self.chooser_users_store.append(child_iter, [subuser, "", True, False])
 
     def set_check_boxes(self):
-        for row in self.proxy_store:
+        for row in self.filter_store:
             if row[1].strip().lower() == "off":
                 row[14] = 0
             if row[2].strip().lower() == "deny":
@@ -908,7 +908,7 @@ class Confix:
         global iconx
         # col 13 = allow/deny state; col 15 = text color
         # col 14 = on/off state; col 15 = text color
-        for store in [self.proxy_store, self.firewall_store]:
+        for store in [self.filter_store, self.firewall_store]:
             for row in store:
                 if row[13] == 1:  # allow
                     row[15] = "#009900"  # green
@@ -999,9 +999,9 @@ class Confix:
         widget = text_view
 
         if widget.name == "proxy_dest":
-            self.proxy_store.set(self.iter_proxy, 8, text1)
+            self.filter_store.set(self.iter_filter, 8, text1)
         elif widget.name == "proxy_#comments":
-            self.proxy_store.set(self.iter_proxy, 4, text1)
+            self.filter_store.set(self.iter_filter, 4, text1)
 
         elif widget.name == "firewall_ports":
             self.firewall_store.set(self.iter_firewall, 3, text1)
@@ -1025,10 +1025,10 @@ class Confix:
         # proxy
         if widget.name == "proxy_full_access":
             if widget.get_active():
-                self.proxy_store[self.iter_proxy][10] = "any"
+                self.filter_store[self.iter_filter][10] = "any"
                 self.arw["paned2"].set_sensitive(False)
             else:
-                self.proxy_store[self.iter_proxy][10] = ""
+                self.filter_store[self.iter_filter][10] = ""
                 self.arw["paned2"].set_sensitive(True)
         # users
         elif widget.name == "internet_email":
@@ -1088,7 +1088,7 @@ class Confix:
             time_condition += self.arw["proxy_time_condition_to"].get_text().strip()
             if time_condition == "1234567 -":
                 time_condition = ""
-            self.proxy_store[self.iter_proxy][3] = time_condition
+            self.filter_store[self.iter_filter][3] = time_condition
 
         if widget.name in ["users_time_days_email", "users_time_from_email", "users_time_to_email"]:
             time_condition = self.arw["users_time_days_email"].get_text() + " "
@@ -1534,7 +1534,7 @@ class Confix:
                 config2["users"][row[0]][user] = mac
 
         # proxy store
-        for row in self.proxy_store :
+        for row in self.filter_store :
             name = row[0]
             for code in["<i>", "</i>", "<s>", "</s>"]:  # remove codes which are only for display
                 name = name.replace(code, "")

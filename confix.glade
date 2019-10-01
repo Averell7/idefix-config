@@ -1972,7 +1972,7 @@ and week</property>
                                             <property name="vscrollbar_policy">always</property>
                                             <property name="shadow_type">in</property>
                                             <child>
-                                              <object class="GtkTreeView" id="proxy_users">
+                                              <object class="GtkTreeView" id="filter_users">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="hscroll_policy">natural</property>

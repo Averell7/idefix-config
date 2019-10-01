@@ -434,13 +434,13 @@ class Users:
         if x is None:
             return
         else:
-            # Rename all existing entries in the proxy_store
-            for item in self.controller.proxy_store:
+            # Rename all existing entries in the filter_store
+            for item in self.controller.filter_store:
                 users = item[5].split('\n')
                 if name in users:
                     i = users.index(name)
                     users[i] = x
-                self.controller.proxy_store.set_value(item.iter, 5, '\n'.join(users))
+                self.controller.filter_store.set_value(item.iter, 5, '\n'.join(users))
                 #self.controller.load_proxy_user(self.arw['treeview3'], event=None)
             # update the mac list
             self.controller.maclist[x] = self.controller.maclist[name]
@@ -578,7 +578,7 @@ class Users:
                         store.set_value(child_iter, 4, colour)
 
         i = 0
-        for row in self.controller.proxy_store:
+        for row in self.controller.filter_store:
             if not row[5]:
                 users = [""]
             else:
