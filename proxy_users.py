@@ -17,12 +17,12 @@ class ProxyUsers:
         self.arw = arw
         self.controller = controller
 
-        self.arw["proxy_users"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
-        self.arw['proxy_users'].drag_source_add_text_targets()
-        self.arw['proxy_users'].connect("drag-data-get", self.proxy_users_data_get)
-        self.arw['proxy_users'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
-        self.arw['proxy_users'].drag_dest_add_text_targets()
-        self.arw['proxy_users'].connect("drag-data-received", self.update_proxy_user_list_view)
+        self.arw["filter_users"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
+        self.arw['filter_users'].drag_source_add_text_targets()
+        self.arw['filter_users'].connect("drag-data-get", self.proxy_users_data_get)
+        self.arw['filter_users'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
+        self.arw['filter_users'].drag_dest_add_text_targets()
+        self.arw['filter_users'].connect("drag-data-received", self.update_proxy_user_list_view)
 
         """
         0 : section
@@ -135,14 +135,14 @@ class ProxyUsers:
             self.filter_store.set_value(self.controller.iter_filter, 11, 1)
             markup = self.filter_store.get_value(self.controller.iter_filter, 0)
             self.filter_store.set_value(self.controller.iter_filter, 0, "<i>" + markup + "</i>")
-            self.arw["proxy_users"].hide()
+            self.arw["filter_users"].hide()
         else:
             self.filter_store.set_value(self.controller.iter_filter, 11, 0)
             markup = self.filter_store.get_value(self.controller.iter_filter, 0)
             markup = markup.replace("<i>", "")
             markup = markup.replace("</i>", "")
             self.filter_store.set_value(self.controller.iter_filter, 0, markup)
-            self.arw["proxy_users"].show()
+            self.arw["filter_users"].show()
         self.update_proxy_user_list()
 
         self.load_proxy_user2()
@@ -226,7 +226,7 @@ class ProxyUsers:
         return 'any' in self.filter_store.get_value(self.controller.iter_filter, 5).split('\n')
 
     def delete_proxy_user(self, widget):
-        model, iter = self.arw['proxy_users'].get_selection().get_selected()
+        model, iter = self.arw['filter_users'].get_selection().get_selected()
         name = model.get_value(iter, 0).strip()
 
         names = self.filter_store.get_value(self.controller.iter_filter, 5).split('\n')

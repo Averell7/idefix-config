@@ -776,8 +776,8 @@ class Confix:
 
         return
 
-        if widget.name in ["proxy_users"]:
-            self.active_chooser = 'proxy_users'
+        if widget.name in ["filter_users"]:
+            self.active_chooser = 'filter_users'
             self.arw["chooser"].set_model(self.chooser_users_store)
             ctx = self.arw['proxy_users_scroll_window'].get_style_context()
             ctx.add_class('chosen_list')
