@@ -34,8 +34,8 @@ class ProxyUsers:
         6 : mac
         7 : dest_group
         8 : dest_domain
-        9 : dest_ip
-        10 : destination
+        9 : (previously : dest_ip. No longer used)
+        10 : (previously : destination. No longer used)
         11 : toggleButton (0/1) users [list/all]
         12 : toggleButton (0/1) destination [list/all]
         13 : toggleButton (0/1) [deny/allow]
@@ -326,21 +326,24 @@ class ProxyUsers:
         self.arw['proxy_users_store'].clear()
 
         # add users
-        data1 = self.proxy_store[proxy_iter][5]  # user
-        for name in self.proxy_store[proxy_iter][5].split('\n'):
+        users = self.proxy_store[proxy_iter][5]  # user
+        if not users:
+            return None
+
+        for name in users.split('\n'):
             if name:
                 iter = self.arw['proxy_users_store'].append()
                 self.arw['proxy_users_store'].set_value(iter, 0, name)
 
         # add mac, if any
-        data1 += self.proxy_store[proxy_iter][6]  # mac
+        users += self.proxy_store[proxy_iter][6]  # mac
 
         for name in self.proxy_store[proxy_iter][6].split('\n'):
             if name:
                 iter = self.arw['proxy_users_store'].append()
                 self.arw['proxy_users_store'].set_value(iter, 0, name)
 
-        return data1
+        return users
 
     def load_proxy_user(self, widget, event):
 
@@ -506,9 +509,11 @@ class ProxyUsers:
 
     def populate_proxy(self):
         self.proxy_store.clear()
-        data1 = self.controller.config["proxy"]
-        keys = ["active", "action", "time_condition", "#comments", "user", "xxx", "dest_group", "dest_domain", "xxx",
-                "destination"]
+        data1 = self.controller.config["rules"]
+        keys = ["active", "action", "time_condition", "#comments",
+                "users", "",
+                "dest_groups", "dest_domains", "", "",
+                "any_user", "any_destination", "allow_deny" ]
         for section in data1:
             if section[0:2] == "@_":  # generated sections must not be loaded
                 continue
@@ -518,24 +523,9 @@ class ProxyUsers:
                 name = '<i>' + section + '</i>'
             else:
                 name = section
-            if data2.get("active") == ['off']:
+            if data2.get("active") == 'off':
                  name = "<s>" + name + "</s>"
             out = [name]
-
-            # merge user and mac
-            if "user" not in data2:
-                if "users" in data2:
-                    data2["user"] = data2["users"]
-            else:
-                if "users" in data2:
-                    data2["user"] += data2["users"]
-            # merge dest_domain and dest_ip
-            if "dest_domain" not in data2:
-                if "dest_ip" in data2:
-                    data2["dest_domain"] = data2["dest_ip"]
-            else:
-                if "dest_ip" in data2:
-                    data2["dest_domain"] += data2["dest_ip"]
 
             for key in keys:
                 if key in data1[section]:
@@ -543,98 +533,24 @@ class ProxyUsers:
 
                     if key == 'time_condition':
                         # days = parse_date_format_from_squid(data[0].split(' ')[0])
-                        days = data[0].split(' ')[0]
-                        if len(data[0].split(' ')) > 1:
-                            data = [days + ' ' + data[0].split(' ', 1)[1]]
+                        days = data.split(' ')[0]
+                        if len(data.split(' ')) > 1:
+                            data = days + ' ' + data.split(' ', 1)[1]
                         else:
-                            data = [days]
+                            data = days
 
-                    out.append("\n".join(data) + "\n")
+                    if isinstance(data, list):
+                        out.append("\n".join(data) + "\n")
+                    else:
+                        out.append(data)
                 else:
                     out.append("")
             # check boxes and ToggleButtons
-            if "any_user" in data1[section]:
-                anyuser = data1[section]["any_user"]
-            else:
-                anyuser = 0
-            out += [anyuser, 1, 1, 1, "#009900", "#ffffff", "", "", 0, 0]
+##            if "any_user" in data2:
+##                anyuser = data1[section]["any_user"]
+##            else:
+##                anyuser = 0
+            out += [1, "#009900", "#ffffff", "", "", 0, 0]
 
             self.proxy_store.append(out)
 
-    def build_proxy_ini(self):
-
-        out = ""
-        # add default permissions
-        out += "\n[@_antivirus]\n"
-        out += "active = on \n"
-        out += "action = allow \n"
-        out += "user = any \n"
-        out += "dest_group = antivirus \n"
-
-        # add permissions for users with open access defined in users tab
-        users = self.controller.config["users"]
-        for section in users:
-            if users[section].get("@_internet")[0] != "open":
-                continue
-            # section header
-            tmp1 = "\n[%s]\n" % section.replace(" ", "_")   # Squid does not support spaces in acl names.
-            tmp1 += "active = on\n"
-            tmp1 += "action = allow\n"
-            tmp1 += "destination = any\n"
-
-            for key in users[section]:
-                if key[0:2] == "@_":  # Technical data, skip
-                    continue
-                tmp1 += "user = " + key + "\n"
-            out += tmp1 + "\n"
-
-        for row in self.proxy_store:
-            # add support for a time condition from evening to morning.
-            # This requires to create two configurations.
-            time_condition = row[3]
-            time_condition_list = format_time(time_condition)
-            i = 1
-            index = ""
-            # remove formatting
-            name = row[0]
-            for code in["<i>", "</i>", "<s>", "</s>"]:
-                name = name.replace(code, "")
-                name = name.replace(" ", "_")           # Squid does not support spaces in acl names.
-            for time_condition2 in time_condition_list:
-                if len(time_condition_list) > 1:  # If the row is duplicated, we must create two different names
-                    index = str(i)
-                    i += 1
-                out += "\n[%s%s]\n" % (name, index)
-                out += format_comment(row[4])  # comments
-                out += format_line("active", row[1])
-                out += format_line("action", row[2])
-                if row[11]:
-                    out += "user = any\n"
-                else:
-                    out += format_userline("user", row[5])
-                out += format_line("time_condition", time_condition2)
-                if format_line("destination", row[10]) == "":
-                    out += format_line("dest_group", row[7])
-                    out += format_domainline("dest_domain", row[8])
-                else:
-                    out += format_line("destination", row[10])
-
-
-
-        with open(get_config_path("./tmp/proxy-users.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
-            f1.write(out)
-
-
-    def build_proxy_groups_ini(self):        # TODO Dysmas - add
-
-        out = ""
-        key = self.controller.config["groups"]
-        for group in key:
-            out += "\n[" + group + "]\n"
-            for key2 in ["comments", "dest_domain", "dest_ip"]:
-                if key2 in key[group]:
-                    for line1 in key[group][key2]:
-                        out += key2 + " = " + line1 + "\n"
-
-        with open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
-            f1.write(out)

@@ -5,7 +5,7 @@ from gi.repository.GdkPixbuf import Pixbuf
 
 from actions import DRAG_ACTION
 from icons import (
-    internet_filtered_icon, internet_full_icon, internet_denied_icon
+    internet_filtered_icon, internet_full_icon
 )
 from util import alert, ask_text, showwarning, askyesno, mac_address_test, ip_address_test
 
@@ -78,14 +78,13 @@ class Users:
                 if user.startswith("@_"):
                     continue
 
-                maclist[user] = list(filter(lambda d: not isinstance(d, dict), data1[section][user]["mac"]))
-
-                if "subusers" in data1[section][user]:
-                    for subuser in data1[section][user]["subusers"]:
-                        maclist[subuser] = [data1[section][user]["subusers"][subuser]]
+                maclist[user] = list(filter(lambda d: not isinstance(d, dict), data1[section][user]))
 
                 for macs in data1[section][user]:
-                    if macs.startswith('-@') or macs.startswith('+@'):
+                    if isinstance(macs, dict):
+                        for subuser in macs.get('subusers', {}).keys():
+                            maclist[subuser] = macs['subusers'][subuser]
+                    elif macs.startswith('-@') or macs.startswith('+@'):
                         self.block_signals = True
                         self.arw['experiment_user_toggle'].set_active(True)
                         self.block_signals = False
@@ -100,13 +99,12 @@ class Users:
         options_list = [0, 0, 0, 0, 0]
         for section in data1:
 
-            options_list[0] = data1[section].get('@_email', [0]) == '1'
-            options_list[1] = data1[section].get('@_internet', ['none']) != 'none'
-            options_list[2] = data1[section].get('@_internet', ['']) == 'filtered'
-            options_list[3] = data1[section].get('@_internet', ['']) == 'open'
+            options_list[0] = data1[section].get('@_email', [0])[0] == '1'
+            options_list[1] = data1[section].get('@_internet', ['none'])[0] != 'none'
+            options_list[2] = data1[section].get('@_internet', [''])[0] == 'filtered'
+            options_list[3] = data1[section].get('@_internet', [''])[0] == 'open'
 
-            """
-            internet_time_condition = data1[section].get("@_internet_time_condition", [''])
+            internet_time_condition = data1[section].get("@_internet_time_condition", [''])[0]
             if internet_time_condition:
                 days = internet_time_condition.split(' ')[0]
                 # days = parse_date_format_from_squid(days)
@@ -116,7 +114,7 @@ class Users:
                 else:
                     internet_time_condition = days
 
-            email_time_condition = data1[section].get("@_email_time_condition", [''])
+            email_time_condition = data1[section].get("@_email_time_condition", [''])[0]
             if email_time_condition:
                 days = email_time_condition.split(' ')[0]
                 # days = parse_date_format_from_squid(days)
@@ -125,9 +123,6 @@ class Users:
                     email_time_condition = days + ' ' + email_time_condition.split(' ', 1)[1]
                 else:
                     email_time_condition = days
-            """
-            email_time_condition = ""
-            internet_time_condition = ""
 
             # add section
             node = self.users_store.append(None,
@@ -148,12 +143,13 @@ class Users:
                     )
 
                     # check if any sub users have been defined
-                    if "subusers" in  data1[section][user]:
-                        for subuser in data1[section][user].get('subusers').keys():
-                            self.users_store.append(
-                                user_iter,
-                                [subuser, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None]
-                            )
+                    for mac in data1[section][user]:
+                        if isinstance(mac, dict):
+                            for subuser in mac.get('subusers').keys():
+                                self.users_store.append(
+                                    user_iter,
+                                    [subuser, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None]
+                                )
 
     def load_user(self, widget, event, iternew=None):
         """ loads data in right pane when a category or a user is selected in the tree"""
@@ -183,7 +179,7 @@ class Users:
             self.arw["users_stack"].set_visible_child(self.arw["vbox2"])
 
             # set internet rights in the check boxes and radio list
-            # self.arw["internet_email"].set_active(self.users_store[iter1][4] or self.users_store[iter1][7])
+            self.arw["internet_email"].set_active(self.users_store[iter1][4] or self.users_store[iter1][7])
             self.arw["internet_filtered"].set_active(self.users_store[iter1][6])
             self.arw["internet_open"].set_active(self.users_store[iter1][7])
             # adapt the right click menu
@@ -196,7 +192,6 @@ class Users:
             self.arw["menu_add_subuser"].hide()
             self.arw["menu_rename_cat"].show()
 
-            """
             self.arw['email_time_condition'].set_sensitive(
                 self.users_store[self.controller.iter_user][4] or self.users_store[self.controller.iter_user][7]
             )
@@ -248,7 +243,7 @@ class Users:
                     print("Error handling time condition :", data1)
             else:
                 print("Invalid time :", data1)
-            """
+
         elif level in (2, 3):  # user / sub user level
 
             self.arw["users_stack"].set_visible_child(self.arw["user_summary_frame"])
@@ -579,11 +574,7 @@ class Users:
 
         i = 0
         for row in self.controller.proxy_store:
-            if not row[5]:
-                users = [""]
-            else:
-                users = row[5].strip().split("\n")
-
+            users = row[5].strip().split("\n")
             for userx in users:
                 if userx.strip() == user1 or row[11] == 1:
                     parent_iter = store.append(None)
@@ -603,7 +594,7 @@ class Users:
                         store.set_value(parent_iter, 4, 'green')
                         colour = 'green'
 
-                    if row[10] and row[10].strip() == 'any':
+                    if row[10].strip() == 'any':
                         store.set_value(parent_iter, 2, internet_full_icon)
                         if colour != 'red':
                             store.set_value(parent_iter, 4, 'blue')

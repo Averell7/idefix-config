@@ -53,7 +53,10 @@ class ProxyGroup:
             domains[row[0]] = row[1]
 
         self.proxy_group_store.clear()
-        for name in self.controller.proxy_store[proxy_iter][7].split('\n'):
+        groups = self.controller.proxy_store[proxy_iter][7]
+        if not groups:
+            return None
+        for name in groups.split('\n'):
             if name:
                 iter = self.proxy_group_store.append()
                 self.proxy_group_store.set_value(iter, 0, name)
