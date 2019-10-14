@@ -138,7 +138,7 @@ class ConfigProfile:
         self.arw['profile_username_entry'].set_text(model.get_value(selected_iter, COLUMN_USERNAME) or '')
         self.arw['profile_password_entry'].set_text(model.get_value(selected_iter, COLUMN_PASSWORD) or '')
         self.arw['profile_server_entry'].set_text(model.get_value(selected_iter, COLUMN_SERVER) or '')
-        self.arw['profile_mode_combo'].set_active_iter(self.mode_iters[model.get_value(selected_iter, COLUMN_MODE)])
+        #self.arw['profile_mode_combo'].set_active_iter(self.mode_iters[model.get_value(selected_iter, COLUMN_MODE)])
         self.block_signals = False
 
     def profile_update_data(self, widget):
@@ -193,5 +193,13 @@ class ConfigProfile:
                 'pass': encrypt_password(row[COLUMN_PASSWORD], self.password),
                 'mode': row[COLUMN_MODE]
             }
+
+##            # update self.config
+##            edit = self.config['conf'][row[COLUMN_NAME]]
+##            edit['server'] = row[COLUMN_SERVER]
+##            edit['login']  = row[COLUMN_USERNAME]
+##            edit['pass']   = row[COLUMN_PASSWORD]
+##            edit['mode']   = row[COLUMN_MODE]
         with open(self.filename, 'w') as f:
             config.write(f)
+

@@ -249,9 +249,6 @@ class editor:
 
             return
 
-        # ftp connect
-        if ftp1['mode'][0] == 'local':
-            self.local_control = True
 
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
 
@@ -536,7 +533,7 @@ class Confix:
         # autosave textview buffers when typing (see also drag and drop below)
         # and when drag is received
         for textView in ["maclist",
-                         "proxy_dest", "proxy_#comments",
+                         "proxy_dest", "filter_#comments",
                          "firewall_ports", "firewall_users", "firewall_comments"]:
             self.arw[textView].connect("key-release-event", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
@@ -1000,7 +997,7 @@ class Confix:
 
         if widget.name == "proxy_dest":
             self.filter_store.set(self.iter_filter, 8, text1)
-        elif widget.name == "proxy_#comments":
+        elif widget.name == "filter_#comments":
             self.filter_store.set(self.iter_filter, 4, text1)
 
         elif widget.name == "firewall_ports":
@@ -1080,12 +1077,12 @@ class Confix:
 
     def update_time(self, widget, x=None):
         # TODO  this function is not very well written.
-        if widget.name in ["proxy_time_condition_days", "proxy_time_condition_from", "proxy_time_condition_to"]:
-            time_condition = self.arw["proxy_time_condition_days"].get_text() + " "
+        if widget.name in ["filter_time_condition_days", "filter_time_condition_from", "filter_time_condition_to"]:
+            time_condition = self.arw["filter_time_condition_days"].get_text() + " "
             if time_condition.strip() == "":
                 time_condition = "1234567 "
-            time_condition += self.arw["proxy_time_condition_from"].get_text().strip() + "-"
-            time_condition += self.arw["proxy_time_condition_to"].get_text().strip()
+            time_condition += self.arw["filter_time_condition_from"].get_text().strip() + "-"
+            time_condition += self.arw["filter_time_condition_to"].get_text().strip()
             if time_condition == "1234567 -":
                 time_condition = ""
             self.filter_store[self.iter_filter][3] = time_condition
@@ -1320,10 +1317,6 @@ class Confix:
             f1.write(json.dumps(config2, indent = 3))
             f1.close()
 
-        if self.local_control:  # if connected to Idefix, send the update signal
-            f1 = open(get_config_path("./tmp/update"), "w")
-            f1.close()
-            self.ftp_upload([get_config_path("./tmp/update")], message=False)
 
     def build_users(self):
         out = ""

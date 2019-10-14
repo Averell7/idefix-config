@@ -517,8 +517,8 @@ class Users:
 ##        email_time_conditions = self.users_store.get_value(parent_iter, 2)
 ##        internet_time_conditions = self.users_store.get_value(parent_iter, 3)
 ##        email_enabled = self.users_store.get_value(parent_iter, 4)
-##        internet_filtered = self.users_store.get_value(parent_iter, 6)
-##        internet_open = self.users_store.get_value(parent_iter, 7)
+        internet_filtered = self.users_store.get_value(parent_iter, 6)
+        internet_open = self.users_store.get_value(parent_iter, 7)
 ##
 ##        if not email_enabled:
 ##            self.arw['user_summary_email_icon'].set_from_pixbuf(email_disabled_icon)
@@ -527,10 +527,12 @@ class Users:
 ##
 ##        if not internet_enabled:
 ##            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_disabled_icon)
-##        elif internet_filtered:
-##            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_filtered_icon)
-##        elif internet_open:
-##            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_full_icon)
+        if internet_filtered:
+            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_filtered_icon)
+        elif internet_open:
+            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_full_icon)
+        else:
+            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_denied_icon)
 ##
 ##        # internet time conditions
 ##        if internet_time_conditions:

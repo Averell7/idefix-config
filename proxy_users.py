@@ -378,9 +378,9 @@ class ProxyUsers:
         # time conditions
         data1 = self.filter_store[iter1][3].strip()
         if data1 == "":
-            self.arw["proxy_time_condition_days"].set_text("")
-            self.arw["proxy_time_condition_from"].set_text("")
-            self.arw["proxy_time_condition_to"].set_text("")
+            self.arw["filter_time_condition_days"].set_text("")
+            self.arw["filter_time_condition_from"].set_text("")
+            self.arw["filter_time_condition_to"].set_text("")
             self.arw["time_button_label"].set_text(_("All day\nand week"))
 
         elif len(data1) > 8:
@@ -397,9 +397,9 @@ class ProxyUsers:
                     color = 'foreground="#ee0000"'
                 button_text ='<span ' + color + ' weight="bold" >'    # size="large" deleted
                 button_text += human_days + '\n  <span size="large">' + time_from + "-" + time_to + "</span></span>"
-                self.arw["proxy_time_condition_days"].set_text(days)
-                self.arw["proxy_time_condition_from"].set_text(time_from)
-                self.arw["proxy_time_condition_to"].set_text(time_to)
+                self.arw["filter_time_condition_days"].set_text(days)
+                self.arw["filter_time_condition_from"].set_text(time_from)
+                self.arw["filter_time_condition_to"].set_text(time_to)
                 self.arw["time_button_label"].set_markup(button_text)
 
             except:
@@ -407,7 +407,7 @@ class ProxyUsers:
         else:
             print("Invalid time :", data1)
 
-        self.arw["proxy_#comments"].get_buffer().set_text(self.filter_store[iter1][4])
+        self.arw["filter_#comments"].get_buffer().set_text(self.filter_store[iter1][4])
 
         self.update_proxy_user_list(iter1)
         self.controller.proxy_group.update_proxy_group_list(iter1)
@@ -491,9 +491,9 @@ class ProxyUsers:
             self.arw['internet_filter_paned'].set_position(self.arw['internet_filter_paned'].get_allocated_height() / 2)
 
     def show_time_conditions_window(self, widget):
-        self.arw["proxy_time_conditions"].show()
+        self.arw["filter_time_conditions"].show()
     def hide_time_conditions_window(self, widget):
-        self.arw["proxy_time_conditions"].hide()
+        self.arw["filter_time_conditions"].hide()
         self.load_proxy_user("","")
 
     def proxy_profile_select(self, widget, event):

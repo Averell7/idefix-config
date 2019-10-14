@@ -1,6 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.3.2 - Developper menu added
+# version 2.3.1 - new idefix.json format
 # version 2.1.0 - supports subusers
 # version 2.0.0 - Supports Unbound
 
@@ -47,7 +49,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.3.1"
+version = "2.3.2"
 
 
 gtk = Gtk
@@ -69,7 +71,9 @@ def ftp_connect(server, login, password):
     try:
         ftp = FTP(server, timeout=15)  # connect to host, default port
         ftp.login(login, password)
-        if ftp1['mode'][0] == 'local':
+        #for (name, properties) in ftp.mlsd():     # would be better, but the ftp server of Idefix does not support the command
+        #    if name == "idefix" and properties['type'] == "dir":
+        if "idefix" in ftp.nlst():
                 ftp.cwd("idefix")
         return ftp
     except FTPError as e:
@@ -152,7 +156,6 @@ class Confix:
         self.mem_text = ""
         self.mem_time = 0
         self.block_signals = False
-        self.local_control = False  # will be set to True if the connection with Idefix is direct
         # Load the glade file
         self.widgets = gtk.Builder()
         self.widgets.set_translation_domain("confix")
@@ -265,7 +268,7 @@ class Confix:
         # autosave textview buffers when typing (see also drag and drop below)
         # and when drag is received
         for textView in ["maclist",
-                         "proxy_dest", "proxy_#comments",
+                         "proxy_dest", "filter_#comments",
                          "firewall_ports", "firewall_users", "firewall_comments"]:
             self.arw[textView].connect("key-release-event", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
@@ -388,6 +391,12 @@ class Confix:
         if filter_tab:
             self.arw['notebook3'].set_current_page(1)
 
+        developper_menu = idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
+        if developper_menu is False:
+            self.arw['developper_menu'].set_sensitive(False)
+            self.arw['developper_menu'].set_visible(False)
+
+
         auto_load = idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
         if auto_load:
             last_config = idefix_config['conf'].get('__options', {}).get('last_config')
@@ -402,6 +411,8 @@ class Confix:
         config_dialog = AskForConfig(idefix_config)
         configname = config_dialog.run()
         self.arw["configname"].set_text(configname)
+        self.arw["save_button1"].set_sensitive(True)
+        self.arw["save_button2"].set_sensitive(True)
         self.ftp_config = self.idefix_config['conf'][configname]
         if not idefix_config['conf'].get('__options'):
             idefix_config['conf']['__options'] = {}
@@ -414,28 +425,29 @@ class Confix:
     def open_connexion_profile(self):
         global ftp1
 
-        ftp1 = self.ftp_config
-        if ftp1['mode'][0] == 'dev':          # development mode - no ftp connection
-            self.load_locale = True
-            config_file = get_config_path("dev/idefix.json")
-            if os.path.isfile(config_file):
-                with open(config_file) as f1:
-                    self.config = json.loads(f1.read(), object_pairs_hook=OrderedDict)
-                    self.update()
-                    self.update_gui()
-            else:
-                self.load_defaults()
 
-            return
+        ftp1 = self.ftp_config
+##        if ftp1['mode'][0] == 'dev':        # development mode - no ftp connection
+##            self.load_locale = True
+##            config_file = get_config_path("dev/idefix.json")
+##            if os.path.isfile(config_file):
+##                with open(config_file) as f1:
+##                    self.config = json.loads(f1.read(), object_pairs_hook=OrderedDict)
+##                    self.update()
+##                    self.update_gui()
+##            else:
+##                self.load_defaults()
+##
+##            return
 
         # ftp connect
-        if ftp1['mode'][0] == 'local':
-            self.local_control = True
+##        if ftp1['mode'][0] == 'local':
+##            self.local_control = True
 
-        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        self.ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
 
 
-        if not ftp:
+        if not self.ftp:
             # x = ConfigProfile(self.arw, self)
             # x.profile_open_window()
 
@@ -443,8 +455,12 @@ class Confix:
                 self.profiles.profile_open_window()
 
                 def restart(*args):
-                    askyesno(_("Restart"), _("Please restart idefix to use new configuration"))
-                    sys.exit(0)
+                    if askyesno(_("Restart"), _("Please restart idefix to use new configuration")):
+                        #sys.exit(0)
+                        configname = self.arw['profile_name_entry'].get_text()
+                        self.ftp_config = self.idefix_config['conf'][configname]
+                        self.open_connexion_profile()
+
 
                 self.profiles.window.connect('hide', restart)
                 print("restart system")
@@ -454,9 +470,7 @@ class Confix:
                 return
         else:
             # retrieve files by ftp
-            data0 = ftp_get(ftp, "idefix.json", json  = True)
-            if data0 == False:                                               # TODO - compatibility
-                data0 = ftp_get(ftp, "idefix-config.json", json  = True)
+            data0 = ftp_get(self.ftp, "idefix.json", json  = True)
             if data0 :
                 try:
                     self.config = json.loads(data0, object_pairs_hook=OrderedDict)
@@ -464,8 +478,10 @@ class Confix:
                     self.update_gui()
                 except:
                     alert("Unable to load configuration. Please import another one.")
-                ftp.close()
+                self.ftp.close()
                 self.update_gui()
+            else:
+                self.load_defaults()
 
         self.update()
 
@@ -484,8 +500,8 @@ class Confix:
         response = askyesno(_("No user data"),
                             _("There is no user data present. \nDo you want to create standard categories ?"))
         if response == 1:
-            if os.path.isfile("./confix-default.json"):
-                data_str = open("./confix-default.json", "r").read()
+            if os.path.isfile("./idefix-default.json"):
+                data_str = open("./idefix-default.json", "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
                 self.update_gui()
                 self.set_colors()
@@ -493,10 +509,19 @@ class Confix:
 
 
 
-    def open_config(self, widget):
-        self.import_json.run()
+    def open_config(self, widgete):
+        self.import_json.run(offline = True)
 
     def save_config(self, widget):
+        self.export_json.run(offline = True)
+
+    def save_config_as(self, widget):
+        self.export_json.run(offline = True)
+
+    def import_config(self, widget):
+        self.import_json.run()
+
+    def export_config(self, widget):
         self.export_json.run()
 
     def show_help(self, widget):
@@ -652,7 +677,7 @@ class Confix:
 
         if widget.name == "proxy_dest":
             self.filter_store.set(self.iter_filter, 8, text1)
-        elif widget.name == "proxy_#comments":
+        elif widget.name == "filter_#comments":
             self.filter_store.set(self.iter_filter, 4, text1)
 
         elif widget.name == "firewall_ports":
@@ -718,12 +743,12 @@ class Confix:
 
     def update_time(self, widget, x=None):
         # TODO  this function is not very well written.
-        if widget.name in ["proxy_time_condition_days", "proxy_time_condition_from", "proxy_time_condition_to"]:
-            time_condition = self.arw["proxy_time_condition_days"].get_text() + " "
+        if widget.name in ["filter_time_condition_days", "filter_time_condition_from", "filter_time_condition_to"]:
+            time_condition = self.arw["filter_time_condition_days"].get_text() + " "
             if time_condition.strip() == "":
                 time_condition = "1234567 "
-            time_condition += self.arw["proxy_time_condition_from"].get_text().strip() + "-"
-            time_condition += self.arw["proxy_time_condition_to"].get_text().strip()
+            time_condition += self.arw["filter_time_condition_from"].get_text().strip() + "-"
+            time_condition += self.arw["filter_time_condition_to"].get_text().strip()
             if time_condition == "1234567 -":
                 time_condition = ""
             self.filter_store[self.iter_filter][3] = time_condition
@@ -821,11 +846,13 @@ class Confix:
         gui_check = self.arw['option_checkbox_gui_check'].get_active()
         filter_tab = self.arw['option_filter_tab_check'].get_active()
         auto_load = self.arw['option_autoload_check'].get_active()
+        developper_menu = self.arw['option_developper_check'].get_active()
 
         idefix_config['conf']['__options'] = {
             'checkbox_config': ['1' if gui_check else '0'],
             'filter_tab': ['1' if filter_tab else '0'],
             'auto_load': ['1' if auto_load else '0'],
+            'developper_menu': ['1' if developper_menu else '0'],
         }
 
         if gui_check:
@@ -847,6 +874,9 @@ class Confix:
         )
         self.arw['option_autoload_check'].set_active(
             idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
+        )
+        self.arw['option_developper_check'].set_active(
+            idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
         )
         self.arw['options_window'].show_all()
 
@@ -951,12 +981,6 @@ class Confix:
             f1 = open(get_config_path("dev/idefix.json"), "w", newline = "\n")
             f1.write(json.dumps(config2, indent = 3))
             f1.close()
-
-        if self.local_control:  # if connected to Idefix, send the update signal
-            f1 = open(get_config_path("./tmp/update"), "w")
-            f1.close()
-            self.ftp_upload([get_config_path("./tmp/update")], message=False)
-
 
 
     def format_row(self, row) :

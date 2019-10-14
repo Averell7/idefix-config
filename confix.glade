@@ -431,159 +431,7 @@ and others</property>
       </object>
     </child>
   </object>
-  <object class="GtkTextBuffer" id="ports_buffer"/>
-  <object class="GtkListStore" id="ports_list">
-    <columns>
-      <!-- column-name group -->
-      <column type="gchararray"/>
-      <!-- column-name value -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkTreeModelSort" id="ports_list_sort">
-    <property name="model">ports_list</property>
-  </object>
-  <object class="GtkMenu" id="profile_context_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkMenuItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Add New</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="profile_add_new" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Remove</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="profile_delete_selected" swapped="no"/>
-      </object>
-    </child>
-  </object>
-  <object class="GtkListStore" id="profile_mode_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">dev</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">local</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">ftp</col>
-      </row>
-    </data>
-  </object>
-  <object class="GtkListStore" id="profiles_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name mode -->
-      <column type="gchararray"/>
-      <!-- column-name username -->
-      <column type="gchararray"/>
-      <!-- column-name password -->
-      <column type="gchararray"/>
-      <!-- column-name server -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkMenu" id="proxy_group_domain_edit_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkMenuItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">delete</property>
-        <signal name="activate" handler="proxy_group_remove_item" swapped="no"/>
-      </object>
-    </child>
-  </object>
-  <object class="GtkListStore" id="proxy_group_domain_store">
-    <columns>
-      <!-- column-name domain -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkTextBuffer" id="proxy_group_import_buffer"/>
-  <object class="GtkMenu" id="proxy_groups_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkMenuItem" id="menuitem5">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">delete</property>
-        <signal name="activate" handler="delete_proxy_group" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">edit</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="edit_proxy_group" object="proxy_group" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">new</property>
-        <signal name="activate" handler="new_proxy_group" swapped="no"/>
-      </object>
-    </child>
-  </object>
-  <object class="GtkListStore" id="proxy_groups_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name gchararray1 -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkMenu" id="proxy_profiles_menu">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkMenuItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">add rule</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="add_rule_below" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">delete rule</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="delete_rule" swapped="no"/>
-      </object>
-    </child>
-    <child>
-      <object class="GtkMenuItem">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="label" translatable="yes">rename rule</property>
-        <property name="use_underline">True</property>
-        <signal name="activate" handler="edit_rule" swapped="no"/>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="proxy_time_conditions">
+  <object class="GtkWindow" id="filter_time_conditions">
     <property name="can_focus">False</property>
     <property name="deletable">False</property>
     <child>
@@ -605,7 +453,7 @@ and others</property>
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="proxy_time_condition_from">
+          <object class="GtkEntry" id="filter_time_condition_from">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="invisible_char">●</property>
@@ -623,7 +471,7 @@ and others</property>
             <property name="label_xalign">0</property>
             <property name="shadow_type">etched-out</property>
             <child>
-              <object class="GtkTextView" id="proxy_#comments">
+              <object class="GtkTextView" id="filter_#comments">
                 <property name="height_request">42</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -667,7 +515,7 @@ and others</property>
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="proxy_time_condition_to">
+          <object class="GtkEntry" id="filter_time_condition_to">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="invisible_char">●</property>
@@ -679,7 +527,7 @@ and others</property>
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="proxy_time_condition_days">
+          <object class="GtkEntry" id="filter_time_condition_days">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="invisible_char">●</property>
@@ -831,6 +679,158 @@ and others</property>
         <child>
           <placeholder/>
         </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkTextBuffer" id="ports_buffer"/>
+  <object class="GtkListStore" id="ports_list">
+    <columns>
+      <!-- column-name group -->
+      <column type="gchararray"/>
+      <!-- column-name value -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkTreeModelSort" id="ports_list_sort">
+    <property name="model">ports_list</property>
+  </object>
+  <object class="GtkMenu" id="profile_context_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Add New</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="profile_add_new" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Remove</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="profile_delete_selected" swapped="no"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="profile_mode_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">dev</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">local</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">ftp</col>
+      </row>
+    </data>
+  </object>
+  <object class="GtkListStore" id="profiles_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name mode -->
+      <column type="gchararray"/>
+      <!-- column-name username -->
+      <column type="gchararray"/>
+      <!-- column-name password -->
+      <column type="gchararray"/>
+      <!-- column-name server -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkMenu" id="proxy_group_domain_edit_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">delete</property>
+        <signal name="activate" handler="proxy_group_remove_item" swapped="no"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="proxy_group_domain_store">
+    <columns>
+      <!-- column-name domain -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkTextBuffer" id="proxy_group_import_buffer"/>
+  <object class="GtkMenu" id="proxy_groups_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem" id="menuitem5">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">delete</property>
+        <signal name="activate" handler="delete_proxy_group" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">edit</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="edit_proxy_group" object="proxy_group" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">new</property>
+        <signal name="activate" handler="new_proxy_group" swapped="no"/>
+      </object>
+    </child>
+  </object>
+  <object class="GtkListStore" id="proxy_groups_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkMenu" id="proxy_profiles_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">add rule</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="add_rule_below" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">delete rule</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="delete_rule" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">rename rule</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="edit_rule" swapped="no"/>
       </object>
     </child>
   </object>
@@ -1048,22 +1048,69 @@ and others</property>
                             <signal name="activate" handler="profile_open_window" swapped="no"/>
                           </object>
                         </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkMenuItem" id="developper_menu">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Developper</property>
+                    <property name="use_underline">True</property>
+                    <child type="submenu">
+                      <object class="GtkMenu">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkMenuItem" id="menu_open">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Open configuration on disk...</property>
+                            <property name="use_underline">True</property>
+                            <signal name="activate" handler="open_config" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkMenuItem" id="menu_save">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Save Configuration on disk...</property>
+                            <property name="use_underline">True</property>
+                            <signal name="activate" handler="save_config" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkMenuItem" id="menu_save_as">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Save Configuration as...</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkSeparatorMenuItem">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </object>
+                        </child>
                         <child>
                           <object class="GtkMenuItem" id="menu_import">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">_Import json file...</property>
+                            <property name="label" translatable="yes">_Import Configuration...</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="open_config" swapped="no"/>
+                            <signal name="activate" handler="import_config" swapped="no"/>
                           </object>
                         </child>
                         <child>
                           <object class="GtkMenuItem" id="menu_export">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">_Export json file...</property>
+                            <property name="label" translatable="yes">_Export Configuration...</property>
                             <property name="use_underline">True</property>
-                            <signal name="activate" handler="save_config" swapped="no"/>
+                            <signal name="activate" handler="export_config" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -1301,7 +1348,7 @@ and others</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkButton">
+                          <object class="GtkButton" id="save_button1">
                             <property name="label">gtk-save</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -1317,7 +1364,7 @@ and others</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton">
+                          <object class="GtkButton" id="show_assistant">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -1597,6 +1644,35 @@ and others</property>
                                 <property name="can_focus">False</property>
                                 <property name="orientation">vertical</property>
                                 <child>
+                                  <object class="GtkBox">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <object class="GtkImage" id="user_summary_internet_icon">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="stock">gtk-missing-image</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                    <child>
+                                      <placeholder/>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
                                   <object class="GtkScrolledWindow">
                                     <property name="height_request">10</property>
                                     <property name="visible">True</property>
@@ -1655,7 +1731,7 @@ and others</property>
                                   <packing>
                                     <property name="expand">True</property>
                                     <property name="fill">True</property>
-                                    <property name="position">0</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
@@ -1673,7 +1749,7 @@ and others</property>
                                   <packing>
                                     <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">1</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                               </object>
@@ -1760,7 +1836,7 @@ and others</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkButton">
+                          <object class="GtkButton" id="save_button2">
                             <property name="label">gtk-save</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -2515,6 +2591,19 @@ allowed</property>
                 <property name="top_attach">2</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkCheckButton" id="option_developper_check">
+                <property name="label" translatable="yes">Show Developper Menu</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">3</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -2814,18 +2903,6 @@ Improper values can ruin your filtering scheme. </property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">end</property>
-                <property name="label" translatable="yes">Mode</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">end</property>
                 <property name="label" translatable="yes">Username</property>
               </object>
               <packing>
@@ -2882,24 +2959,6 @@ Improper values can ruin your filtering scheme. </property>
               </packing>
             </child>
             <child>
-              <object class="GtkComboBox" id="profile_mode_combo">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="model">profile_mode_store</property>
-                <signal name="changed" handler="profile_update_data" swapped="no"/>
-                <child>
-                  <object class="GtkCellRendererText"/>
-                  <attributes>
-                    <attribute name="text">0</attribute>
-                  </attributes>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -2922,6 +2981,12 @@ Improper values can ruin your filtering scheme. </property>
                 <property name="left_attach">1</property>
                 <property name="top_attach">4</property>
               </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
