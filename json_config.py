@@ -16,6 +16,7 @@ class ImportJsonDialog:
 
         self.file_filter = Gtk.FileFilter()
         self.file_filter.add_pattern('*.json')
+        self.configpath = ""
 
     def run(self, offline = False):
         dialog = Gtk.FileChooserDialog(
@@ -28,10 +29,10 @@ class ImportJsonDialog:
 
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
-            configpath = dialog.get_filename()
-            configname = os.path.split(configpath)[1]
+            self.configpath = dialog.get_filename()
+            configname = os.path.split(self.configpath)[1]
             config = json.load(
-                open(configpath, 'r'),
+                open(self.configpath, 'r'),
                 object_pairs_hook=OrderedDict
             )
 
@@ -71,21 +72,23 @@ class ExportJsonDialog:
         self.file_filter = Gtk.FileFilter()
         self.file_filter.add_pattern('*.json')
 
-    def run(self, offline = False):
-        dialog = Gtk.FileChooserDialog(
-            _("Export Config"),
-            self.arw['window1'],
-            Gtk.FileChooserAction.SAVE,
-            (_("Export"), Gtk.ResponseType.ACCEPT),
-        )
-        dialog.set_filter(self.file_filter)
+    def run(self, configpath = None, offline = False):
+        if not configpath:
+            dialog = Gtk.FileChooserDialog(
+                _("Export Config"),
+                self.arw['window1'],
+                Gtk.FileChooserAction.SAVE,
+                (_("Export"), Gtk.ResponseType.ACCEPT),
+            )
+            dialog.set_filter(self.file_filter)
 
-        response = dialog.run()
-        if response == Gtk.ResponseType.ACCEPT:
-            f1 = open(dialog.get_filename(), "w", newline = "\n")
-            config2 = self.controller.rebuild_config()
-            f1.write(json.dumps(config2, indent = 3))
-            f1.close()
-            #shutil.copy(get_config_path("idefix.json"), )
+            response = dialog.run()
+            if response == Gtk.ResponseType.ACCEPT:
+                configpath =    dialog.get_filename()
+            dialog.destroy()
 
-        dialog.destroy()
+        f1 = open(configpath, "w", newline = "\n")
+        config2 = self.controller.rebuild_config()
+        f1.write(json.dumps(config2, indent = 3))
+        f1.close()
+

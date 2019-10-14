@@ -508,11 +508,11 @@ class Confix:
 
 
 
-    def open_config(self, widgete):
+    def open_config(self, widget):
         self.import_json.run(offline = True)
 
     def save_config(self, widget):
-        self.export_json.run(offline = True)
+        self.export_json.run(configpath = self.import_json.configpath, offline = True)
 
     def save_config_as(self, widget):
         self.export_json.run(offline = True)
