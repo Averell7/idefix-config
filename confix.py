@@ -448,26 +448,25 @@ class Confix:
 
 
         if not self.ftp:
-            # x = ConfigProfile(self.arw, self)
-            # x.profile_open_window()
+            alert(_("Could not connect to %s. \nVerify your cables or your configuration.") % ftp1["server"][0])
 
-            if askyesno(_("Update Configuration"), _("Could not connect to FTP. Edit Configuration?")):
-                self.profiles.profile_open_window()
-
-                def restart(*args):
-                    if askyesno(_("Restart"), _("Please restart idefix to use new configuration")):
-                        #sys.exit(0)
-                        configname = self.arw['profile_name_entry'].get_text()
-                        self.ftp_config = self.idefix_config['conf'][configname]
-                        self.open_connexion_profile()
-
-
-                self.profiles.window.connect('hide', restart)
-                print("restart system")
-                self.profiles.list_configuration_profiles()
-                return
-            else:
-                return
+##            if askyesno(_("Update Configuration"), _("Could not connect to FTP. Edit Configuration?")):
+##                self.profiles.profile_open_window()
+##
+##                def restart(*args):
+##                    if askyesno(_("Restart"), _("Please restart idefix to use new configuration")):
+##                        #sys.exit(0)
+##                        configname = self.arw['profile_name_entry'].get_text()
+##                        self.ftp_config = self.idefix_config['conf'][configname]
+##                        self.open_connexion_profile()
+##
+##
+##                self.profiles.window.connect('hide', restart)
+##                print("restart system")
+##                self.profiles.list_configuration_profiles()
+##                return
+##            else:
+##                return
         else:
             # retrieve files by ftp
             data0 = ftp_get(self.ftp, "idefix.json", json  = True)
