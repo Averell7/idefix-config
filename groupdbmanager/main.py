@@ -1,7 +1,8 @@
-from gi.repository import Gtk
-from db import Database
 import configparser
 
+from gi.repository import Gtk
+
+from db import Database
 
 COLUMN_NAME = 0
 COLUMN_DATA = 1
@@ -15,6 +16,7 @@ TYPE_GROUP = 1
 class DatabaseManager:
 
     category_iters = {}
+    group_iters = {}
 
     def __init__(self):
         widgets = Gtk.Builder()
@@ -101,6 +103,20 @@ class DatabaseManager:
             buffer = Gtk.TextBuffer()
             buffer.set_text(model.get_value(iter, COLUMN_DATA))
             self.widgets['unverified_textview'].set_buffer(buffer)
+
+            # Try to find the corresponding verified group (if one exists)
+            name = model.get_value(iter, COLUMN_NAME)
+            selected_id = model.get_value(iter, COLUMN_ID)
+            for item_iter, item in self.group_iters.items():
+                if item['name'] == name and item['id'] != selected_id:
+                    # Select this item
+                    filtered_model = self.widgets['verified_treeview'].get_model()
+                    found, select_iter = filtered_model.convert_child_iter_to_iter(item_iter)
+                    if found:
+                        path = filtered_model.get_path(select_iter)
+                        self.widgets['verified_treeview'].expand_to_path(path)
+                        self.widgets['verified_treeview'].set_cursor(path)
+
         else:
             self.widgets['unverified_entry_name'].set_text('')
             self.widgets['unverified_entry_checkbox'].set_active(False)
@@ -171,6 +187,7 @@ class DatabaseManager:
         """Refresh the tree views"""
         self.store.clear()
         self.category_iters = {}
+        self.group_iters = {}
 
         for row in self.database.get_categories():
 
@@ -191,6 +208,8 @@ class DatabaseManager:
             self.store.set_value(iter, COLUMN_NAME, row['name'])
             self.store.set_value(iter, COLUMN_TYPE, TYPE_GROUP)
             self.store.set_value(iter, COLUMN_DATA, row['domains'])
+
+            self.group_iters[iter] = row
 
     def quit(self, *args):
         if self.database.connected:
