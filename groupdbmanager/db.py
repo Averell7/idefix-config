@@ -2,6 +2,7 @@
 Connect to the remote database to do operations
 """
 import json
+
 import mysql.connector
 
 
@@ -86,7 +87,9 @@ class Database:
 
     def delete_group(self, group_id):
         """Remove the group by its id"""
-        pass
+        cur = self.db.cursor()
+        cur.execute("DELETE FROM proxy_groups WHERE id=%s LIMIT 1", (group_id,))
+        cur.close()
 
     def delete_category(self, category_id):
         """Delete the category by its id"""

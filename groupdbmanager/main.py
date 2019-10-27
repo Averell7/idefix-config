@@ -3,6 +3,7 @@ import configparser
 from gi.repository import Gtk
 
 from db import Database
+from util import askyesno
 
 COLUMN_NAME = 0
 COLUMN_DATA = 1
@@ -172,6 +173,9 @@ class DatabaseManager:
         iter = model.convert_iter_to_child_iter(iter)
         model = model.get_model()
 
+        if model.get_value(iter, COLUMN_TYPE) == TYPE_CATEGORY:
+            return
+
         # Get the id
         id = model.get_value(iter, COLUMN_ID)
 
@@ -199,6 +203,9 @@ class DatabaseManager:
         iter = model.convert_iter_to_child_iter(iter)
         model = model.get_model()
 
+        if model.get_value(iter, COLUMN_TYPE) == TYPE_CATEGORY:
+            return
+
         # Get the id
         id = model.get_value(iter, COLUMN_ID)
 
@@ -219,6 +226,46 @@ class DatabaseManager:
             data.split('\n')
         )
         self.refresh_database()
+
+    def delete_unverified(self, widget):
+        """Delete an unverified group"""
+
+        model, iter = self.widgets['unverified_treeview'].get_selection().get_selected()
+        if not iter:
+            return
+        iter = model.convert_iter_to_child_iter(iter)
+        if not iter:
+            return
+        model = model.get_model()
+
+        if model.get_value(iter, COLUMN_TYPE) == TYPE_CATEGORY:
+            return
+
+        name = model.get_value(iter, COLUMN_NAME)
+
+        if askyesno("Delete Unverified Group", "Delete %s?" % name):
+            self.database.delete_group(int(model.get_value(iter, COLUMN_ID)))
+            self.refresh_database()
+
+    def delete_verified(self, widget):
+        """Delete a verified group"""
+
+        model, iter = self.widgets['verified_treeview'].get_selection().get_selected()
+        if not iter:
+            return
+        iter = model.convert_iter_to_child_iter(iter)
+        if not iter:
+            return
+        model = model.get_model()
+
+        if model.get_value(iter, COLUMN_TYPE) == TYPE_CATEGORY:
+            return
+
+        name = model.get_value(iter, COLUMN_NAME)
+
+        if askyesno("Delete Verified Group", "Delete %s?" % name):
+            self.database.delete_group(int(model.get_value(iter, COLUMN_ID)))
+            self.refresh_database()
 
     def connect_database(self, widget):
         if not self.database.connected:
