@@ -39,6 +39,8 @@ class DatabaseManager:
         self.store = self.widgets['group_store']
         self.widgets['verified_treeview'].get_model().set_visible_func(self.filter_verified)
         self.widgets['unverified_treeview'].get_model().set_visible_func(self.filter_unverified)
+        self.widgets['unverified_buffer'] = self.widgets['unverified_textview'].get_buffer()
+        self.widgets['verified_buffer'] = self.widgets['verified_textview'].get_buffer()
 
         self.database = Database(
             self.config['database']['host'],
@@ -47,6 +49,10 @@ class DatabaseManager:
             self.config['database']['password'],
             self.config['database']['database'],
         )
+
+        # Create text tags
+
+
 
     def filter_verified(self, model, iter, data=None):
         """Return true if the iter is verified. Also hides categories that don't have any groups"""
@@ -82,13 +88,14 @@ class DatabaseManager:
         if model.get_value(iter, COLUMN_TYPE) == TYPE_GROUP:
             self.widgets['verified_entry_name'].set_text(model.get_value(iter, COLUMN_NAME))
             self.widgets['verified_entry_checkbox'].set_active(model.get_value(iter, COLUMN_VERIFIED))
-            buffer = Gtk.TextBuffer()
-            buffer.set_text(model.get_value(iter, COLUMN_DATA))
-            self.widgets['verified_textview'].set_buffer(buffer)
+
+            self.widgets['verified_buffer'].set_text(model.get_value(iter, COLUMN_DATA))
         else:
             self.widgets['verified_entry_name'].set_text('')
             self.widgets['verified_entry_checkbox'].set_active(False)
             self.widgets['verified_textview'].get_buffer().set_text('')
+
+        self.diff_group_domains()
 
     def unverified_selected(self, widget):
         model, iter = widget.get_selected()
@@ -100,9 +107,7 @@ class DatabaseManager:
         if model.get_value(iter, COLUMN_TYPE) == TYPE_GROUP:
             self.widgets['unverified_entry_name'].set_text(model.get_value(iter, COLUMN_NAME))
             self.widgets['unverified_entry_checkbox'].set_active(model.get_value(iter, COLUMN_VERIFIED))
-            buffer = Gtk.TextBuffer()
-            buffer.set_text(model.get_value(iter, COLUMN_DATA))
-            self.widgets['unverified_textview'].set_buffer(buffer)
+            self.widgets['unverified_buffer'].set_text(model.get_value(iter, COLUMN_DATA))
 
             # Try to find the corresponding verified group (if one exists)
             name = model.get_value(iter, COLUMN_NAME)
@@ -121,6 +126,45 @@ class DatabaseManager:
             self.widgets['unverified_entry_name'].set_text('')
             self.widgets['unverified_entry_checkbox'].set_active(False)
             self.widgets['unverified_textview'].get_buffer().set_text('')
+
+        self.diff_group_domains()
+
+    def diff_group_domains(self):
+        """Highlight differences in domains between unverified and verified"""
+
+        buf = self.widgets['unverified_buffer']
+        unverified_data = buf.get_text(
+            buf.get_start_iter(), buf.get_end_iter(), True
+        ).lower()
+        unverified_list = unverified_data.split('\n')
+
+        buf = self.widgets['verified_buffer']
+        verified_data = buf.get_text(
+            buf.get_start_iter(), buf.get_end_iter(), True
+        ).lower()
+        verified_list = verified_data.split('\n')
+
+        for line in unverified_list:
+            if line in verified_list:
+                start_pos = unverified_data.find(line)
+                end_pos = start_pos + len(line)
+                start_iter = self.widgets['unverified_buffer'].get_iter_at_offset(start_pos)
+                end_iter = self.widgets['unverified_buffer'].get_iter_at_offset(end_pos)
+                self.widgets['unverified_buffer'].apply_tag_by_name('existingdomain', start_iter, end_iter)
+            else:
+                start_pos = unverified_data.find(line)
+                end_pos = start_pos + len(line)
+                start_iter = self.widgets['unverified_buffer'].get_iter_at_offset(start_pos)
+                end_iter = self.widgets['unverified_buffer'].get_iter_at_offset(end_pos)
+                self.widgets['unverified_buffer'].apply_tag_by_name('newdomain', start_iter, end_iter)
+
+        for line in verified_list:
+            if line not in unverified_list:
+                start_pos = verified_data.find(line)
+                end_pos = start_pos + len(line)
+                start_iter = self.widgets['verified_buffer'].get_iter_at_offset(start_pos)
+                end_iter = self.widgets['verified_buffer'].get_iter_at_offset(end_pos)
+                self.widgets['verified_buffer'].apply_tag_by_name('deletedomain', start_iter, end_iter)
 
     def updated_unverified(self, widget):
         """Update the selected group"""
@@ -185,6 +229,10 @@ class DatabaseManager:
 
     def refresh_database(self, widget=None):
         """Refresh the tree views"""
+
+        if not self.database.connected:
+            return
+
         self.store.clear()
         self.category_iters = {}
         self.group_iters = {}
