@@ -3,7 +3,7 @@ import configparser
 from gi.repository import Gtk
 
 from db import Database
-from util import askyesno
+from util import askyesno, ask_text, message_dialog
 
 COLUMN_NAME = 0
 COLUMN_DATA = 1
@@ -18,6 +18,10 @@ class DatabaseManager:
 
     category_iters = {}
     group_iters = {}
+
+    new_item = False
+    verified_dirty = False
+    unverified_dirty = False
 
     def __init__(self):
         widgets = Gtk.Builder()
@@ -53,22 +57,61 @@ class DatabaseManager:
 
         # Create text tags
 
+    def ask_verified_save_changes(self):
+        """Asks the user if they want to save their changes"""
+        if self.verified_dirty:
+            return askyesno("Save Changes?", "Do you want to save your changes first?")
 
+    def add_new_group(self, widget):
+        """Create a new group entry"""
+        if self.ask_verified_save_changes():
+            # Do save?
+            self.updated_verified(widget)
+
+        name = ask_text(self.widgets['main_window'], "Enter the group name")
+        if name:
+            self.verified_dirty = True
+            self.new_item = True
+            self.widgets['verified_entry_name'].set_text(name)
+            self.widgets['verified_entry_checkbox'].set_active(True)
+            self.widgets['verified_buffer'].set_text("")
+            self.widgets['verified_textview'].grab_focus()
+
+    def add_new_category(self, widget):
+        """Create a new category entry"""
+        name = ask_text(self.widgets['main_window'], "Please enter the category name")
+        if not name:
+            return
+
+        parent_id = None
+
+        model, iter = self.widgets['verified_treeview'].get_selection().get_selected()
+        if iter:
+            iter = model.convert_iter_to_child_iter(iter)
+            model = model.get_model()
+
+            if model.get_value(iter, COLUMN_TYPE) == TYPE_CATEGORY:
+                parent_id = model.get_value(iter, COLUMN_ID)
+
+        ok, err = self.database.create_category(name, parent_id)
+        if not ok:
+            message_dialog("Error", err)
+        self.refresh_database()
 
     def filter_verified(self, model, iter, data=None):
-        """Return true if the iter is verified. Also hides categories that don't have any groups"""
+        """Return true if the iter is verified."""
         if model.get_value(iter, COLUMN_TYPE) == TYPE_GROUP:
             return model.get_value(iter, COLUMN_VERIFIED)
         else:
             child = model.iter_children(iter)
             while child:
-                if self.filter_verified(model, child):
-                    return True
+                if not self.filter_verified(model, child):
+                    return False
                 child = model.iter_next(child)
-            return False
+            return True
 
     def filter_unverified(self, model, iter, data=None):
-        """Return true if the iter is verified"""
+        """Return true if the iter is verified. Also hides categories that don't have any groups"""
         if model.get_value(iter, COLUMN_TYPE) == TYPE_GROUP:
             return not model.get_value(iter, COLUMN_VERIFIED)
         else:
@@ -96,6 +139,7 @@ class DatabaseManager:
             self.widgets['verified_entry_checkbox'].set_active(False)
             self.widgets['verified_textview'].get_buffer().set_text('')
 
+        self.new_item = False
         self.diff_group_domains()
 
     def unverified_selected(self, widget):
@@ -196,18 +240,28 @@ class DatabaseManager:
             data.split('\n')
         )
         self.refresh_database()
+        self.unverified_dirty = False
 
     def updated_verified(self, widget):
         """Update the selected group"""
+
         model, iter = self.widgets['verified_treeview'].get_selection().get_selected()
         iter = model.convert_iter_to_child_iter(iter)
         model = model.get_model()
 
-        if model.get_value(iter, COLUMN_TYPE) == TYPE_CATEGORY:
-            return
+        category_id = None
+        id = None
 
-        # Get the id
-        id = model.get_value(iter, COLUMN_ID)
+        if not self.new_item:
+            if model.get_value(iter, COLUMN_TYPE) == TYPE_CATEGORY:
+                return
+
+            # Get the id
+            id = model.get_value(iter, COLUMN_ID)
+        else:
+            while iter and model.get_value(iter, COLUMN_TYPE) != TYPE_CATEGORY:
+                iter = model.parent_iter(iter)
+            category_id = model.get_value(iter, COLUMN_ID)
 
         # Update with the entry data
         buffer = self.widgets['verified_textview'].get_buffer()
@@ -219,13 +273,23 @@ class DatabaseManager:
         name = self.widgets['verified_entry_name'].get_text()
         verified = self.widgets['verified_entry_checkbox'].get_active()
 
-        self.database.update_group(
-            int(id),
-            verified,
-            name,
-            data.split('\n')
-        )
+        if self.new_item:
+            self.database.create_group(
+                True,
+                name,
+                data.split('\n'),
+                category_id
+            )
+        else:
+            self.database.update_group(
+                int(id),
+                verified,
+                name,
+                data.split('\n')
+            )
         self.refresh_database()
+        self.verified_dirty = False
+        self.new_item = False
 
     def delete_unverified(self, widget):
         """Delete an unverified group"""
@@ -246,6 +310,7 @@ class DatabaseManager:
         if askyesno("Delete Unverified Group", "Delete %s?" % name):
             self.database.delete_group(int(model.get_value(iter, COLUMN_ID)))
             self.refresh_database()
+            self.unverified_dirty = False
 
     def delete_verified(self, widget):
         """Delete a verified group"""
@@ -266,6 +331,7 @@ class DatabaseManager:
         if askyesno("Delete Verified Group", "Delete %s?" % name):
             self.database.delete_group(int(model.get_value(iter, COLUMN_ID)))
             self.refresh_database()
+            self.verified_dirty = False
 
     def connect_database(self, widget):
         if not self.database.connected:
@@ -285,8 +351,10 @@ class DatabaseManager:
         self.group_iters = {}
 
         for row in self.database.get_categories():
-
-            iter = self.store.append(self.category_iters.get(row['id'], None))
+            iter = self.store.append(
+                self.category_iters.get(row['parent_id'], None),
+                None
+            )
 
             self.category_iters[row['id']] = iter
             self.store.set_value(iter, COLUMN_ID, str(row['id']))

@@ -31,6 +31,26 @@
   <object class="GtkTextBuffer" id="verified_buffer">
     <property name="tag_table">domain_table</property>
   </object>
+  <object class="GtkTreeStore" id="group_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name domains -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="gchararray"/>
+      <!-- column-name type -->
+      <column type="gint"/>
+      <!-- column-name verified -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
+  <object class="GtkTreeModelFilter" id="unverified_filter">
+    <property name="child_model">group_store</property>
+  </object>
+  <object class="GtkTreeModelFilter" id="verified_filter">
+    <property name="child_model">group_store</property>
+  </object>
   <object class="GtkWindow" id="main_window">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Group Database Manager</property>
@@ -87,6 +107,43 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="homogeneous">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkMenuToolButton">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Add</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-new</property>
+                <signal name="clicked" handler="add_new_group" swapped="no"/>
+                <child type="menu">
+                  <object class="GtkMenu">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">New Category</property>
+                        <signal name="activate" handler="add_new_category" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">New Group</property>
+                        <property name="use_underline">True</property>
+                        <signal name="activate" handler="add_new_group" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
           </object>
@@ -569,25 +626,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkTreeStore" id="group_store">
-    <columns>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name domains -->
-      <column type="gchararray"/>
-      <!-- column-name id -->
-      <column type="gchararray"/>
-      <!-- column-name type -->
-      <column type="gint"/>
-      <!-- column-name verified -->
-      <column type="gboolean"/>
-    </columns>
-  </object>
-  <object class="GtkTreeModelFilter" id="unverified_filter">
-    <property name="child_model">group_store</property>
-  </object>
-  <object class="GtkTreeModelFilter" id="verified_filter">
-    <property name="child_model">group_store</property>
   </object>
 </interface>
