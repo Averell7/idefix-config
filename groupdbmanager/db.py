@@ -97,6 +97,24 @@ class Database:
 
     def create_group(self, verified, name, domains, category_id):
         """Create a new group and return its id"""
+        cur = self.db.cursor()
+        cur.execute("INSERT INTO proxy_groups (unverified, name, domains, category_id) VALUES(%s, %s, %s, %s)", (
+            not verified,
+            name,
+            json.dumps(domains),
+            category_id
+        ))
+        cur.close()
 
     def create_category(self, name, parent_id):
         """Create a new category and return its id"""
+        cur = self.db.cursor()
+        try:
+            cur.execute("INSERT INTO proxy_category (name, parent_id) VALUES (%s, %s)", (
+                name,
+                int(parent_id) if parent_id is not None else None
+            ))
+        except mysql.connector.errors.IntegrityError as e:
+            return False, 'Category already exists. Please use a different name'
+        cur.close()
+        return True, ''
