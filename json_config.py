@@ -1,5 +1,6 @@
 import json
 import shutil
+import os
 from collections import OrderedDict
 
 from gi.repository import Gtk
@@ -9,15 +10,15 @@ from util import get_config_path
 
 class ImportJsonDialog:
 
-    def __init__(self, arw, controller, merge = False):
+    def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
-        self.merge = merge
 
         self.file_filter = Gtk.FileFilter()
         self.file_filter.add_pattern('*.json')
+        self.configpath = ""
 
-    def run(self):
+    def run(self, offline = False):
         dialog = Gtk.FileChooserDialog(
             _("Import Config"),
             self.arw['window1'],
@@ -28,45 +29,24 @@ class ImportJsonDialog:
 
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
+            self.configpath = dialog.get_filename()
+            configname = os.path.split(self.configpath)[1]
             config = json.load(
-                open(dialog.get_filename(), 'r'),
+                open(self.configpath, 'r'),
                 object_pairs_hook=OrderedDict
             )
 
-            if self.merge :
-                # merge the opened config with the existing one
+            if offline :
+                # close ftp connection
+                self.controller.ftp.close()
+                # disable the save button
+                self.controller.arw["save_button1"].set_sensitive(False)
+                self.controller.arw["save_button2"].set_sensitive(False)
+                self.controller.arw["configname"].set_text(configname)
 
-                if 'users' in config:
-                    for user in config['users']:
-                        if user not in self.controller.config['users']:
-                            self.controller.config['users'][user] = OrderedDict()
-                        self.controller.config['users'][user].update(config['users'][user])
 
-                if 'proxy' in config:
-                    for proxy in config['proxy']:
-                        if proxy not in self.controller.config['proxy']:
-                            self.controller.config['proxy'][proxy] = OrderedDict()
-                        self.controller.config['proxy'][proxy].update(config['proxy'][proxy])
-
-                if 'ports' in config:
-                    for port in config['ports']:
-                        if port not in self.controller.config['ports']:
-                            self.controller.config['ports'][port] = OrderedDict()
-                        self.controller.config['ports'][port].update(config['ports'][port])
-
-                if 'groups' in config:
-                    for group in config['groups']:
-                        if group not in self.controller.config['groups']:
-                            self.controller.config['groups'][group] = OrderedDict()
-                        self.controller.config['groups'][group].update(config['groups'][group])
-
-                if 'firewall' in config:
-                    for firewall in config['firewall']:
-                        if firewall not in self.controller.config['firewall']:
-                            self.controller.config['firewall'][firewall] = OrderedDict()
-                        self.controller.config['firewall'][firewall].update(config['firewall'][firewall])
-            else :
-                self.controller.config = config
+            self.controller.config = config
+            self.controller.update()
             self.update_gui()
         dialog.destroy()
 
@@ -74,10 +54,10 @@ class ImportJsonDialog:
         self.controller.maclist = self.controller.users.create_maclist()
         self.controller.users.populate_users()
         self.controller.proxy_users.populate_proxy()
-        self.controller.populate_ports()
+        #self.controller.populate_ports()
         self.controller.populate_groups()
         self.controller.populate_users_chooser()
-        self.controller.firewall.populate_firewall()
+        #self.controller.firewall.populate_firewall()
         self.controller.set_check_boxes()
         self.controller.set_colors()
 
@@ -92,17 +72,23 @@ class ExportJsonDialog:
         self.file_filter = Gtk.FileFilter()
         self.file_filter.add_pattern('*.json')
 
-    def run(self):
-        dialog = Gtk.FileChooserDialog(
-            _("Export Config"),
-            self.arw['window1'],
-            Gtk.FileChooserAction.SAVE,
-            (_("Export"), Gtk.ResponseType.ACCEPT),
-        )
-        dialog.set_filter(self.file_filter)
+    def run(self, configpath = None, offline = False):
+        if not configpath:
+            dialog = Gtk.FileChooserDialog(
+                _("Export Config"),
+                self.arw['window1'],
+                Gtk.FileChooserAction.SAVE,
+                (_("Export"), Gtk.ResponseType.ACCEPT),
+            )
+            dialog.set_filter(self.file_filter)
 
-        response = dialog.run()
-        if response == Gtk.ResponseType.ACCEPT:
-            shutil.copy(get_config_path("confix.json"), dialog.get_filename())
+            response = dialog.run()
+            if response == Gtk.ResponseType.ACCEPT:
+                configpath =    dialog.get_filename()
+            dialog.destroy()
 
-        dialog.destroy()
+        f1 = open(configpath, "w", newline = "\n")
+        config2 = self.controller.rebuild_config()
+        f1.write(json.dumps(config2, indent = 3))
+        f1.close()
+

@@ -1,0 +1,393 @@
+{
+   "users": {
+      "internet ferm\u00e9": {
+         "@_internet": "none",
+         "#Hector": {
+            "mac": [
+               "00:40:CA:3C:5F:33"
+            ]
+         }
+      },
+      "Internet filtr\u00e9": {
+         "@_internet": "filtered",
+         "#Louis": {
+            "mac": [
+               "00:17:A4:FC:5A:15",
+               "d8:50:e6:84:a2:b1\t#\t  Tablette",
+               "b8:27:eb:3c:3f:23\t#\t Raspberry pi",
+               "",
+               ""
+            ]
+         },
+         "#Etienne": {
+            "mac": [
+               "00:21:70:F8:58:F1",
+               "98:3b:16:13:d9:9b\t#\t Wi-Fi"
+            ]
+         }
+      },
+      "Internet ouvert": {
+         "@_internet": "open",
+         "#Nicolas": {
+            "mac": [
+               "08:60:6E:89:A8:01",
+               "20:68:9d:ee:45:7a\t#\t  WIFI",
+               "60:a4:4c:7b:1d:5f"
+            ]
+         }
+      }
+   },
+   "rules": {
+      "courrier \u00e9lectronique": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "#Louis"
+         ],
+         "dest_groups": [
+            ""
+         ],
+         "dest_domains": [
+            "*.gmail.com"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1
+      },
+      "autorisations_g\u00e9n\u00e9rales": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            ""
+         ],
+         "dest_groups": [
+            "technique",
+            "antivirus",
+            "mozilla"
+         ],
+         "dest_domains": [
+            "*.mailshell.net",
+            "*.mon-ip.com",
+            "svrsecure-g3-crl.verisign.com",
+            "*.ntp.org",
+            "*.mappy.com",
+            "www.adobe.com",
+            "*.java.com",
+            "*.jsdelivr.net"
+         ],
+         "any_user": 1,
+         "any_destination": 0,
+         "allow_deny": 1
+      },
+      "Coupure_de_nuit": {
+         "active": "on",
+         "action": "deny",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            ""
+         ],
+         "dest_groups": [
+            ""
+         ],
+         "dest_domains": [
+            ""
+         ],
+         "any_user": 1,
+         "any_destination": 1,
+         "allow_deny": 0
+      },
+      "autorisations_temporaires": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            ""
+         ],
+         "dest_groups": [
+            ""
+         ],
+         "dest_domains": [
+            ""
+         ],
+         "any_user": 1,
+         "any_destination": 0,
+         "allow_deny": 1
+      },
+      "Louis": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "#Louis"
+         ],
+         "dest_groups": [
+            "religieux",
+            "vatican",
+            "livres",
+            "ebay",
+            "finances"
+         ],
+         "dest_domains": [
+            "*.openoffice.org",
+            "*.linuxfoundation.org",
+            "www.safedns.com"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1
+      }
+   },
+   "groups": {
+      "technique": {
+         "dest_domain": [
+            "*.verisign.com",
+            "*.ntp.org",
+            "*.googleapis.com",
+            "*.gstatic.com",
+            "*.google-analytics.com",
+            "*.sanasecurity.com",
+            "*.microsoft.com",
+            "*.windows.com",
+            "*.windowsupdate.com"
+         ]
+      },
+      "antivirus": {
+         "dest_domain": [
+            "*.avg.com",
+            "*.avg.fr",
+            "*.avast.com",
+            "*.avg.cz",
+            "avg.nation.com",
+            "*.avcdn.net",
+            "*.avgfree.com",
+            "*.akamai.net",
+            "*.geo.kaspersky.com",
+            "*.akamaitechnologies.com",
+            "akamai.grisoft.com",
+            "akamai.grisoft.cz",
+            "akamai.grisoft.cz.edgesuite.net",
+            "akamai.avg.cz.edgesuite.net",
+            "akamai.grisoft.com.edgesuite.net",
+            "akamai.avg.com.edgesuite.net"
+         ]
+      },
+      "mozilla": {
+         "dest_domain": [
+            "*.mozillamessaging.com",
+            "*.mozilla.com",
+            "*.mozilla.org",
+            "*.mozilla.net",
+            "*.firefox.com",
+            "mozilla.c3sl.ufpr.br",
+            "*.thunderbird.net"
+         ]
+      },
+      "skype": {
+         "dest_domain": [
+            "*.skype.com"
+         ]
+      },
+      "transports": {
+         "dest_domain": [
+            "*.cff.ch",
+            "*.sbb.ch",
+            "*.transisere.fr",
+            "*.ter-sncf.com",
+            "*.transisere.fr",
+            "*.voyages-sncf.com",
+            "*.oui.sncf",
+            "*.sncf.com",
+            "*.eurolines.fr",
+            "*.faurevercors.fr",
+            "*.grenoble-airport.com",
+            "*.lyonaeroports.com",
+            "*.rhonealpes.fr",
+            "*.aerocar.fr",
+            "*.opodo.fr"
+         ]
+      },
+      "poste": {
+         "dest_domain": [
+            "*.coliposte.net",
+            "*.colissimo.fr",
+            "*.laposte.fr",
+            "*.laposte.net",
+            "*.pagesjaunes.fr",
+            "*.mondialrelay.fr",
+            "*.dhl.de"
+         ]
+      },
+      "telephone": {
+         "dest_domain": [
+            "*.ippi.com"
+         ]
+      },
+      "transfert_fichiers": {
+         "dest_domain": [
+            "*.wetransfer.com",
+            "*.wetransfer.net",
+            "*.grosfichiers.com",
+            "*.grosfichiers.ch"
+         ]
+      },
+      "meteo": {
+         "dest_domain": [
+            "*.meteosuisse.admin.ch",
+            "*.meteosuisse.ch",
+            "*.meteofrance.com",
+            "*.meteociel.fr"
+         ]
+      },
+      "bible": {
+         "dest_domain": [
+            "*.saintebible.com",
+            "*.biblemenus.com",
+            "*.biblehub.net"
+         ]
+      },
+      "traduction": {
+         "dest_domain": [
+            "translate.google.fr",
+            "*.online-translator.com",
+            "ajax.googleapis.com",
+            "*.systran.fr",
+            "*.Promt.com",
+            "*.reverso.net"
+         ]
+      },
+      "livres": {
+         "dest_domain": [
+            "*.chapitre.com",
+            "*.chapitrepro.com",
+            "*.images-chapitre.com",
+            "*.abebooks.fr",
+            "*.abebooks.de",
+            "*.abebookscdn.com",
+            "*.clz.com",
+            "*.collectorz.net",
+            "*.collectorz.fr",
+            "*.collectorz.com"
+         ]
+      },
+      "ebay": {
+         "dest_domain": [
+            "*.ebay.fr",
+            "*.ebay.co.uk",
+            "*.ebay.com",
+            "*.ebayimg.com",
+            "*.ebaydesc.fr",
+            "*.ebaydesc.com",
+            "*.ebaystatic.com",
+            "*.leboncoin.fr",
+            "*.priceminister.com"
+         ]
+      },
+      "finances": {
+         "dest_domain": [
+            "*.paypal.fr",
+            "*.paypal.com",
+            "*.paypalobjects.com",
+            "*.xe.com",
+            "*.xe.net",
+            "*.westernunion.fr",
+            "*.lapostefinance.fr"
+         ]
+      },
+      "vatican": {
+         "dest_domain": [
+            "*.vatican.va",
+            "*.vaticanlibrary.va",
+            "*.vatlib.it",
+            "*.news.va"
+         ]
+      },
+      "wikipedia": {
+         "dest_domain": [
+            "*.wikibooks.org",
+            "*.wikiquote.org",
+            "*.wikisource.org",
+            "*.wikiversity.org",
+            "*.wiktionary.org",
+            "*.wikipedia.org",
+            "*.wikimedia.org"
+         ]
+      },
+      "annuaires": {
+         "dest_domain": [
+            "*.pagesjaunes.fr"
+         ]
+      },
+      "achats": {
+         "dest_domain": [
+            "*.amazon.co.uk",
+            "*.amazon.fr"
+         ]
+      },
+      "google": {
+         "dest_domain": [
+            "*.google.com",
+            "*.google.fr"
+         ]
+      },
+      "google_extensions": {
+         "dest_domain": [
+            "myaccount.google.com",
+            "policies.google.com",
+            "google.consents.com",
+            "support.google.com",
+            "safety.google.com",
+            "accounts.google.com",
+            "tools.google.com",
+            "adssetings.goggle.fr",
+            "consent.google.fr"
+         ]
+      },
+      "cartes": {
+         "dest_domain": [
+            "*.mappy.com",
+            "*.viamichelin.fr"
+         ]
+      },
+      "chartreuse": {
+         "dest_domain": [
+            "*.chartreux.org",
+            "*.vocatiochartreux.org",
+            "*.cartoixamontalegre.net"
+         ]
+      },
+      "religieux": {
+         "dest_domain": [
+            "*.viereligieuse.fr",
+            "*.corref.com",
+            "*.corref.fr",
+            "*.zenit.org",
+            "*.la-croix.com",
+            "*.bayardweb.com",
+            "*.krxd.net",
+            "*.zenit.org"
+         ]
+      },
+      "dictionnaires": {
+         "dest_domain": [
+            "*.dicolatin.com",
+            "*.lexilogos.com",
+            "*.wiktionary.org",
+            "*.larousse.fr"
+         ]
+      },
+      "lilo": {
+         "dest_domain": [
+            "*.lilo.org",
+            "*.lilosearch.org"
+         ]
+      }
+   },
+   "version": 24
+}

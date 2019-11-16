@@ -17,12 +17,12 @@ class ProxyUsers:
         self.arw = arw
         self.controller = controller
 
-        self.arw["proxy_users"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
-        self.arw['proxy_users'].drag_source_add_text_targets()
-        self.arw['proxy_users'].connect("drag-data-get", self.proxy_users_data_get)
-        self.arw['proxy_users'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
-        self.arw['proxy_users'].drag_dest_add_text_targets()
-        self.arw['proxy_users'].connect("drag-data-received", self.update_proxy_user_list_view)
+        self.arw["filter_users"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
+        self.arw['filter_users'].drag_source_add_text_targets()
+        self.arw['filter_users'].connect("drag-data-get", self.proxy_users_data_get)
+        self.arw['filter_users'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
+        self.arw['filter_users'].drag_dest_add_text_targets()
+        self.arw['filter_users'].connect("drag-data-received", self.update_proxy_user_list_view)
 
         """
         0 : section
@@ -34,8 +34,8 @@ class ProxyUsers:
         6 : mac
         7 : dest_group
         8 : dest_domain
-        9 : dest_ip
-        10 : destination
+        9 : (previously : dest_ip. No longer used)
+        10 : (previously : destination. No longer used)
         11 : toggleButton (0/1) users [list/all]
         12 : toggleButton (0/1) destination [list/all]
         13 : toggleButton (0/1) [deny/allow]
@@ -48,21 +48,21 @@ class ProxyUsers:
         20 : reserved (0/1)
         """
 
-        self.proxy_store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, int, int, int, int, str,
+        self.filter_store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, int, int, int, int, str,
                                          str, str, str, int, int)  #
         self.cell3 = Gtk.CellRendererText()
         self.check2 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
-        self.check2.connect('toggled', self.toggle_col14, self.proxy_store)
+        self.check2.connect('toggled', self.toggle_col14, self.filter_store)
         # Test pour Daniel
         self.check3 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
-        self.check3.connect('toggled', self.toggle_col5, self.proxy_store)
+        self.check3.connect('toggled', self.toggle_col5, self.filter_store)
         self.check4 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
-        self.check4.connect('toggled', self.toggle_col12, self.proxy_store)
+        self.check4.connect('toggled', self.toggle_col12, self.filter_store)
         self.check5 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
-        self.check5.connect('toggled', self.toggle_col13_proxy, self.proxy_store)
+        self.check5.connect('toggled', self.toggle_col13_proxy, self.filter_store)
 
         self.treeview3 = self.arw["treeview3"]
-        self.treeview3.set_model(self.proxy_store)
+        self.treeview3.set_model(self.filter_store)
         self.treeview3.connect("button-press-event", self.load_proxy_user)
 
         self.tvcolumn = Gtk.TreeViewColumn(_('Key'), self.cell3, markup=0, foreground=15, background=16)
@@ -117,32 +117,32 @@ class ProxyUsers:
         # callback of the open access button in proxy tab.
         # col 12 = open access state; col 16 = background color
 
-        treestore = self.proxy_store
-        if treestore.get_value(self.controller.iter_proxy, 12) == 0:
-            treestore.set_value(self.controller.iter_proxy, 12, 1)
-            treestore.set_value(self.controller.iter_proxy, 10, "any")
-            treestore.set_value(self.controller.iter_proxy, 16, "#ffff88")
+        treestore = self.filter_store
+        if treestore.get_value(self.controller.iter_filter, 12) == 0:
+            treestore.set_value(self.controller.iter_filter, 12, 1)
+            treestore.set_value(self.controller.iter_filter, 10, "any")
+            treestore.set_value(self.controller.iter_filter, 16, "#ffff88")
         else:
-            treestore.set_value(self.controller.iter_proxy, 12, 0)
-            treestore.set_value(self.controller.iter_proxy, 10, "")
-            treestore.set_value(self.controller.iter_proxy, 16, "#ffffff")
+            treestore.set_value(self.controller.iter_filter, 12, 0)
+            treestore.set_value(self.controller.iter_filter, 10, "")
+            treestore.set_value(self.controller.iter_filter, 16, "#ffffff")
             #self.arw["toggle_proxy_open_button"].set_image(self.controller.red_button)
         self.load_proxy_user2()
 
     def toggle_col5(self, widget, a=0, b= 0):
         """Toggle any user or specific users"""
-        if self.proxy_store.get_value(self.controller.iter_proxy, 11) == 0:
-            self.proxy_store.set_value(self.controller.iter_proxy, 11, 1)
-            markup = self.proxy_store.get_value(self.controller.iter_proxy, 0)
-            self.proxy_store.set_value(self.controller.iter_proxy, 0, "<i>" + markup + "</i>")
-            self.arw["proxy_users"].hide()
+        if self.filter_store.get_value(self.controller.iter_filter, 11) == 0:
+            self.filter_store.set_value(self.controller.iter_filter, 11, 1)
+            markup = self.filter_store.get_value(self.controller.iter_filter, 0)
+            self.filter_store.set_value(self.controller.iter_filter, 0, "<i>" + markup + "</i>")
+            self.arw["filter_users"].hide()
         else:
-            self.proxy_store.set_value(self.controller.iter_proxy, 11, 0)
-            markup = self.proxy_store.get_value(self.controller.iter_proxy, 0)
+            self.filter_store.set_value(self.controller.iter_filter, 11, 0)
+            markup = self.filter_store.get_value(self.controller.iter_filter, 0)
             markup = markup.replace("<i>", "")
             markup = markup.replace("</i>", "")
-            self.proxy_store.set_value(self.controller.iter_proxy, 0, markup)
-            self.arw["proxy_users"].show()
+            self.filter_store.set_value(self.controller.iter_filter, 0, markup)
+            self.arw["filter_users"].show()
         self.update_proxy_user_list()
 
         self.load_proxy_user2()
@@ -151,17 +151,17 @@ class ProxyUsers:
         # callback of the allow/deny button in proxy tab.
         # col 13 = allow/deny state; col 15 = text color
 
-        treestore = self.proxy_store
-        if treestore.get_value(self.controller.iter_proxy, 13) == 0:
-            treestore.set_value(self.controller.iter_proxy, 13, 1)
-            treestore.set_value(self.controller.iter_proxy, 2, "allow")
-            treestore.set_value(self.controller.iter_proxy, 15, "#009900")
+        treestore = self.filter_store
+        if treestore.get_value(self.controller.iter_filter, 13) == 0:
+            treestore.set_value(self.controller.iter_filter, 13, 1)
+            treestore.set_value(self.controller.iter_filter, 2, "allow")
+            treestore.set_value(self.controller.iter_filter, 15, "#009900")
             self.arw["allow_deny_groups"].set_text("Allowed Groups")
             self.arw["allow_deny_sites"].set_text("Allowed Sites")
         else:
-            treestore.set_value(self.controller.iter_proxy, 13, 0)
-            treestore.set_value(self.controller.iter_proxy, 2, "deny")
-            treestore.set_value(self.controller.iter_proxy, 15, "#f00000")
+            treestore.set_value(self.controller.iter_filter, 13, 0)
+            treestore.set_value(self.controller.iter_filter, 2, "deny")
+            treestore.set_value(self.controller.iter_filter, 15, "#f00000")
             self.arw["allow_deny_groups"].set_text("Denied Groups")
             self.arw["allow_deny_sites"].set_text("Denied Sites")
 
@@ -200,7 +200,7 @@ class ProxyUsers:
             return
         else:
             name = format_name(x)
-            iter1 = self.controller.proxy_store.insert_after(node,
+            iter1 = self.controller.filter_store.insert_after(node,
                                                              [name, "on", "allow", "", "", "", "", "", "", "", "", 0,
                                                               0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
 
@@ -208,7 +208,7 @@ class ProxyUsers:
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
         name = model.get_value(node, 0)
         if askyesno("Remove filter rule", "Do you want to remove %s?" % name):
-            self.controller.proxy_store.remove(node)
+            self.controller.filter_store.remove(node)
 
     def edit_rule(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
@@ -218,18 +218,18 @@ class ProxyUsers:
             return
         else:
             x = format_name(x)
-            self.controller.proxy_store.set(node, [0], [x])
+            self.controller.filter_store.set(node, [0], [x])
 
 
     def proxy_user_has_any(self):
         """Return True if the proxy user has any"""
-        return 'any' in self.proxy_store.get_value(self.controller.iter_proxy, 5).split('\n')
+        return 'any' in self.filter_store.get_value(self.controller.iter_filter, 5).split('\n')
 
     def delete_proxy_user(self, widget):
-        model, iter = self.arw['proxy_users'].get_selection().get_selected()
+        model, iter = self.arw['filter_users'].get_selection().get_selected()
         name = model.get_value(iter, 0).strip()
 
-        names = self.proxy_store.get_value(self.controller.iter_proxy, 5).split('\n')
+        names = self.filter_store.get_value(self.controller.iter_filter, 5).split('\n')
         if name not in names:
             return
 
@@ -239,7 +239,7 @@ class ProxyUsers:
 
         names.remove(name)
 
-        self.proxy_store.set_value(self.controller.iter_proxy, 5, '\n'.join(names))
+        self.filter_store.set_value(self.controller.iter_filter, 5, '\n'.join(names))
         self.update_proxy_user_list()
 
     def update_proxy_user_list_view(self, widget, ctx, x, y, data, info, etime):
@@ -302,15 +302,15 @@ class ProxyUsers:
             if source_model == model:       # move row in the list
                 model.remove(iter_source)
             names = [name[0] for name in model]
-            self.proxy_store.set_value(self.controller.iter_proxy, 5, '\n'.join(names))
+            self.filter_store.set_value(self.controller.iter_filter, 5, '\n'.join(names))
             return
 
-        names = self.proxy_store.get_value(self.controller.iter_proxy, 5).split('\n')
+        names = self.filter_store.get_value(self.controller.iter_filter, 5).split('\n')
         if new_name in names:
             return
         names.append(new_name)
-        self.proxy_store.set_value(self.controller.iter_proxy, 5, '\n'.join(names))
-        self.update_proxy_user_list(self.controller.iter_proxy)
+        self.filter_store.set_value(self.controller.iter_filter, 5, '\n'.join(names))
+        self.update_proxy_user_list(self.controller.iter_filter)
 
     def proxy_user_select(self, widget, event):
         if event.type == Gdk.EventType.BUTTON_RELEASE:
@@ -321,26 +321,29 @@ class ProxyUsers:
         """ (re)create the users list from the store """
         # called when something is changed in the store
         if not proxy_iter:
-            proxy_iter = self.controller.iter_proxy
+            proxy_iter = self.controller.iter_filter
 
         self.arw['proxy_users_store'].clear()
 
         # add users
-        data1 = self.proxy_store[proxy_iter][5]  # user
-        for name in self.proxy_store[proxy_iter][5].split('\n'):
+        users = self.filter_store[proxy_iter][5]  # user
+        if not users:
+            return None
+
+        for name in users.split('\n'):
             if name:
                 iter = self.arw['proxy_users_store'].append()
                 self.arw['proxy_users_store'].set_value(iter, 0, name)
 
         # add mac, if any
-        data1 += self.proxy_store[proxy_iter][6]  # mac
+        users += self.filter_store[proxy_iter][6]  # mac
 
-        for name in self.proxy_store[proxy_iter][6].split('\n'):
+        for name in self.filter_store[proxy_iter][6].split('\n'):
             if name:
                 iter = self.arw['proxy_users_store'].append()
                 self.arw['proxy_users_store'].set_value(iter, 0, name)
 
-        return data1
+        return users
 
     def load_proxy_user(self, widget, event):
 
@@ -354,7 +357,7 @@ class ProxyUsers:
                 sel = self.arw["treeview3"].get_selection()
                 sel.unselect_all()
                 return
-            iter1 = self.proxy_store.get_iter(path[0])
+            iter1 = self.filter_store.get_iter(path[0])
         else:
             model, iter1 = self.arw["treeview3"].get_selection().get_selected()
             if not iter1:
@@ -362,7 +365,7 @@ class ProxyUsers:
 
         """# debug
         i = 0
-        row = self.proxy_store[iter1]
+        row = self.filter_store[iter1]
         try :
             for i in range(20):
                 print(i, " = ", row[i])
@@ -370,14 +373,14 @@ class ProxyUsers:
             pass
         """
 
-        self.controller.iter_proxy = iter1
+        self.controller.iter_filter = iter1
 
         # time conditions
-        data1 = self.proxy_store[iter1][3].strip()
+        data1 = self.filter_store[iter1][3].strip()
         if data1 == "":
-            self.arw["proxy_time_condition_days"].set_text("")
-            self.arw["proxy_time_condition_from"].set_text("")
-            self.arw["proxy_time_condition_to"].set_text("")
+            self.arw["filter_time_condition_days"].set_text("")
+            self.arw["filter_time_condition_from"].set_text("")
+            self.arw["filter_time_condition_to"].set_text("")
             self.arw["time_button_label"].set_text(_("All day\nand week"))
 
         elif len(data1) > 8:
@@ -388,15 +391,15 @@ class ProxyUsers:
                 human_days = self.convert_days_to_local(days)
                 time_from = tmp2[0].strip()
                 time_to = tmp2[1].strip()
-                if self.proxy_store[self.controller.iter_proxy][13] == 1:      # change colour for deny or allow
+                if self.filter_store[self.controller.iter_filter][13] == 1:      # change colour for deny or allow
                     color =  'foreground="#008800"'
                 else :
                     color = 'foreground="#ee0000"'
                 button_text ='<span ' + color + ' weight="bold" >'    # size="large" deleted
                 button_text += human_days + '\n  <span size="large">' + time_from + "-" + time_to + "</span></span>"
-                self.arw["proxy_time_condition_days"].set_text(days)
-                self.arw["proxy_time_condition_from"].set_text(time_from)
-                self.arw["proxy_time_condition_to"].set_text(time_to)
+                self.arw["filter_time_condition_days"].set_text(days)
+                self.arw["filter_time_condition_from"].set_text(time_from)
+                self.arw["filter_time_condition_to"].set_text(time_to)
                 self.arw["time_button_label"].set_markup(button_text)
 
             except:
@@ -404,15 +407,15 @@ class ProxyUsers:
         else:
             print("Invalid time :", data1)
 
-        self.arw["proxy_#comments"].get_buffer().set_text(self.proxy_store[iter1][4])
+        self.arw["filter_#comments"].get_buffer().set_text(self.filter_store[iter1][4])
 
         self.update_proxy_user_list(iter1)
         self.controller.proxy_group.update_proxy_group_list(iter1)
 
         # add dest_domains
-        data1 = self.proxy_store[iter1][8]  # dest_domain
+        data1 = self.filter_store[iter1][8]  # dest_domain
         # add dest_ip, if any
-        data1 += self.proxy_store[iter1][9]  # dest_ip
+        data1 += self.filter_store[iter1][9]  # dest_ip
         self.arw["proxy_dest"].get_buffer().set_text(data1)
         self.load_proxy_user2()
 
@@ -420,7 +423,7 @@ class ProxyUsers:
         # used by the function above, and by the buttons of the proxy tab
         list_color = Gdk.Color(red=50535, green=50535, blue=60535)
 
-        if self.proxy_store[self.controller.iter_proxy][11] == 1:
+        if self.filter_store[self.controller.iter_filter][11] == 1:
             self.arw["proxy_users_stack"].set_visible_child(self.arw["proxy_users_all"])
             x = self.arw["toggle_proxy_user_open_button"]
             self.arw["toggle_proxy_user_open_button"].set_image(self.controller.all_button)
@@ -431,7 +434,7 @@ class ProxyUsers:
 
 
         # set full access
-        if self.proxy_store[self.controller.iter_proxy][12] == 1:
+        if self.filter_store[self.controller.iter_filter][12] == 1:
             self.arw["proxy_dest_stack"].set_visible_child(self.arw["proxy_dest_all"])
             self.arw["toggle_proxy_open_button"].set_image(self.controller.all2_button)
 
@@ -441,7 +444,7 @@ class ProxyUsers:
 
 
         # set allow/deny button
-        if self.proxy_store[self.controller.iter_proxy][13] == 1:
+        if self.filter_store[self.controller.iter_filter][13] == 1:
             self.arw["toggle_proxy_allow_button"].set_image(self.controller.allow_button)
             message = '<span foreground="#00aa00">' + _("All destinations \nallowed.") +  '</span>'
             self.arw["proxy_dest_all"].set_markup(message)
@@ -488,9 +491,9 @@ class ProxyUsers:
             self.arw['internet_filter_paned'].set_position(self.arw['internet_filter_paned'].get_allocated_height() / 2)
 
     def show_time_conditions_window(self, widget):
-        self.arw["proxy_time_conditions"].show()
+        self.arw["filter_time_conditions"].show()
     def hide_time_conditions_window(self, widget):
-        self.arw["proxy_time_conditions"].hide()
+        self.arw["filter_time_conditions"].hide()
         self.load_proxy_user("","")
 
     def proxy_profile_select(self, widget, event):
@@ -505,10 +508,12 @@ class ProxyUsers:
             data.set_text(path, -1)
 
     def populate_proxy(self):
-        self.proxy_store.clear()
-        data1 = self.controller.config["proxy"]
-        keys = ["active", "action", "time_condition", "#comments", "user", "xxx", "dest_group", "dest_domain", "xxx",
-                "destination"]
+        self.filter_store.clear()
+        data1 = self.controller.config["rules"]
+        keys = ["active", "action", "time_condition", "#comments",
+                "users", "",
+                "dest_groups", "dest_domains", "", "",
+                "any_user", "any_destination", "allow_deny" ]
         for section in data1:
             if section[0:2] == "@_":  # generated sections must not be loaded
                 continue
@@ -518,24 +523,9 @@ class ProxyUsers:
                 name = '<i>' + section + '</i>'
             else:
                 name = section
-            if data2.get("active") == ['off']:
+            if data2.get("active") == 'off':
                  name = "<s>" + name + "</s>"
             out = [name]
-
-            # merge user and mac
-            if "user" not in data2:
-                if "users" in data2:
-                    data2["user"] = data2["users"]
-            else:
-                if "users" in data2:
-                    data2["user"] += data2["users"]
-            # merge dest_domain and dest_ip
-            if "dest_domain" not in data2:
-                if "dest_ip" in data2:
-                    data2["dest_domain"] = data2["dest_ip"]
-            else:
-                if "dest_ip" in data2:
-                    data2["dest_domain"] += data2["dest_ip"]
 
             for key in keys:
                 if key in data1[section]:
@@ -543,98 +533,24 @@ class ProxyUsers:
 
                     if key == 'time_condition':
                         # days = parse_date_format_from_squid(data[0].split(' ')[0])
-                        days = data[0].split(' ')[0]
-                        if len(data[0].split(' ')) > 1:
-                            data = [days + ' ' + data[0].split(' ', 1)[1]]
+                        days = data.split(' ')[0]
+                        if len(data.split(' ')) > 1:
+                            data = days + ' ' + data.split(' ', 1)[1]
                         else:
-                            data = [days]
+                            data = days
 
-                    out.append("\n".join(data) + "\n")
+                    if isinstance(data, list):
+                        out.append("\n".join(data) + "\n")
+                    else:
+                        out.append(data)
                 else:
                     out.append("")
             # check boxes and ToggleButtons
-            if "any_user" in data1[section]:
-                anyuser = data1[section]["any_user"]
-            else:
-                anyuser = 0
-            out += [anyuser, 1, 1, 1, "#009900", "#ffffff", "", "", 0, 0]
+##            if "any_user" in data2:
+##                anyuser = data1[section]["any_user"]
+##            else:
+##                anyuser = 0
+            out += [1, "#009900", "#ffffff", "", "", 0, 0]
 
-            self.proxy_store.append(out)
+            self.filter_store.append(out)
 
-    def build_proxy_ini(self):
-
-        out = ""
-        # add default permissions
-        out += "\n[@_antivirus]\n"
-        out += "active = on \n"
-        out += "action = allow \n"
-        out += "user = any \n"
-        out += "dest_group = antivirus \n"
-
-        # add permissions for users with open access defined in users tab
-        users = self.controller.config["users"]
-        for section in users:
-            if users[section].get("@_internet")[0] != "open":
-                continue
-            # section header
-            tmp1 = "\n[%s]\n" % section.replace(" ", "_")   # Squid does not support spaces in acl names.
-            tmp1 += "active = on\n"
-            tmp1 += "action = allow\n"
-            tmp1 += "destination = any\n"
-
-            for key in users[section]:
-                if key[0:2] == "@_":  # Technical data, skip
-                    continue
-                tmp1 += "user = " + key + "\n"
-            out += tmp1 + "\n"
-
-        for row in self.proxy_store:
-            # add support for a time condition from evening to morning.
-            # This requires to create two configurations.
-            time_condition = row[3]
-            time_condition_list = format_time(time_condition)
-            i = 1
-            index = ""
-            # remove formatting
-            name = row[0]
-            for code in["<i>", "</i>", "<s>", "</s>"]:
-                name = name.replace(code, "")
-                name = name.replace(" ", "_")           # Squid does not support spaces in acl names.
-            for time_condition2 in time_condition_list:
-                if len(time_condition_list) > 1:  # If the row is duplicated, we must create two different names
-                    index = str(i)
-                    i += 1
-                out += "\n[%s%s]\n" % (name, index)
-                out += format_comment(row[4])  # comments
-                out += format_line("active", row[1])
-                out += format_line("action", row[2])
-                if row[11]:
-                    out += "user = any\n"
-                else:
-                    out += format_userline("user", row[5])
-                out += format_line("time_condition", time_condition2)
-                if format_line("destination", row[10]) == "":
-                    out += format_line("dest_group", row[7])
-                    out += format_domainline("dest_domain", row[8])
-                else:
-                    out += format_line("destination", row[10])
-
-
-
-        with open(get_config_path("./tmp/proxy-users.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
-            f1.write(out)
-
-
-    def build_proxy_groups_ini(self):        # TODO Dysmas - add
-
-        out = ""
-        key = self.controller.config["groups"]
-        for group in key:
-            out += "\n[" + group + "]\n"
-            for key2 in ["comments", "dest_domain", "dest_ip"]:
-                if key2 in key[group]:
-                    for line1 in key[group][key2]:
-                        out += key2 + " = " + line1 + "\n"
-
-        with open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig", newline="\n") as f1:
-            f1.write(out)

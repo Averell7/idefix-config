@@ -17,6 +17,9 @@ internet_timed_icon = image.get_pixbuf()
 image.set_from_file('./data/internet-disabled-32.gif')
 internet_disabled_icon = image.get_pixbuf()
 
+image.set_from_file('./data/internet-denied-32.gif')
+internet_denied_icon = image.get_pixbuf()
+
 image.set_from_file('./data/email-disabled-32.png')
 email_disabled_icon = image.get_pixbuf()
 

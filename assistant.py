@@ -34,7 +34,7 @@ class Assistant:
 
 
         # Listview
-        self.arw2["assistant_proxy_rules"].set_model(self.controller.proxy_users.proxy_store)
+        self.arw2["assistant_proxy_rules"].set_model(self.controller.proxy_users.filter_store)
 
         self.cell = Gtk.CellRendererText()
         self.check = Gtk.CellRendererToggle(xalign=0.5)
@@ -245,7 +245,7 @@ class Assistant:
 
     def choose_rules(self, widget, row):
         """ controls the toggle buttons column """
-        self.controller.proxy_store[row][19] = not self.controller.proxy_store[row][19]
+        self.controller.filter_store[row][19] = not self.controller.filter_store[row][19]
 
     def summary(self, widget):
 
@@ -299,11 +299,11 @@ class Assistant:
 
         # create rule
         if self.arw2["check_specific_rule"].get_active() == 1:
-            iter1 = self.controller.proxy_store.insert(-1,
+            iter1 = self.controller.filter_store.insert(-1,
                         [self.username, "on", "allow", "", "", self.username, "", "", "", "", "", 0, 0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
 
         # Add the user to the chosen rules
-        for row in self.controller.proxy_store:
+        for row in self.controller.filter_store:
             if row[19] and (not row[11]):       # if selected, but is not a general rule (all users)
                 # add user to users list
                 row[5] += "\n" + self.username
