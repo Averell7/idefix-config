@@ -42,3 +42,19 @@ def search_repository_groups(category_id, query=None):
         return results.json()
     except:
         return []
+
+
+def upload_group(group_name, domains):
+    """Create an unverified group"""
+
+    url = REPOSITORY_URL + '?action=create'
+
+    try:
+        requests.post(url, {
+            'name': group_name,
+            'domains': ','.join(domains),
+        })
+        return True
+    except requests.exceptions.RequestException as e:
+        print(e)
+        return False
