@@ -3,7 +3,7 @@ from collections import OrderedDict, defaultdict
 from gi.repository import Gtk, Gdk
 
 from myconfigparser import myConfigParser
-from repository import fetch_repository_list, search_repository_groups
+from repository import fetch_repository_list, search_repository_groups, upload_group
 from util import showwarning, askyesno, ask_text, ip_address_test
 
 IMPORT_COLUMN_SELECTED = 0
@@ -286,6 +286,25 @@ class GroupManager:
                 f.write(data)
 
         dialog.destroy()
+
+    def action_export_repository(self, widget):
+        """Create a new unverified group"""
+        smodel, siter = self.widgets['groups_tree'].get_selection().get_selected()
+        if not siter:
+            return
+
+        if self.imported_groups or self.groups_changed:
+            if askyesno(_("Save Changes"), _("Do you want to save your changes?")):
+                self.save_groups()
+
+        iter = smodel.convert_iter_to_child_iter(siter)
+        model = smodel.get_model()
+
+        if askyesno(_("Export Group"), _("Are you sure you want to send this group to the repository?")):
+            if upload_group(model.get_value(iter, 0), model.get_value(iter, 1).split('\n')):
+                showwarning(_("Exported"), _("Thank you for sending us the group details"))
+            else:
+                showwarning(_("Error"), _("Please try again"), 4)
 
     def action_import_repository(self, widget):
         if self.imported_groups or self.groups_changed:
