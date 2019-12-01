@@ -3,14 +3,20 @@ from collections import OrderedDict, defaultdict
 from gi.repository import Gtk, Gdk
 
 from myconfigparser import myConfigParser
-from repository import fetch_repository_list, search_repository_groups, upload_group
+from repository import fetch_repository_categories, search_repository_groups, upload_group
 from util import showwarning, askyesno, ask_text, ip_address_test
 
 IMPORT_COLUMN_SELECTED = 0
 IMPORT_COLUMN_NAME = 1
-IMPORT_COLUMN_PATH = 2
+IMPORT_COLUMN_ID = 2
 IMPORT_COLUMN_INCONSISTENT = 3
 IMPORT_COLUMN_DOMAINS = 4
+IMPORT_COLUMN_PARENT_ID = 5
+IMPORT_COLUMN_TYPE = 6
+IMPORT_COLUMN_CATEGORY = 7
+IMPORT_COLUMN_GROUP = 8
+CATEGORY_TYPE = 0
+GROUP_TYPE = 1
 
 
 class GroupManager:
@@ -19,6 +25,13 @@ class GroupManager:
     buffer = None
     widgets = {}
     imported_groups = False
+
+    _cached_categories = {}
+    _cached_groups = {}
+    _cached_groups_by_category_id = {}
+
+    group_results = []
+    categories_in_results = []
 
     # If we encounter a group that already exists
     # if None - ask the user what to do
@@ -51,8 +64,10 @@ class GroupManager:
         self.groups_changed = False
         self.buffer = None
         self.imported_groups = False
-        self.widgets['import_tree'].get_model().set_sort_column_id(IMPORT_COLUMN_NAME, Gtk.SortType.ASCENDING)
-        self.widgets['groups_tree'].get_model().set_sort_column_id(0, Gtk.SortType.ASCENDING)
+        self.widgets['import_tree'].get_model().get_model().set_sort_column_id(
+            IMPORT_COLUMN_NAME, Gtk.SortType.ASCENDING
+        )
+        self.widgets['import_tree'].get_model().set_visible_func(self.filter_groups)
         self.subcategories = defaultdict(list)
 
     def hide(self, *args):
@@ -316,107 +331,126 @@ class GroupManager:
 
         self.widgets['add_group_menu'].hide()
 
-        # Get repository file from server
-        data = fetch_repository_list()
+        # Get the categories from the server
+        data = fetch_repository_categories()
         if not data:
             showwarning(_("Repository"), _("Could not get files from server"))
             return
 
-        self.widgets['repository_store'].clear()
-        self.widgets['import_category_store'].clear()
-        self.widgets['import_search_entry'].set_text("")
-        for category in data:
-            if 'parent_id' in category and category['parent_id']:
-                # Store this for later
-                self.subcategories[int(category['parent_id'])].append((category['name'], int(category['id'])))
-            else:
-                item_iter = self.widgets['import_category_store'].append()
-                self.widgets['import_category_store'].set_value(item_iter, 0, category['name'])
-                self.widgets['import_category_store'].set_value(item_iter, 1, int(category['id']))
-        self.change_category(self.widgets['import_category_combo'])
+        self._cached_categories = {}
+        self._cached_groups = {}
+        self._cached_groups_by_category_id = {}
 
-        """
-        path_iters = {
-            '/': None
+        self.group_results = []
+        self.categories_in_results = []
+
+        self.widgets['repository_store'].clear()
+
+        category_iters = {
+            None: None
         }
 
-        for path, files in data:
-            directory = urlparse(path).path
-            if directory.endswith('/'):
-                directory = directory[:-1]
+        # Always make sure parent id is at the top
+        data.sort(key=lambda x: x['parent_id'] is None, reverse=True)
 
-            parent_path, name = os.path.split(directory)
-            if not name:
-                name = 'all'
+        for category in data:
+            self._cached_categories[int(category['id'])] = category
+            category_id = int(category['id'])
 
-            if parent_path not in path_iters:
-                path_iters[parent_path] = self.widgets['repository_store'].append(None)
-                self.widgets['repository_store'].set_value(
-                    path_iters[parent_path],
-                    IMPORT_COLUMN_NAME, os.path.split(parent_path)[1])
-                self.widgets['repository_store'].set_value(
-                    path_iters[parent_path],
-                    IMPORT_COLUMN_PATH, "")
+            if category.get('parent_id'):
+                parent_id = int(category['parent_id'])
+            else:
+                parent_id = None
 
-            parent = self.widgets['repository_store'].append(path_iters[parent_path])
-            path_iters[directory] = parent
-
-            self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_NAME, name)
-            self.widgets['repository_store'].set_value(parent, IMPORT_COLUMN_PATH, "")
-            for file in files:
-                if file.endswith('.json'):
-                    # Only import ini files for now
-                    continue
-
-                iter = self.widgets['repository_store'].append(parent)
-
-                full_path = urljoin(path, file)
-                name, ext = os.path.splitext(file)
-
-                self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_NAME, name)
-                self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_PATH, full_path)
-        """
+            category_iters[category_id] = iter = self.widgets['repository_store'].append(category_iters.get(parent_id))
+            self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_NAME, category['name'])
+            self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_ID, category_id)
+            self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_PARENT_ID, parent_id)
+            self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_TYPE, CATEGORY_TYPE)
+            self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_CATEGORY, True)
+            self._cached_categories[int(category['id'])]['path'] = self.widgets['repository_store'].get_path(iter)
 
         self.widgets['import_window'].show_all()
+
+    def add_group_to_store(self, group):
+        if group.get('category_id') not in self._cached_groups_by_category_id:
+            self._cached_groups_by_category_id[group.get('category_id')] = []
+
+        if group not in self._cached_groups_by_category_id[group.get('category_id')]:
+            self._cached_groups_by_category_id[group.get('category_id')].append(group)
+
+        self._cached_groups[group['id']] = group
+
+        # Get the iter that the group must be stored to
+        try:
+            iter = self.widgets['repository_store'].get_iter(self._cached_categories[int(group['category_id'])]['path'])
+        except KeyError:
+            iter = None
+
+        group_iter = self.widgets['repository_store'].append(iter)
+        self.widgets['repository_store'].set_value(group_iter, IMPORT_COLUMN_NAME, group['name'])
+        self.widgets['repository_store'].set_value(group_iter, IMPORT_COLUMN_ID, int(group['id']))
+        self.widgets['repository_store'].set_value(group_iter, IMPORT_COLUMN_PARENT_ID, group.get('category_id'))
+        self.widgets['repository_store'].set_value(group_iter, IMPORT_COLUMN_TYPE, GROUP_TYPE)
+        self.widgets['repository_store'].set_value(group_iter, IMPORT_COLUMN_GROUP, True)
+        domains = ''
+        for domain in group.get('domains', []):
+            domains += 'dest_domain = %s\n' % domain
+        self.widgets['repository_store'].set_value(group_iter, IMPORT_COLUMN_DOMAINS, domains)
+
+    def import_selection_changed(self, widget):
+        """Check if we must load items"""
+        if self.widgets['import_search_entry'].get_text():
+            return
+
+        filter_model, filter_iter = widget.get_selected()
+
+        sort_iter = filter_model.convert_iter_to_child_iter(filter_iter)
+        sort_model = filter_model.get_model()
+        iter = sort_model.convert_iter_to_child_iter(sort_iter)
+        model = sort_model.get_model()
+
+        if model.get_value(iter, IMPORT_COLUMN_TYPE) != CATEGORY_TYPE:
+            return
+
+        category_id = model.get_value(iter, IMPORT_COLUMN_ID)
+
+        # Have we loaded any items?
+        if category_id in self._cached_groups_by_category_id:
+            return
+
+        # Get items from the api
+        groups = search_repository_groups(category_id)
+        for group in groups:
+            self.add_group_to_store(group)
+
+        if category_id not in self._cached_groups_by_category_id:
+            self._cached_groups_by_category_id[category_id] = []
+            return
 
     def action_cancel_repository(self, widget):
         self.widgets['import_window'].hide()
 
-    def change_category(self, widget):
-        """Load sub categories"""
-        # Clear sub categories
-        self.widgets['import_subcategory_store'].clear()
-        self.widgets['import_subcategory_combo'].set_sensitive(False)
-
-        if widget.get_active() > -1:
-            # Load sub categories (if any)
-            category_iter = self.widgets['import_category_combo'].get_active_iter()
-            if category_iter:
-                category_id = self.widgets['import_category_store'].get_value(category_iter, 1)
-                if category_id in self.subcategories:
-                    for name, id in self.subcategories[category_id]:
-                        item_iter = self.widgets['import_subcategory_store'].append(None)
-                        self.widgets['import_subcategory_store'].set_value(item_iter, 0, name)
-                        self.widgets['import_subcategory_store'].set_value(item_iter, 1, id)
-                self.widgets['import_subcategory_combo'].set_sensitive(True)
-
-            self.toggle_search(True)
-        else:
-            self.widgets['import_subcategory_combo'].set_active(-1)
-            self.widgets['import_subcategory_combo'].set_sensitive(False)
-            self.toggle_search(False)
-
-    def change_subcategory(self, widget):
-        """Change sub category (if any)"""
-        self.toggle_search(True)
-
     def toggle_search(self, enabled=True):
         self.widgets['import_search_entry'].set_sensitive(enabled)
         self.widgets['import_search_button'].set_sensitive(enabled and self.widgets['import_search_entry'].get_text())
+
         self.search_groups()
 
-    def update_search_text(self, widget):
-        self.widgets['import_search_button'].set_sensitive(self.widgets['import_search_entry'].get_text())
+    def filter_groups(self, model, iter, data):
+        if not self.widgets['import_search_entry'].get_text():
+            return True
+
+        if model.get_value(iter, IMPORT_COLUMN_TYPE) == GROUP_TYPE:
+            # Check if our id is in the results
+            group_id = model.get_value(iter, IMPORT_COLUMN_ID)
+            return group_id in self.group_results
+        else:
+            # Category
+            category_id = model.get_value(iter, IMPORT_COLUMN_ID)
+
+            if category_id in self.categories_in_results:
+                return True
 
     def search_groups(self, *args):
         """Query the database for results"""
@@ -425,30 +459,31 @@ class GroupManager:
         else:
             query = None
 
-        self.widgets['repository_store'].clear()
+        self.categories_in_results = set()
+        self.group_results = []
 
-        category_iter = self.widgets['import_category_combo'].get_active_iter()
-        if category_iter:
-            category_id = self.widgets['import_category_store'].get_value(category_iter, 1)
-        else:
+        if not query:
+            self.widgets['import_tree'].get_model().refilter()
             return
 
-        # Check for sub-category
-        subcat_iter = self.widgets['import_subcategory_combo'].get_active_iter()
-        if subcat_iter:
-            category_id = self.widgets['import_subcategory_store'].get_value(subcat_iter, 1)
-
-        for result in search_repository_groups(category_id, query):
-            if not result['name']:
+        for result in search_repository_groups(None, query):
+            if not result.get('name'):
                 continue
-            item_iter = self.widgets['repository_store'].append(None)
-            self.widgets['repository_store'].set_value(item_iter, IMPORT_COLUMN_NAME, result['name'])
 
-            domains = ''
-            for domain in result['domains']:
-                domains += 'dest_domain = %s\n' % domain
+            if result['id'] not in self._cached_groups:
+                self.add_group_to_store(result)
 
-            self.widgets['repository_store'].set_value(item_iter, IMPORT_COLUMN_DOMAINS, domains)
+            category_id = int(result.get('category_id'))
+            while category_id:
+                self.categories_in_results.add(category_id)
+                try:
+                    category_id = int(self._cached_categories.get(category_id, {}).get('parent_id'))
+                except TypeError:
+                    category_id = None
+
+            self.group_results.append(int(result['id']))
+
+        self.widgets['import_tree'].get_model().refilter()
 
     def walk_repository_tree(self, iterchildren):
         """Return the paths of any bottom most children which have been selected"""
@@ -462,7 +497,7 @@ class GroupManager:
                 results.extend(self.walk_repository_tree(children))
             else:
                 # We are at the base
-                results.append((child[IMPORT_COLUMN_PATH], child[IMPORT_COLUMN_NAME]))
+                results.append((child[IMPORT_COLUMN_ID], child[IMPORT_COLUMN_NAME], child[IMPORT_COLUMN_DOMAINS]))
         return results
 
     def action_start_repository_import(self, widget):
@@ -472,12 +507,10 @@ class GroupManager:
         groups = OrderedDict()
 
         for row in self.widgets['repository_store']:
-            if not row[IMPORT_COLUMN_SELECTED] and not row[IMPORT_COLUMN_INCONSISTENT]:
-                continue
-
-            content = ('[%s]\n' % row[IMPORT_COLUMN_NAME]) + row[IMPORT_COLUMN_DOMAINS]
-            data = parser.read(content.split('\n'), 'groups', isdata=True, comments=True)
-            groups.update(data['groups'])
+            for group_id, group_name, domains in self.walk_repository_tree(row.iterchildren()):
+                content = ('[%s]\n' % group_name) + domains
+                data = parser.read(content.split('\n'), 'groups', isdata=True, comments=True)
+                groups.update(data['groups'])
 
         self.buffer = Gtk.TextBuffer()
         self.widgets['groups_view'].set_buffer(self.buffer)
@@ -485,33 +518,6 @@ class GroupManager:
         self.read_config_data(groups)
         self.imported_groups = True
         self.widgets['import_window'].hide()
-
-        """
-        download_files = []
-
-        for row in self.widgets['repository_store']:
-            if not row[IMPORT_COLUMN_SELECTED] and not row[IMPORT_COLUMN_INCONSISTENT]:
-                continue
-
-            # Get to the bottom level
-            children = row.iterchildren()
-            download_files = self.walk_repository_tree(children)
-
-        parser = myConfigParser()
-        groups = OrderedDict()
-        for file, name in download_files:
-            #file = file.replace("http://", "https://")
-            ini_data = ('[%s]\n' % name) + download_group_file(file).decode("utf-8-sig")
-            data = parser.read(ini_data.split('\n'), "groups", isdata=True, comments=True)
-            groups.update(data['groups'])
-
-        self.buffer = Gtk.TextBuffer()
-        self.widgets['groups_view'].set_buffer(self.buffer)
-        self.groups_store.clear()
-        self.read_config_data(groups)
-        self.imported_groups = True
-        self.widgets['import_window'].hide()
-        """
 
     def show_context(self, widget, event):
         if event.type != Gdk.EventType.BUTTON_RELEASE or event.button != 3:
@@ -581,8 +587,11 @@ class GroupManager:
         """Update the checkbox across the whole tree view"""
 
         # Transform from sort path to actual path
-        iter = self.widgets['import_tree'].get_model().get_iter(path)
-        iter = self.widgets['import_tree'].get_model().convert_iter_to_child_iter(iter)
+        filter_iter = self.widgets['import_tree'].get_model().get_iter(path)
+        sort_iter = self.widgets['import_tree'].get_model().convert_iter_to_child_iter(filter_iter)
+        sort_model = self.widgets['import_tree'].get_model().get_model()
+
+        iter = sort_model.convert_iter_to_child_iter(sort_iter)
 
         value = not widget.get_active()
         self.propagate_status(iter, value)  # Get children and set appropriately

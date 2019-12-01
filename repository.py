@@ -5,7 +5,7 @@ import requests
 REPOSITORY_URL = 'https://proxy-groups.idefix64.fr/main.php'
 
 
-def fetch_repository_list(url=REPOSITORY_URL):
+def fetch_repository_categories(url=REPOSITORY_URL):
     """Fetch the list of categories"""
 
     result = requests.get(url + '?action=categories')
@@ -24,14 +24,17 @@ def download_group_file(path):
     return result.content
 
 
-def search_repository_groups(category_id, query=None):
+def search_repository_groups(category_id=None, query=None):
     """Return search results"""
 
     data = {
         'action': 'groups',
-        'category_id': category_id,
         'verified': 1,
     }
+
+    if category_id:
+        data['category_id'] = category_id
+
     if query:
         data['query'] = query
 
