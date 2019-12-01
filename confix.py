@@ -1,6 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.3.5 - groups repository is presented as a tree
+# version 2.3.4 - Adds the "informations" tab
 # version 2.3.3 - bug in assistant fixed - menu changed
 # version 2.3.2 - Developper menu added
 # version 2.3.1 - new idefix.json format
@@ -50,7 +52,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.3.4"
+version = "2.3.5"
 
 
 gtk = Gtk

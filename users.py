@@ -532,10 +532,13 @@ class Users:
 ##            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_disabled_icon)
         if internet_filtered:
             self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_filtered_icon)
+            self.arw["user_summary_category_label"].set_markup(_("<b><span color='green' size='x-large'>Access to Internet is limited for this user</span></b>"))
         elif internet_open:
             self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_full_icon)
+            self.arw["user_summary_category_label"].set_markup(_("<b><span color='blue' size='x-large'>This user has full Internet access</span></b>"))
         else:
             self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_denied_icon)
+            self.arw["user_summary_category_label"].set_markup(_("<b><span color='red' size='x-large'>This user has no Internet access</span></b>"))
 ##
 ##        # internet time conditions
 ##        if internet_time_conditions:
@@ -551,6 +554,8 @@ class Users:
 
         store = self.arw['user_summary_tree_store']
         store.clear()
+
+        # firewall permissions
 
         # 0 - name
         # 1 - time conditions
@@ -581,6 +586,9 @@ class Users:
                         child_iter = store.append(parent_iter)
                         store.set_value(child_iter, 0, port)
                         store.set_value(child_iter, 4, colour)
+
+        # Internet filter
+
         # 0 : section
         # 1 : active     (off/on)
         # 2 : action     (deny/allow)
@@ -597,9 +605,6 @@ class Users:
         # 15 : color1      (foreground)
         # 16 : color2      (background)
         # 19 : chekbox assistant (0/1)
-
-
-
 
         i = 0
         for row in self.controller.filter_store:
@@ -628,10 +633,15 @@ class Users:
                         colour = 'red'
 
                     if row[12] :
-                        store.set_value(parent_iter, 2, internet_full_icon)
                         if colour != 'red':
+                            store.set_value(parent_iter, 2, internet_full_icon)
                             store.set_value(parent_iter, 4, 'blue')
                             colour = 'blue'
+                        else:
+                            store.set_value(parent_iter, 2, internet_denied_icon)
+                            store.set_value(parent_iter, 4, 'red')
+                            colour = 'red'
+
                     elif not (internet_filtered or internet_open):
                         store.set_value(parent_iter, 4, 'red')
                         colour = 'red'
