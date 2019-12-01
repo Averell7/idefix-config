@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.3.3 - bug in assistant fixed - menu changed
 # version 2.3.2 - Developper menu added
 # version 2.3.1 - new idefix.json format
 # version 2.1.0 - supports subusers
@@ -12,19 +13,19 @@ import json
 import os
 import sys
 import time
+import subprocess
 from copy import deepcopy
 from collections import OrderedDict
 from ftplib import FTP, all_errors as FTPError
 
 import gi
-
-from groups_manager import GroupManager
-
 gi.require_version('Gtk', '3.0')
+
 from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 
+from groups_manager import GroupManager
 from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
@@ -49,7 +50,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.3.2"
+version = "2.3.4"
 
 
 gtk = Gtk
@@ -105,7 +106,6 @@ def ftp_get(ftp, filename, directory="", required=True, json=False):
         ftp.retrbinary('RETR ' + filename, f1.write)  # get the file
         data1 = f1.getvalue()
         f1.close()
-        print(filename, _("received OK."))
         if json :           # returns string
             return data1.decode("ascii")
         else :              # returns list
@@ -230,6 +230,13 @@ class Confix:
 
         # self.arw["button1"].set_image(self.blue_button)
         # self.arw["button1"].set_always_show_image(True)
+
+        # set check boxes in menu
+        self.block_signals = True
+        self.arw['menu_autoload_check'].set_active(
+            idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
+        )
+        self.block_signals = False
 
         # get the style from the css file and apply it
         css_provider = Gtk.CssProvider()
@@ -425,26 +432,10 @@ class Confix:
     def open_connexion_profile(self):
         global ftp1
 
-
-        ftp1 = self.ftp_config
-##        if ftp1['mode'][0] == 'dev':        # development mode - no ftp connection
-##            self.load_locale = True
-##            config_file = get_config_path("dev/idefix.json")
-##            if os.path.isfile(config_file):
-##                with open(config_file) as f1:
-##                    self.config = json.loads(f1.read(), object_pairs_hook=OrderedDict)
-##                    self.update()
-##                    self.update_gui()
-##            else:
-##                self.load_defaults()
-##
-##            return
-
         # ftp connect
-##        if ftp1['mode'][0] == 'local':
-##            self.local_control = True
-
+        ftp1 = self.ftp_config
         self.ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+
 
 
         if not self.ftp:
@@ -523,11 +514,11 @@ class Confix:
     def export_config(self, widget):
         self.export_json.run()
 
-    def show_help(self, widget):
-        self.arw2["help_window"].show()
+    def show_help_colors(self, widget):
+        self.arw2["help_colors_window"].show()
 
-    def hide_help(self, widget):
-        self.arw2["help_window"].hide()
+    def hide_help_colors(self, widget):
+        self.arw2["help_colors_window"].hide()
 
     def show_manage_groups(self, widget):
         self.groups_manager.show()
@@ -537,6 +528,67 @@ class Confix:
 
     def show_about(self, widget):
         self.arw["about_window"].show()
+
+    def getmac(self, widget):
+        getmac_txt = subprocess.check_output(["getmac", "-v"]).decode("cp850")
+        x = getmac_txt.replace("\r", "").split("\n")
+        message = ""
+        for line in x:
+            x = line.strip()
+            if x[0:3] == "===":
+                x = "----------------------------------------------"
+            #words = line.split()
+            #message += chr(9).join(words[0:7]) + "\n"
+            message += x  + "\n"
+        showwarning(_("Mac addresses"), message)
+
+
+    def idefix_infos(self, widget):
+        action = widget.name
+        if action == "show_technical_data":
+            command = self.arw["infos_technical"].get_active_id().replace("info_", "")
+        else:
+            command = action.replace("infos_", "")
+        command_f = io.BytesIO()
+        command_f.write(bytes(command, "utf-8"))
+        command_f.seek(0)
+        ftp1 = self.ftp_config
+        self.ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        self.ftp.storlines('STOR trigger', command_f)
+        time.sleep(2)
+        data1 = ftp_get(self.ftp, "result")
+        if command in ("unbound", "versions"):
+            self.arw["infos_label"].set_markup("\n".join(data1))
+        else:
+            self.arw["infos_label"].set_text("\n".join(data1))
+        self.ftp.close()
+
+    def search(self, widget):
+        mac_search =  self.arw["search_mac"].get_text().strip().lower()
+        if mac_search != "":
+            output = ""
+            for user in self.maclist:
+                for mac in self.maclist[user]:
+                    if mac_search in mac:
+                        output += user + " : " + mac + "\n"
+
+        domain_search =  self.arw["search_domain"].get_text().strip().lower()
+        if domain_search != "":
+            output = ""
+            for group in self.config['groups']:
+                if domain_search in group:
+                    output += _("group : %s \n") % (group)
+                for domain in self.config['groups'][group]['dest_domains']:
+                    if domain_search in domain:
+                        output += _("group : %s --> %s \n") % (group, domain)
+            for rule in self.config['rules']:
+                if domain_search in rule:
+                    output += _("rule : %s \n") % (rule)
+                for domain in self.config['rules'][rule]['dest_domains']:
+                    if domain_search in domain:
+                        output += _("rule : %s --> %s \n") % (rule, domain)
+
+        self.arw["infos_label"].set_text(output)
 
 
 
@@ -631,17 +683,17 @@ class Confix:
 
             # icons for email and Internet access
 
-            if row[3]:
-                row[12] = internet_timed_icon
-            elif not row[5]:
-                row[12] = internet_denied_icon
+##            if row[3]:
+##                row[12] = internet_timed_icon
+##            elif not row[5]:
+##                row[12] = internet_denied_icon
 
-            elif row[7]:
+            if row[7]:
                 row[12] = internet_full_icon
             elif row[6]:
                 row[12] = internet_filtered_icon
             else:
-                row[12] = None
+                row[12] = internet_denied_icon
 
 
     """Actions"""
@@ -731,9 +783,9 @@ class Confix:
             else:
                 self.users_store[self.iter_user][7] = 0
 
-        self.set_colors()
-        self.populate_users_chooser()
 
+        self.populate_users_chooser()
+        self.set_colors()
         # Update the time conditions frames
 ##        self.arw['email_time_condition'].set_sensitive(
 ##            self.users_store[self.iter_user][4] or self.users_store[self.iter_user][7]
@@ -842,9 +894,11 @@ class Confix:
         self.arw['options_window'].hide()
 
     def save_options(self, widget):
+        if self.block_signals:
+            return
         gui_check = self.arw['option_checkbox_gui_check'].get_active()
         filter_tab = self.arw['option_filter_tab_check'].get_active()
-        auto_load = self.arw['option_autoload_check'].get_active()
+        auto_load = self.arw['menu_autoload_check'].get_active()
         developper_menu = self.arw['option_developper_check'].get_active()
 
         idefix_config['conf']['__options'] = {
@@ -870,9 +924,6 @@ class Confix:
         )
         self.arw['option_filter_tab_check'].set_active(
             idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
-        )
-        self.arw['option_autoload_check'].set_active(
-            idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
         )
         self.arw['option_developper_check'].set_active(
             idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
@@ -1125,8 +1176,9 @@ class Confix:
 
 
     def destroy(self, widget=None, donnees=None):
-        print("Évènement destroy survenu.")
         gtk.main_quit()
+        if not widget.name == "window1":
+            self.arw["window1"].destroy()
         return (True)
 
 

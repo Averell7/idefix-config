@@ -105,7 +105,7 @@ class ProxyUsers:
                 self.arw["treeview3"].get_column(col).set_visible(True)
             for button in ["toggle_proxy_user_open_button", "toggle_proxy_open_button", "toggle_proxy_allow_button"]:
                 self.arw[button].hide()
-            self.arw["proxy_users_box"].set_size_request(470,100)
+            self.arw["proxy_users_box"].set_size_request(550,100)
 
 
 

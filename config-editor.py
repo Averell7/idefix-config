@@ -63,8 +63,9 @@ def ftp_connect(server, login, password):
     try:
         ftp = FTP(server, timeout=15)  # connect to host, default port
         ftp.login(login, password)
-        if ftp1['mode'][0] == 'local':
+        if "idefix" in ftp.nlst():
                 ftp.cwd("idefix")
+
         return ftp
     except FTPError as e:
         print("Unable to connect to ftp server with : %s / %s. \nError: %s" % (login, password, e))
@@ -236,19 +237,6 @@ class editor:
         global ftp1
 
         ftp1 = self.ftp_config
-        if ftp1['mode'][0] == 'dev':          # development mode - no ftp connection
-            self.load_locale = True
-            config_file = get_config_path("dev/idefix.json")
-            if os.path.isfile(config_file):
-                with open(config_file) as f1:
-                    self.config = json.loads(f1.read(), object_pairs_hook=OrderedDict)
-                    self.update()
-                    self.update_gui()
-            else:
-                self.load_defaults()
-
-            return
-
 
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
 
@@ -781,69 +769,6 @@ class Confix:
 
     def show_about(self, widget):
         self.arw["about_window"].show()
-
-    def import_ini_files(self):
-        # This function is presently unused
-
-        if not self.load_locale:
-            print("WARNING ! unable to get idefix.json.\n Loading ini files")
-
-            # retrieve common files by ftp
-            if ftp1['mode'][0] != 'local':
-                ftp.cwd("common")
-            data1 = ftp_get(ftp, "firewall-ports.ini")
-            data2 = ftp_get(ftp, "proxy-groups.ini")
-            if ftp1['mode'][0] != 'local':
-                ftp.cwd("..")
-
-            # make a local copy for debug purpose
-            f1 = open(get_config_path("./tmp/firewall-ports.ini"), "w", encoding="utf-8-sig")
-            f1.write("\n".join(data1))
-            f1.close()
-            f1 = open(get_config_path("./tmp/proxy-groups.ini"), "w", encoding="utf-8-sig")
-            f1.write("\n".join(data2))
-            f1.close()
-
-            # retrieve perso files by ftp
-            data3 = ftp_get(ftp, "users.ini")
-            data4 = ftp_get(ftp, "firewall-users.ini")
-            data5 = ftp_get(ftp, "proxy-users.ini")
-
-            ftp.close()
-
-            if data1 is None:
-                print("WARNING ! unable to get firewall-ports.ini.")
-            if data2 is None:
-                print("WARNING ! unable to get proxy-groups.ini.")
-            if data3 is None:
-                print("WARNING ! unable to get users.ini.")
-            if data4 is None:
-                print("WARNING ! unable to get users.ini.")
-            if data5 is None:
-                print("WARNING ! unable to get proxy-users.ini.")
-
-            self.config = parser.read(data3, "users", comments=True, isdata=True)
-            self.config = parser.read(data4, "firewall", merge=self.config, comments=True, isdata=True)
-            self.config = parser.read(data5, "rules", merge=self.config, comments=True, isdata=True)
-            self.config = parser.read(data1, "ports", merge=self.config, comments=True, isdata=True)
-            self.config = parser.read(data2, "groups", merge=self.config, comments=True, isdata=True)
-        else:
-
-            self.config = parser.read(
-                get_config_path("./tmp/users.ini"), "users", merge=self.config, comments=True
-            )
-            self.config = parser.read(
-                get_config_path("./tmp/firewall-users.ini"), "firewall", merge=self.config, comments=True
-            )
-            self.config = parser.read(
-                get_config_path("./tmp/proxy-users.ini"), "rules", merge=self.config, comments=True
-            )
-            self.config = parser.read(
-                get_config_path("./tmp/firewall-ports.ini"), "ports", merge=self.config, comments=True
-            )
-            self.config = parser.read(
-                get_config_path("./tmp/proxy-groups.ini"), "groups", merge=self.config, comments=True
-            )
 
 
 

@@ -110,27 +110,24 @@ class Assistant:
     def assistant_check_nothing(self, widget):
         self.block_signals = True
         if self.arw2["check_nothing"].get_active() == 1:
-            for check in ["email", "filter", "full"]:
+            for check in ["filter", "full"]:
                 self.arw2["check_" + check].set_active(False)
-                self.arw2["check_" + check].set_sensitive(False)
-        else:
-            for check in ["email", "filter", "full"]:
-                self.arw2["check_" + check].set_sensitive(True)
+
         self.block_signals = False
 
     def assistant_check_filter(self, widget):
         if self.block_signals:
             return
         if self.arw2["check_filter"].get_active() == 1:
+            self.arw2["check_nothing"].set_active(False)
             self.arw2["check_full"].set_active(False)
 
     def assistant_check_full(self, widget):
         if self.block_signals:
             return
         if self.arw2["check_full"].get_active() == 1:
+            self.arw2["check_nothing"].set_active(False)
             self.arw2["check_filter"].set_active(False)
-            self.arw2["check_email"].set_active(True)
-
 
     def ass_firewall_permissions(self, widget, event = None):
         self.arw2["assistant1"].set_page_complete(self.arw2["firewall_permissions"], True)
@@ -139,7 +136,6 @@ class Assistant:
     def update_categories_list(self,widget = None):
         """ updates the list of categories which correspond to the choices for email, web etc. """
         self.categories_store.clear()
-        email = self.arw2["check_email"].get_active()
         webfilter = self.arw2["check_filter"].get_active()
         webfull = self.arw2["check_full"].get_active()
         if webfilter or webfull:
@@ -149,8 +145,7 @@ class Assistant:
 
         # get category
         for row in self.controller.users_store:
-            if (row[4] == email
-                and row[5] == web
+            if (row[5] == web
                 and row[6] == webfilter
                 and row[7] == webfull):
                 iter1 = row.iter
@@ -328,7 +323,7 @@ class Assistant:
             self.arw2[entry].set_text("")
         for textview in ["new_user_mac"]:
             self.arw2[textview].get_buffer().set_text("")
-        for checkbox in ["check_nothing", "check_email", "check_filter", "check_full"]:
+        for checkbox in ["check_nothing", "check_filter", "check_full"]:
             self.arw2[checkbox].set_active(False)
         for page in ["new_user", "firewall_permissions"]:
             self.arw2["assistant1"].set_page_complete(self.arw2[page], False)

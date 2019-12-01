@@ -262,6 +262,7 @@ class Users:
             self.arw["menu_rename_cat"].hide()
             self.arw["menu_add_subuser"].show()
 
+            # fill the mac address frame
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
             if username in self.controller.maclist:
@@ -276,11 +277,13 @@ class Users:
                 if not iternew:
                     alert(_("No mac address for this user !"))
 
+            # adapt the title of the frame for user/subuser
             if level == 3:
-                self.arw['user_summary_label'].set_label(_("Passwords"))
+                self.arw['user_summary_label'].set_label(_("Passwords"))         # subuser
             else:
-                self.arw['user_summary_label'].set_label(_("Mac Addresses"))
+                self.arw['user_summary_label'].set_label(_("Mac Addresses"))     # user
 
+            # fill the user summary
             self.user_summary(username)
 
             # get data in lists for this user
@@ -578,6 +581,25 @@ class Users:
                         child_iter = store.append(parent_iter)
                         store.set_value(child_iter, 0, port)
                         store.set_value(child_iter, 4, colour)
+        # 0 : section
+        # 1 : active     (off/on)
+        # 2 : action     (deny/allow)
+        # 3 : time_condition
+        # 4 : #comments
+        # 5 : user
+        # 6 : mac
+        # 7 : dest_group
+        # 8 : dest_domain
+        # 11 : toggleButton (0/1) users [list/all]
+        # 12 : toggleButton (0/1) destination [list/all]
+        # 13 : toggleButton (0/1) [deny/allow]
+        # 14 : checkbox    (0/1)  [off/on]
+        # 15 : color1      (foreground)
+        # 16 : color2      (background)
+        # 19 : chekbox assistant (0/1)
+
+
+
 
         i = 0
         for row in self.controller.filter_store:
@@ -598,18 +620,22 @@ class Users:
 
                     store.set_value(parent_iter, 5, row[1] == 'no')
 
-                    if row[2].strip() == 'deny':
-                        store.set_value(parent_iter, 4, 'red')
-                        colour = 'red'
-                    else:
+                    if row[13]:                                     # if the rule denies, the line is red
                         store.set_value(parent_iter, 4, 'green')
                         colour = 'green'
+                    else:
+                        store.set_value(parent_iter, 4, 'red')
+                        colour = 'red'
 
-                    if row[10] and row[10].strip() == 'any':
+                    if row[12] :
                         store.set_value(parent_iter, 2, internet_full_icon)
                         if colour != 'red':
                             store.set_value(parent_iter, 4, 'blue')
                             colour = 'blue'
+                    elif not (internet_filtered or internet_open):
+                        store.set_value(parent_iter, 4, 'red')
+                        colour = 'red'
+                        store.set_value(parent_iter, 2, internet_denied_icon)
                     else:
                         store.set_value(parent_iter, 2, internet_filtered_icon)
 

@@ -190,8 +190,7 @@ class ConfigProfile:
             config[row[COLUMN_NAME]] = {
                 'server': row[COLUMN_SERVER],
                 'login': row[COLUMN_USERNAME],
-                'pass': encrypt_password(row[COLUMN_PASSWORD], self.password),
-                'mode': row[COLUMN_MODE]
+                'pass': encrypt_password(row[COLUMN_PASSWORD], self.password)
             }
 
 ##            # update self.config
@@ -202,4 +201,6 @@ class ConfigProfile:
 ##            edit['mode']   = row[COLUMN_MODE]
         with open(self.filename, 'w') as f:
             config.write(f)
+
+        #self.config = get_config(self.filename, self.password)
 
