@@ -5,7 +5,7 @@ from collections import OrderedDict
 
 from gi.repository import Gtk
 
-from util import get_config_path
+from util import get_config_path, alert
 
 
 class ImportJsonDialog:
@@ -19,6 +19,9 @@ class ImportJsonDialog:
         self.configpath = ""
 
     def run(self, offline = False):
+        if not hasattr(self.controller, 'ftp') or not self.controller.ftp:
+            alert(_("You cannot Restore a configuration without a connexion. \nIf you want to work offline, \nuse «Open Configuration on disk...» \nin the devlopper menu"))
+            return
         dialog = Gtk.FileChooserDialog(
             _("Import Config"),
             self.arw['window1'],
@@ -38,7 +41,10 @@ class ImportJsonDialog:
 
             if offline :
                 # close ftp connection
-                self.controller.ftp.close()
+                try:
+                    self.controller.ftp.close()
+                except:
+                    pass
                 # disable the save button
                 self.controller.arw["save_button1"].set_sensitive(False)
                 self.controller.arw["save_button2"].set_sensitive(False)

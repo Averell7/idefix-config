@@ -2,6 +2,48 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
+  <object class="GtkAssistant" id="Assistant2">
+    <property name="can_focus">False</property>
+    <property name="use_header_bar">0</property>
+    <child>
+      <object class="GtkLabel">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Page d’introduction</property>
+      </object>
+      <packing>
+        <property name="page_type">intro</property>
+        <property name="has_padding">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Page de contenu</property>
+      </object>
+      <packing>
+        <property name="has_padding">False</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">Page de confirmation</property>
+      </object>
+      <packing>
+        <property name="page_type">confirm</property>
+        <property name="has_padding">False</property>
+      </packing>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
   <object class="GtkAssistant" id="assistant1">
     <property name="can_focus">False</property>
     <property name="window_position">center-on-parent</property>
@@ -499,51 +541,6 @@ If you don't know it, it is possible to add it later  in the "Users and categori
                 <property name="row_spacing">13</property>
                 <property name="column_spacing">10</property>
                 <child>
-                  <object class="GtkCheckButton" id="check_email">
-                    <property name="label" translatable="yes">Email</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="draw_indicator">True</property>
-                    <signal name="toggled" handler="ass_firewall_permissions" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="check_filter">
-                    <property name="label" translatable="yes">Filtered Web access</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="draw_indicator">True</property>
-                    <signal name="clicked" handler="assistant_check_filter" after="yes" swapped="no"/>
-                    <signal name="toggled" handler="ass_firewall_permissions" swapped="no"/>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="margin_left">12</property>
-                    <property name="label" translatable="yes">This option gives access for email clients 
-running on the computer.
-It includes the permissions necessary 
-for antivirus update, but not for Webmail. </property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">1</property>
-                  </packing>
-                </child>
-                <child>
                   <object class="GtkLabel">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -555,6 +552,20 @@ of websites which you will define later. </property>
                   <packing>
                     <property name="left_attach">1</property>
                     <property name="top_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="margin_left">12</property>
+                    <property name="label" translatable="yes">This option gives access to all Internet ressources
+without limitations, e-mail, Web, etc.</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">3</property>
                   </packing>
                 </child>
                 <child>
@@ -573,17 +584,18 @@ of websites which you will define later. </property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel">
+                  <object class="GtkCheckButton" id="check_filter">
+                    <property name="label" translatable="yes">Filtered Web access</property>
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="margin_left">12</property>
-                    <property name="label" translatable="yes">This option gives access to all Internet ressources
-without limitations, e-mail, Web, etc.</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                    <signal name="clicked" handler="assistant_check_filter" after="yes" swapped="no"/>
+                    <signal name="toggled" handler="ass_firewall_permissions" swapped="no"/>
                   </object>
                   <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">3</property>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">2</property>
                   </packing>
                 </child>
                 <child>
@@ -600,6 +612,12 @@ without limitations, e-mail, Web, etc.</property>
                     <property name="left_attach">0</property>
                     <property name="top_attach">0</property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
                 <child>
                   <placeholder/>
@@ -1057,7 +1075,7 @@ Don't forget to do this before you close the program ! </property>
       <placeholder/>
     </child>
   </object>
-  <object class="GtkWindow" id="help_window">
+  <object class="GtkWindow" id="help_colors_window">
     <property name="can_focus">False</property>
     <property name="accept_focus">False</property>
     <property name="deletable">False</property>
@@ -1245,7 +1263,7 @@ Don't forget to do this before you close the program ! </property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <signal name="clicked" handler="hide_help" swapped="no"/>
+                <signal name="clicked" handler="hide_help_colors" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
