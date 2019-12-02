@@ -370,6 +370,9 @@ class GroupManager:
             self.widgets['repository_store'].set_value(iter, IMPORT_COLUMN_CATEGORY, True)
             self._cached_categories[int(category['id'])]['path'] = self.widgets['repository_store'].get_path(iter)
 
+        for group in search_repository_groups():
+            self.add_group_to_store(group)
+
         self.widgets['import_window'].show_all()
 
     def add_group_to_store(self, group):
