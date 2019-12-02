@@ -413,6 +413,20 @@ class GroupManager:
         iter = sort_model.convert_iter_to_child_iter(sort_iter)
         model = sort_model.get_model()
 
+        if model.get_value(iter, IMPORT_COLUMN_TYPE) == GROUP_TYPE:
+            buf = Gtk.TextBuffer()
+            self.widgets['import_group_domains_view'].set_buffer(buf)
+            data = model.get_value(iter, IMPORT_COLUMN_DOMAINS).split('\n')
+            domains = ''
+            for row in data:
+                if not row:
+                    continue
+                domains += row.split(' = ', 1)[1] + '\n'
+            buf.set_text(domains)
+        else:
+            buf = Gtk.TextBuffer()
+            self.widgets['import_group_domains_view'].set_buffer(buf)
+
         if model.get_value(iter, IMPORT_COLUMN_TYPE) != CATEGORY_TYPE:
             return
 
