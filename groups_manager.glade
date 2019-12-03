@@ -289,36 +289,8 @@
       </object>
     </child>
   </object>
-  <object class="GtkTreeStore" id="repository_store">
-    <columns>
-      <!-- column-name import -->
-      <column type="gboolean"/>
-      <!-- column-name name -->
-      <column type="gchararray"/>
-      <!-- column-name id -->
-      <column type="gint"/>
-      <!-- column-name inconsistent -->
-      <column type="gboolean"/>
-      <!-- column-name domains -->
-      <column type="gchararray"/>
-      <!-- column-name parent_id -->
-      <column type="gint"/>
-      <!-- column-name type -->
-      <column type="gint"/>
-      <!-- column-name category -->
-      <column type="gboolean"/>
-      <!-- column-name group -->
-      <column type="gboolean"/>
-    </columns>
-  </object>
-  <object class="GtkTreeModelSort" id="repository_sort">
-    <property name="model">repository_store</property>
-  </object>
-  <object class="GtkTreeModelFilter" id="repository_filter">
-    <property name="child_model">repository_sort</property>
-  </object>
   <object class="GtkWindow" id="import_window">
-    <property name="width_request">320</property>
+    <property name="width_request">360</property>
     <property name="height_request">400</property>
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
@@ -410,62 +382,94 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow">
+          <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="shadow_type">in</property>
+            <property name="can_focus">False</property>
             <child>
-              <object class="GtkTreeView" id="import_tree">
+              <object class="GtkScrolledWindow">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">repository_filter</property>
-                <property name="search_column">0</property>
-                <child internal-child="selection">
-                  <object class="GtkTreeSelection">
-                    <signal name="changed" handler="import_selection_changed" swapped="no"/>
-                  </object>
-                </child>
+                <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkTreeViewColumn">
-                    <child>
-                      <object class="GtkCellRendererToggle">
-                        <signal name="toggled" handler="update_import_selection" swapped="no"/>
+                  <object class="GtkTreeView" id="import_tree">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="model">repository_filter</property>
+                    <property name="search_column">0</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection">
+                        <signal name="changed" handler="import_selection_changed" swapped="no"/>
                       </object>
-                      <attributes>
-                        <attribute name="active">0</attribute>
-                        <attribute name="inconsistent">3</attribute>
-                      </attributes>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkTreeViewColumn">
-                    <property name="title" translatable="yes">Name</property>
-                    <child>
-                      <object class="GtkCellRendererPixbuf">
-                        <property name="stock_id">gtk-open</property>
-                      </object>
-                      <attributes>
-                        <attribute name="visible">7</attribute>
-                      </attributes>
                     </child>
                     <child>
-                      <object class="GtkCellRendererPixbuf">
-                        <property name="stock_id">gtk-index</property>
+                      <object class="GtkTreeViewColumn">
+                        <child>
+                          <object class="GtkCellRendererToggle">
+                            <signal name="toggled" handler="update_import_selection" swapped="no"/>
+                          </object>
+                          <attributes>
+                            <attribute name="active">0</attribute>
+                            <attribute name="inconsistent">3</attribute>
+                          </attributes>
+                        </child>
                       </object>
-                      <attributes>
-                        <attribute name="visible">8</attribute>
-                      </attributes>
                     </child>
                     <child>
-                      <object class="GtkCellRendererText"/>
-                      <attributes>
-                        <attribute name="text">1</attribute>
-                      </attributes>
+                      <object class="GtkTreeViewColumn">
+                        <property name="title" translatable="yes">Name</property>
+                        <child>
+                          <object class="GtkCellRendererPixbuf">
+                            <property name="stock_id">gtk-open</property>
+                          </object>
+                          <attributes>
+                            <attribute name="visible">7</attribute>
+                          </attributes>
+                        </child>
+                        <child>
+                          <object class="GtkCellRendererPixbuf">
+                            <property name="stock_id">gtk-index</property>
+                          </object>
+                          <attributes>
+                            <attribute name="visible">8</attribute>
+                          </attributes>
+                        </child>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="text">1</attribute>
+                          </attributes>
+                        </child>
+                      </object>
                     </child>
                   </object>
                 </child>
               </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="width_request">150</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTextView" id="import_group_domains_view">
+                    <property name="width_request">150</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="editable">False</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -517,5 +521,33 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkTreeStore" id="repository_store">
+    <columns>
+      <!-- column-name import -->
+      <column type="gboolean"/>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name id -->
+      <column type="gint"/>
+      <!-- column-name inconsistent -->
+      <column type="gboolean"/>
+      <!-- column-name domains -->
+      <column type="gchararray"/>
+      <!-- column-name parent_id -->
+      <column type="gint"/>
+      <!-- column-name type -->
+      <column type="gint"/>
+      <!-- column-name category -->
+      <column type="gboolean"/>
+      <!-- column-name group -->
+      <column type="gboolean"/>
+    </columns>
+  </object>
+  <object class="GtkTreeModelSort" id="repository_sort">
+    <property name="model">repository_store</property>
+  </object>
+  <object class="GtkTreeModelFilter" id="repository_filter">
+    <property name="child_model">repository_sort</property>
   </object>
 </interface>
