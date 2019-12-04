@@ -1,3 +1,4 @@
+import argparse
 import configparser
 
 from gi.repository import Gtk
@@ -23,7 +24,7 @@ class DatabaseManager:
     verified_dirty = False
     unverified_dirty = False
 
-    def __init__(self):
+    def __init__(self, config_file='config.ini'):
         widgets = Gtk.Builder()
         widgets.set_translation_domain("confix")
         widgets.add_from_file('./main.glade')
@@ -39,7 +40,7 @@ class DatabaseManager:
         self.widgets['main_window'].show()
 
         self.config = configparser.ConfigParser(interpolation=None)
-        self.config.read('config.ini')
+        self.config.read(config_file)
 
         self.store = self.widgets['group_store']
         self.widgets['verified_treeview'].get_model().set_visible_func(self.filter_verified)
@@ -381,5 +382,8 @@ class DatabaseManager:
 
 
 if __name__ == '__main__':
-    manager = DatabaseManager()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config-file', default='config.ini')
+    args = parser.parse_args()
+    manager = DatabaseManager(args.config_file)
     Gtk.main()
