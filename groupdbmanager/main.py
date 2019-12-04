@@ -14,6 +14,35 @@ COLUMN_VERIFIED = 4
 TYPE_CATEGORY = 0
 TYPE_GROUP = 1
 
+COLUMN_DIFF_DOMAIN = 0
+COLUMN_DIFF_MERGE = 1
+COLUMN_DIFF_COLOUR = 2
+COLUMN_DIFF_ACTION = 3
+
+ADD_ACTION = 0
+DELETE_ACTION = 1
+
+
+def diff_sort(model, iter_a, iter_b, _data=None):
+    domain_a = model.get_value(iter_a, COLUMN_DIFF_DOMAIN)
+    if domain_a:
+        domain_a = domain_a.replace('*.', '')
+    else:
+        domain_a = ''
+
+    domain_b = model.get_value(iter_b, COLUMN_DIFF_DOMAIN)
+    if domain_b:
+        domain_b = domain_b.replace('*.', '')
+    else:
+        domain_b = ''
+
+    if domain_a > domain_b:
+        return 1
+    elif domain_a < domain_b:
+        return -1
+    else:
+        return 0
+
 
 class DatabaseManager:
 
@@ -56,7 +85,7 @@ class DatabaseManager:
             self.config['database']['database'],
         )
 
-        # Create text tags
+        self.widgets['diff_view'].get_model().set_default_sort_func(diff_sort)
 
     def ask_verified_save_changes(self):
         """Asks the user if they want to save their changes"""
@@ -178,6 +207,8 @@ class DatabaseManager:
     def diff_group_domains(self):
         """Highlight differences in domains between unverified and verified"""
 
+        self.widgets['diff_store'].clear()
+
         buf = self.widgets['unverified_buffer']
         unverified_data = buf.get_text(
             buf.get_start_iter(), buf.get_end_iter(), True
@@ -202,15 +233,60 @@ class DatabaseManager:
                 end_pos = start_pos + len(line)
                 start_iter = self.widgets['unverified_buffer'].get_iter_at_offset(start_pos)
                 end_iter = self.widgets['unverified_buffer'].get_iter_at_offset(end_pos)
-                self.widgets['unverified_buffer'].apply_tag_by_name('newdomain', start_iter, end_iter)
+                diff_iter = self.widgets['diff_store'].append()
+
+                if line:
+                    self.widgets['unverified_buffer'].apply_tag_by_name('newdomain', start_iter, end_iter)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_DOMAIN, line)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_MERGE, False)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_COLOUR, 'light green')
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_ACTION, ADD_ACTION)
 
         for line in verified_list:
+            if not len(line) or not line:
+                continue
+
             if line not in unverified_list:
                 start_pos = verified_data.find(line)
                 end_pos = start_pos + len(line)
                 start_iter = self.widgets['verified_buffer'].get_iter_at_offset(start_pos)
                 end_iter = self.widgets['verified_buffer'].get_iter_at_offset(end_pos)
                 self.widgets['verified_buffer'].apply_tag_by_name('deletedomain', start_iter, end_iter)
+
+                if line:
+                    diff_iter = self.widgets['diff_store'].append()
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_DOMAIN, line)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_MERGE, False)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_COLOUR, 'light coral')
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_ACTION, DELETE_ACTION)
+
+    def toggle_diff_merge(self, widget, path):
+        path = Gtk.TreePath.new_from_string(path)
+        store_path = self.widgets['diff_view'].get_model().convert_path_to_child_path(path)
+        store_iter = self.widgets['diff_store'].get_iter(store_path)
+        v = self.widgets['diff_store'].get_value(store_iter, COLUMN_DIFF_MERGE)
+        self.widgets['diff_store'].set_value(store_iter, COLUMN_DIFF_MERGE, not v)
+
+    def merge_diff(self, widget):
+        """Merge the selected items in the diff store"""
+
+        model, iter = self.widgets['verified_treeview'].get_selection().get_selected()
+        iter = model.convert_iter_to_child_iter(iter)
+        model = model.get_model()
+
+        domains = set(model.get_value(iter, COLUMN_DATA).split('\n'))
+
+        for item in self.widgets['diff_store']:
+            domain, merge, col, action = item
+            if not merge:
+                continue
+            if action == DELETE_ACTION:
+                domains.discard(domain)
+            elif action == ADD_ACTION:
+                domains.add(domain)
+
+        self.widgets['verified_buffer'].set_text('\n'.join(domains))
+        self.diff_group_domains()
 
     def updated_unverified(self, widget):
         """Update the selected group"""
