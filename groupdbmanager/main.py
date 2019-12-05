@@ -222,6 +222,9 @@ class DatabaseManager:
         verified_list = verified_data.split('\n')
 
         for line in unverified_list:
+            if not len(line) or not line:
+                continue
+
             if line in verified_list:
                 start_pos = unverified_data.find(line)
                 end_pos = start_pos + len(line)
@@ -286,7 +289,7 @@ class DatabaseManager:
                 domains.add(domain)
 
         self.widgets['verified_buffer'].set_text('\n'.join(domains))
-        self.diff_group_domains()
+        self.updated_verified()
 
     def updated_unverified(self, widget):
         """Update the selected group"""
@@ -319,7 +322,7 @@ class DatabaseManager:
         self.refresh_database()
         self.unverified_dirty = False
 
-    def updated_verified(self, widget):
+    def updated_verified(self, widget=None):
         """Update the selected group"""
 
         model, iter = self.widgets['verified_treeview'].get_selection().get_selected()
