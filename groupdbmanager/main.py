@@ -1,7 +1,7 @@
 import argparse
 import configparser
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 from db import Database
 from util import askyesno, ask_text, message_dialog
@@ -85,7 +85,101 @@ class DatabaseManager:
             self.config['database']['database'],
         )
 
+        self.widgets['verified_treeview'].enable_model_drag_source(
+            Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.COPY
+        )
+        self.widgets['verified_treeview'].drag_dest_set(Gtk.DestDefaults.DROP, [], Gdk.DragAction.COPY)
+        self.widgets['verified_treeview'].drag_source_add_text_targets()
+        self.widgets['verified_treeview'].drag_dest_add_text_targets()
+        self.widgets['verified_treeview'].connect("drag-data-get", self.drag_data_get)
+        self.widgets['verified_treeview'].connect("drag-data-received", self.drag_data_received)
+
+        self.widgets['unverified_treeview'].enable_model_drag_source(
+            Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.MOVE
+        )
+        self.widgets['unverified_treeview'].drag_source_add_text_targets()
+        self.widgets['unverified_treeview'].connect("drag-data-get", self.drag_data_get)
+
         self.widgets['diff_view'].get_model().set_default_sort_func(diff_sort)
+
+    def drag_data_get(self, widget, drag_context, data, info, time):
+        (model, iter) = widget.get_selection().get_selected()
+        if iter:
+            path = model.get_string_from_iter(iter)
+            data.set_text(widget.get_name() + ',' + path, -1)
+
+    def drag_data_received(self, widget, drag_context, x, y, data, info, etime):
+        """Drag and drop items in the treeviews, allows for:
+         - Moving groups from unverified list to verified list
+         - Moving groups from one category to another
+         - Moving categories from one category to another
+        """
+
+        src_widget_name, path = data.get_text().split(',')
+
+        dest_path, position = self.widgets['verified_treeview'].get_dest_row_at_pos(x, y)
+        dest_iter = self.widgets['verified_treeview'].get_model().get_iter(dest_path)
+
+        if src_widget_name == 'unverified_treeview':
+            # Unverified --> Verified
+            model = self.widgets[src_widget_name].get_model()
+            source_iter = model.get_iter(path)
+            if not source_iter:
+                return True
+            # Make the item verified
+            if model.get_value(source_iter, COLUMN_TYPE) == TYPE_GROUP:
+                group_id = model.get_value(source_iter, COLUMN_ID)
+
+                dest_model = self.widgets['verified_treeview'].get_model()
+
+                if not dest_iter:
+                    category_id = None
+                elif dest_model.get_value(dest_iter, COLUMN_TYPE) == TYPE_CATEGORY:
+                    category_id = dest_model.get_value(dest_iter, COLUMN_ID)
+                elif dest_model.get_value(dest_iter, COLUMN_TYPE) == TYPE_GROUP:
+                    parent_iter = dest_model.iter_parent(dest_iter)
+                    category_id = dest_model.get_value(parent_iter, COLUMN_ID)
+                else:
+                    category_id = None
+
+                self.database.update_group(group_id, category_id=category_id, verified=True)
+                self.refresh_database()
+        elif src_widget_name == 'verified_treeview':
+            # Update verified
+            model = self.widgets[src_widget_name].get_model()
+            source_iter = model.get_iter(path)
+            if not source_iter:
+                return True
+
+            if model.get_value(source_iter, COLUMN_TYPE) == TYPE_GROUP:
+                if not dest_iter:
+                    return True
+
+                group_id = model.get_value(source_iter, COLUMN_ID)
+
+                if model.get_value(dest_iter, COLUMN_TYPE) == TYPE_CATEGORY:
+                    category_id = model.get_value(dest_iter, COLUMN_ID)
+                else:
+                    parent_iter = model.iter_parent(dest_iter)
+                    category_id = model.get_value(parent_iter, COLUMN_ID)
+                self.database.update_group(group_id, category_id=category_id)
+                self.refresh_database()
+            else:
+                if not model.iter_parent(dest_iter) and position in (
+                        Gtk.TreeViewDropPosition.BEFORE, Gtk.TreeViewDropPosition.AFTER
+                ):
+                    category_id = ''
+                elif not dest_iter:
+                    category_id = ''
+                elif model.get_value(dest_iter, COLUMN_TYPE) == TYPE_CATEGORY:
+                    category_id = model.get_value(dest_iter, COLUMN_ID)
+                else:
+                    parent_iter = model.iter_parent(dest_iter)
+                    category_id = model.get_value(parent_iter, COLUMN_ID)
+                self.database.update_category(model.get_value(source_iter, COLUMN_ID), parent_id=category_id)
+                self.refresh_database()
+
+        return True
 
     def ask_verified_save_changes(self):
         """Asks the user if they want to save their changes"""

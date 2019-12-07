@@ -69,21 +69,54 @@ class Database:
             }
         rows.close()
 
-    def update_group(self, group_id, verified, name, domains):
+    def update_group(self, group_id, verified=None, name=None, domains=None, category_id=None):
         """Update the group with the given details"""
 
         cur = self.db.cursor()
-        cur.execute("UPDATE proxy_groups SET unverified=%s, name=%s, domains=%s WHERE id=%s LIMIT 1", (
-            not verified,
-            name,
-            json.dumps(domains),
-            group_id
-        ))
+        parameters = []
+        query = 'UPDATE proxy_groups SET'
+        if verified is not None:
+            query += ' unverified=%s,'
+            parameters.append(not verified)
+        if name:
+            query += ' name=%s,'
+            parameters.append(name)
+        if domains:
+            query += ' domains=%s,'
+            parameters.append(json.dumps(domains))
+        if category_id:
+            query += ' category_id=%s,'
+            parameters.append(category_id)
+
+        if ',' in query:
+            query = query[:-1]
+
+        query += ' WHERE id=%s LIMIT 1'
+        parameters.append(group_id)
+
+        cur.execute(query, parameters)
         cur.close()
 
-    def update_category(self, category, name, parent_id):
-        """Update the category with the given details"""
-        pass
+    def update_category(self, category_id, name=None, parent_id=None):
+        """Update the category with the given details. Use parent_id='' to unset"""
+        cur = self.db.cursor()
+        parameters = []
+        query = 'UPDATE proxy_category SET'
+        if name is not None:
+            query += ' name=%s,'
+            parameters.append(name)
+        if parent_id is not None:
+            if parent_id == '':
+                query += ' parent_id=NULL,'
+            else:
+                query += ' parent_id=%s,'
+                parameters.append(parent_id)
+        if ',' in query:
+            query = query[:-1]
+        query += ' WHERE id=%s LIMIT 1'
+        parameters.append(category_id)
+        cur.execute(query, parameters)
+        cur.close()
 
     def delete_group(self, group_id):
         """Remove the group by its id"""

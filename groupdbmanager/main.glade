@@ -66,6 +66,11 @@
   <object class="GtkTreeModelFilter" id="verified_filter">
     <property name="child_model">group_store</property>
   </object>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="stock">gtk-media-forward</property>
+  </object>
   <object class="GtkWindow" id="main_window">
     <property name="width_request">750</property>
     <property name="can_focus">False</property>
@@ -201,6 +206,7 @@
                             <property name="shadow_type">in</property>
                             <child>
                               <object class="GtkTreeView" id="unverified_treeview">
+                                <property name="name">unverified_treeview</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="model">unverified_filter</property>
@@ -534,6 +540,7 @@
                             <property name="shadow_type">in</property>
                             <child>
                               <object class="GtkTreeView" id="verified_treeview">
+                                <property name="name">verified_treeview</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="model">verified_filter</property>
@@ -754,10 +761,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="can_focus">False</property>
-    <property name="stock">gtk-media-forward</property>
   </object>
 </interface>
