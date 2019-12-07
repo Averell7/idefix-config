@@ -1,6 +1,7 @@
+import argparse
 import configparser
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 from db import Database
 from util import askyesno, ask_text, message_dialog
@@ -13,6 +14,35 @@ COLUMN_VERIFIED = 4
 TYPE_CATEGORY = 0
 TYPE_GROUP = 1
 
+COLUMN_DIFF_DOMAIN = 0
+COLUMN_DIFF_MERGE = 1
+COLUMN_DIFF_COLOUR = 2
+COLUMN_DIFF_ACTION = 3
+
+ADD_ACTION = 0
+DELETE_ACTION = 1
+
+
+def diff_sort(model, iter_a, iter_b, _data=None):
+    domain_a = model.get_value(iter_a, COLUMN_DIFF_DOMAIN)
+    if domain_a:
+        domain_a = domain_a.replace('*.', '')
+    else:
+        domain_a = ''
+
+    domain_b = model.get_value(iter_b, COLUMN_DIFF_DOMAIN)
+    if domain_b:
+        domain_b = domain_b.replace('*.', '')
+    else:
+        domain_b = ''
+
+    if domain_a > domain_b:
+        return 1
+    elif domain_a < domain_b:
+        return -1
+    else:
+        return 0
+
 
 class DatabaseManager:
 
@@ -23,7 +53,7 @@ class DatabaseManager:
     verified_dirty = False
     unverified_dirty = False
 
-    def __init__(self):
+    def __init__(self, config_file='config.ini'):
         widgets = Gtk.Builder()
         widgets.set_translation_domain("confix")
         widgets.add_from_file('./main.glade')
@@ -39,7 +69,7 @@ class DatabaseManager:
         self.widgets['main_window'].show()
 
         self.config = configparser.ConfigParser(interpolation=None)
-        self.config.read('config.ini')
+        self.config.read(config_file)
 
         self.store = self.widgets['group_store']
         self.widgets['verified_treeview'].get_model().set_visible_func(self.filter_verified)
@@ -55,7 +85,101 @@ class DatabaseManager:
             self.config['database']['database'],
         )
 
-        # Create text tags
+        self.widgets['verified_treeview'].enable_model_drag_source(
+            Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.COPY
+        )
+        self.widgets['verified_treeview'].drag_dest_set(Gtk.DestDefaults.DROP, [], Gdk.DragAction.COPY)
+        self.widgets['verified_treeview'].drag_source_add_text_targets()
+        self.widgets['verified_treeview'].drag_dest_add_text_targets()
+        self.widgets['verified_treeview'].connect("drag-data-get", self.drag_data_get)
+        self.widgets['verified_treeview'].connect("drag-data-received", self.drag_data_received)
+
+        self.widgets['unverified_treeview'].enable_model_drag_source(
+            Gdk.ModifierType.BUTTON1_MASK, [], Gdk.DragAction.MOVE
+        )
+        self.widgets['unverified_treeview'].drag_source_add_text_targets()
+        self.widgets['unverified_treeview'].connect("drag-data-get", self.drag_data_get)
+
+        self.widgets['diff_view'].get_model().set_default_sort_func(diff_sort)
+
+    def drag_data_get(self, widget, drag_context, data, info, time):
+        (model, iter) = widget.get_selection().get_selected()
+        if iter:
+            path = model.get_string_from_iter(iter)
+            data.set_text(widget.get_name() + ',' + path, -1)
+
+    def drag_data_received(self, widget, drag_context, x, y, data, info, etime):
+        """Drag and drop items in the treeviews, allows for:
+         - Moving groups from unverified list to verified list
+         - Moving groups from one category to another
+         - Moving categories from one category to another
+        """
+
+        src_widget_name, path = data.get_text().split(',')
+
+        dest_path, position = self.widgets['verified_treeview'].get_dest_row_at_pos(x, y)
+        dest_iter = self.widgets['verified_treeview'].get_model().get_iter(dest_path)
+
+        if src_widget_name == 'unverified_treeview':
+            # Unverified --> Verified
+            model = self.widgets[src_widget_name].get_model()
+            source_iter = model.get_iter(path)
+            if not source_iter:
+                return True
+            # Make the item verified
+            if model.get_value(source_iter, COLUMN_TYPE) == TYPE_GROUP:
+                group_id = model.get_value(source_iter, COLUMN_ID)
+
+                dest_model = self.widgets['verified_treeview'].get_model()
+
+                if not dest_iter:
+                    category_id = None
+                elif dest_model.get_value(dest_iter, COLUMN_TYPE) == TYPE_CATEGORY:
+                    category_id = dest_model.get_value(dest_iter, COLUMN_ID)
+                elif dest_model.get_value(dest_iter, COLUMN_TYPE) == TYPE_GROUP:
+                    parent_iter = dest_model.iter_parent(dest_iter)
+                    category_id = dest_model.get_value(parent_iter, COLUMN_ID)
+                else:
+                    category_id = None
+
+                self.database.update_group(group_id, category_id=category_id, verified=True)
+                self.refresh_database()
+        elif src_widget_name == 'verified_treeview':
+            # Update verified
+            model = self.widgets[src_widget_name].get_model()
+            source_iter = model.get_iter(path)
+            if not source_iter:
+                return True
+
+            if model.get_value(source_iter, COLUMN_TYPE) == TYPE_GROUP:
+                if not dest_iter:
+                    return True
+
+                group_id = model.get_value(source_iter, COLUMN_ID)
+
+                if model.get_value(dest_iter, COLUMN_TYPE) == TYPE_CATEGORY:
+                    category_id = model.get_value(dest_iter, COLUMN_ID)
+                else:
+                    parent_iter = model.iter_parent(dest_iter)
+                    category_id = model.get_value(parent_iter, COLUMN_ID)
+                self.database.update_group(group_id, category_id=category_id)
+                self.refresh_database()
+            else:
+                if not model.iter_parent(dest_iter) and position in (
+                        Gtk.TreeViewDropPosition.BEFORE, Gtk.TreeViewDropPosition.AFTER
+                ):
+                    category_id = ''
+                elif not dest_iter:
+                    category_id = ''
+                elif model.get_value(dest_iter, COLUMN_TYPE) == TYPE_CATEGORY:
+                    category_id = model.get_value(dest_iter, COLUMN_ID)
+                else:
+                    parent_iter = model.iter_parent(dest_iter)
+                    category_id = model.get_value(parent_iter, COLUMN_ID)
+                self.database.update_category(model.get_value(source_iter, COLUMN_ID), parent_id=category_id)
+                self.refresh_database()
+
+        return True
 
     def ask_verified_save_changes(self):
         """Asks the user if they want to save their changes"""
@@ -177,6 +301,8 @@ class DatabaseManager:
     def diff_group_domains(self):
         """Highlight differences in domains between unverified and verified"""
 
+        self.widgets['diff_store'].clear()
+
         buf = self.widgets['unverified_buffer']
         unverified_data = buf.get_text(
             buf.get_start_iter(), buf.get_end_iter(), True
@@ -190,6 +316,9 @@ class DatabaseManager:
         verified_list = verified_data.split('\n')
 
         for line in unverified_list:
+            if not len(line) or not line:
+                continue
+
             if line in verified_list:
                 start_pos = unverified_data.find(line)
                 end_pos = start_pos + len(line)
@@ -201,15 +330,60 @@ class DatabaseManager:
                 end_pos = start_pos + len(line)
                 start_iter = self.widgets['unverified_buffer'].get_iter_at_offset(start_pos)
                 end_iter = self.widgets['unverified_buffer'].get_iter_at_offset(end_pos)
-                self.widgets['unverified_buffer'].apply_tag_by_name('newdomain', start_iter, end_iter)
+                diff_iter = self.widgets['diff_store'].append()
+
+                if line:
+                    self.widgets['unverified_buffer'].apply_tag_by_name('newdomain', start_iter, end_iter)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_DOMAIN, line)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_MERGE, False)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_COLOUR, 'light green')
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_ACTION, ADD_ACTION)
 
         for line in verified_list:
+            if not len(line) or not line:
+                continue
+
             if line not in unverified_list:
                 start_pos = verified_data.find(line)
                 end_pos = start_pos + len(line)
                 start_iter = self.widgets['verified_buffer'].get_iter_at_offset(start_pos)
                 end_iter = self.widgets['verified_buffer'].get_iter_at_offset(end_pos)
                 self.widgets['verified_buffer'].apply_tag_by_name('deletedomain', start_iter, end_iter)
+
+                if line:
+                    diff_iter = self.widgets['diff_store'].append()
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_DOMAIN, line)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_MERGE, False)
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_COLOUR, 'light coral')
+                    self.widgets['diff_store'].set_value(diff_iter, COLUMN_DIFF_ACTION, DELETE_ACTION)
+
+    def toggle_diff_merge(self, widget, path):
+        path = Gtk.TreePath.new_from_string(path)
+        store_path = self.widgets['diff_view'].get_model().convert_path_to_child_path(path)
+        store_iter = self.widgets['diff_store'].get_iter(store_path)
+        v = self.widgets['diff_store'].get_value(store_iter, COLUMN_DIFF_MERGE)
+        self.widgets['diff_store'].set_value(store_iter, COLUMN_DIFF_MERGE, not v)
+
+    def merge_diff(self, widget):
+        """Merge the selected items in the diff store"""
+
+        model, iter = self.widgets['verified_treeview'].get_selection().get_selected()
+        iter = model.convert_iter_to_child_iter(iter)
+        model = model.get_model()
+
+        domains = set(model.get_value(iter, COLUMN_DATA).split('\n'))
+
+        for item in self.widgets['diff_store']:
+            domain, merge, col, action = item
+            if not merge:
+                continue
+            if action == DELETE_ACTION:
+                domains.discard(domain)
+            elif action == ADD_ACTION:
+                domains.add(domain)
+
+        self.widgets['verified_buffer'].set_text('\n'.join(domains))
+        self.updated_verified()
 
     def updated_unverified(self, widget):
         """Update the selected group"""
@@ -242,7 +416,7 @@ class DatabaseManager:
         self.refresh_database()
         self.unverified_dirty = False
 
-    def updated_verified(self, widget):
+    def updated_verified(self, widget=None):
         """Update the selected group"""
 
         model, iter = self.widgets['verified_treeview'].get_selection().get_selected()
@@ -381,5 +555,8 @@ class DatabaseManager:
 
 
 if __name__ == '__main__':
-    manager = DatabaseManager()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config-file', default='config.ini')
+    args = parser.parse_args()
+    manager = DatabaseManager(args.config_file)
     Gtk.main()
