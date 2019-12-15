@@ -13,14 +13,15 @@ import glob
 import io
 import json
 import os
+import subprocess
 import sys
 import time
-import subprocess
-from copy import deepcopy
 from collections import OrderedDict
+from copy import deepcopy
 from ftplib import FTP, all_errors as FTPError
 
 import gi
+
 gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk
@@ -36,8 +37,7 @@ from util import (
     ip_address_test
 )
 from icons import (
-    internet_full_icon, internet_filtered_icon, internet_denied_icon,
-    internet_timed_icon, email_icon, email_timed_icon
+    internet_full_icon, internet_filtered_icon, internet_denied_icon
 )
 from proxy_users import ProxyUsers
 from proxy_group import ProxyGroup
@@ -233,10 +233,18 @@ class Confix:
         # self.arw["button1"].set_image(self.blue_button)
         # self.arw["button1"].set_always_show_image(True)
 
+        if config_password:
+            kargs = {'password': config_password}
+        else:
+            kargs = {}
+        self.profiles = ConfigProfile(self.arw, self, **kargs)
+        self.idefix_config = self.profiles.config
+        # à garder $$ self.ftp_config = self.idefix_config['conf'][active_config]
+
         # set check boxes in menu
         self.block_signals = True
         self.arw['menu_autoload_check'].set_active(
-            idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
+            self.idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
         )
         self.block_signals = False
 
@@ -254,14 +262,6 @@ class Confix:
         self.firewall = Firewall(self.arw, self)
         self.users = Users(self.arw, self)
         self.assistant = Assistant(self.arw, self.arw2, self)
-
-        if config_password:
-            kargs = {'password': config_password}
-        else:
-            kargs = {}
-        self.profiles = ConfigProfile(self.arw, self, **kargs)
-        self.idefix_config = self.profiles.config
-        # à garder $$ self.ftp_config = self.idefix_config['conf'][active_config]
 
         self.users_store = self.users.users_store
         self.filter_store = self.proxy_users.filter_store
@@ -392,23 +392,22 @@ class Confix:
 
 
         # user defined options
-        checkbox_config = idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+        checkbox_config = self.idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
         if checkbox_config:
             self.proxy_users.set_gui('check')
 
-        filter_tab = idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+        filter_tab = self.idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
         if filter_tab:
             self.arw['notebook3'].set_current_page(1)
 
-        developper_menu = idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
+        developper_menu = self.idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
         if developper_menu is False:
             self.arw['developper_menu'].set_sensitive(False)
             self.arw['developper_menu'].set_visible(False)
 
-
-        auto_load = idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
+        auto_load = self.idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
         if auto_load:
-            last_config = idefix_config['conf'].get('__options', {}).get('last_config')
+            last_config = self.idefix_config['conf'].get('__options', {}).get('last_config')
             if last_config:
                 configname = last_config[0]
                 if configname:
@@ -417,16 +416,20 @@ class Confix:
                     self.arw["configname"].set_text(configname)
 
     def ask_for_profile(self, widget = None):
-        config_dialog = AskForConfig(idefix_config)
+        # Refresh available configurations?
+
+        config_dialog = AskForConfig(self.idefix_config)
         configname = config_dialog.run()
+        if not configname:
+            return
         self.arw["configname"].set_text(configname)
         self.arw["save_button1"].set_sensitive(True)
         self.arw["save_button2"].set_sensitive(True)
         self.ftp_config = self.idefix_config['conf'][configname]
-        if not idefix_config['conf'].get('__options'):
-            idefix_config['conf']['__options'] = {}
-        idefix_config['conf']['__options']["last_config"] = configname
-        parser.write(idefix_config['conf'], get_config_path('confix.cfg'))
+        if not self.idefix_config['conf'].get('__options'):
+            self.idefix_config['conf']['__options'] = {}
+        self.idefix_config['conf']['__options']["last_config"] = configname
+        parser.write(self.idefix_config['conf'], get_config_path('confix.cfg'))
 
         self.open_connexion_profile()
 
@@ -903,7 +906,7 @@ class Confix:
         auto_load = self.arw['menu_autoload_check'].get_active()
         developper_menu = self.arw['option_developper_check'].get_active()
 
-        idefix_config['conf']['__options'] = {
+        self.idefix_config['conf']['__options'] = {
             'checkbox_config': ['1' if gui_check else '0'],
             'filter_tab': ['1' if filter_tab else '0'],
             'auto_load': ['1' if auto_load else '0'],
@@ -916,19 +919,19 @@ class Confix:
             self.proxy_users.set_gui('buttons')
 
         # Save to config
-        parser.write(idefix_config['conf'], get_config_path('confix.cfg'))
+        parser.write(self.idefix_config['conf'], get_config_path('confix.cfg'))
         self.arw['options_window'].hide()
 
     def show_options(self, widget):
         # Get options
         self.arw['option_checkbox_gui_check'].set_active(
-            idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+            self.idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
         )
         self.arw['option_filter_tab_check'].set_active(
-            idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+            self.idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
         )
         self.arw['option_developper_check'].set_active(
-            idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
+            self.idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
         )
         self.arw['options_window'].show_all()
 
