@@ -10,17 +10,17 @@
 # version 2.0.0 - Supports Unbound
 
 import glob
-import io
 import json
 import os
-import subprocess
 import sys
 import time
 from collections import OrderedDict
 from copy import deepcopy
-from ftplib import FTP, all_errors as FTPError
 
 import gi
+
+from connection_information import Information
+from ftp_client import ftp_connect, ftp_get, ftp_send
 
 gi.require_version('Gtk', '3.0')
 
@@ -57,83 +57,6 @@ version = "2.3.5"
 
 gtk = Gtk
 Pixbuf = GdkPixbuf.Pixbuf
-
-
-def ftp_connect(server, login, password):
-    global ftp1
-
-    if password[0:1] == "%":
-        hysteresis = ""
-        i = 0
-        for deplacement in password:
-            if i % 2 == 1:
-                hysteresis += deplacement
-            i += 1
-        password = hysteresis
-
-    try:
-        ftp = FTP(server, timeout=15)  # connect to host, default port
-        ftp.login(login, password)
-        #for (name, properties) in ftp.mlsd():     # would be better, but the ftp server of Idefix does not support the command
-        #    if name == "idefix" and properties['type'] == "dir":
-        if "idefix" in ftp.nlst():
-                ftp.cwd("idefix")
-        return ftp
-    except FTPError as e:
-        print("Unable to connect to ftp server with : %s / %s. \nError: %s" % (login, password, e))
-
-
-
-def ftp_get(ftp, filename, directory="", required=True, json=False):
-    if not ftp:
-        print(_("No ftp connection"))
-        return False
-
-    # verify that the file exists on the server
-    try:
-        x = ftp.mlsd(directory)
-        if not filename in ([n[0] for n in x]):
-            if required:
-                print(_("We got an error with %s. Is it present on the server?" % filename))
-            return False
-    except:
-        if not filename in ftp.nlst(directory):  # deprecated, but vsftpd does non support mlsd (used in idefix.py)
-            if required:
-                print(_("We got an error with %s. Is it present on the server?" % filename))
-            return False
-
-
-    try:
-        f1 = io.BytesIO()
-        ftp.retrbinary('RETR ' + filename, f1.write)  # get the file
-        data1 = f1.getvalue()
-        f1.close()
-        if json :           # returns string
-            return data1.decode("ascii")
-        else :              # returns list
-            return data1.decode("utf-8-sig").split("\n")
-    except FTPError:
-        print(_("could not get ") + filename)
-
-
-def ftp_send(ftp, filepath, directory=None, dest_name=None):
-    if directory:
-        ftp.cwd(directory)  # change into subdirectory
-    if not dest_name:
-        dest_name = os.path.split(filepath)[1]
-
-    if os.path.isfile(get_config_path(filepath)):
-        with open(get_config_path(filepath), 'rb') as f1:  # file to send
-            ftp.storbinary('STOR ' + dest_name, f1)  # send the file
-    else:
-        message = filepath + " not found"
-        print(message)
-        return message
-
-    # print( ftp.retrlines('LIST'))
-    if directory:
-        ftp.cwd('..')  # return to house directory
-    return True
 
 
 def get_row(treestore, iter1):
@@ -262,6 +185,7 @@ class Confix:
         self.firewall = Firewall(self.arw, self)
         self.users = Users(self.arw, self)
         self.assistant = Assistant(self.arw, self.arw2, self)
+        self.information = Information(self.arw, self)
 
         self.users_store = self.users.users_store
         self.filter_store = self.proxy_users.filter_store
@@ -269,7 +193,8 @@ class Confix:
         self.firewall_store = self.firewall.firewall_store
 
         self.signal_handler = SignalHandler([
-            self, self.proxy_users, self.proxy_group, self.firewall, self.users, self.profiles, self.assistant
+            self, self.proxy_users, self.proxy_group, self.firewall, self.users, self.profiles, self.assistant,
+            self.information
         ])
         self.widgets.connect_signals(self.signal_handler)
         self.widgets2.connect_signals(self.signal_handler)
@@ -533,69 +458,6 @@ class Confix:
 
     def show_about(self, widget):
         self.arw["about_window"].show()
-
-    def getmac(self, widget):
-        getmac_txt = subprocess.check_output(["getmac", "-v"]).decode("cp850")
-        x = getmac_txt.replace("\r", "").split("\n")
-        message = ""
-        for line in x:
-            x = line.strip()
-            if x[0:3] == "===":
-                x = "----------------------------------------------"
-            #words = line.split()
-            #message += chr(9).join(words[0:7]) + "\n"
-            message += x  + "\n"
-        showwarning(_("Mac addresses"), message)
-
-
-    def idefix_infos(self, widget):
-        action = widget.name
-        if action == "show_technical_data":
-            command = self.arw["infos_technical"].get_active_id().replace("info_", "")
-        else:
-            command = action.replace("infos_", "")
-        command_f = io.BytesIO()
-        command_f.write(bytes(command, "utf-8"))
-        command_f.seek(0)
-        ftp1 = self.ftp_config
-        self.ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
-        self.ftp.storlines('STOR trigger', command_f)
-        time.sleep(2)
-        data1 = ftp_get(self.ftp, "result")
-        if command in ("unbound", "versions"):
-            self.arw["infos_label"].set_markup("\n".join(data1))
-        else:
-            self.arw["infos_label"].set_text("\n".join(data1))
-        self.ftp.close()
-
-    def search(self, widget):
-        mac_search =  self.arw["search_mac"].get_text().strip().lower()
-        if mac_search != "":
-            output = ""
-            for user in self.maclist:
-                for mac in self.maclist[user]:
-                    if mac_search in mac:
-                        output += user + " : " + mac + "\n"
-
-        domain_search =  self.arw["search_domain"].get_text().strip().lower()
-        if domain_search != "":
-            output = ""
-            for group in self.config['groups']:
-                if domain_search in group:
-                    output += _("group : %s \n") % (group)
-                for domain in self.config['groups'][group]['dest_domains']:
-                    if domain_search in domain:
-                        output += _("group : %s --> %s \n") % (group, domain)
-            for rule in self.config['rules']:
-                if domain_search in rule:
-                    output += _("rule : %s \n") % (rule)
-                for domain in self.config['rules'][rule]['dest_domains']:
-                    if domain_search in domain:
-                        output += _("rule : %s --> %s \n") % (rule, domain)
-
-        self.arw["infos_label"].set_text(output)
-
-
 
     """ Load interface """
 
