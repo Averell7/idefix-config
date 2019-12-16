@@ -6,6 +6,33 @@ from ftp_client import ftp_connect, ftp_get
 from util import showwarning
 
 
+class ExportDiagnosticDialog:
+    def __init__(self, arw, controller):
+        self.arw = arw
+        self.controller = controller
+
+        #self.file_filter = Gtk.FileFilter()
+        #self.file_filter.add_pattern('*.json')
+
+    def run(self, data1, configpath = None ):
+        if not configpath:
+            dialog = Gtk.FileChooserDialog(
+                _("Export Config"),
+                self.arw['window1'],
+                Gtk.FileChooserAction.SAVE,
+                (_("Export"), Gtk.ResponseType.ACCEPT),
+            )
+            #dialog.set_filter(self.file_filter)
+
+            response = dialog.run()
+            if response == Gtk.ResponseType.ACCEPT:
+                configpath =    dialog.get_filename()
+            dialog.destroy()
+
+        f1 = open(configpath, "wb")
+        f1.write(data1)
+        f1.close() 
+
 class Information:
     def __init__(self, arw, controller):
         self.arw = arw
@@ -24,6 +51,16 @@ class Information:
             message += x + "\n"
         showwarning(_("Mac addresses"), message)
 
+
+    def spin(self, delay):
+        # insure that the spinner runs for the required time
+        time1 = time.time()
+        while time.time() < time1 + delay:
+            while Gtk.events_pending():
+                    Gtk.main_iteration()
+        return True
+
+
     def idefix_infos(self, widget):
         action = widget.name
         if action == "show_technical_data":
@@ -36,18 +73,27 @@ class Information:
         ftp1 = self.controller.ftp_config
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
         ftp.storlines('STOR trigger', command_f)
-        time.sleep(2)
-        data1 = ftp_get(ftp, "result")
-        if command in ("unbound", "versions"):
-            self.arw["infos_label"].set_markup("\n".join(data1))
+                self.arw["infos_spinner"].start()
+
+        if command in ("ping"):
+            self.spin(4)
+        elif command in ("all"):
+            self.spin(6)
         else:
-            self.arw["infos_label"].set_text("\n".join(data1))
+            self.spin(2)
+        self.arw["infos_spinner"].stop()
+        data1 = ftp_get(ftp, "result")
+        if command == "all":
+            dialog = ExportDiagnosticDialog(self.arw, self)
+            dialog.run("\n".join(data1).encode("utf8"))
+        else:
+            self.arw["infos_label"].set_markup("\n".join(data1))
         ftp.close()
 
     def search(self, widget):
         mac_search = self.arw["search_mac"].get_text().strip().lower()
 
-        if mac_search:
+        if mac_search != "":
             output = ""
             for user in self.controller.maclist:
                 for mac in self.controller.maclist[user]:
@@ -55,9 +101,9 @@ class Information:
                         output += user + " : " + mac + "\n"
 
         domain_search = self.arw["search_domain"].get_text().strip().lower()
-
+     
         output = ""
-        if domain_search:
+        if domain_search != "":
             for group in self.controller.config['groups']:
                 if domain_search in group:
                     output += _("group : %s \n") % (group)
