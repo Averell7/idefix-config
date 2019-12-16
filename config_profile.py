@@ -102,6 +102,11 @@ class ConfigProfile:
 
         self.config = get_config(self.filename, self.password)
 
+    def refresh_saved_profiles(self):
+        """Read the config file again and update the configuration profiles"""
+        config = get_config(self.filename, self.password)
+        self.config['conf'] = config['conf']
+
     def list_configuration_profiles(self):
         """Update the list view with all the configuration profiles found"""
         self.profiles_store.clear()
@@ -126,6 +131,7 @@ class ConfigProfile:
     def profile_close_window(self, *args):
         """Close the profile window"""
         self.window.hide()
+        self.refresh_saved_profiles()
         return True
 
     def profile_selection_updated(self, widget):
@@ -189,8 +195,8 @@ class ConfigProfile:
         for row in self.profiles_store:
             config[row[COLUMN_NAME]] = {
                 'server': row[COLUMN_SERVER],
-                'login': row[COLUMN_USERNAME],
-                'pass': encrypt_password(row[COLUMN_PASSWORD], self.password)
+                'login': row[COLUMN_USERNAME] or '',
+                'pass': encrypt_password(row[COLUMN_PASSWORD] or '', self.password)
             }
 
 ##            # update self.config
