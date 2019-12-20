@@ -19,9 +19,10 @@ class ImportJsonDialog:
         self.configpath = ""
 
     def run(self, offline = False):
-        if not hasattr(self.controller, 'ftp') or not self.controller.ftp:
-            alert(_("You cannot Restore a configuration without a connexion. \nIf you want to work offline, \nuse «Open Configuration on disk...» \nin the devlopper menu"))
-            return
+        if not offline:
+            if not hasattr(self.controller, 'ftp') or not self.controller.ftp:
+                alert(_("You cannot Restore a configuration without a connexion. \nIf you want to work offline, \nuse «Open Configuration on disk...» \nin the developper menu"))
+                return
         dialog = Gtk.FileChooserDialog(
             _("Import Config"),
             self.arw['window1'],

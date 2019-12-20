@@ -2488,8 +2488,8 @@ allowed</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="infos_arp">
-                        <property name="label" translatable="yes">Connected Users</property>
+                      <object class="GtkButton" id="infos_squid">
+                        <property name="label" translatable="yes">Log Squid</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -2502,8 +2502,8 @@ allowed</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="infos_dhcp">
-                        <property name="label" translatable="yes">DHCP</property>
+                      <object class="GtkButton" id="infos_mac">
+                        <property name="label" translatable="yes">Connected Users</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -2516,11 +2516,22 @@ allowed</property>
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
-                    </child>
-                    <child>
                       <object class="GtkButton" id="infos_versions">
                         <property name="label" translatable="yes">Versions</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="idefix_infos" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="infos_all">
+                        <property name="label" translatable="yes">Diagnostic</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -2533,11 +2544,10 @@ allowed</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel">
+                      <object class="GtkSpinner" id="infos_spinner">
+                        <property name="height_request">25</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Search&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2546,21 +2556,16 @@ allowed</property>
                       </packing>
                     </child>
                     <child>
+                      <placeholder/>
+                    </child>
+                    <child>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Mac Address</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">6</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="search_mac">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
+                        <property name="label" translatable="yes">
+&lt;b&gt;Search&lt;/b&gt;
+</property>
+                        <property name="use_markup">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -2572,12 +2577,38 @@ allowed</property>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Domain</property>
+                        <property name="label" translatable="yes">Mac Address</property>
+                        <property name="xalign">0.039999999105930328</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">8</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="search_mac">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">9</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">
+Domain</property>
+                        <property name="xalign">0.029999999329447746</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">10</property>
                       </packing>
                     </child>
                     <child>
@@ -2588,7 +2619,7 @@ allowed</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">9</property>
+                        <property name="position">11</property>
                       </packing>
                     </child>
                     <child>
@@ -2602,7 +2633,7 @@ allowed</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">10</property>
+                        <property name="position">12</property>
                       </packing>
                     </child>
                     <child>
@@ -2617,35 +2648,38 @@ allowed</property>
                         <property name="can_focus">False</property>
                         <property name="margin_top">12</property>
                         <property name="margin_bottom">6</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Technical data
-&lt;/b&gt;</property>
+                        <property name="label" translatable="yes">
+&lt;b&gt;Technical data&lt;/b&gt;
+</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">13</property>
+                        <property name="position">15</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkComboBoxText" id="infos_technical">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="active">1</property>
+                        <property name="active">0</property>
                         <property name="active_id">info_apache</property>
                         <items>
-                          <item id="info_diagnostic" translatable="yes">Diagnostic</item>
-                          <item id="info_apache" translatable="yes">Apache</item>
-                          <item id="info_ls_home" translatable="yes">/home/.../idefix</item>
-                          <item id="info_ls_etc" translatable="yes">/etc/idefix</item>
-                          <item id="info_ls_usr" translatable="yes">/usr/lib/idefix</item>
+                          <item id="info_apache" translatable="yes">Apache log</item>
                           <item id="info_cron" translatable="yes">Cron log</item>
+                          <item id="info_syslog" translatable="yes">Syslog</item>
+                          <item id="info_dirs" translatable="yes">Directories</item>
+                          <item id="info_conf" translatable="yes">*.conf files</item>
+                          <item id="info_network" translatable="yes">Network</item>
+                          <item id="info_services" translatable="yes">Services</item>
+                          <item id="info_ping" translatable="yes">ping</item>
                         </items>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">14</property>
+                        <property name="position">16</property>
                       </packing>
                     </child>
                     <child>
@@ -2659,7 +2693,7 @@ allowed</property>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">15</property>
+                        <property name="position">17</property>
                       </packing>
                     </child>
                   </object>
@@ -2700,6 +2734,10 @@ allowed</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">label</property>
+                                <property name="selectable">True</property>
+                                <attributes>
+                                  <attribute name="font-desc" value="Courier New 10"/>
+                                </attributes>
                               </object>
                             </child>
                           </object>
@@ -2752,71 +2790,6 @@ allowed</property>
               </object>
               <packing>
                 <property name="position">2</property>
-                <property name="tab_fill">False</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkBox">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="orientation">vertical</property>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="search_output">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">label</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="position">3</property>
-              </packing>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Search</property>
-              </object>
-              <packing>
-                <property name="position">3</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>

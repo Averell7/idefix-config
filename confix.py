@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.3.6 - Changes in connexion profiles are active immediately
 # version 2.3.5 - groups repository is presented as a tree
 # version 2.3.4 - Adds the "informations" tab
 # version 2.3.3 - bug in assistant fixed - menu changed
@@ -52,7 +53,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.3.5"
+version = "2.3.6"
 
 
 gtk = Gtk

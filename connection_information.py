@@ -1,9 +1,13 @@
 import io
+import os
 import subprocess
 import time
+import re
+import http.client
 
 from ftp_client import ftp_connect, ftp_get
 from util import showwarning
+from gi.repository import Gdk, Gtk
 
 
 class ExportDiagnosticDialog:
@@ -31,7 +35,7 @@ class ExportDiagnosticDialog:
 
         f1 = open(configpath, "wb")
         f1.write(data1)
-        f1.close() 
+        f1.close()
 
 class Information:
     def __init__(self, arw, controller):
@@ -49,15 +53,54 @@ class Information:
             # words = line.split()
             # message += chr(9).join(words[0:7]) + "\n"
             message += x + "\n"
+
+
+        def ip_address_test(value):
+            """Check IP Address is valid"""
+
+            value = value.split("#")[0].strip()  # strip comment
+            result = re.search(r'((2[0-5]|1[0-9]|[0-9])?[0-9]\.){3}((2[0-5]|1[0-9]|[0-9])?[0-9])', value, re.I)
+            return result
+
+        arp = subprocess.check_output(["arp", "-a"])
+        arp = arp.decode("cp850")
+        for line1 in arp.split("\n"):
+            result = ip_address_test(line1)
+            if result:
+                ip = result.group(0)
+                h1 = http.client.HTTPConnection(ip, timeout = 0.1)
+                try:
+                    h1.connect()
+                    h1.request("GET","/subuser.html")
+                    res = h1.getresponse()
+                    if res.status == 200:
+                        x = res.read()
+                        if b"engrenages" in x:
+                            message += "\n\nfound Idefix at " + ip
+                            supervix = "http://" + ip + ":10080/visu-ifconfig.php"
+                    h1.close()
+                except:
+                    pass
+
+
         showwarning(_("Mac addresses"), message)
 
+        os.startfile(supervix)
 
-    def spin(self, delay):
+    def spin(self, delay, progress = False):
         # insure that the spinner runs for the required time
         time1 = time.time()
-        while time.time() < time1 + delay:
-            while Gtk.events_pending():
-                    Gtk.main_iteration()
+        for i in range(delay):
+            while time.time() < time1 + i:
+                while Gtk.events_pending():
+                        Gtk.main_iteration()
+            if progress:
+                data1 = ftp_get(self.ftp, "result")
+                self.arw["infos_label"].set_markup("\n".join(data1))
+##        while Gtk.events_pending():
+##            Gtk.main_iteration()
+
+
         return True
 
 
@@ -72,13 +115,16 @@ class Information:
         command_f.seek(0)
         ftp1 = self.controller.ftp_config
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        self.ftp = ftp
         ftp.storlines('STOR trigger', command_f)
-                self.arw["infos_spinner"].start()
+        self.arw["infos_spinner"].start()
 
         if command in ("ping"):
-            self.spin(4)
+            self.spin(4, True)
         elif command in ("all"):
             self.spin(6)
+        elif command in ("versions"):
+            self.spin(15, True)
         else:
             self.spin(2)
         self.arw["infos_spinner"].stop()
@@ -88,20 +134,21 @@ class Information:
             dialog.run("\n".join(data1).encode("utf8"))
         else:
             self.arw["infos_label"].set_markup("\n".join(data1))
+
         ftp.close()
 
     def search(self, widget):
         mac_search = self.arw["search_mac"].get_text().strip().lower()
 
+        output1 = ""
         if mac_search != "":
-            output = ""
             for user in self.controller.maclist:
                 for mac in self.controller.maclist[user]:
                     if mac_search in mac:
-                        output += user + " : " + mac + "\n"
+                        output1 += user + " : " + mac + "\n"
 
         domain_search = self.arw["search_domain"].get_text().strip().lower()
-     
+
         output = ""
         if domain_search != "":
             for group in self.controller.config['groups']:
@@ -117,4 +164,4 @@ class Information:
                     if domain_search in domain:
                         output += _("rule : %s --> %s \n") % (rule, domain)
 
-        self.arw["infos_label"].set_text(output)
+        self.arw["infos_label"].set_text(output1 + "\n\n" + output)
