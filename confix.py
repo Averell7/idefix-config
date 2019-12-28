@@ -1,6 +1,9 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.3.8 - Warning when leaving the program, if user has not savec his changes
+#                 Edit file added to the information tab
+# version 2.3.7 - Idefix module automatically detected
 # version 2.3.6 - Changes in connexion profiles are active immediately
 # version 2.3.5 - groups repository is presented as a tree
 # version 2.3.4 - Adds the "informations" tab
@@ -22,6 +25,7 @@ import gi
 
 from connection_information import Information
 from ftp_client import ftp_connect, ftp_get, ftp_send
+import http.client
 
 gi.require_version('Gtk', '3.0')
 
@@ -53,7 +57,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.3.6"
+version = "2.3.8"
 
 
 gtk = Gtk
@@ -68,7 +72,7 @@ def get_row(treestore, iter1):
 
 
 class Confix:
-    cat_list = {}
+    cat_list = OrderedDict()
     iter_user = None
     iter_firewall = None
     iter_filter = None
@@ -120,8 +124,6 @@ class Confix:
         window1.show_all()
         window1.set_title(_("Confix"))
         window1.connect("destroy", self.destroy)
-
-        window2 = self.arw2["assistant1"]
 
         self.groups_manager = GroupManager(self.arw, self)
 
@@ -317,6 +319,13 @@ class Confix:
         self.assistant.disable_simulated_user()     # In case the previous user has not disabled simulation before shutting down
 
 
+        # Assistants
+        # manage requests uses the model of the first tab
+        self.arw2["manage_request_tree"].set_model(self.users.users_store)
+        self.tvcolumn = gtk.TreeViewColumn(_('Users'), self.users.cell, text=0)
+        self.arw2["manage_request_tree"].append_column(self.tvcolumn)
+
+
         # user defined options
         checkbox_config = self.idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
         if checkbox_config:
@@ -392,6 +401,7 @@ class Confix:
         else:
             # retrieve files by ftp
             data0 = ftp_get(self.ftp, "idefix.json", json  = True)
+            self.active_config_text = data0
             if data0 :
                 try:
                     self.config = json.loads(data0, object_pairs_hook=OrderedDict)
@@ -405,6 +415,34 @@ class Confix:
                 self.load_defaults()
 
         self.update()
+
+        if ip_address_test(ftp1["server"][0]):
+            ip = ftp1["server"][0]
+            h1 = http.client.HTTPConnection(ip, timeout = 2)
+            h1.connect()
+            h1.request("GET","/network-info.php")
+            res = h1.getresponse()
+            if res.status == 200:
+                data1 = res.read().decode("cp850")
+                content = json.loads(data1)
+                self.myip = content["client"]["ip"]
+                self.mymac = content["client"]["mac"]
+                if self.mymac in self.maclist:
+                    self.myaccount = self.maclist[self.mymac]
+                else:
+                    self.myaccount = _("unknown")
+
+            h1.request("GET","/request_account.json")
+            res = h1.getresponse()
+            if res.status == 200:
+                data1 = res.read().decode("cp850")
+                requests = json.loads(data1)
+                for mac, user in requests["account"].items():
+                    self.arw2["requests_liststore"].append([user,mac])
+
+
+        # Experimental
+        self.arw2["my_account"].set_text(self.myaccount)
 
     def update_gui(self):
         self.maclist = self.users.create_maclist()
@@ -890,15 +928,12 @@ class Confix:
 
         f1 = open(get_config_path("idefix.json"), "w", newline = "\n")
         config2 = self.rebuild_config()
-        f1.write(json.dumps(config2, indent = 3))
+        self.active_config_text = json.dumps(config2, indent = 3)      # update the copy in memory of the config, used to detect changes and remind the user to save.
+        f1.write(self.active_config_text)
         f1.close()
 
         if not self.load_locale:  # send the files by FTP. Load_locale is the development mode, where files are read and written only on the local disk
             self.ftp_upload()
-        else:
-            f1 = open(get_config_path("dev/idefix.json"), "w", newline = "\n")
-            f1.write(json.dumps(config2, indent = 3))
-            f1.close()
 
 
     def format_row(self, row) :
@@ -951,7 +986,7 @@ class Confix:
                     for address in macaddress:
                         mac.append(address)
 
-                subusers = {}
+                subusers = OrderedDict()
 
                 for subchild in child.iterchildren():
                     submac = []
@@ -968,7 +1003,7 @@ class Confix:
                         subusers[subchild[0]] = password
 
 
-                config2["users"][row[0]][user] = {}
+                config2["users"][row[0]][user] = OrderedDict()
                 config2["users"][row[0]][user]["mac"] = mac
                 if subusers:
                     config2["users"][row[0]][user]["subusers"] = subusers
@@ -996,7 +1031,7 @@ class Confix:
 
         # groups store
         for row in self.groups_store:
-            config2['groups'][row[0]] = {}
+            config2['groups'][row[0]] = OrderedDict()
             domains = []
             ip = []
 
@@ -1044,15 +1079,28 @@ class Confix:
 
 
     def destroy(self, widget=None, donnees=None):
+        # are the changes saved ?
+        present_config = self.rebuild_config()
+        present_config = json.dumps(present_config, indent = 3)
+        if present_config != self.active_config_text:
+            dialog = Gtk.Dialog()
+            dialog.set_transient_for(self.arw['window1'])
+            dialog.add_button(_("Save and Quit"), Gtk.ResponseType.APPLY)
+            dialog.add_button(_("Quit without saving"), Gtk.ResponseType.CANCEL)
+            label = Gtk.Label(_("Data has been changed. \nDo you want to save your changes ?"))
+            dialog.get_content_area().add(label)
+            dialog.show_all()
+            result = dialog.run()
+            dialog.hide()
+            if result == Gtk.ResponseType.APPLY:
+                 self.build_files("")
+
         gtk.main_quit()
         if not widget.name == "window1":
             self.arw["window1"].destroy()
         return (True)
 
-
     def update(self):
-
-
         if self.config.get("version") == None:
             self.config["version"] = 1
         elif self.config.get("version") == "2.2":
@@ -1074,7 +1122,7 @@ class Confix:
                         continue
                     if isinstance(config2["users"][cat1][user1], list):
                         macaddress = deepcopy(config2["users"][cat1][user1])    # list
-                        config2["users"][cat1][user1] = {}
+                        config2["users"][cat1][user1] = OrderedDict()
                         config2["users"][cat1][user1]["mac"] = macaddress
 
 

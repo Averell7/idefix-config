@@ -16,7 +16,10 @@ class Assistant:
         self.arw2 = arw2
         self.controller = controller
         self.block_signals = False
-        self.arw2["assistant1"].set_forward_page_func(self.forward_func)
+        self.arw2["assistant_create_user"].set_forward_page_func(self.forward_func)
+        # During development
+        for name in ["proxy_rules2", "manage_request"]:
+            self.arw2["assistant_create_user"].set_page_complete(self.arw2[name], True)
 
         # Listview
         self.categories_store = Gtk.ListStore(str,Gtk.TreeIter,str,int)
@@ -66,41 +69,48 @@ class Assistant:
 
         # Treeview for experiment user permissions
 
-        for tree in ["experiment_source", "experiment_dest"]:
+        for tree in ["experiment_dest"]:
             self.treeview1 = self.arw2[tree]
             self.treeview1.set_model(self.controller.users.users_store)
 
         self.cell = Gtk.CellRendererText()
-        self.tvcolumn = Gtk.TreeViewColumn(_('You'), self.cell, text=0)
-        self.arw2["experiment_source"].append_column(self.tvcolumn)
         self.tvcolumn = Gtk.TreeViewColumn(_('User'), self.cell, text=0)
         self.arw2["experiment_dest"].append_column(self.tvcolumn)
 
 
 
+    def show_assistant_create(self, widget = None):
+        self.arw2["assistant_create_user"].show()
+        self.arw2["assistant_create_user"].set_keep_above(True)
 
-
-
-    def show_assistant(self, widget = None):
-        self.arw2["assistant1"].show()
-        self.arw2["assistant1"].set_keep_above(True)
+    def show_assistant_experiment(self, widget = None):
+        self.arw2["assistant_experiment"].show()
+        self.arw2["assistant_experiment"].set_keep_above(True)
 
     def cancel (self, widget, a = None):
-        self.arw2["assistant1"].hide()
+        self.arw2["assistant_create_user"].hide()
+        self.arw2["assistant_experiment"].hide()
 
     def forward_func(self, page):
         """ manage the page flow, depending of the choices made by the user """
 
         if page == 0 :
-            if self.arw2["ass_create_user_check"].get_active():
+            if self.arw2["account_request_radio"].get_active():
+                 # get usr name
+                (model, node) = self.arw2["requests"].get_selection().get_selected()
+                name = model.get_value(node, 0)
+                self.mac_address = model.get_value(node,1)
+                self.arw2["requested_user_entry"].set_text(name)
+                return 2
+            else:
+                self.arw2["new_user_entry"].set_text(self.arw2["new_user_entry1"].get_text())
                 return 1
-            elif self.arw2["ass_experiment_check"].get_active():
-                return 5
-        elif (  page == 2    # if no proxy rules are necessary
-                and self.arw2["check_filter"].get_active() == 0
-             ):
-            return 4   # summary page
-        elif page == 4:
+        elif page == 1:
+            return 3
+        elif page == 2:    # manage requested account
+            self.username = self.arw2["requested_user_entry"].get_text()
+            return 3
+        elif page == 6:
             self.summary("")
             return 0
 
@@ -130,7 +140,7 @@ class Assistant:
             self.arw2["check_filter"].set_active(False)
 
     def ass_firewall_permissions(self, widget, event = None):
-        self.arw2["assistant1"].set_page_complete(self.arw2["firewall_permissions"], True)
+        self.arw2["assistant_create_user"].set_page_complete(self.arw2["firewall_permissions"], True)
         self.update_categories_list()
 
     def update_categories_list(self,widget = None):
@@ -168,7 +178,7 @@ class Assistant:
 
     def ass_new_user_rules(self, widget, event = None):
         # activated when the user changes the radio buttons of the page 4 of the assistant
-        self.arw2["assistant1"].set_page_complete(self.arw2["proxy_rules"], True)
+        self.arw2["assistant_create_user"].set_page_complete(self.arw2["proxy_rules"], True)
 
     def get_mac_address(self, allowempty = False):
         mac = []
@@ -233,9 +243,10 @@ class Assistant:
         if x == True:
             showwarning(_("Name already used"), _("The name %s is already in use.\nPlease choose another one.") % self.username)
             return
-        self.arw2["assistant1"].set_page_complete(self.arw2["new_user"], True)
+        self.arw2["assistant_create_user"].set_page_complete(self.arw2["new_user"], True)
         # prepare the following page
-        self.arw2["check_specific_rule"].set_label(_("Create a specific access rule for %s") % self.username)
+        message = _("%s will have a filtered Web access.\nDo you want to create a specific access rule for him ?" % self.username)
+        self.arw2["label_specific_rule"].set_label(message)
 
 
     def choose_rules(self, widget, row):
@@ -275,7 +286,7 @@ class Assistant:
         self.controller.set_colors()
 
         # if Web filter is not selected, show the first tab with the new user selected and close the assistant
-        if self.arw2["check_filter"].get_active() == 0:
+        if self.arw2["proxy_rule_radio2"].get_active() == 1:
             model = self.controller.users_store
             iterparent = model.iter_parent(iternew)
             path1 = model.get_path(iterparent)
@@ -284,7 +295,7 @@ class Assistant:
             sel.select_iter(iternew)
             self.arw["notebook3"].set_current_page(0)
             self.controller.users.load_user("","", iternew)
-            self.arw2["assistant1"].hide()
+            self.arw2["assistant_create_user"].hide()
             return
 
 
@@ -293,7 +304,7 @@ class Assistant:
         memiter = None
 
         # create rule
-        if self.arw2["check_specific_rule"].get_active() == 1:
+        if self.arw2["proxy_rule_radio1"].get_active() == 1:
             iter1 = self.controller.filter_store.insert(-1,
                         [self.username, "on", "allow", "", "", self.username, "", "", "", "", "", 0, 0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
 
@@ -313,7 +324,7 @@ class Assistant:
             sel.select_iter(iter1)
         self.controller.proxy_users.load_proxy_user(None, None)
         self.arw["notebook3"].set_current_page(1)
-        self.arw2["assistant1"].hide()
+        self.arw2["assistant_create_user"].hide()
         self.reset_assistant()
 
 
@@ -326,36 +337,31 @@ class Assistant:
         for checkbox in ["check_nothing", "check_filter", "check_full"]:
             self.arw2[checkbox].set_active(False)
         for page in ["new_user", "firewall_permissions"]:
-            self.arw2["assistant1"].set_page_complete(self.arw2[page], False)
+            self.arw2["assistant_create_user"].set_page_complete(self.arw2[page], False)
 
 
     """ Experiment user permissions """
-
-    def get_current_user(self,widget, event = None):
-        path = widget.get_path_at_pos(event.x, event.y)
-        iter1 = self.controller.users.users_store.get_iter(path[0])
-        self.current_name = self.controller.users.users_store[iter1][0]
-        self.arw2["current_name"].set_text(self.current_name)
 
     def get_target_user(self,widget, event = None):
         path = widget.get_path_at_pos(event.x, event.y)
         iter1 = self.controller.users.users_store.get_iter(path[0])
         self.target_name = self.controller.users.users_store[iter1][0]
+        #self.arw2["my_account"].set_text(self.controller.myaccount)
         self.arw2["target_name"].set_text(self.target_name)
 
     def start_simulate_user(self, widget):
         """ called by the toggle button in the Asssistant """
-        if self.current_name == self.target_name:
+        if self.controller.myaccount == self.target_name:
             showwarning(_("Incvalid configuration"), _("You cannot experiment yourself! \n Please choose another user."))
             widget.set_active(False)
             return
-        self.enable_simulated_user(self.current_name, self.target_name)
+        self.enable_simulated_user(self.controller.myaccount, self.target_name)
 
 
     def simulate_user_titlebar_toggled(self,widget):
         """ called by the toggle button in the title bar. Disables experimentation, and show the normal status bar """
         if not self.arw["experiment_user_toggle"].get_active():
-            self.disable_simulated_user(self.current_name)
+            self.disable_simulated_user(self.controller.myaccount)
             # Toggle the indicator in the title bar
             self.arw["titlebar_stack"].set_visible_child(self.arw["titlebar_standard"])
             self.arw["experiment_user_toggle"].set_active(False)
@@ -380,7 +386,7 @@ class Assistant:
         self.arw["titlebar_stack"].set_visible_child(self.arw["titlebar_experiment"])
         self.arw["experiment_user_toggle"].set_active(True)
         self.arw["experiment_username"].set_text(target_user)
-        self.arw2["assistant1"].hide()
+        self.arw2["assistant_experiment"].hide()
 
     def disable_simulated_user(self, current_user = None):
         """Remove -@ and +@ prefixes from all users"""

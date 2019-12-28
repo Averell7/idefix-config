@@ -89,6 +89,15 @@ class Users:
                         self.block_signals = True
                         self.arw['experiment_user_toggle'].set_active(True)
                         self.block_signals = False
+        # reverse search
+        temp1 = {}
+        for user, macs in maclist.items():
+            for mac in macs:
+                mac = mac.split("#")[0].strip()
+                if mac != "":
+                    temp1[mac] = user
+        maclist.update(temp1)
+
         return maclist
 
 
