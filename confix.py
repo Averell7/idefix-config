@@ -24,7 +24,7 @@ from copy import deepcopy
 import gi
 
 from connection_information import Information
-from ftp_client import ftp_connect, ftp_get, ftp_send
+from ftp_client import ftp_connect, ftp_get, ftp_send, FTPError
 import http.client
 
 gi.require_version('Gtk', '3.0')
@@ -418,31 +418,35 @@ class Confix:
 
         if ip_address_test(ftp1["server"][0]):
             ip = ftp1["server"][0]
-            h1 = http.client.HTTPConnection(ip, timeout = 2)
-            h1.connect()
-            h1.request("GET","/network-info.php")
-            res = h1.getresponse()
-            if res.status == 200:
-                data1 = res.read().decode("cp850")
-                content = json.loads(data1)
-                self.myip = content["client"]["ip"]
-                self.mymac = content["client"]["mac"]
-                if self.mymac in self.maclist:
-                    self.myaccount = self.maclist[self.mymac]
-                else:
-                    self.myaccount = _("unknown")
+            try:
+                h1 = http.client.HTTPConnection(ip, timeout = 2)
+                h1.connect()
 
-            h1.request("GET","/request_account.json")
-            res = h1.getresponse()
-            if res.status == 200:
-                data1 = res.read().decode("cp850")
-                requests = json.loads(data1)
-                for mac, user in requests["account"].items():
-                    self.arw2["requests_liststore"].append([user,mac])
+                h1.request("GET","/network-info.php")
+                res = h1.getresponse()
+                if res.status == 200:
+                    data1 = res.read().decode("cp850")
+                    content = json.loads(data1)
+                    self.myip = content["client"]["ip"]
+                    self.mymac = content["client"]["mac"]
+                    if self.mymac in self.maclist:
+                        self.myaccount = self.maclist[self.mymac]
+                    else:
+                        self.myaccount = _("unknown")
+
+                h1.request("GET","/request_account.json")
+                res = h1.getresponse()
+                if res.status == 200:
+                    data1 = res.read().decode("cp850")
+                    requests = json.loads(data1)
+                    for mac, user in requests["account"].items():
+                        self.arw2["requests_liststore"].append([user,mac])
+            except FTPError:
+                print("No ftp connection")
 
 
         # Experimental
-        self.arw2["my_account"].set_text(self.myaccount)
+        # self.arw2["my_account"].set_text(self.myaccount)
 
     def update_gui(self):
         self.maclist = self.users.create_maclist()

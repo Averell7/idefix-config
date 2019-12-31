@@ -61,11 +61,10 @@ class Information:
                 x = x.replace(" ", "  ")
                 #x = re.sub("(\s)", "§", x)
                 message += x + "\n"
-
-
         else:
             pass  # TODO : code for Linux and Mac
 
+        # find Idefix and display network settings
         (ip, content) = find_idefix()
         if content:
 
@@ -78,16 +77,35 @@ class Information:
             message += _("\n     Internet port (eth0) Netmask : ") + network["idefix"]["netmask0"]
             message += _("\n     Internet port (eth0) active : ") + network["idefix"]["link_eth0"]
 
-
-
             wan = ipaddress.ip_interface(network["idefix"]["eth0"] + "/" + network["idefix"]["netmask0"])
             lan = ipaddress.ip_interface(network["idefix"]["eth1"] + "/" + network["idefix"]["netmask1"])
 
             if lan.network.overlaps(wan.network):
                 message += "\n\nWARNING !!!  WARNING !!!  WARNING !!!  WARNING !!! \n Both subnets overlap !\nIdefix cannot work"
 
-
             supervix = "http://" + ip + ":10080/visu-donnees-systeme.php"
+
+            # verify Idefix Internet connection
+            command_f = io.BytesIO()
+            command_f.write(b'ping')
+
+            # delete data in "result" file
+            ftp1 = self.controller.ftp_config
+            ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+            self.ftp = ftp
+            ftp.storlines('STOR result', command_f)    # the pointer is at the end of the file, so nothing will be written
+            command_f.seek(0)
+            ftp.storlines('STOR trigger', command_f)
+            self.arw["infos_spinner"].start()
+            self.spin(True)
+            self.arw["infos_spinner"].stop()
+            result = ftp_get(ftp, "result")
+            result = "\n".join(result)
+            message += "\n\nInternet connexion : \n" + result
+            ftp.close()
+        else:
+            message += "\n\nIdefix not found ! "
+
 
 
 
@@ -103,22 +121,30 @@ class Information:
         if result == Gtk.ResponseType.APPLY:
             os.startfile(supervix)
 
-        #showwarning(_("Mac addresses"), message)
 
 
 
 
 
-    def spin(self, delay, progress = False):
+    def spin(self, progress = False):
         # insure that the spinner runs for the required time
         time1 = time.time()
-        for i in range(delay):
+        for i in range(30):     # set absolute maximum to 30 seconds
             while time.time() < time1 + i:
                 while Gtk.events_pending():
                         Gtk.main_iteration()
             if progress:
-                data1 = ftp_get(self.ftp, "result")
-                self.arw["infos_label"].set_markup("\n".join(data1))
+                result = ftp_get(self.ftp, "result")
+                result = "\n".join(result)
+                # escape characters incompatible with pango markup
+                result = result.replace("&", "&amp;")
+                result = result.replace(">", "&gt;")
+                result = result.replace("<", "&lt;")
+
+                self.arw["infos_label"].set_markup(result)
+            status =  ftp_get(self.ftp, "trigger")
+            if status[0] == "ready":
+                break
 ##        while Gtk.events_pending():
 ##            Gtk.main_iteration()
 
@@ -134,32 +160,68 @@ class Information:
             command = "linux " + self.arw["linux_command_entry"].get_text()
         else:
             command = action.replace("infos_", "")
+
+        if command in["unbound", "squid"]:
+            command += " " + self.controller.myip
+
         command_f = io.BytesIO()
         command_f.write(bytes(command, "utf-8"))
         command_f.seek(0)
-        ftp1 = controller.ftp_config
-        ftp_login = (ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
-        ftp = ftp_connect(ftp_login)
+        ftp1 = self.controller.ftp_config
+        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        self.ftp = ftp
         ftp.storlines('STOR trigger', command_f)
         self.arw["infos_spinner"].start()
 
         if command in ("ping"):
-            self.spin(4, True)
+            self.spin(True)
         elif command in ("all"):
-            self.spin(6)
+            self.spin()
         elif command in ("versions"):
-            self.spin(15, True)
+                self.spin(True)
         elif command.startswith("linux"):
-            self.spin(6)
+            self.spin()
         else:
-            self.spin(2)
+            self.spin()
         self.arw["infos_spinner"].stop()
-        data1 = ftp_get(ftp, "result")
+        result = ftp_get(ftp, "result")
+        result = "\n".join(result)
         if command == "all":
             dialog = ExportDiagnosticDialog(self.arw, self)
-            dialog.run("\n".join(data1).encode("utf8"))
+            dialog.run(result.encode("utf8"))
         else:
-            self.arw["infos_label"].set_markup("\n".join(data1))
+            # escape characters incompatible with pango markup
+            result = result.replace("&", "&amp;")
+            result = result.replace(">", "&gt;")
+            result = result.replace("<", "&lt;")
+
+            # set colors
+            if command.startswith("unbound"):
+                result2 = result.split("\n")
+                result3 = ""
+                for line in result2:
+                    if "no match" in line :
+                        line = '<span foreground="blue">' + line.strip() + "</span>"
+                    elif "denied" in line :
+                        line = '<span foreground="red">' + line.strip() + "</span>"
+                    elif "allowed" in line :
+                        line = '<span foreground="green">' + line.strip() + "</span>"
+                    if "validation failure" in line :
+                        line = '<span background="#ff9999">' + line.strip().replace("<", "&lt;").replace(">", "&gt;") + "</span>\n"
+                    result3 += line + "\n"
+                result = result3
+            elif command == "mac":
+                result2 = result.split("\n")
+                result3 = ""
+                for line in result2:
+                    if "expired" in line :
+                        line = '<span foreground="red">' + line.strip() + "</span>"
+                    elif "active" in line :
+                        line = '<span foreground="green">' + line.strip() + "</span>"
+                    result3 += line +"\n"
+                result = result3
+
+            self.arw["infos_label"].set_markup(result)
 
         ftp.close()
 
@@ -190,7 +252,7 @@ class Information:
         command_f.seek(0)
         ftp.storlines('STOR trigger', command_f)
         self.arw["infos_spinner"].start()
-        self.spin(2)
+        self.spin(True)
         self.arw["infos_spinner"].stop()
 
         data1 = ftp_get(ftp, "result")
@@ -217,8 +279,11 @@ class Information:
 
 
     def update_display(self, widget):
-        data1 = ftp_get(self.ftp, "result")
+        ftp1 = self.controller.ftp_config
+        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        data1 = ftp_get(ftp, "result")
         self.arw["infos_label"].set_markup("\n".join(data1))
+        ftp.close()
 
     def open_editor(self, widget):
         self.arw["informations_stack"].set_visible_child(self.arw["editor_box"])
