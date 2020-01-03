@@ -1,7 +1,9 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
-# version 2.3.8 - Warning when leaving the program, if user has not savec his changes
+# version 2.3.10 - restore from Idefix backups or FTP backups
+# version 2.3.9 - Network summary
+# version 2.3.8 - Warning when leaving the program, if user has not saved his changes
 #                 Edit file added to the information tab
 # version 2.3.7 - Idefix module automatically detected
 # version 2.3.6 - Changes in connexion profiles are active immediately
@@ -50,14 +52,14 @@ from firewall import Firewall
 from users import Users
 from config_profile import ConfigProfile
 from assistant import Assistant
-from json_config import ImportJsonDialog, ExportJsonDialog
+from json_config import ImportJsonDialog, ExportJsonDialog, ImportJsonFromIdefix, ImportJsonFromFTP
 
 ###########################################################################
 # CONFIGURATION ###########################################################
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.3.8"
+version = "2.3.10"
 
 
 gtk = Gtk
@@ -117,6 +119,8 @@ class Confix:
                 pass
 
         self.import_json = ImportJsonDialog(self.arw, self)
+        self.import_json_from_idefix = ImportJsonFromIdefix(self.arw, self)
+        self.import_json_from_ftp = ImportJsonFromFTP(self.arw, self)
         self.export_json = ExportJsonDialog(self.arw, self)
 
         self.arw["program_title"].set_text("Confix - Version " + version)
@@ -291,13 +295,6 @@ class Confix:
             self.arw[chooser].drag_source_add_text_targets()
             self.arw[chooser].connect("drag-data-get", self.chooser_drag_data_get)
 
-        # list of inifiles
-
-        self.inifiles_store = gtk.ListStore(str, str)
-        self.tvcolumn = gtk.TreeViewColumn(_('---'), self.users.cell, text=0)
-        self.arw["inifiles_list"].append_column(self.tvcolumn)
-        self.arw["inifiles_list"].connect("button-press-event", self.load_file)
-        self.arw["inifiles_list"].set_model(self.inifiles_store)
 
         # drop for TextView
         # see above, the line : self.arw["proxy_group"].connect("drag-data-received", self.on_drag_data_received)
@@ -313,7 +310,6 @@ class Confix:
         self.firewall.populate_firewall()
         self.set_check_boxes()
         self.set_colors()
-        self.load_ini_files()
         self.profiles.list_configuration_profiles()
         self.load_chooser("")
         self.assistant.disable_simulated_user()     # In case the previous user has not disabled simulation before shutting down
@@ -372,32 +368,22 @@ class Confix:
     def open_connexion_profile(self):
         global ftp1
 
+        self.arw['loading_window'].show()
+        while Gtk.events_pending():
+            Gtk.main_iteration()
         # ftp connect
         ftp1 = self.ftp_config
         self.ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
-
+        self.arw['loading_window'].hide()
+        while Gtk.events_pending():
+            Gtk.main_iteration()
 
 
         if not self.ftp:
+
             alert(_("Could not connect to %s. \nVerify your cables or your configuration.") % ftp1["server"][0])
 
-##            if askyesno(_("Update Configuration"), _("Could not connect to FTP. Edit Configuration?")):
-##                self.profiles.profile_open_window()
-##
-##                def restart(*args):
-##                    if askyesno(_("Restart"), _("Please restart idefix to use new configuration")):
-##                        #sys.exit(0)
-##                        configname = self.arw['profile_name_entry'].get_text()
-##                        self.ftp_config = self.idefix_config['conf'][configname]
-##                        self.open_connexion_profile()
-##
-##
-##                self.profiles.window.connect('hide', restart)
-##                print("restart system")
-##                self.profiles.list_configuration_profiles()
-##                return
-##            else:
-##                return
+
         else:
             # retrieve files by ftp
             data0 = ftp_get(self.ftp, "idefix.json", json  = True)
@@ -415,7 +401,7 @@ class Confix:
                 self.load_defaults()
 
         self.update()
-
+        self.arw['loading_window'].hide()
         if ip_address_test(ftp1["server"][0]):
             ip = ftp1["server"][0]
             try:
@@ -483,6 +469,12 @@ class Confix:
 
     def import_config(self, widget):
         self.import_json.run()
+
+    def import_config_from_idefix_backup(self, widget):
+        self.import_json_from_idefix.run()
+
+    def import_config_from_ftp_backup(self, widget):
+        self.import_json_from_ftp.run()
 
     def export_config(self, widget):
         self.export_json.run()
@@ -873,57 +865,6 @@ class Confix:
             return
         self.arw["chooser_proxy_groups_menu"].popup(None, None, None, None, event.button, event.time)
 
-    def load_ini_files(self):
-        for path in glob.glob(get_config_path("./tmp/") + "*.ini"):
-            filename = os.path.split(path)[1]
-            self.inifiles_store.append([filename, path])
-        #self.load_log_files()
-
-    def load_log_files(self) :
-        ftp1 = self.ftp_config
-        if ftp1['mode'][0] == 'local':
-            ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
-        ftp.cwd("..")
-        ftp.cwd("..")
-        ftp.cwd("..")
-        ftp.cwd("var")
-        ftp.cwd("log")
-        f1 = open(get_config_path("./tmp/syslog"), "wb")
-        filename = "syslog"
-        ftp.retrbinary('RETR ' + filename, f1.write)  # get the file
-        self.inifiles_store.append([filename, get_config_path("./tmp/syslog")])
-
-        ftp.cwd("squid")
-        self.f1 = open(get_config_path("./tmp/squid.log"), "w")
-        filename = "access.log"
-        ftp.retrlines('RETR ' + filename, self.filter_squid_log)  # get the file
-        self.inifiles_store.append([filename, get_config_path("./tmp/squid.log")])
-        self.f1.close()
-
-    def filter_squid_log(self, line1):
-        urlfilter = ["cloudfront.net", "agkn.net", "avast", "avcdn", "googleapis.com",
-             "mozilla.org", "microsoft.com", "google.fr", "google.com", "youtube.com"]
-
-        for url in urlfilter :
-            if url in line1 :
-               return
-
-        line1 = line1.split()
-        time1 = time.localtime(int(float(line1[0])))
-        time1 = time.strftime("%a %d, %H:%M:%S", time1)
-
-        self.f1.write(chr(9).join([time1, line1[2], line1[3], line1[6]]) + "\n")
-
-    def load_file(self, widget, event):
-        pos = widget.get_path_at_pos(event.x, event.y)
-        if pos is None:  # click outside a valid line
-            return
-        iter1 = self.inifiles_store.get_iter(pos[0])
-        path = self.inifiles_store[iter1][1]
-        f1 = open(get_config_path(path), "r", encoding="utf-8-sig")
-        text = f1.read()
-        f1.close()
-        self.arw["inifiles_view"].get_buffer().set_text(text)
 
     """ Output """
 

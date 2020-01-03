@@ -61,6 +61,9 @@
     <child>
       <placeholder/>
     </child>
+    <child>
+      <placeholder/>
+    </child>
   </object>
   <object class="GtkAssistant" id="assistant_experiment">
     <property name="height_request">600</property>
@@ -1465,6 +1468,9 @@ Click on "Apply" to apply your choices. </property>
         <property name="complete">True</property>
         <property name="has_padding">False</property>
       </packing>
+    </child>
+    <child>
+      <placeholder/>
     </child>
     <child>
       <placeholder/>

@@ -6,6 +6,8 @@ import traceback
 import subprocess
 import http.client
 
+import gi
+gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 import elib_intl3
@@ -169,6 +171,7 @@ def find_idefix():
                         h1.close()
                         return (ip, content)
                 h1.close()
+        return (None, None)
 
 def bool_test(value):
     if isinstance(value, str):

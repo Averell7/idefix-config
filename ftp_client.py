@@ -55,7 +55,11 @@ def ftp_get(ftp, filename, directory="", required=True, json=False):
         if json:  # returns string
             return data1.decode("ascii")
         else:  # returns list
-            return data1.decode("utf-8-sig").split("\n")
+            try:
+                return data1.decode("utf-8-sig")
+            except:
+                return data1
+
     except FTPError:
         print(_("could not get ") + filename)
 
