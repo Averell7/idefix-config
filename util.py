@@ -343,7 +343,7 @@ def format_domainline(dummy, line1):
             if ip_address_test(value):
                 key = "dest_ip"
             else:
-                key = "dest_domain"
+                key = "dest_domains"
             text += key + " = " + value + "\n"
     return text
 

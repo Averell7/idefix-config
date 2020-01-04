@@ -515,6 +515,10 @@ class Users:
 
     def user_summary(self, user1):
 
+        #(model, node) = self.arw["treeview1"].get_selection().get_selected()   --> Does not work. Returns the previous selection
+        #level = model.get_path(node).get_depth()
+
+
         parent_iter = self.users_store.iter_parent(self.controller.iter_user)
         if not parent_iter:
             parent_iter = self.controller.iter_user
@@ -606,7 +610,7 @@ class Users:
         # 5 : user
         # 6 : mac
         # 7 : dest_group
-        # 8 : dest_domain
+        # 8 : dest_domains
         # 11 : toggleButton (0/1) users [list/all]
         # 12 : toggleButton (0/1) destination [list/all]
         # 13 : toggleButton (0/1) [deny/allow]
@@ -616,6 +620,7 @@ class Users:
         # 19 : chekbox assistant (0/1)
 
         i = 0
+        print("level = ", level)
         for row in self.controller.filter_store:
             if not row[5]:
                 users = [""]
@@ -623,7 +628,9 @@ class Users:
                 users = row[5].strip().split("\n")
 
             for userx in users:
+
                 if userx.strip() == user1 or row[11] == 1:
+                    print ("===>", userx, user1)
                     parent_iter = store.append(None)
                     if row[11]:
                         name = '<i>' + row[0] + '</i>'

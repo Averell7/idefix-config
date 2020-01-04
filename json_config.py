@@ -140,8 +140,13 @@ class ImportJsonFromFTP:
 
         # get the list of backups present on the ftp server
         # get Idefix ftp configuration
-        ftp1 = json.loads(Information.get_infos(self, "ftp"))
-        ftp = ftp_connect(ftp1["ftp"], ftp1["login"], ftp1["password"])
+        if self.controller.idefix_module:
+            ftp1 = json.loads(Information.get_infos(self, "ftp"))
+            ftp = ftp_connect(ftp1["ftp"], ftp1["login"], ftp1["password"], self.controller)
+        else:
+            ftp1 = self.controller.ftp_config
+            ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+
         if ftp:
             ftp.cwd("backup")
             backup_list = ftp.nlst()
@@ -210,4 +215,5 @@ class ExportJsonDialog:
         config2 = self.controller.rebuild_config()
         f1.write(json.dumps(config2, indent = 3))
         f1.close()
+        alert(_("Configuration saved"))
 

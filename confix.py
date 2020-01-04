@@ -366,24 +366,17 @@ class Confix:
 
 
     def open_connexion_profile(self):
-        global ftp1
 
         self.arw['loading_window'].show()
         while Gtk.events_pending():
             Gtk.main_iteration()
         # ftp connect
         ftp1 = self.ftp_config
-        self.ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        self.ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0], self)
         self.arw['loading_window'].hide()
-        while Gtk.events_pending():
-            Gtk.main_iteration()
-
 
         if not self.ftp:
-
             alert(_("Could not connect to %s. \nVerify your cables or your configuration.") % ftp1["server"][0])
-
-
         else:
             # retrieve files by ftp
             data0 = ftp_get(self.ftp, "idefix.json", json  = True)
@@ -396,12 +389,9 @@ class Confix:
                 except:
                     alert("Unable to load configuration. Please import another one.")
                 self.ftp.close()
-                self.update_gui()
             else:
                 self.load_defaults()
 
-        self.update()
-        self.arw['loading_window'].hide()
         if ip_address_test(ftp1["server"][0]):
             ip = ftp1["server"][0]
             try:
@@ -987,7 +977,7 @@ class Confix:
                     domains.append(line)
 
             if domains:
-                config2['groups'][row[0]]['dest_domain'] = domains
+                config2['groups'][row[0]]['dest_domains'] = domains
 
             if ip:
                 config2['groups'][row[0]]['dest_ip'] = ip
@@ -1025,24 +1015,26 @@ class Confix:
 
     def destroy(self, widget=None, donnees=None):
         # are the changes saved ?
-        present_config = self.rebuild_config()
-        present_config = json.dumps(present_config, indent = 3)
-        if present_config != self.active_config_text:
-            dialog = Gtk.Dialog()
-            dialog.set_transient_for(self.arw['window1'])
-            dialog.add_button(_("Save and Quit"), Gtk.ResponseType.APPLY)
-            dialog.add_button(_("Quit without saving"), Gtk.ResponseType.CANCEL)
-            label = Gtk.Label(_("Data has been changed. \nDo you want to save your changes ?"))
-            dialog.get_content_area().add(label)
-            dialog.show_all()
-            result = dialog.run()
-            dialog.hide()
-            if result == Gtk.ResponseType.APPLY:
-                 self.build_files("")
+        if hasattr(self, "active_config_text"):
+            present_config = self.rebuild_config()
+            present_config = json.dumps(present_config, indent = 3)
+            if present_config != self.active_config_text:
+                open("present_config", "w").write(present_config)
+                open("active_config_text", "w").write(self.active_config_text)
+                dialog = Gtk.Dialog()
+                dialog.set_transient_for(self.arw['window1'])
+                dialog.add_button(_("Save and Quit"), Gtk.ResponseType.APPLY)
+                dialog.add_button(_("Quit without saving"), Gtk.ResponseType.CANCEL)
+                label = Gtk.Label(_("Data has been changed. \nDo you want to save your changes ?"))
+                dialog.get_content_area().add(label)
+                dialog.show_all()
+                result = dialog.run()
+                dialog.hide()
+                if result == Gtk.ResponseType.APPLY:
+                     self.build_files("")
 
         gtk.main_quit()
-        if not widget.name == "window1":
-            self.arw["window1"].destroy()
+        self.arw["window1"].destroy()
         return (True)
 
     def update(self):
@@ -1053,23 +1045,9 @@ class Confix:
         elif self.config.get("version") == "2.3":
             self.config["version"] = 23
 
-##        if self.config["version"] == 23:
-##            return
 
         config2 = deepcopy(self.config)
-        print("update called", self.config.get("version"))
-
-        if config2["version"] < 23:
-            # users
-            for cat1 in config2["users"]:
-                for user1 in config2["users"][cat1]:
-                    if user1.startswith("@_"):
-                        continue
-                    if isinstance(config2["users"][cat1][user1], list):
-                        macaddress = deepcopy(config2["users"][cat1][user1])    # list
-                        config2["users"][cat1][user1] = OrderedDict()
-                        config2["users"][cat1][user1]["mac"] = macaddress
-
+        #print("update called", self.config.get("version"))
 
         if config2["version"] < 22:
 
@@ -1092,18 +1070,30 @@ class Confix:
                 if not x["action"] in ["allow", "deny"]:
                      x["action"] = "allow"
                 x["time_condition"] = ""
+            config2["version"] = 22
 
-        for group in config2["groups"]:
-            x = config2["groups"][group]
-            for key in ["dest_domain"]:
-                if key in x:
-                    x[key + "s"] = x[key]
-                    del x[key]
-        config2["version"] = 24
+        if config2["version"] < 23:
+            # users
+            for cat1 in config2["users"]:
+                for user1 in config2["users"][cat1]:
+                    if user1.startswith("@_"):
+                        continue
+                    if isinstance(config2["users"][cat1][user1], list):
+                        macaddress = deepcopy(config2["users"][cat1][user1])    # list
+                        config2["users"][cat1][user1] = OrderedDict()
+                        config2["users"][cat1][user1]["mac"] = macaddress
+            config2["version"] = 23
 
-        f1 = open("new-idefix.json", "w")
-        f1.write(json.dumps(config2, indent = 3))
-        f1.close()
+
+        if config2["version"] < 25:
+            for group in config2["groups"]:
+                x = config2["groups"][group]
+                for key in ["dest_domain"]:
+                    if key in x:
+                        x[key + "s"] = x[key]
+                        del x[key]
+            config2["version"] = 25
+
         self.config = config2
 
 

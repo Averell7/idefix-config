@@ -5,7 +5,7 @@ from ftplib import FTP, all_errors as FTPError
 from util import get_config_path
 
 
-def ftp_connect(server, login, password):
+def ftp_connect(server, login, password, controller = None):
     global ftp1
 
     if password[0:1] == "%":
@@ -24,6 +24,11 @@ def ftp_connect(server, login, password):
         #    if name == "idefix" and properties['type'] == "dir":
         if "idefix" in ftp.nlst():
             ftp.cwd("idefix")
+            if controller:
+                controller.idefix_module = True
+        else:
+            if controller:
+                controller.idefix_module = False
         return ftp
     except FTPError as e:
         print("Unable to connect to ftp server with : %s / %s. \nError: %s" % (login, password, e))

@@ -919,6 +919,7 @@ and others</property>
                             <property name="can_focus">False</property>
                             <property name="label" translatable="yes">Save Configuration as...</property>
                             <property name="use_underline">True</property>
+                            <signal name="activate" handler="save_config_as" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -2803,7 +2804,7 @@ Domain</property>
                                       </object>
                                     </child>
                                     <child>
-                                      <object class="GtkMenuItem" id="infos_all1">
+                                      <object class="GtkMenuItem" id="infos_all">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">Diagnostic summary</property>

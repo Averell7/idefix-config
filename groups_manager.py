@@ -180,7 +180,7 @@ class GroupManager:
     def read_config_data(self, data):
         """Read ini config data from an ini file into the group manager's groups store"""
         for key in data:
-            tooltip = "\n".join(data[key].get('dest_domain', ''))
+            tooltip = "\n".join(data[key].get('dest_domains', ''))
             if data[key].get('dest_ip', ''):
                 if tooltip:
                     tooltip += '\n'
@@ -295,7 +295,7 @@ class GroupManager:
                     if ip_address_test(domain):
                         data += 'dest_ip = %s\n' % domain
                     else:
-                        data += 'dest_domain = %s\n' % domain
+                        data += 'dest_domains = %s\n' % domain
 
             with open(dialog.get_filename(), 'w', encoding="utf-8-sig", newline="\n") as f:
                 f.write(data)
@@ -398,7 +398,7 @@ class GroupManager:
         self.widgets['repository_store'].set_value(group_iter, IMPORT_COLUMN_GROUP, True)
         domains = ''
         for domain in group.get('domains', []):
-            domains += 'dest_domain = %s\n' % domain
+            domains += 'dest_domains = %s\n' % domain
         self.widgets['repository_store'].set_value(group_iter, IMPORT_COLUMN_DOMAINS, domains)
 
     def import_selection_changed(self, widget):

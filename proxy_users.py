@@ -33,7 +33,7 @@ class ProxyUsers:
         5 : user
         6 : mac
         7 : dest_group
-        8 : dest_domain
+        8 : dest_domains
         9 : (previously : dest_ip. No longer used)
         10 : (previously : destination. No longer used)
         11 : toggleButton (0/1) users [list/all]
@@ -413,7 +413,7 @@ class ProxyUsers:
         self.controller.proxy_group.update_proxy_group_list(iter1)
 
         # add dest_domains
-        data1 = self.filter_store[iter1][8]  # dest_domain
+        data1 = self.filter_store[iter1][8]  # dest_domains
         # add dest_ip, if any
         data1 += self.filter_store[iter1][9]  # dest_ip
         self.arw["proxy_dest"].get_buffer().set_text(data1)

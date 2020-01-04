@@ -167,7 +167,12 @@ class Information:
         else:
             action = widget.name
 
-        if action in ["unbound", "squid", "users"]:
+        if action == "linux_command":                                          # launched by the Go button
+            command = "linux " + self.arw["linux_command_entry"].get_text()      # get command from the entry
+        else:
+            command = action.replace("infos_", "")
+
+        if command in ["unbound", "squid", "mac"]:
             display_label = self.arw["infos_label"]
             spinner = self.arw["infos_spinner"]
         else:
@@ -175,14 +180,12 @@ class Information:
             spinner = self.arw["infos_spinner2"]
             self.arw["display2_stack"].set_visible_child(self.arw["infos_page2_1"])
 
-
-        if action == "linux_command":                                          # launched by the Go button
-            command = "linux " + self.arw["linux_command_entry"].get_text()      # get command from the entry
-        else:
-            command = action.replace("infos_", "")
-
         if command in["unbound", "squid"]:
-            command += " " + self.controller.myip
+            try:
+                command += " " + self.controller.myip
+            except:
+                display_label.set_markup("ip not found. The command cannot be executed")
+                return
 
         spinner.start()
         if command in ("versions"):
