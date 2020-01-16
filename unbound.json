@@ -1,0 +1,3335 @@
+{
+   "rules": {
+      "@_open_access": {
+         "active": "on",
+         "action": "allow",
+         "users": [
+            "Daniel",
+            "Jose-Luis",
+            "Nicolas",
+            "Luc",
+            "Laurent BORNE",
+            "Sebastien",
+            "Thierry Pont",
+            "Roman",
+            "Pierre-Marie Flach",
+            "RPI-Dysmas",
+            "poste 43",
+            "RPI x",
+            "RPI y",
+            "QMS",
+            "JetDirect",
+            "Central",
+            "EFW",
+            "OBELIX",
+            "ASURANCETOURIX",
+            "Sainte Marthe",
+            "Idefix",
+            "RasPBX",
+            "e500",
+            "iPhone blanc porterie",
+            "Rock64 3",
+            "Rock64 4",
+            "Sr Marie-Noemi",
+            "Dom Norbert",
+            "Dom Moses",
+            "Miraflores",
+            "Dom Magdalenus",
+            "Portes",
+            "Dom Lorenzo",
+            "Valsainte",
+            "Dom Piero",
+            "Maria Medianeira",
+            "John Babeau",
+            "San Jose",
+            "Jean-Paul G.",
+            "Dom Jacques",
+            "Pedro de la C.",
+            "Maximiliano",
+            "Dom Juan Jesus",
+            "Aula Dei",
+            "Notre Dame",
+            "Annonciation",
+            "Marie-Christine",
+            "Sr. Marie-S\u00e9gol\u00e8ne",
+            "Trinita",
+            "Mere Blanca",
+            "Prieure Nonenque",
+            "Sr Marie Paques",
+            "Sr Marie-Ange (ND)",
+            "Marie Ange",
+            "RPI-Sainte-Marthe",
+            "P\u00e8re Vianney"
+         ],
+         "any_destination": 1,
+         "domains_tree": {
+            "*": {}
+         }
+      },
+      "idefix64": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": null,
+         "any_user": 1,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "fr": {
+               "idefix64": {
+                  "*": {}
+               }
+            }
+         }
+      },
+      "Acces_ouvert": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Sebastien",
+            "Roman",
+            "Thierry Pont",
+            "Jose-Luis",
+            "Nicolas",
+            "Rock64 4",
+            "Rock64 3"
+         ],
+         "dest_groups": [
+            ""
+         ],
+         "dest_domains": [
+            ""
+         ],
+         "any_user": 0,
+         "any_destination": 1,
+         "allow_deny": 1,
+         "domains_tree": {
+            "*": {}
+         }
+      },
+      "autorisations de nuit": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": null,
+         "any_user": 1,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "org": {
+               "gps123": {
+                  "*": {}
+               },
+               "ntp": {
+                  "*": {}
+               },
+               "letsencrypt": {
+                  "*": {}
+               }
+            },
+            "com": {
+               "amap": {
+                  "*": {}
+               },
+               "autonavi": {
+                  "*": {}
+               },
+               "avg": {
+                  "*": {}
+               },
+               "avast": {
+                  "*": {}
+               },
+               "nation": {
+                  "avg": {}
+               },
+               "avgfree": {
+                  "*": {}
+               },
+               "kaspersky": {
+                  "geo": {
+                     "*": {}
+                  }
+               },
+               "akamaitechnologies": {
+                  "*": {}
+               },
+               "grisoft": {
+                  "akamai": {}
+               },
+               "verisign": {
+                  "*": {}
+               },
+               "digicert": {
+                  "*": {}
+               },
+               "googleapis": {
+                  "*": {},
+                  "ajax": {}
+               },
+               "google": {
+                  "apis": {},
+                  "developers": {}
+               },
+               "gstatic": {
+                  "*": {}
+               },
+               "google-analytics": {
+                  "*": {}
+               },
+               "sanasecurity": {
+                  "*": {}
+               },
+               "microsoft": {
+                  "*": {}
+               },
+               "windows": {
+                  "*": {}
+               },
+               "windowsupdate": {
+                  "*": {}
+               },
+               "wetransfer": {
+                  "*": {}
+               },
+               "grosfichiers": {
+                  "*": {}
+               },
+               "online-translator": {},
+               "Promt": {
+                  "*": {}
+               },
+               "deepl": {
+                  "*": {}
+               },
+               "skype": {
+                  "*": {}
+               },
+               "skypeassets": {
+                  "*": {}
+               },
+               "msftconnecttest": {
+                  "*": {}
+               }
+            },
+            "fr": {
+               "avg": {
+                  "*": {}
+               },
+               "google": {
+                  "translate": {}
+               },
+               "systran": {
+                  "*": {}
+               }
+            },
+            "cz": {
+               "avg": {
+                  "*": {}
+               },
+               "grisoft": {
+                  "akamai": {}
+               }
+            },
+            "net": {
+               "avcdn": {
+                  "*": {}
+               },
+               "akamai": {
+                  "*": {}
+               },
+               "edgesuite": {
+                  "cz": {
+                     "grisoft": {
+                        "akamai": {}
+                     },
+                     "avg": {
+                        "akamai": {}
+                     }
+                  },
+                  "com": {
+                     "grisoft": {
+                        "akamai": {}
+                     },
+                     "avg": {
+                        "akamai": {}
+                     }
+                  }
+               },
+               "myfonts": {
+                  "*": {}
+               },
+               "wetransfer": {
+                  "*": {}
+               },
+               "reverso": {
+                  "*": {}
+               },
+               "msauth": {
+                  "*": {}
+               }
+            },
+            "goog": {
+               "pki": {
+                  "*": {}
+               }
+            },
+            "ch": {
+               "grosfichiers": {
+                  "*": {}
+               }
+            },
+            "toto": {},
+            "tata": {}
+         }
+      },
+      "Acces_EFW": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "RP Dysmas",
+            "Joseph-Marie"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "184": {
+               "1": {
+                  "168": {
+                     "192": {}
+                  }
+               }
+            },
+            "1": {
+               "0": {
+                  "168": {
+                     "192": {}
+                  }
+               }
+            },
+            "254": {
+               "0": {
+                  "0": {
+                     "10": {}
+                  }
+               }
+            }
+         }
+      },
+      "central t\u00e9l\u00e9phonique": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Central",
+            "poste 43"
+         ],
+         "dest_groups": [
+            ""
+         ],
+         "dest_domains": [
+            ""
+         ],
+         "any_user": 0,
+         "any_destination": 1,
+         "allow_deny": 1,
+         "domains_tree": {
+            "*": {}
+         }
+      },
+      "Dom Beno\u00eet": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Dom Beno\u00eet"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "com": {
+               "la-croix": {
+                  "www": {}
+               }
+            }
+         }
+      },
+      "courrier \u00e9lectronique": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Etienne",
+            "Joseph-Marie",
+            "Jean-Thomas",
+            "Procure",
+            "Dom Beno\u00eet",
+            "Serafico",
+            "RP Dysmas"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "net": {
+               "online": {
+                  "*": {}
+               },
+               "wetransfer": {
+                  "*": {}
+               }
+            },
+            "fr": {
+               "orange": {
+                  "pop": {},
+                  "smtp": {}
+               },
+               "wanadoo": {
+                  "*": {}
+               }
+            },
+            "com": {
+               "gmx": {
+                  "*": {},
+                  "mail": {}
+               },
+               "wetransfer": {
+                  "*": {}
+               },
+               "grosfichiers": {
+                  "*": {}
+               }
+            },
+            "ch": {
+               "grosfichiers": {
+                  "*": {}
+               }
+            }
+         }
+      },
+      "Coupure de nuit": {
+         "active": "on",
+         "action": "deny",
+         "time_condition": {
+            "week": "1234567",
+            "from": 1910,
+            "to": 700
+         },
+         "comments": "",
+         "users": null,
+         "dest_groups": null,
+         "dest_domains": [
+            ""
+         ],
+         "any_user": 1,
+         "any_destination": 1,
+         "allow_deny": 0,
+         "domains_tree": {
+            "*": {}
+         }
+      },
+      "autorisations_g\u00e9n\u00e9rales": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            ""
+         ],
+         "any_user": 1,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "localdomain": {
+               "*": {}
+            },
+            "net": {
+               "mailshell": {
+                  "*": {}
+               },
+               "jsdelivr": {
+                  "*": {}
+               },
+               "mozilla": {
+                  "*": {}
+               },
+               "thunderbird": {
+                  "*": {}
+               },
+               "coliposte": {
+                  "*": {}
+               },
+               "laposte": {
+                  "*": {}
+               },
+               "biblehub": {
+                  "*": {}
+               },
+               "cartoixamontalegre": {
+                  "*": {}
+               }
+            },
+            "com": {
+               "mon-ip": {
+                  "*": {}
+               },
+               "verisign": {
+                  "svrsecure-g3-crl": {}
+               },
+               "ipc-coaching": {
+                  "*": {}
+               },
+               "mappy": {
+                  "*": {}
+               },
+               "ogone": {
+                  "*": {}
+               },
+               "adobe": {
+                  "www": {}
+               },
+               "java": {
+                  "*": {}
+               },
+               "google": {
+                  "accounts": {},
+                  "calendar": {}
+               },
+               "mozillamessaging": {
+                  "*": {}
+               },
+               "mozilla": {
+                  "*": {}
+               },
+               "firefox": {
+                  "*": {}
+               },
+               "meteofrance": {
+                  "*": {}
+               },
+               "vigimeteo": {
+                  "*": {}
+               },
+               "ter-sncf": {
+                  "*": {}
+               },
+               "voyages-sncf": {
+                  "*": {}
+               },
+               "sncf": {
+                  "*": {}
+               },
+               "grenoble-airport": {
+                  "*": {}
+               },
+               "lyonaeroports": {
+                  "*": {}
+               },
+               "saintebible": {
+                  "*": {}
+               },
+               "biblemenus": {
+                  "*": {}
+               }
+            },
+            "de": {
+               "cactus2000": {
+                  "latin": {},
+                  "conjit": {}
+               },
+               "dhl": {
+                  "*": {}
+               }
+            },
+            "fr": {
+               "ownpage": {
+                  "*": {}
+               },
+               "meteofrance": {
+                  "*": {}
+               },
+               "meteociel": {
+                  "*": {}
+               },
+               "colissimo": {
+                  "*": {}
+               },
+               "laposte": {
+                  "*": {}
+               },
+               "pagesjaunes": {
+                  "*": {}
+               },
+               "mondialrelay": {
+                  "*": {}
+               },
+               "lefigaro": {
+                  "leconjugueur": {}
+               },
+               "transisere": {
+                  "*": {}
+               },
+               "eurolines": {
+                  "*": {}
+               },
+               "faurevercors": {
+                  "*": {}
+               },
+               "rhonealpes": {
+                  "*": {}
+               },
+               "aerocar": {
+                  "*": {}
+               },
+               "opodo": {
+                  "*": {}
+               }
+            },
+            "org": {
+               "mozilla": {
+                  "*": {}
+               },
+               "chartreux": {
+                  "*": {}
+               },
+               "vocatiochartreux": {
+                  "*": {}
+               }
+            },
+            "br": {
+               "ufpr": {
+                  "c3sl": {
+                     "mozilla": {}
+                  }
+               }
+            },
+            "ch": {
+               "admin": {
+                  "meteosuisse": {
+                     "*": {}
+                  }
+               },
+               "meteosuisse": {
+                  "*": {}
+               },
+               "cff": {
+                  "*": {}
+               },
+               "sbb": {
+                  "*": {}
+               }
+            },
+            "sncf": {
+               "oui": {
+                  "*": {}
+               }
+            }
+         }
+      },
+      "autorisations_temporaires": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            ""
+         ],
+         "any_user": 1,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "org": {
+               "python": {
+                  "*": {}
+               }
+            },
+            "fr": {
+               "leds-boutique": {
+                  "*": {}
+               }
+            }
+         }
+      },
+      "acc\u00e8s_ouvert_temporaire": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Jose-Luis"
+         ],
+         "dest_groups": [
+            ""
+         ],
+         "dest_domains": [
+            ""
+         ],
+         "any_user": 0,
+         "any_destination": 1,
+         "allow_deny": 1,
+         "domains_tree": {
+            "*": {}
+         }
+      },
+      "Joseph-Marie": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Joseph-Marie"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "org": {
+               "chartreux,": {
+                  "*": {}
+               },
+               "libreoffice": {
+                  "*": {}
+               },
+               "kiwix": {
+                  "*": {}
+               },
+               "mutt": {
+                  "*": {}
+               },
+               "wikisource": {
+                  "*": {}
+               },
+               "openoffice": {
+                  "*": {}
+               },
+               "linuxfoundation": {
+                  "*": {}
+               },
+               "pine64": {
+                  "*": {}
+               },
+               "raspberrypi": {
+                  "*": {}
+               },
+               "raspbian": {
+                  "*": {}
+               },
+               "f-droid": {
+                  "*": {}
+               },
+               "tug": {},
+               "ctan": {
+                  "*": {}
+               },
+               "debian": {
+                  "*": {}
+               },
+               "wiktionary": {
+                  "*": {}
+               },
+               "wikipedia": {
+                  "*": {}
+               },
+               "familyradio": {
+                  "*": {}
+               },
+               "zenit": {
+                  "*": {}
+               },
+               "lilo": {
+                  "*": {}
+               },
+               "lilosearch": {
+                  "*": {}
+               }
+            },
+            "com": {
+               "avira": {
+                  "*": {}
+               },
+               "tarif-lettre": {
+                  "*": {}
+               },
+               "tameteo": {
+                  "*": {}
+               },
+               "bintray": {
+                  "dl": {
+                     "*": {}
+                  }
+               },
+               "safedns": {
+                  "www": {}
+               },
+               "grosfichiers": {
+                  "www": {}
+               },
+               "wikidevi": {
+                  "*": {}
+               },
+               "ubuntu": {
+                  "*": {}
+               },
+               "apk20": {
+                  "*": {}
+               },
+               "termux": {
+                  "*": {}
+               },
+               "dizionario-latino": {
+                  "*": {}
+               },
+               "grand-dictionnaire-latin": {
+                  "*": {}
+               },
+               "ccmbg": {
+                  "estatic": {}
+               },
+               "apkpure": {
+                  "*": {}
+               },
+               "winudf": {
+                  "*": {}
+               },
+               "gstatic": {
+                  "*": {}
+               },
+               "githubusercontent": {
+                  "*": {}
+               },
+               "github": {
+                  "*": {}
+               },
+               "googlecode": {
+                  "*": {}
+               },
+               "staticpmrk": {
+                  "pmcdn": {}
+               },
+               "googleadservices": {
+                  "www": {}
+               },
+               "wordpress": {
+                  "*": {}
+               },
+               "wp": {
+                  "s2": {
+                     "*": {}
+                  }
+               },
+               "pons": {
+                  "*": {}
+               },
+               "linguee": {
+                  "*": {}
+               },
+               "soundcloud": {
+                  "*": {}
+               },
+               "googleusercontent": {
+                  "lh3": {}
+               },
+               "corref": {
+                  "*": {}
+               },
+               "la-croix": {
+                  "*": {}
+               },
+               "bayardweb": {
+                  "*": {}
+               },
+               "chapitre": {
+                  "*": {}
+               },
+               "chapitrepro": {
+                  "*": {}
+               },
+               "images-chapitre": {
+                  "*": {}
+               },
+               "abebookscdn": {
+                  "*": {}
+               },
+               "clz": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               },
+               "ebay": {
+                  "*": {}
+               },
+               "ebayimg": {
+                  "*": {}
+               },
+               "ebaydesc": {
+                  "*": {}
+               },
+               "ebaystatic": {
+                  "*": {}
+               },
+               "priceminister": {
+                  "*": {}
+               },
+               "paypal": {
+                  "*": {}
+               },
+               "paypalobjects": {
+                  "*": {}
+               },
+               "xe": {
+                  "*": {}
+               }
+            },
+            "va": {
+               "penitenzieria": {
+                  "*": {}
+               },
+               "vatican": {
+                  "*": {}
+               },
+               "vaticanlibrary": {
+                  "*": {}
+               },
+               "news": {
+                  "*": {}
+               }
+            },
+            "de": {
+               "fefe": {
+                  "*": {}
+               },
+               "forum-raspberrypi": {
+                  "*": {}
+               },
+               "elsira": {
+                  "*": {}
+               },
+               "yourhealthfit": {
+                  "*": {}
+               },
+               "medikamente-per-klick": {
+                  "*": {}
+               },
+               "uni-kl": {
+                  "ftp": {}
+               },
+               "navigium": {
+                  "*": {}
+               },
+               "hs-esslingen": {
+                  "ftp-stud": {}
+               },
+               "cactus2000": {
+                  "*": {}
+               },
+               "cactus": {
+                  "*": {}
+               },
+               "grammatiken": {
+                  "*": {}
+               },
+               "italienisch-lehrbuch": {
+                  "*": {}
+               },
+               "abebooks": {
+                  "*": {}
+               }
+            },
+            "fr": {
+               "catholique": {
+                  "recherche": {}
+               },
+               "adnext": {
+                  "*": {}
+               },
+               "ircam": {
+                  "*": {}
+               },
+               "cnrs": {
+                  "igh": {
+                     "ftp": {}
+                  }
+               },
+               "ibcp": {
+                  "mirror": {}
+               },
+               "gmx": {
+                  "*": {}
+               },
+               "diocese-grenoble-vienne": {
+                  "*": {}
+               },
+               "larousse": {
+                  "*": {}
+               },
+               "linguee": {
+                  "*": {}
+               },
+               "viereligieuse": {
+                  "*": {}
+               },
+               "corref": {
+                  "*": {}
+               },
+               "abebooks": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               },
+               "ebay": {
+                  "*": {}
+               },
+               "ebaydesc": {
+                  "*": {}
+               },
+               "leboncoin": {
+                  "*": {}
+               },
+               "paypal": {
+                  "*": {}
+               },
+               "westernunion": {
+                  "*": {}
+               },
+               "lapostefinance": {
+                  "*": {}
+               }
+            },
+            "se": {
+               "umu": {
+                  "acc": {
+                     "ftp": {
+                        "gensho": {}
+                     }
+                  }
+               }
+            },
+            "eu": {
+               "ayufan": {
+                  "*": {}
+               },
+               "pons": {
+                  "*": {}
+               }
+            },
+            "net": {
+               "termux": {
+                  "*": {}
+               },
+               "online": {
+                  "*": {}
+               },
+               "commentcamarche": {
+                  "*": {}
+               },
+               "reverso": {
+                  "*": {}
+               },
+               "sbc16": {
+                  "eye": {}
+               },
+               "launchpad": {
+                  "*": {}
+               },
+               "cloudfront": {
+                  "*": {}
+               },
+               "sourceforge": {
+                  "*": {}
+               },
+               "debian": {
+                  "*": {}
+               },
+               "fastly": {
+                  "map": {
+                     "debian": {
+                        "*": {}
+                     }
+                  }
+               },
+               "brunonis": {
+                  "*": {}
+               },
+               "ponsline": {
+                  "*": {}
+               },
+               "krxd": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               },
+               "xe": {
+                  "*": {}
+               }
+            },
+            "me": {
+               "ogp": {}
+            },
+            "it": {
+               "vatlib": {
+                  "*": {}
+               }
+            },
+            "uk": {
+               "co": {
+                  "ebay": {
+                     "*": {}
+                  }
+               }
+            }
+         }
+      },
+      "D.Dysmas": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "RP Dysmas"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "net": {
+               "online": {
+                  "*": {}
+               },
+               "sstatic": {
+                  "*": {}
+               },
+               "phicdn": {
+                  "*": {}
+               },
+               "cloudfront": {
+                  "*": {}
+               },
+               "xe": {
+                  "*": {}
+               },
+               "biblehub": {
+                  "*": {}
+               },
+               "msauth": {
+                  "*": {}
+               },
+               "krxd": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               },
+               "cartoixamontalegre": {
+                  "*": {}
+               },
+               "coliposte": {
+                  "*": {}
+               },
+               "laposte": {
+                  "*": {}
+               },
+               "sourceforge": {
+                  "*": {}
+               },
+               "sf": {
+                  "*": {}
+               },
+               "reverso": {
+                  "*": {}
+               },
+               "wetransfer": {
+                  "*": {}
+               }
+            },
+            "com": {
+               "neodomaine": {
+                  "*": {}
+               },
+               "ldlc": {
+                  "*": {}
+               },
+               "qnap": {
+                  "*": {}
+               },
+               "uicdn": {
+                  "*": {}
+               },
+               "atlantiswordprocessor": {
+                  "*": {}
+               },
+               "live": {
+                  "*": {}
+               },
+               "dropbox": {
+                  "*": {}
+               },
+               "dropboxstatic": {
+                  "*": {}
+               },
+               "electionbuddy": {
+                  "*": {}
+               },
+               "woopic": {
+                  "*": {}
+               },
+               "amazonaws": {
+                  "s3": {
+                     "*": {}
+                  }
+               },
+               "amap": {
+                  "*": {}
+               },
+               "autonavi": {
+                  "*": {}
+               },
+               "noip": {
+                  "*": {}
+               },
+               "jquery": {
+                  "code": {}
+               },
+               "safedns": {
+                  "*": {}
+               },
+               "ebay": {
+                  "*": {}
+               },
+               "ebayimg": {
+                  "*": {}
+               },
+               "ebaydesc": {
+                  "*": {}
+               },
+               "ebaystatic": {
+                  "*": {}
+               },
+               "priceminister": {
+                  "*": {}
+               },
+               "paypal": {
+                  "*": {}
+               },
+               "paypalobjects": {
+                  "*": {}
+               },
+               "xe": {
+                  "*": {}
+               },
+               "saintebible": {
+                  "*": {}
+               },
+               "biblemenus": {
+                  "*": {}
+               },
+               "skype": {
+                  "*": {}
+               },
+               "skypeassets": {
+                  "*": {}
+               },
+               "msftconnecttest": {
+                  "*": {}
+               },
+               "corref": {
+                  "*": {}
+               },
+               "la-croix": {
+                  "*": {}
+               },
+               "bayardweb": {
+                  "*": {}
+               },
+               "chapitre": {
+                  "*": {}
+               },
+               "chapitrepro": {
+                  "*": {}
+               },
+               "images-chapitre": {
+                  "*": {}
+               },
+               "abebookscdn": {
+                  "*": {}
+               },
+               "clz": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               },
+               "mappy": {
+                  "*": {}
+               },
+               "github": {
+                  "*": {}
+               },
+               "githubassets": {
+                  "*": {}
+               },
+               "githubusercontent": {
+                  "*": {}
+               },
+               "digicert": {
+                  "*": {}
+               },
+               "google": {
+                  "*": {},
+                  "developers": {}
+               },
+               "fsdn": {
+                  "*": {}
+               },
+               "softpedia": {
+                  "*": {}
+               },
+               "softpedia-static": {
+                  "*": {}
+               },
+               "stackoverflow": {
+                  "*": {}
+               },
+               "upwork": {
+                  "*": {}
+               },
+               "static-upwork": {
+                  "*": {}
+               },
+               "meteofrance": {
+                  "*": {}
+               },
+               "vigimeteo": {
+                  "*": {}
+               },
+               "googleapis": {
+                  "ajax": {}
+               },
+               "online-translator": {},
+               "Promt": {
+                  "*": {}
+               },
+               "deepl": {
+                  "*": {}
+               },
+               "wetransfer": {
+                  "*": {}
+               },
+               "grosfichiers": {
+                  "*": {}
+               },
+               "ter-sncf": {
+                  "*": {}
+               },
+               "voyages-sncf": {
+                  "*": {}
+               },
+               "sncf": {
+                  "*": {}
+               },
+               "grenoble-airport": {
+                  "*": {}
+               },
+               "lyonaeroports": {
+                  "*": {}
+               }
+            },
+            "fr": {
+               "orange": {
+                  "*": {}
+               },
+               "orangepro": {
+                  "*": {}
+               },
+               "gouv": {
+                  "diplomatie": {
+                     "*": {}
+                  }
+               },
+               "lecedre": {
+                  "*": {}
+               },
+               "idefix64": {
+                  "*": {}
+               },
+               "ciase": {
+                  "*": {}
+               },
+               "ebay": {
+                  "*": {}
+               },
+               "ebaydesc": {
+                  "*": {}
+               },
+               "leboncoin": {
+                  "*": {}
+               },
+               "paypal": {
+                  "*": {}
+               },
+               "westernunion": {
+                  "*": {}
+               },
+               "lapostefinance": {
+                  "*": {}
+               },
+               "viereligieuse": {
+                  "*": {}
+               },
+               "corref": {
+                  "*": {}
+               },
+               "abebooks": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               },
+               "viamichelin": {
+                  "*": {}
+               },
+               "colissimo": {
+                  "*": {}
+               },
+               "laposte": {
+                  "*": {}
+               },
+               "pagesjaunes": {
+                  "*": {}
+               },
+               "mondialrelay": {
+                  "*": {}
+               },
+               "google": {
+                  "*": {},
+                  "translate": {}
+               },
+               "meteofrance": {
+                  "*": {}
+               },
+               "meteociel": {
+                  "*": {}
+               },
+               "systran": {
+                  "*": {}
+               },
+               "transisere": {
+                  "*": {}
+               },
+               "eurolines": {
+                  "*": {}
+               },
+               "faurevercors": {
+                  "*": {}
+               },
+               "rhonealpes": {
+                  "*": {}
+               },
+               "aerocar": {
+                  "*": {}
+               },
+               "opodo": {
+                  "*": {}
+               }
+            },
+            "de": {
+               "uilogin": {
+                  "*": {}
+               },
+               "ui-portal": {
+                  "*": {}
+               },
+               "abebooks": {
+                  "*": {}
+               },
+               "dhl": {
+                  "*": {}
+               }
+            },
+            "org": {
+               "acsemb": {
+                  "*": {}
+               },
+               "mediawiki": {
+                  "*": {}
+               },
+               "gps123": {
+                  "*": {}
+               },
+               "wikibooks": {
+                  "*": {}
+               },
+               "wikiquote": {
+                  "*": {}
+               },
+               "wikisource": {
+                  "*": {}
+               },
+               "wikiversity": {
+                  "*": {}
+               },
+               "wiktionary": {
+                  "*": {}
+               },
+               "wikipedia": {
+                  "*": {}
+               },
+               "wikimedia": {
+                  "*": {}
+               },
+               "zenit": {
+                  "*": {}
+               },
+               "chartreux": {
+                  "*": {}
+               },
+               "vocatiochartreux": {
+                  "*": {}
+               },
+               "github": {
+                  "*": {}
+               }
+            },
+            "uk": {
+               "co": {
+                  "ebay": {
+                     "*": {}
+                  }
+               }
+            },
+            "va": {
+               "vatican": {
+                  "*": {}
+               },
+               "vaticanlibrary": {
+                  "*": {}
+               },
+               "news": {
+                  "*": {}
+               }
+            },
+            "it": {
+               "vatlib": {
+                  "*": {}
+               }
+            },
+            "toto": {},
+            "tata": {},
+            "ch": {
+               "admin": {
+                  "meteosuisse": {
+                     "*": {}
+                  }
+               },
+               "meteosuisse": {
+                  "*": {}
+               },
+               "grosfichiers": {
+                  "*": {}
+               },
+               "cff": {
+                  "*": {}
+               },
+               "sbb": {
+                  "*": {}
+               }
+            },
+            "sncf": {
+               "oui": {
+                  "*": {}
+               }
+            }
+         }
+      },
+      "D_Serafico": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Serafico"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "edu": {
+               "jhu": {
+                  "muse": {
+                     "*": {}
+                  }
+               },
+               "academia": {
+                  "independent": {
+                     "*": {}
+                  }
+               }
+            },
+            "es": {
+               "patrimonionacional": {
+                  "rbme": {
+                     "*": {}
+                  }
+               },
+               "bne": {
+                  "*": {}
+               },
+               "mcu": {
+                  "*": {}
+               },
+               "gob": {
+                  "mecd": {
+                     "*": {}
+                  }
+               }
+            },
+            "fr": {
+               "musee-grande-chartreuse": {
+                  "*": {}
+               },
+               "bnf": {
+                  "*": {}
+               },
+               "viereligieuse": {
+                  "*": {}
+               },
+               "corref": {
+                  "*": {}
+               }
+            },
+            "com": {
+               "deepl": {
+                  "*": {}
+               },
+               "corref": {
+                  "*": {}
+               },
+               "la-croix": {
+                  "*": {}
+               },
+               "bayardweb": {
+                  "*": {}
+               }
+            },
+            "ab": {},
+            "org": {
+               "zenit": {
+                  "*": {}
+               }
+            },
+            "net": {
+               "krxd": {
+                  "*": {}
+               }
+            }
+         }
+      },
+      "Procure-ouverture_g\u00e9n\u00e9rale": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Procure"
+         ],
+         "dest_groups": [
+            ""
+         ],
+         "dest_domains": [
+            ""
+         ],
+         "any_user": 0,
+         "any_destination": 1,
+         "allow_deny": 1,
+         "domains_tree": {
+            "*": {}
+         }
+      },
+      "Procure": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Procure",
+            "Thierry Pont"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "fr": {
+               "bruneau": {
+                  "*": {}
+               },
+               "aerocar": {
+                  "*": {}
+               },
+               "amazon": {
+                  "*": {}
+               },
+               "pagesjaunes": {
+                  "*": {}
+               },
+               "geant-beaux-arts": {
+                  "*": {}
+               },
+               "blancheporte": {
+                  "*": {}
+               },
+               "123pneus": {
+                  "*": {}
+               },
+               "comptoir-droguerie": {
+                  "*": {}
+               },
+               "smsdistribution": {
+                  "lecedre": {}
+               },
+               "proapro": {
+                  "*": {}
+               },
+               "agrifournitures": {
+                  "*": {}
+               },
+               "mousse-sur-mesure": {
+                  "*": {}
+               },
+               "sodipieces": {
+                  "*": {}
+               },
+               "chronocartouche": {
+                  "*": {}
+               },
+               "decathlon": {
+                  "*": {}
+               },
+               "mondialtissus": {
+                  "*": {}
+               },
+               "lecedre": {
+                  "*": {}
+               },
+               "adecco-online": {
+                  "*": {}
+               },
+               "adecco": {
+                  "*": {}
+               },
+               "prixfioul": {
+                  "*": {}
+               },
+               "service-public": {
+                  "*": {}
+               },
+               "geoportail": {
+                  "tab": {}
+               },
+               "gouv": {
+                  "geoportail": {
+                     "*": {}
+                  }
+               },
+               "inkadoo": {
+                  "*": {}
+               },
+               "caisse-epargne": {
+                  "*": {}
+               },
+               "google": {
+                  "*": {}
+               },
+               "viamichelin": {
+                  "*": {}
+               },
+               "lacentrale": {
+                  "*": {}
+               },
+               "rexel": {
+                  "*": {}
+               },
+               "paypal": {
+                  "*": {}
+               },
+               "westernunion": {
+                  "*": {}
+               },
+               "lapostefinance": {
+                  "*": {}
+               },
+               "ebay": {
+                  "*": {}
+               },
+               "ebaydesc": {
+                  "*": {}
+               },
+               "leboncoin": {
+                  "*": {}
+               },
+               "transisere": {
+                  "*": {}
+               },
+               "eurolines": {
+                  "*": {}
+               },
+               "faurevercors": {
+                  "*": {}
+               },
+               "rhonealpes": {
+                  "*": {}
+               },
+               "opodo": {
+                  "*": {}
+               },
+               "abebooks": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               }
+            },
+            "uk": {
+               "co": {
+                  "amazon": {
+                     "*": {}
+                  },
+                  "ebay": {
+                     "*": {}
+                  }
+               }
+            },
+            "com": {
+               "chapitrepro": {
+                  "*": {}
+               },
+               "images-chapitre": {
+                  "*": {}
+               },
+               "fsdn": {
+                  "*": {}
+               },
+               "github": {
+                  "*": {}
+               },
+               "ldlc": {
+                  "*": {}
+               },
+               "skype": {
+                  "*": {}
+               },
+               "softpedia": {
+                  "*": {}
+               },
+               "softpedia-static": {
+                  "*": {}
+               },
+               "images-amazon": {
+                  "*": {}
+               },
+               "delti": {
+                  "ssl": {}
+               },
+               "ipc-coaching": {
+                  "*": {}
+               },
+               "staticpmrk": {
+                  "pmcdn": {}
+               },
+               "emailretargeting": {
+                  "tc": {}
+               },
+               "tagcommander": {
+                  "v4": {}
+               },
+               "acronis": {
+                  "*": {}
+               },
+               "laprocure": {
+                  "*": {}
+               },
+               "vinatis": {
+                  "*": {}
+               },
+               "fils-debroussailleuse": {
+                  "*": {}
+               },
+               "coursesu": {
+                  "*": {}
+               },
+               "sips-atos": {
+                  "*": {}
+               },
+               "espace-produits-bio": {
+                  "*": {}
+               },
+               "welkit": {
+                  "*": {}
+               },
+               "agriaffaires": {
+                  "*": {}
+               },
+               "legallais": {
+                  "*": {}
+               },
+               "kiabi": {
+                  "*": {}
+               },
+               "fermedesaintemarthe": {
+                  "*": {}
+               },
+               "graines-grelin-grelinette": {
+                  "*": {}
+               },
+               "seigneuriegauthier": {
+                  "*": {}
+               },
+               "verisign": {
+                  "*": {}
+               },
+               "zonelabs": {
+                  "update": {}
+               },
+               "gstatic": {
+                  "maps": {}
+               },
+               "google": {
+                  "*": {}
+               },
+               "colruytgroup": {
+                  "*": {}
+               },
+               "paypal": {
+                  "*": {}
+               },
+               "paypalobjects": {
+                  "*": {}
+               },
+               "xe": {
+                  "*": {}
+               },
+               "ebay": {
+                  "*": {}
+               },
+               "ebayimg": {
+                  "*": {}
+               },
+               "ebaydesc": {
+                  "*": {}
+               },
+               "ebaystatic": {
+                  "*": {}
+               },
+               "priceminister": {
+                  "*": {}
+               },
+               "ter-sncf": {
+                  "*": {}
+               },
+               "voyages-sncf": {
+                  "*": {}
+               },
+               "sncf": {
+                  "*": {}
+               },
+               "grenoble-airport": {
+                  "*": {}
+               },
+               "lyonaeroports": {
+                  "*": {}
+               },
+               "chapitre": {
+                  "*": {}
+               },
+               "abebookscdn": {
+                  "*": {}
+               },
+               "clz": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               }
+            },
+            "org": {
+               "chartreux": {
+                  "*": {}
+               },
+               "mirrorservice": {
+                  "www": {}
+               }
+            },
+            "ch": {
+               "gva": {
+                  "*": {}
+               },
+               "cff": {
+                  "*": {}
+               },
+               "sbb": {
+                  "*": {}
+               }
+            },
+            "net": {
+               "online": {
+                  "*": {}
+               },
+               "sf": {
+                  "*": {}
+               },
+               "reverso": {
+                  "*": {}
+               },
+               "adeccoweb": {
+                  "*": {}
+               },
+               "odistatic": {
+                  "*": {}
+               },
+               "xe": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               }
+            },
+            "va": {
+               "vatican": {
+                  "*": {}
+               }
+            },
+            "de": {
+               "firma-knowhow-shop": {
+                  "*": {}
+               },
+               "diplo": {
+                  "allemagne": {
+                     "*": {}
+                  }
+               },
+               "abebooks": {
+                  "*": {}
+               }
+            },
+            "hu": {
+               "gov": {
+                  "mfa": {
+                     "*": {}
+                  }
+               }
+            },
+            "br": {
+               "gov": {
+                  "itamaraty": {
+                     "cgparis": {}
+                  }
+               }
+            },
+            "pl": {
+               "gov": {
+                  "msz": {
+                     "lyon": {
+                        "*": {}
+                     }
+                  }
+               }
+            },
+            "sncf": {
+               "oui": {
+                  "*": {}
+               }
+            }
+         }
+      },
+      "Jean-Thomas": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Jean-Thomas",
+            "Thinkpad Bibl."
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "uk": {
+               "bl": {
+                  "*": {}
+               },
+               "ac": {
+                  "copac": {},
+                  "ox": {
+                     "bodley": {
+                        "www": {}
+                     },
+                     "bodleian": {
+                        "www": {}
+                     }
+                  }
+               }
+            },
+            "org": {
+               "archive": {
+                  "*": {}
+               },
+               "wikipedia": {
+                  "*": {}
+               },
+               "wikimedia": {
+                  "*": {}
+               },
+               "oclc": {
+                  "errol": {}
+               },
+               "wikibooks": {
+                  "fr": {}
+               },
+               "wikiquote": {
+                  "fr": {}
+               },
+               "wikisource": {
+                  "fr": {}
+               },
+               "wikiversity": {
+                  "fr": {}
+               },
+               "wiktionary": {
+                  "fr": {}
+               },
+               "geneanet": {
+                  "images": {},
+                  "my": {},
+                  "search": {},
+                  "www": {}
+               },
+               "dabis": {
+                  "kvk1": {},
+                  "lbb": {}
+               },
+               "crue": {
+                  "rebiun": {}
+               },
+               "theeuropeanlibrary": {
+                  "search": {},
+                  "www": {}
+               },
+               "toolserver": {},
+               "viaf": {},
+               "bibliothequedusaulchoir": {
+                  "www": {}
+               },
+               "catholic-hierarchy": {
+                  "www": {}
+               },
+               "cerl": {
+                  "www": {}
+               },
+               "eromm": {
+                  "www": {}
+               },
+               "worldcat": {
+                  "www": {},
+                  "static1": {}
+               }
+            },
+            "fr": {
+               "bnf": {
+                  "*": {}
+               },
+               "abes": {
+                  "sudoc": {
+                     "corail": {},
+                     "www": {},
+                     "cinabre": {}
+                  }
+               },
+               "cths": {},
+               "ens": {
+                  "halley": {}
+               },
+               "icp": {
+                  "ipac": {}
+               },
+               "cef": {
+                  "nominis": {}
+               },
+               "univ-lyon2": {
+                  "portail": {}
+               },
+               "mom": {
+                  "trd": {}
+               },
+               "abebooks": {
+                  "*": {}
+               },
+               "idref": {
+                  "www": {}
+               },
+               "collectorz": {
+                  "*": {}
+               }
+            },
+            "it": {
+               "unibo": {
+                  "cib": {
+                     "acnp": {}
+                  },
+                  "acnp": {}
+               },
+               "sbn": {
+                  "iccu": {
+                     "edit16": {}
+                  },
+                  "opac": {}
+               },
+               "internetculturale": {
+                  "opac": {}
+               },
+               "vatlib": {
+                  "vaticanlibrary": {
+                     "www": {}
+                  },
+                  "*": {}
+               }
+            },
+            "com": {
+               "avg": {
+                  "af": {},
+                  "guru": {}
+               },
+               "googleapis": {
+                  "ajax": {}
+               },
+               "dominicains": {
+                  "bibindex": {}
+               },
+               "google": {
+                  "books": {}
+               },
+               "images-amazon": {
+                  "ecx": {},
+                  "g-ecx": {}
+               },
+               "adobe": {
+                  "get": {},
+                  "www": {}
+               },
+               "choosebooks": {
+                  "www": {}
+               },
+               "zvab": {
+                  "en": {
+                     "www": {}
+                  },
+                  "www": {}
+               },
+               "ipc-coaching": {
+                  "*": {}
+               },
+               "online-translator": {
+                  "www": {}
+               },
+               "qnap": {
+                  "www": {}
+               },
+               "skype": {
+                  "*": {}
+               },
+               "skypeassets": {
+                  "*": {}
+               },
+               "msftconnecttest": {
+                  "*": {}
+               },
+               "wetransfer": {
+                  "*": {}
+               },
+               "grosfichiers": {
+                  "*": {}
+               },
+               "chapitre": {
+                  "*": {}
+               },
+               "chapitrepro": {
+                  "*": {}
+               },
+               "images-chapitre": {
+                  "*": {}
+               },
+               "abebookscdn": {
+                  "*": {}
+               },
+               "clz": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               }
+            },
+            "lu": {
+               "etat": {
+                  "aleph": {}
+               },
+               "bibnet": {
+                  "catalog": {}
+               }
+            },
+            "at": {
+               "ac": {
+                  "onb": {
+                     "aleph": {},
+                     "aleph18": {},
+                     "aleph20": {}
+                  }
+               },
+               "obvsg": {
+                  "aleph20-prod-acc": {},
+                  "search": {},
+                  "www": {}
+               },
+               "lbb": {
+                  "www": {}
+               }
+            },
+            "ru": {
+               "rsl": {
+                  "aleph": {},
+                  "www": {}
+               }
+            },
+            "ch": {
+               "unibas": {
+                  "aleph": {}
+               },
+               "unizh": {
+                  "biblio": {}
+               },
+               "admin": {
+                  "nb": {
+                     "helveticat": {}
+                  },
+                  "libraries": {}
+               },
+               "nebis": {
+                  "opac": {}
+               },
+               "rero": {
+                  "opac": {}
+               },
+               "swissbib": {
+                  "www": {}
+               },
+               "grosfichiers": {
+                  "*": {}
+               }
+            },
+            "il": {
+               "ac": {
+                  "libnet": {
+                     "aleph3": {}
+                  }
+               }
+            },
+            "ca": {
+               "collectionscanada": {
+                  "amicus": {},
+                  "www": {}
+               },
+               "ulaval": {
+                  "bibl": {
+                     "ariane2": {},
+                     "rvmweb": {},
+                     "www": {}
+                  }
+               },
+               "gc": {
+                  "nrc-cnrc": {
+                     "cisti-icist": {
+                        "cat": {}
+                     }
+                  },
+                  "bac-lac": {
+                     "www": {}
+                  },
+                  "collectionscanada": {
+                     "www": {},
+                     "amicus": {}
+                  }
+               }
+            },
+            "no": {
+               "bibsys": {
+                  "ask": {}
+               }
+            },
+            "gov": {
+               "loc": {
+                  "authoritis": {},
+                  "catalog": {},
+                  "authorities": {}
+               },
+               "locatorplus": {}
+            },
+            "de": {
+               "uni-bielefeld": {
+                  "ub": {
+                     "base": {}
+                  }
+               },
+               "bib-bvb": {
+                  "bvbd2": {},
+                  "opac": {}
+               },
+               "uni-frankfurt": {
+                  "rz": {
+                     "cbsopac": {},
+                     "orsprod": {}
+                  }
+               },
+               "saur": {
+                  "db": {}
+               },
+               "kobv": {
+                  "digibib": {},
+                  "vs13": {}
+               },
+               "ddb": {
+                  "opac": {
+                     "dispatch": {}
+                  }
+               },
+               "gateway-bayern": {},
+               "gbv": {
+                  "gso": {},
+                  "tws": {},
+                  "tiborder": {}
+               },
+               "uni-karlsruhe": {
+                  "ubka": {
+                     "kvk": {}
+                  }
+               },
+               "hbz-nrw": {
+                  "okeanos-www": {}
+               },
+               "bsz-bw": {
+                  "pollux": {},
+                  "swb": {}
+               },
+               "d-nb": {
+                  "portal": {}
+               },
+               "hebis": {
+                  "retro": {},
+                  "www": {},
+                  "portal": {
+                     "www": {}
+                  }
+               },
+               "spk-berlin": {
+                  "sbb": {
+                     "stabikat": {}
+                  }
+               },
+               "wikimedia": {
+                  "tools": {}
+               },
+               "abebooks": {
+                  "*": {}
+               },
+               "amazon": {
+                  "www": {}
+               },
+               "antiquario": {
+                  "www": {}
+               },
+               "booklooker": {
+                  "www": {}
+               },
+               "buchkatalog": {
+                  "www": {}
+               },
+               "dnb": {
+                  "www": {},
+                  "portal": {}
+               },
+               "libri": {
+                  "www": {}
+               },
+               "vd17": {
+                  "www": {}
+               },
+               "vthk": {
+                  "www": {}
+               }
+            },
+            "be": {
+               "ac": {
+                  "ucl": {
+                     "sipr": {
+                        "bib": {}
+                     },
+                     "bib": {
+                        "www": {}
+                     }
+                  }
+               },
+               "jesuitica": {
+                  "www": {}
+               }
+            },
+            "es": {
+               "bne": {
+                  "catalogo": {}
+               }
+            },
+            "au": {
+               "gov": {
+                  "nla": {
+                     "catalogue": {}
+                  }
+               }
+            },
+            "net": {
+               "handle": {
+                  "hdl": {}
+               },
+               "base-search": {
+                  "www": {}
+               },
+               "msauth": {
+                  "*": {}
+               },
+               "wetransfer": {
+                  "*": {}
+               },
+               "collectorz": {
+                  "*": {}
+               }
+            },
+            "pl": {
+               "umk": {
+                  "karo": {}
+               },
+               "org": {
+                  "bn": {
+                     "www": {}
+                  }
+               }
+            },
+            "edu": {
+               "kit": {
+                  "bibliothek": {
+                     "kvk": {},
+                     "www": {}
+                  }
+               },
+               "fiu": {
+                  "www": {},
+                  "www2": {}
+               }
+            },
+            "se": {
+               "kb": {
+                  "libris": {}
+               }
+            },
+            "fi": {
+               "linneanet": {
+                  "linda": {}
+               },
+               "helsinki": {
+                  "lib": {
+                     "www": {}
+                  }
+               }
+            },
+            "nl": {
+               "kb": {
+                  "opc4": {},
+                  "www": {}
+               }
+            },
+            "pt": {
+               "bnportugal": {
+                  "porbase": {}
+               }
+            },
+            "cz": {
+               "nkp": {
+                  "sigma": {},
+                  "www": {},
+                  "aleph": {}
+               }
+            },
+            "ee": {
+               "ester": {
+                  "www": {}
+               }
+            },
+            "eu": {
+               "europeana": {
+                  "www": {}
+               }
+            },
+            "hu": {
+               "oszk": {
+                  "www": {},
+                  "nektar2": {}
+               }
+            },
+            "134": {
+               "112": {
+                  "30": {
+                     "193": {}
+                  }
+               }
+            },
+            "28": {
+               "26": {
+                  "52": {
+                     "193": {}
+                  }
+               }
+            },
+            "toto": {},
+            "tata": {},
+            "va": {
+               "vatican": {
+                  "*": {}
+               },
+               "vaticanlibrary": {
+                  "*": {}
+               },
+               "news": {
+                  "*": {}
+               }
+            }
+         }
+      },
+      "Pavillon_6_Silouane": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "Pavillon 6"
+         ],
+         "dest_groups": [
+            ""
+         ],
+         "dest_domains": [
+            "*.ucly.fr",
+            "*.ucly.frimages",
+            "*.mooddle.com",
+            "*.bnf.fr",
+            "*.revue-rsr.com",
+            "*.cairn.info"
+         ],
+         "any_user": 0,
+         "any_destination": 1,
+         "allow_deny": 1,
+         "domains_tree": {
+            "*": {}
+         }
+      },
+      "Valsainte-test": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "RP Dysmas"
+         ],
+         "any_user": 0,
+         "any_destination": 0,
+         "allow_deny": 1,
+         "domains_tree": {
+            "com": {
+               "mirabaud-stats": {
+                  "*": {}
+               },
+               "mirabaud": {
+                  "*": {}
+               },
+               "mirabaud-am": {
+                  "*": {}
+               },
+               "googletagmanager": {
+                  "*": {}
+               },
+               "trustedshops": {
+                  "*": {}
+               },
+               "wuerth": {
+                  "*": {}
+               },
+               "responsability": {
+                  "*": {}
+               },
+               "quovadisglobal": {
+                  "*": {}
+               },
+               "mozillamessaging": {
+                  "*": {}
+               },
+               "mozilla": {
+                  "*": {}
+               },
+               "firefox": {
+                  "*": {}
+               },
+               "verisign": {
+                  "*": {}
+               },
+               "digicert": {
+                  "*": {}
+               },
+               "googleapis": {
+                  "*": {}
+               },
+               "google": {
+                  "apis": {}
+               },
+               "gstatic": {
+                  "*": {}
+               },
+               "google-analytics": {
+                  "*": {}
+               },
+               "sanasecurity": {
+                  "*": {}
+               },
+               "microsoft": {
+                  "*": {}
+               },
+               "windows": {
+                  "*": {}
+               },
+               "windowsupdate": {
+                  "*": {}
+               },
+               "hellobar": {
+                  "*": {}
+               }
+            },
+            "ch": {
+               "mirabaud": {
+                  "*": {}
+               },
+               "bcf": {
+                  "*": {}
+               },
+               "bcv": {
+                  "*": {}
+               },
+               "zkb": {
+                  "*": {}
+               },
+               "culturefood": {
+                  "*": {}
+               },
+               "iba": {
+                  "*": {}
+               },
+               "elektro-material": {
+                  "*": {}
+               },
+               "opo": {
+                  "*": {}
+               },
+               "transgourmet": {
+                  "*": {}
+               },
+               "wuerth-ag": {
+                  "*": {}
+               },
+               "shop-wuerth": {
+                  "*": {}
+               },
+               "getaz-miauton": {
+                  "*": {}
+               },
+               "victor-meyer": {
+                  "*": {}
+               },
+               "herzogkerzen": {
+                  "*": {}
+               },
+               "la-belle-luce": {
+                  "*": {}
+               },
+               "landimoleson": {
+                  "*": {}
+               },
+               "morard-quincaillerie": {
+                  "*": {}
+               },
+               "jumbo": {
+                  "*": {}
+               },
+               "ottos": {
+                  "*": {}
+               },
+               "postfinance": {
+                  "*": {}
+               },
+               "e-assura": {
+                  "*": {}
+               },
+               "ecab": {
+                  "*": {}
+               },
+               "assura": {
+                  "*": {}
+               },
+               "fr": {
+                  "*": {}
+               },
+               "admin": {
+                  "*": {}
+               },
+               "meteonews": {
+                  "*": {}
+               }
+            },
+            "goog": {
+               "pki": {
+                  "*": {}
+               }
+            },
+            "de": {
+               "epoq": {
+                  "*": {}
+               },
+               "pax-bank": {
+                  "*": {}
+               }
+            },
+            "net": {
+               "trafficmanager": {
+                  "*": {}
+               },
+               "mozilla": {
+                  "*": {}
+               },
+               "thunderbird": {
+                  "*": {}
+               },
+               "myfonts": {
+                  "*": {}
+               },
+               "azureedge": {
+                  "*": {}
+               },
+               "msecnd": {
+                  "*": {}
+               }
+            },
+            "org": {
+               "paxbank": {
+                  "*": {}
+               },
+               "mozilla": {
+                  "*": {}
+               },
+               "ntp": {
+                  "*": {}
+               },
+               "letsencrypt": {
+                  "*": {}
+               }
+            },
+            "br": {
+               "ufpr": {
+                  "c3sl": {
+                     "mozilla": {}
+                  }
+               }
+            }
+         }
+      },
+      "test groupes": {
+         "active": "on",
+         "action": "allow",
+         "time_condition": "",
+         "comments": "",
+         "users": [
+            "test autorisations",
+            "urgence"
+         ],
+         "dest_groups": [
+            "skype"
+         ],
+         "dest_domains": [
+            "*.mirabaud.com"
+         ],
+         "any_user": 0,
+         "any_destination": 1,
+         "allow_deny": 1,
+         "domains_tree": {
+            "*": {}
+         }
+      }
+   },
+   "groups": {
+      "vatican": {
+         "dest_domains": [
+            "*.vatican.va",
+            "*.vaticanlibrary.va",
+            "*.vatlib.it",
+            "*.news.va"
+         ]
+      },
+      "transfert_fichiers": {
+         "dest_domains": [
+            "*.wetransfer.com",
+            "*.wetransfer.net",
+            "*.grosfichiers.com",
+            "*.grosfichiers.ch"
+         ]
+      },
+      "google_extensions": {
+         "dest_domains": [
+            "myaccount.google.com",
+            "policies.google.com",
+            "google.consents.com",
+            "support.google.com",
+            "safety.google.com",
+            "accounts.google.com",
+            "tools.google.com",
+            "adssetings.goggle.fr",
+            "consent.google.fr"
+         ]
+      },
+      "dictionnaires": {
+         "dest_domains": [
+            "*.dicolatin.com",
+            "*.lexilogos.com",
+            "*.wiktionary.org",
+            "*.larousse.fr"
+         ]
+      },
+      "finances": {
+         "dest_domains": [
+            "*.paypal.fr",
+            "*.paypal.com",
+            "*.paypalobjects.com",
+            "*.xe.com",
+            "*.xe.net",
+            "*.westernunion.fr",
+            "*.lapostefinance.fr"
+         ]
+      },
+      "google": {
+         "dest_domains": [
+            "*.google.com",
+            "*.google.fr"
+         ]
+      },
+      "lilo": {
+         "dest_domains": [
+            "*.lilo.org",
+            "*.lilosearch.org"
+         ]
+      },
+      "livres": {
+         "dest_domains": [
+            "*.chapitre.com",
+            "*.chapitrepro.com",
+            "*.images-chapitre.com",
+            "*.abebooks.fr",
+            "*.abebooks.de",
+            "*.abebookscdn.com",
+            "*.clz.com",
+            "*.collectorz.net",
+            "*.collectorz.fr",
+            "*.collectorz.com"
+         ]
+      },
+      "programmation": {
+         "dest_domains": [
+            "*.sourceforge.net",
+            "*.sf.net",
+            "*.fsdn.com",
+            "*.softpedia.com",
+            "*.softpedia-static.com",
+            "*.stackoverflow.com",
+            "*.upwork.com",
+            "*.static-upwork.com"
+         ]
+      },
+      "skype": {
+         "dest_domains": [
+            "*.skype.com",
+            "*.msauth.net",
+            "*.skypeassets.com",
+            "*.msftconnecttest.com",
+            "toto",
+            "tata"
+         ]
+      },
+      "mozilla": {
+         "dest_domains": [
+            "*.mozillamessaging.com",
+            "*.mozilla.com",
+            "*.mozilla.org",
+            "*.mozilla.net",
+            "*.firefox.com",
+            "mozilla.c3sl.ufpr.br",
+            "*.thunderbird.net"
+         ]
+      },
+      "antivirus": {
+         "dest_domains": [
+            "*.avg.com",
+            "*.avg.fr",
+            "*.avast.com",
+            "*.avg.cz",
+            "avg.nation.com",
+            "*.avcdn.net",
+            "*.avgfree.com",
+            "*.akamai.net",
+            "*.geo.kaspersky.com",
+            "*.akamaitechnologies.com",
+            "akamai.grisoft.com",
+            "akamai.grisoft.cz",
+            "akamai.grisoft.cz.edgesuite.net",
+            "akamai.avg.cz.edgesuite.net",
+            "akamai.grisoft.com.edgesuite.net",
+            "akamai.avg.com.edgesuite.net"
+         ]
+      },
+      "poste": {
+         "dest_domains": [
+            "*.coliposte.net",
+            "*.colissimo.fr",
+            "*.laposte.fr",
+            "*.laposte.net",
+            "*.pagesjaunes.fr",
+            "*.mondialrelay.fr",
+            "*.dhl.de"
+         ]
+      },
+      "cartes": {
+         "dest_domains": [
+            "*.mappy.com",
+            "*.viamichelin.fr"
+         ]
+      },
+      "wikipedia": {
+         "dest_domains": [
+            "*.wikibooks.org",
+            "*.wikiquote.org",
+            "*.wikisource.org",
+            "*.wikiversity.org",
+            "*.wiktionary.org",
+            "*.wikipedia.org",
+            "*.wikimedia.org"
+         ]
+      },
+      "telephone": {
+         "dest_domains": [
+            "*.ippi.com"
+         ]
+      },
+      "religieux": {
+         "dest_domains": [
+            "*.viereligieuse.fr",
+            "*.corref.com",
+            "*.corref.fr",
+            "*.zenit.org",
+            "*.la-croix.com",
+            "*.bayardweb.com",
+            "*.krxd.net",
+            "*.zenit.org"
+         ]
+      },
+      "ebay": {
+         "dest_domains": [
+            "*.ebay.fr",
+            "*.ebay.co.uk",
+            "*.ebay.com",
+            "*.ebayimg.com",
+            "*.ebaydesc.fr",
+            "*.ebaydesc.com",
+            "*.ebaystatic.com",
+            "*.leboncoin.fr",
+            "*.priceminister.com"
+         ]
+      },
+      "meteo": {
+         "dest_domains": [
+            "*.meteosuisse.admin.ch",
+            "*.meteosuisse.ch",
+            "*.meteofrance.com",
+            "*.meteofrance.fr",
+            "*.vigimeteo.com",
+            "*.meteociel.fr"
+         ]
+      },
+      "bible": {
+         "dest_domains": [
+            "*.saintebible.com",
+            "*.biblemenus.com",
+            "*.biblehub.net"
+         ]
+      },
+      "transports": {
+         "dest_domains": [
+            "*.cff.ch",
+            "*.sbb.ch",
+            "*.transisere.fr",
+            "*.ter-sncf.com",
+            "*.transisere.fr",
+            "*.voyages-sncf.com",
+            "*.oui.sncf",
+            "*.sncf.com",
+            "*.eurolines.fr",
+            "*.faurevercors.fr",
+            "*.grenoble-airport.com",
+            "*.lyonaeroports.com",
+            "*.rhonealpes.fr",
+            "*.aerocar.fr",
+            "*.opodo.fr"
+         ]
+      },
+      "achats": {
+         "dest_domains": [
+            "*.amazon.co.uk",
+            "*.amazon.fr"
+         ]
+      },
+      "gmx.com": {
+         "dest_domains": [
+            "*.gmx.fr",
+            "*.gmx.com",
+            "*.gmx.net"
+         ]
+      },
+      "chartreuse": {
+         "dest_domains": [
+            "*.chartreux.org",
+            "*.vocatiochartreux.org",
+            "*.cartoixamontalegre.net"
+         ]
+      },
+      "traduction": {
+         "dest_domains": [
+            "translate.google.fr",
+            "ajax.googleapis.com",
+            "online-translator.com",
+            "*.systran.fr",
+            "*.Promt.com",
+            "*.reverso.net",
+            "*.deepl.com",
+            "developers.google.com"
+         ]
+      },
+      "github.com": {
+         "dest_domains": [
+            "*.github.com",
+            "*.github.org",
+            "*.githubassets.com",
+            "*.githubusercontent.com",
+            "*.digicert.com"
+         ]
+      },
+      "annuaires": {
+         "dest_domains": [
+            "*.pagesjaunes.fr"
+         ]
+      },
+      "google-translate": {
+         "dest_domains": [
+            "translate.google.fr",
+            "ajax.googleapis.com.",
+            "ocsp.pki.goog",
+            "id.google.fr",
+            "id.google.com",
+            "consent.google.com",
+            "consent.google.fr",
+            "accounts.google.com"
+         ]
+      },
+      "technique": {
+         "dest_domains": [
+            "*.verisign.com",
+            "*.ntp.org\t\t# serveur de temps",
+            "*.digicert.com\t# certificats SSL",
+            "*.letsencrypt.org",
+            "*.pki.goog\t\t# authentification",
+            "*.googleapis.com",
+            "apis.google.com",
+            "*.gstatic.com",
+            "*.google-analytics.com",
+            "*.sanasecurity.com",
+            "*.microsoft.com",
+            "*.windows.com",
+            "*.windowsupdate.com",
+            "*.myfonts.net"
+         ]
+      },
+      "web-assura.ch": {
+         "dest_domains": [
+            "*.assura.ch",
+            "*.azureedge.net",
+            "*.hellobar.com",
+            "*.msecnd.net"
+         ]
+      },
+      "web-mirabaud": {
+         "dest_domains": [
+            "*.mirabaud.ch",
+            "*.mirabaud.com",
+            "*.mirabaud-am.com.",
+            "mirabaud-stats.com"
+         ]
+      },
+      "fr/grammaire": {
+         "dest_domains": [
+            "leconjugueur.lefigaro.fr"
+         ]
+      }
+   },
+   "version": 25,
+   "mac_user": {
+      "14:da:e9:28:06:70": "Sym\u00e9on",
+      "00:1f:d0:97:58:7e": "St. Maximilien",
+      "00:40:ca:3c:5f:33": "Gerard",
+      "dc:85:de:72:96:d9": "Dominique",
+      "00:1e:33:82:f1:6f": "Dominique",
+      "00:17:a4:fc:5a:15": "Joseph-Marie",
+      "d8:50:e6:84:a2:b1": "Joseph-Marie",
+      "b0:eb:57:85:42:66": "Joseph-Marie",
+      "b8:27:eb:3c:3f:23": "Joseph-Marie",
+      "b8:27:eb:69:6a:76": "Joseph-Marie",
+      "aa:94:40:6e:38:49": "Joseph-Marie",
+      "00:02:44:0a:65:9c": "Joseph-Marie",
+      "00:e0:4c:52:c0:bd": "Joseph-Marie",
+      "00:21:70:f8:58:f1": "Etienne",
+      "98:3b:16:13:d9:9b": "Etienne",
+      "00:16:17:e4:55:de": "Grande Biblioth\u00e8que",
+      "08:60:6e:05:46:a3": "Procure",
+      "b8:6b:23:52:8b:17": "Dom Beno\u00eet",
+      "b8:6b:23:14:86:11": "Dom Beno\u00eet",
+      "00:07:e9:72:d0:1c": "Serafico",
+      "40:8d:5c:5f:28:72": "Serafico",
+      "58:ef:68:e4:10:b2": "Jacques-Marie Lorrain",
+      "8c:85:90:90:a0:06": "Jacques-Marie Lorrain",
+      "00:0d:60:2e:ff:1b": "Thinkpad Bibl.",
+      "00:25:11:5f:e4:a0": "Pavillon 6",
+      "11:11:11:11:11:11": "test autorisations",
+      "00:0c:29:35:8a:06": "RP Dysmas",
+      "60:a4:4c:7b:1d:5f": "RP Dysmas",
+      "20:16:d8:cb:0c:6d": "RP Dysmas",
+      "00:1e:64:25:2a:f0": "RP Dysmas",
+      "90:e6:ba:40:2b:03": "RP Dysmas",
+      "48:5b:39:4a:40:be": "Jean-Thomas",
+      "d4:be:d9:d4:db:7e": "Jean-Thomas",
+      "f4:6d:04:b5:72:4c": "Daniel",
+      "48:5d:60:e1:d0:95": "Daniel",
+      "78:45:c4:3f:03:04": "Daniel",
+      "70:54:d2:91:c4:d9": "Jose-Luis",
+      "40:16:7e:6b:51:54": "Jose-Luis",
+      "08:60:6e:89:a8:01": "Nicolas",
+      "20:68:9d:ee:45:7a": "Nicolas",
+      "00:0e:c6:a4:0b:85": "Nicolas",
+      "88:ae:1d:f0:ff:40": "Luc",
+      "fc:aa:14:28:de:e0": "Laurent BORNE",
+      "64:00:6a:02:4e:37": "Sebastien",
+      "30:85:a9:f1:e3:6b": "Thierry Pont",
+      "24:b6:fd:26:72:38": "Roman",
+      "54:04:a6:03:b5:80": "Pierre-Marie Flach",
+      "b8:27:eb:fd:f1:41": "RPI-Dysmas",
+      "b8:27:eb:a8:a4:14": "RPI-Dysmas",
+      "00:08:5d:39:38:c8": "poste 43",
+      "b8:27:eb:47:fb:39": "RPI x",
+      "b8:27:eb:5c:ff:bc": "RPI y",
+      "08:00:86:16:56:45": "QMS",
+      "00:10:83:76:1b:4a": "JetDirect",
+      "00:22:64:16:5a:ba": "Central",
+      "00:13:72:2b:c8:4b": "Central",
+      "00:1b:11:c4:74:f9": "EFW",
+      "00:08:9b:d6:10:52": "OBELIX",
+      "00:08:9b:d0:5e:d5": "ASURANCETOURIX",
+      "b8:27:eb:fd:2a:de": "Sainte Marthe",
+      "da:d8:2c:28:df:4c": "Idefix",
+      "b8:27:eb:db:d3:ad": "RasPBX",
+      "00:d0:59:9c:50:1c": "e500",
+      "c0:1a:da:50:a5:92": "iPhone blanc porterie",
+      "62:0e:dd:7d:e4:4f": "Rock64 3",
+      "3e:89:ac:80:49:a1": "Rock64 3",
+      "fe:fd:0a:55:f8:77": "Rock64 3",
+      "00:e0:4c:68:91:40": "Rock64 3",
+      "c6:93:91:01:6f:46": "Rock64 3",
+      "fa:96:24:59:08:94": "Rock64 4",
+      "fa:fe:48:9f:d5:e4": "Rock64 4",
+      "f6:5b:1d:f3:6c:1e": "Rock64 4",
+      "00:23:df:a0:7f:5e": "Sr Marie-Noemi",
+      "3c:18:a0:04:a6:64": "Dom Norbert",
+      "08:9e:01:6d:d2:6e": "Dom Moses",
+      "30:c7:ae:8e:b3:af": "Dom Moses",
+      "08:60:6e:b6:9c:cb": "Dom Moses",
+      "00:23:8b:01:49:2f": "Miraflores",
+      "88:ae:1d:9e:f5:18": "Dom Magdalenus",
+      "08:60:6e:89:0c:ad": "Portes",
+      "c0:33:5e:0d:53:95": "Dom Lorenzo",
+      "a0:ce:c8:30:03:3d": "Dom Lorenzo",
+      "00:50:b6:11:ea:c7": "Valsainte",
+      "00:26:37:eb:07:b0": "Valsainte",
+      "a0:ce:c8:11:3c:da": "Valsainte",
+      "f8:32:e4:3b:cc:fd": "Dom Piero",
+      "78:84:3c:32:1e:bd": "Maria Medianeira",
+      "00:09:1a:09:22:09": "Maria Medianeira",
+      "00:05:11:0b:2f:22": "Maria Medianeira",
+      "98:28:a6:16:6a:76": "John Babeau",
+      "d8:50:e6:ab:56:09": "San Jose",
+      "96:3e:73:6f:a8:c0": "San Jose",
+      "a0:af:bd:dd:43:bd": "San Jose",
+      "00:a0:d1:34:05:12": "San Jose",
+      "00:0e:c6:d9:be:14": "San Jose",
+      "00:24:54:dd:2b:3b": "Jean-Paul G.",
+      "0c:4d:e9:bd:d3:a0": "Dom Jacques",
+      "00:00:f0:78:65:fd": "Pedro de la C.",
+      "00:02:78:48:42:9f": "Pedro de la C.",
+      "a6:c4:94:91:91:ff": "Pedro de la C.",
+      "a6:c4:94:91:91:00": "Pedro de la C.",
+      "a4:c4:94:91:91:ff": "Pedro de la C.",
+      "3c:4a:92:ca:53:56": "Maximiliano",
+      "84:7b:eb:00:dd:b4": "Maximiliano",
+      "38:c9:86:4a:a2:65": "Dom Juan Jesus",
+      "00:1f:5b:ed:b7:1e": "Aula Dei",
+      "f0:bf:97:0f:56:dd": "Notre Dame",
+      "98:83:89:1c:57:72": "Annonciation",
+      "00:00:f0:7e:4b:98": "Marie-Christine",
+      "f4:6d:04:bd:0f:1a": "Marie-Christine",
+      "98:83:89:4b:dc:4a": "Marie-Christine",
+      "40:16:7e:12:4b:02": "Sr. Marie-S\u00e9gol\u00e8ne",
+      "00:40:d0:8b:4c:cd": "Trinita",
+      "c8:60:00:1a:cb:7f": "Trinita",
+      "00:40:d0:65:1e:5c": "Mere Blanca",
+      "00:ff:98:9c:e7:85": "Mere Blanca",
+      "08:62:66:52:ee:e3": "Prieure Nonenque",
+      "00:23:ae:30:d3:3b": "Sr Marie Paques",
+      "d0:67:e5:4f:62:fa": "Sr Marie-Ange (ND)",
+      "02:00:64:09:45:17": "Marie Ange",
+      "b8:27:eb:99:6c:46": "RPI-Sainte-Marthe",
+      "b8:27:eb:cc:39:13": "RPI-Sainte-Marthe",
+      "00:23:df:fe:25:8e": "P\u00e8re Vianney"
+   }
+}

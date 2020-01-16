@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.4.0
 # version 2.3.10 - restore from Idefix backups or FTP backups
 # version 2.3.9 - Network summary
 # version 2.3.8 - Warning when leaving the program, if user has not saved his changes
@@ -59,7 +60,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog, ImportJsonFromIdefix
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.3.10"
+version = "2.4.1"
 
 
 gtk = Gtk
@@ -122,6 +123,7 @@ class Confix:
         self.import_json_from_idefix = ImportJsonFromIdefix(self.arw, self)
         self.import_json_from_ftp = ImportJsonFromFTP(self.arw, self)
         self.export_json = ExportJsonDialog(self.arw, self)
+        self.offline = False
 
         self.arw["program_title"].set_text("Confix - Version " + version)
         window1 = self.arw["window1"]
@@ -353,6 +355,11 @@ class Confix:
         configname = config_dialog.run()
         if not configname:
             return
+        if self.offline == True:                  # if an offline configuration is open, offer to save it
+            alert("TODO : Do you want to save your changes, before opening another configuration?")
+            # TODO : finish this dialog
+            self.offline = False
+
         self.arw["configname"].set_text(configname)
         self.arw["save_button1"].set_sensitive(True)
         self.arw["save_button2"].set_sensitive(True)
@@ -1019,8 +1026,6 @@ class Confix:
             present_config = self.rebuild_config()
             present_config = json.dumps(present_config, indent = 3)
             if present_config != self.active_config_text:
-                open("present_config", "w").write(present_config)
-                open("active_config_text", "w").write(self.active_config_text)
                 dialog = Gtk.Dialog()
                 dialog.set_transient_for(self.arw['window1'])
                 dialog.add_button(_("Save and Quit"), Gtk.ResponseType.APPLY)

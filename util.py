@@ -4,7 +4,6 @@ import re
 import sys
 import traceback
 import subprocess
-import http.client
 
 import gi
 gi.require_version('Gtk', '3.0')
@@ -144,34 +143,6 @@ def get_ip_address(value):
 def get_mac_address(value):
     """Check that a MAC Address is valid"""
     return re.search(r'([0-9A-F]{2}[:-]){5}([0-9A-F]{2})', value, re.I)
-
-
-def find_idefix():
-
-    if os.name == "nt":
-        arp = subprocess.check_output(["arp", "-a"])
-        arp = arp.decode("cp850")
-        for line1 in arp.split("\n"):
-            result = get_ip_address(line1)
-            if result:
-                ip = result.group(0)
-                h1 = http.client.HTTPConnection(ip, timeout = 2)
-                try:
-                    h1.connect()
-                except:
-                    h1.close()
-                    continue
-                h1.request("GET","/network-info.php")
-                res = h1.getresponse()
-                if res.status == 200:
-                    content = res.read().decode("cp850")
-                    # some devices which are protected by a password will give a positive (200) answer to any file name.
-                    # We must check for a string which is specific to Idefix
-                    if "idefix network info" in content:
-                        h1.close()
-                        return (ip, content)
-                h1.close()
-        return (None, None)
 
 def bool_test(value):
     if isinstance(value, str):

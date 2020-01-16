@@ -6,13 +6,18 @@ import re
 import http.client
 import json
 import ipaddress
+import http.client
+from collections import OrderedDict
 
 from ftp_client import ftp_connect, ftp_get
-from util import showwarning, find_idefix
+from util import showwarning, get_ip_address
 from gi.repository import Gdk, Gtk
 
 # version 2.3.19 - Edit files added
 
+
+def me(string) :   # Markup Escape
+    return string.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 class ExportDiagnosticDialog:
     def __init__(self, arw, controller):
@@ -46,10 +51,129 @@ class Information:
         self.arw = arw
         self.controller = controller
 
+    # the two following functions come from unbound-filter.py, and are slightly modified to add informations in the return
+    def is_time_allowed(self, time_condition):
+        local = time.localtime()
+        hour = int(str(local[3]).rjust(2,"0") + str(local[4]).rjust(2,"0"))
+        if time_condition["from"] < time_condition["to"]:                       # time window inside the same day
+            if (hour > time_condition["from"]) and (hour < time_condition["to"]):
+                return True
+            else:
+                return False
+        else:                                                                   # time window overlaps midnight
+            if (hour > time_condition["from"]) or (hour < time_condition["to"]):
+                return True
+            else:
+                return False
 
+    def is_allowed(self, user, domain, config):
+
+        infos = {}
+        infos["user"] = user
+        infos["domain"] = domain
+        infos["rules"] = OrderedDict()
+        data1 = domain.split(".")
+        data1.reverse()
+        #data1 = data1[1:]       # the last element must be omitted
+        for rule in config["rules"]:
+            infos["rules"][rule] = {}
+            rule1 = config["rules"][rule]
+            # invalid rule
+            if not (rule1.get("users") or rule1.get("any_user")):        # no user defined
+                infos["rules"][rule]["invalid"] = _("no user defined in this rule")
+                continue
+            if not "domains_tree" in rule1:                              # no destination defined
+                infos["rules"][rule]["invalid"] = _("no domain defined in this rule")
+                continue
+
+            # user
+            if not (rule1.get("any_user")  or  (user in rule1.get("users"))):       # user not allowed
+                infos["rules"][rule]["no-match"] = _("user is not allowed")
+                continue
+
+            # time condition
+            tc = rule1.get("time_condition")
+            if tc:
+                if not self.is_time_allowed(tc):
+                    infos["rules"][rule]["no-match"] = _("time condition is not satisfied")
+                    continue
+
+            # action
+            if rule1["action"] == "allow":
+                action = True
+            else:
+                action = False
+
+            # domain
+            infos["rules"][rule]["domain"] = []
+            base = rule1["domains_tree"]
+            for i in range(len(data1)):
+                if "*" in base:
+                    infos["rules"][rule]["domain"].append("*")
+                    infos["rules"][rule]["action"] = action
+                    infos["rules"][rule]["rule"] = rule
+                    return infos
+                if not data1[i] in base:
+                    break
+
+                if i == len(data1) - 1:         # if this is the last element to check, we must verify if the next level is *
+                                                # or nothing. If there were other elements to check, the permission must not be given.
+                    if "*" in base[data1[i]]:
+                        infos["rules"][rule]["domain"].append("*")
+                        infos["rules"][rule]["action"] = action
+                        infos["rules"][rule]["rule"] = rule
+                        return infos
+                    if len(base[data1[i]]) == 0:
+                        infos["rules"][rule]["domain"].append("???")
+                        infos["rules"][rule]["action"] = action
+                        infos["rules"][rule]["rule"] = rule
+                        return infos
+                base = base[data1[i]]
+                infos["rules"][rule]["domain"].append(data1[i])
+        if not "no-match" in infos:
+            infos["no-match"] = "No-match is empty, this is an error"
+        return infos
+
+
+    def find_idefix(self, widget = None):
+
+        results = []
+        checked = []
+        if os.name == "nt":
+            arp = subprocess.check_output(["arp", "-a"])
+            arp = arp.decode("cp850")
+            for line1 in arp.split("\n"):
+                result = get_ip_address(line1)
+                if result:
+                    ip = result.group(0)
+                    if ip in checked:       # no use to check a second time
+                        continue
+                    else:
+                        checked.append(ip)
+                    self.controller.arw["network_summary_status"].set_text(_("Connecting : " + ip))
+                    while Gtk.events_pending():
+                        Gtk.main_iteration()
+                    h1 = http.client.HTTPConnection(ip)
+                    try:
+                        h1.connect()
+                    except:
+                        h1.close()
+                        continue
+                    h1.request("GET","/network-info.php")
+                    res = h1.getresponse()
+                    if res.status == 200:
+                        content = res.read().decode("cp850")
+                        # some devices which are protected by a password will give a positive (200) answer to any file name.
+                        # We must check for a string which is specific to Idefix
+                        if "idefix network info" in content:
+                            h1.close()
+                            results.append([ip, content])
+                    h1.close()
+            return results
 
     def getmac(self, widget):
 
+        self.idefix_ip = ""
         # clear data
         for widget in ["network_summary_label1", "network_summary_label2", "network_summary_label3"]:
             self.arw[widget].set_text("")
@@ -74,41 +198,99 @@ class Information:
             pass  # TODO : code for Linux and Mac
 
         # find Idefix and display network settings
-        (ip, content) = find_idefix()
-        if content:
+        found = self.find_idefix()
 
-            message = "<b>found Idefix at " + ip + "</b>"
-            network = json.loads(content)
-            message += _("\n\n     Local port (eth1) IP : ") + network["idefix"]["eth1"]
-            message += _("\n     Local port (eth1) Netmask : ") + network["idefix"]["netmask1"]
-            message += _("\n     Local port (eth1) active : ") + network["idefix"]["link_eth1"]
-            message += _("\n\n     Internet port (eth0) IP : ") + network["idefix"]["eth0"]
-            message += _("\n     Internet port (eth0) Netmask : ") + network["idefix"]["netmask0"]
-            message += _("\n     Internet port (eth0) active : ") + network["idefix"]["link_eth0"]
-
-            wan = ipaddress.ip_interface(network["idefix"]["eth0"] + "/" + network["idefix"]["netmask0"])
-            lan = ipaddress.ip_interface(network["idefix"]["eth1"] + "/" + network["idefix"]["netmask1"])
-
-            if lan.network.overlaps(wan.network):
-                message += "\n\n<b>WARNING !!!  WARNING !!!  WARNING !!!  WARNING !!! \n Both subnets overlap !\nIdefix cannot work</b>"
-
-            supervix = "http://" + ip + ":10080/visu-donnees-systeme.php"
-            self.arw["network_summary_label2"].set_markup(message)
-            while Gtk.events_pending():
-                        Gtk.main_iteration()
-
-            # verify Idefix Internet connection
-            ping_data = get_infos("ping")
-            self.arw["network_summary_spinner"].stop()
-            if ping_data:
-                message = "\n\nInternet connexion : \n" + result
-            else:
-                message = "Open a connection for this Idefix, and resend the command.\n"
-                message += "It will then be able to test if Idefix Internet connection is working."
-            self.arw["network_summary_label3"].set_markup(message)
-        else:
+        if len(found) == 0:
             message += "<b>Idefix not found ! </b>"
             self.arw["network_summary_label2"].set_markup(message)
+        else:
+            message = ""
+            for (ip, content) in found:
+
+                self.idefix_ip = ip
+                if content:
+
+                    message += '<b><span foreground="green">Idefix found at ' + ip + "</span></b>"
+                    network = json.loads(content)
+                    # check validity to avoid errors
+                    for key in ["eth1", "netmask1", "link_eth1", "eth0", "netmask0", "link_eth0", "gateway"]:
+                        if not key in network["idefix"]:
+                            network["idefix"][key] = ""
+                    message += _("\n\n     Local port (eth1) IP : ") + network["idefix"].get("eth1")
+                    message += _("\n     Local port (eth1) Netmask : ") + network["idefix"]["netmask1"]
+                    if "yes" in network["idefix"]["link_eth1"]:
+                        message += _('\n<span foreground="green">     Idefix port (eth1) active : yes </span>')
+                    else:
+                        message += _('\n<span foreground="red">     Idefix port (eth1) active : no </span>')
+
+                    message += _("\n\n     Internet port (eth0) IP : ") + network["idefix"].get("eth0")
+                    message += _("\n     Internet port (eth0) Netmask : ") + network["idefix"]["netmask0"]
+                    if "yes" in network["idefix"]["link_eth0"]:
+                        message += _('\n<span foreground="green">     Idefix port (eth0) active : yes </span>')
+                    else:
+                        message += _('\n<span foreground="red">     Idefix port (eth0) active : no </span>')
+                    message += _("\n\n              Gateway : ") + network["idefix"]["gateway"]
+                    message += "\n\n"
+
+                    if network["idefix"]["eth0"] != "" and network["idefix"]["eth1"] != "":
+                        wan = ipaddress.ip_interface(network["idefix"]["eth0"] + "/" + network["idefix"]["netmask0"])
+                        lan = ipaddress.ip_interface(network["idefix"]["eth1"] + "/" + network["idefix"]["netmask1"])
+
+                        if lan.network.overlaps(wan.network):
+                            message += "\n\n<b>WARNING !!!  WARNING !!!  WARNING !!!  WARNING !!! \n Both subnets overlap !\nIdefix cannot work</b>"
+
+                    supervix = "http://" + ip + ":10080/visu-donnees-systeme.php"
+                    self.arw["network_summary_label2"].set_markup(message)
+                    while Gtk.events_pending():
+                                Gtk.main_iteration()
+
+            # verify Idefix Internet connection
+            self.controller.arw["network_summary_status"].set_text(_("Ping gateway from Idefix "))
+            while Gtk.events_pending():
+                Gtk.main_iteration()
+            ping_data = json.loads(self.get_infos("ping"))
+            self.arw["network_summary_spinner"].stop()
+            if ping_data:
+                message = "\n<b>Internet connexion : for %s </b>\n" % self.controller.ftp_config["server"]
+                for test in ping_data:
+                    message1 = "ping %s (%s) : " % (test, ping_data[test]["id"])
+                    if ping_data[test]["ping"] == 0:
+                        message += '<span foreground="green">' + message1 + _("OK") + "</span>\n"
+                    else:
+                        message += '<span foreground="red">' + message1 + _("failed") + "</span>\n"
+            else:
+                message += "Open a connection for this Idefix, and resend the command.\n"
+                message += "It will then be able to test if Idefix Internet connection is working."
+            self.arw["network_summary_label3"].set_markup(message)
+
+            self.controller.arw["network_summary_status"].set_text(_("Ping Idefix eth1 "))
+            while Gtk.events_pending():
+                Gtk.main_iteration()
+
+
+            network = json.loads(found[0][1])
+            test_ip = network["idefix"]["eth1"]
+            result = subprocess.check_output(["ping", "-n", "1", test_ip ]).decode("cp850")
+            if "TTL" in result:
+                message += "%s Ping Idefix eth1 (%s) from local computer : Success %s" % ('\n\n<b><span foreground="green">', test_ip, '</span></b> \n')
+            else :
+                message += "%s Ping Idefix eth1 (%s) from local computer : Failed %s" % ('\n\n<b><span foreground="red">', test_ip, '</span></b> \n')
+            self.arw["network_summary_label3"].set_markup(message)
+
+
+
+            self.controller.arw["network_summary_status"].set_text(_("Ping Idefix eth0 "))
+            while Gtk.events_pending():
+                Gtk.main_iteration()
+
+            test_ip = network["idefix"]["eth0"]
+            result = subprocess.check_output(["ping", "-n", "1", test_ip ]).decode("cp850")
+            if "TTL" in result:
+                message += "%s Ping Idefix eth0 (%s) from local computer : Success %s" % ('\n<b><span foreground="green">', test_ip, '</span></b> \n')
+            else :
+                message += "%s Ping Idefix eth0 (%s) from local computer : Failed %s" % ('\n<b><span foreground="red">', test_ip, '</span></b> \n')
+            self.arw["network_summary_label3"].set_markup(message)
+
 
 
     def get_infos(self, command, result = "result", progress = False, json = False):
@@ -120,9 +302,6 @@ class Information:
         #  - if progress is set, data is sent every second
         #  @spin : the spin object
         #  @ progress : a label object
-
-
-
 
         ftp1 = self.controller.ftp_config
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
@@ -146,11 +325,7 @@ class Information:
                         Gtk.main_iteration()
             if progress:
                 data1 = ftp_get(ftp, result)
-                # escape characters incompatible with pango markup
-                data1 = data1.replace("&", "&amp;")
-                data1 = data1.replace(">", "&gt;")
-                data1 = data1.replace("<", "&lt;")
-                progress.set_markup(data1)
+                progress.set_markup(me(data1))
 
             status =  ftp_get(self.ftp, "trigger")
             if status == "ready":
@@ -169,10 +344,15 @@ class Information:
 
         if action == "linux_command":                                          # launched by the Go button
             command = "linux " + self.arw["linux_command_entry"].get_text()      # get command from the entry
+        elif action == "infos_filter":
+            if self.arw["infos_filter_dns"].get_active():
+                command = "unbound"
+            else:
+                command = "squid"
         else:
             command = action.replace("infos_", "")
 
-        if command in ["unbound", "squid", "mac"]:
+        if command in ["unbound", "squid", "mac", "all"]:
             display_label = self.arw["infos_label"]
             spinner = self.arw["infos_spinner"]
         else:
@@ -201,9 +381,7 @@ class Information:
             dialog.run(result)
         else:
             # escape characters incompatible with pango markup
-            result = result.replace("&", "&amp;")
-            result = result.replace(">", "&gt;")
-            result = result.replace("<", "&lt;")
+            result = me(result)
 
             # set colors
             if command.startswith("unbound"):
@@ -217,7 +395,7 @@ class Information:
                     elif "allowed" in line :
                         line = '<span foreground="green">' + line.strip() + "</span>"
                     if "validation failure" in line :
-                        line = '<span background="#ff9999">' + line.strip().replace("<", "&lt;").replace(">", "&gt;") + "</span>\n"
+                        line = '<span background="#ff9999">' + me(line.strip()) + "</span>\n"
                     result3 += line + "\n"
                 result = result3
             elif command == "mac":
@@ -271,6 +449,17 @@ class Information:
         ftp.close()
 
 
+    def check_permissions(self, widget):
+        user = "RP Dysmas"
+        domain = "public.meteofrance.com"
+
+        config = json.loads(open("unbound.json").read(), object_pairs_hook=OrderedDict)
+        x = self.is_allowed(user, domain, config)
+        message = "<b>Why is %s allowed or denied for %s ?</b>\n\n" % (domain, user)
+        for rule in x["rules"]:
+            message += rule + " " + repr(x["rules"][rule]) + "\n"
+        self.arw["infos_label"].set_markup(message)
+
     """ File editor   """
 
     def edit_file(self, widget):
@@ -316,3 +505,11 @@ class Information:
     def close_editor(self, widget):
         self.arw["informations_stack"].set_visible_child(self.arw["informations_box"])
 
+    def hide_network_summary(self, widget):
+        self.arw["network_summary"].hide()
+
+    def open_supervix(self, widget):
+        if self.idefix_ip:
+            os.startfile("http://%s:10080/visu-donnees-systeme.php" % self.idefix_ip)
+        else:
+            alert(_("Idefix was not found"))

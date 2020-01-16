@@ -277,14 +277,15 @@ class Users:
             if username in self.controller.maclist:
                 macaddr = self.controller.maclist[username]
                 if not macaddr or (macaddr[0] == False) or (macaddr[0] == ""):
-                    alert(_("No valid mac address for this user !"))
+                    buffer.set_text("")
+                    alert(_("No valid mac address for this user1 !"))
                 else :
                     data1 = "\n".join(macaddr)
                     buffer.set_text(data1)
             else:
                 buffer.set_text("")
                 if not iternew:
-                    alert(_("No mac address for this user !"))
+                    alert(_("No mac address for this user2 !"))
 
             # adapt the title of the frame for user/subuser
             if level == 3:
@@ -293,7 +294,7 @@ class Users:
                 self.arw['user_summary_label'].set_label(_("Mac Addresses"))     # user
 
             # fill the user summary
-            self.user_summary(username)
+            self.user_summary(username, level)
 
             # get data in lists for this user
         self.block_signals = False
@@ -477,8 +478,23 @@ class Users:
         for i in range(self.users_store.get_n_columns()):
             row.append(self.users_store.get_value(self.controller.iter_user, i))
 
+        # subusers
+        sub_users = []
+        model = self.users_store
+        child = model.iter_children(self.controller.iter_user)
+        while child:
+            childrow = []
+            for i in range(model.get_n_columns()):
+                childrow.append(model.get_value(child, i))
+            sub_users.append(childrow)
+            child = model.iter_next(child)
+
+
         node = self.cat_list[cat]
-        self.users_store.append(node, row)
+        iter_new = self.users_store.append(node, row)
+        for subuser in sub_users:
+            model.append(iter_new, subuser)
+
         self.users_store.remove(self.controller.iter_user)
 
         # self.users_store.move_after(self.controller.iter_user, node)       # serait plus élégant mais ne marche pas
@@ -513,13 +529,11 @@ class Users:
 
     """ User Summary """
 
-    def user_summary(self, user1):
-
-        #(model, node) = self.arw["treeview1"].get_selection().get_selected()   --> Does not work. Returns the previous selection
-        #level = model.get_path(node).get_depth()
-
+    def user_summary(self, user1, level):
 
         parent_iter = self.users_store.iter_parent(self.controller.iter_user)
+        if level == 3:
+            parent_iter = self.users_store.iter_parent(parent_iter)
         if not parent_iter:
             parent_iter = self.controller.iter_user
 
@@ -527,12 +541,13 @@ class Users:
 
         if user1 not in self.controller.maclist:
             self.arw['maclist'].get_buffer().set_text(
-                _("# No mac address for this user")
+                _("# No mac address for this user3")
             )
 
 ##        email_time_conditions = self.users_store.get_value(parent_iter, 2)
 ##        internet_time_conditions = self.users_store.get_value(parent_iter, 3)
 ##        email_enabled = self.users_store.get_value(parent_iter, 4)
+
         internet_filtered = self.users_store.get_value(parent_iter, 6)
         internet_open = self.users_store.get_value(parent_iter, 7)
 ##
@@ -620,7 +635,6 @@ class Users:
         # 19 : chekbox assistant (0/1)
 
         i = 0
-        print("level = ", level)
         for row in self.controller.filter_store:
             if not row[5]:
                 users = [""]
@@ -630,7 +644,6 @@ class Users:
             for userx in users:
 
                 if userx.strip() == user1 or row[11] == 1:
-                    print ("===>", userx, user1)
                     parent_iter = store.append(None)
                     if row[11]:
                         name = '<i>' + row[0] + '</i>'

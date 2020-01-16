@@ -45,6 +45,7 @@ class ImportJsonDialog:
             )
 
             if offline :
+                self.controller.offline = True
                 # close ftp connection
                 try:
                     self.controller.ftp.close()
