@@ -16,7 +16,7 @@
 # version 2.1.0 - supports subusers
 # version 2.0.0 - Supports Unbound
 
-import glob
+import http.client
 import json
 import os
 import sys
@@ -28,7 +28,6 @@ import gi
 
 from connection_information import Information
 from ftp_client import ftp_connect, ftp_get, ftp_send, FTPError
-import http.client
 
 gi.require_version('Gtk', '3.0')
 
@@ -811,6 +810,9 @@ class Confix:
             self.proxy_users.set_gui('check')
         else:
             self.proxy_users.set_gui('buttons')
+
+        self.arw['developper_menu'].set_sensitive(developper_menu)
+        self.arw['developper_menu'].set_visible(developper_menu)
 
         # Save to config
         parser.write(self.idefix_config['conf'], get_config_path('confix.cfg'))

@@ -4,8 +4,7 @@ from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
 from util import (
-    askyesno, ask_text, get_config_path,
-    format_comment, format_line, format_time, format_userline, format_domainline, format_name,
+    askyesno, ask_text, format_name,
     showwarning)
 
 
@@ -544,13 +543,20 @@ class ProxyUsers:
                     else:
                         out.append(data)
                 else:
-                    out.append("")
+                    out.append('')
             # check boxes and ToggleButtons
 ##            if "any_user" in data2:
 ##                anyuser = data1[section]["any_user"]
 ##            else:
 ##                anyuser = 0
             out += [1, "#009900", "#ffffff", "", "", 0, 0]
+
+            if not out[11]:
+                out[11] = 0
+            if not out[12]:
+                out[12] = 0
+            if not out[13]:
+                out[13] = 0
 
             self.filter_store.append(out)
 
