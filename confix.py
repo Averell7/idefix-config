@@ -490,6 +490,9 @@ class Confix:
     def show_about(self, widget):
         self.arw["about_window"].show()
 
+    def close_about(self, *args):
+        self.arw['about_window'].hide()
+
     """ Load interface """
 
     def populate_ports(self):

@@ -382,11 +382,12 @@
     <property name="authors">Daniel Pot
 Serge Pichon
 Bertrand Thomas
-Chris Stranek
+Chris Stranex
 Vincent Denizot
 and others</property>
     <property name="logo_icon_name">help-about</property>
     <property name="license_type">gpl-3-0</property>
+    <signal name="response" handler="close_about" swapped="no"/>
     <child>
       <placeholder/>
     </child>
