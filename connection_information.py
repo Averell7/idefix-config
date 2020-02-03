@@ -1,19 +1,26 @@
+import http.client
+import http.client
 import io
+import ipaddress
+import json
 import os
 import subprocess
 import time
-import re
-import http.client
-import json
-import ipaddress
-import http.client
 from collections import OrderedDict
+
+from gi.repository import Gtk
 
 from ftp_client import ftp_connect, ftp_get
 from util import showwarning, get_ip_address
-from gi.repository import Gdk, Gtk
 
 # version 2.3.19 - Edit files added
+
+WHY_COLUMN_NAME = 0
+WHY_COLUMN_DOMAIN = 1
+WHY_COLUMN_INFO = 2
+WHY_COLUMN_RULE_TYPE = 3
+WHY_COLUMN_RULE_DISABLED = 4
+WHY_COLUMN_RULE_INVALID = 5
 
 
 def me(string) :   # Markup Escape
@@ -75,34 +82,52 @@ class Information:
         data1 = domain.split(".")
         data1.reverse()
         #data1 = data1[1:]       # the last element must be omitted
+
         for rule in config["rules"]:
-            infos["rules"][rule] = {}
             rule1 = config["rules"][rule]
+
+            infos["rules"][rule] = {
+                'enabled': rule1.get('active', 'on') == 'on',
+            }
+
             # invalid rule
             if not (rule1.get("users") or rule1.get("any_user")):        # no user defined
-                infos["rules"][rule]["invalid"] = _("no user defined in this rule")
+                infos["rules"][rule].update({
+                    'valid': False,
+                    'reason': _('No user defined in this rule'),
+                })
                 continue
             if not "domains_tree" in rule1:                              # no destination defined
-                infos["rules"][rule]["invalid"] = _("no domain defined in this rule")
+                infos['rules'][rule].update({
+                    'valid': False,
+                    'reason': _('No domain defined in this rule')
+                })
                 continue
 
             # user
             if not (rule1.get("any_user")  or  (user in rule1.get("users"))):       # user not allowed
-                infos["rules"][rule]["no-match"] = _("user is not allowed")
+                infos['rules'][rule].update({
+                    'valid': True,
+                    'user': False,
+                    'reason': _('User is not allowed')
+                })
                 continue
 
             # time condition
             tc = rule1.get("time_condition")
             if tc:
                 if not self.is_time_allowed(tc):
-                    infos["rules"][rule]["no-match"] = _("time condition is not satisfied")
+                    infos['rules'][rule].update({
+                        'match': False,
+                        'time_condition': False,
+                        'reason': _('Time condition not satisfied'),
+                    })
                     continue
+                else:
+                    infos['rules'][rule]['time_condition'] = True
 
             # action
-            if rule1["action"] == "allow":
-                action = True
-            else:
-                action = False
+            action = rule1.get("action") == "allow"
 
             # domain
             infos["rules"][rule]["domain"] = []
@@ -200,7 +225,7 @@ class Information:
         # find Idefix and display network settings
         found = self.find_idefix()
 
-        if len(found) == 0:
+        if not found:
             message += "<b>Idefix not found ! </b>"
             self.arw["network_summary_label2"].set_markup(message)
         else:
@@ -337,6 +362,7 @@ class Information:
 
 
     def idefix_infos(self, widget):
+        self.arw['why_stack'].set_visible_child_name('page0')
         if isinstance(widget, str):
             action = widget
         else:
@@ -412,6 +438,7 @@ class Information:
             display_label.set_markup(result)
 
     def search(self, widget):
+        self.arw['why_stack'].set_visible_child_name('page0')
         mac_search = self.arw["search_mac"].get_text().strip().lower()
 
         output1 = ""
@@ -442,23 +469,131 @@ class Information:
 
 
     def update_display(self, widget):
+        self.arw['why_stack'].set_visible_child_name('page0')
         ftp1 = self.controller.ftp_config
         ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
         data1 = ftp_get(ftp, "result")
         self.arw["infos_label"].set_markup(data1)
         ftp.close()
 
-
     def check_permissions(self, widget):
-        user = "RP Dysmas"
-        domain = "public.meteofrance.com"
+        """Run the permissions check after the check permission dialog has been completed"""
+
+        # Recreate the store
+        self.arw['permission_user_store'].clear()
+        for item in self.controller.users.users_store:
+            for user in item.iterchildren():
+                self.arw['permission_user_store'].append([user[0]])
+                for subuser in user.iterchildren():
+                    self.arw['permission_user_store'].append([subuser[0]])
+
+        # Show the selection dialog
+        dialog = self.arw['permission_check_dialog']
+        response = dialog.run()
+
+        dialog.hide()
+
+        if response != Gtk.ResponseType.OK:
+            return
+
+        model, selected_iter = self.arw['permission_check_user'].get_selection().get_selected()
+
+        if not model or not selected_iter:
+            showwarning(_("No User Selected"), _("Please select a user"))
+            return
+
+        user = model.get_value(selected_iter, 0)
+
+        domain = self.arw['permission_check_domain'].get_text()
+
+        if not domain:
+            showwarning(_("No Domain Entered"), _("Please enter a valid domain"))
+            return
+
+        self.arw['why_stack'].set_visible_child_name('why')
 
         config = json.loads(open("unbound.json").read(), object_pairs_hook=OrderedDict)
-        x = self.is_allowed(user, domain, config)
-        message = "<b>Why is %s allowed or denied for %s ?</b>\n\n" % (domain, user)
-        for rule in x["rules"]:
-            message += rule + " " + repr(x["rules"][rule]) + "\n"
-        self.arw["infos_label"].set_markup(message)
+
+        self.arw['why_store'].clear()
+
+        rule_info = self.is_allowed(user, domain, config)
+        self.arw['why_info_label'].set_text(_("%s rules for %s") % (domain, user))
+
+        for name, info in rule_info['rules'].items():
+
+            rule_iter = self.arw['why_store'].append()
+            self.arw['why_store'].set_value(rule_iter, WHY_COLUMN_NAME, name)
+
+            # The domain is a list of matches to compare against the target domain
+            # eg: ['com', 'microsoft', '*']  will match 'www.microsoft.com'
+            # iterate through both target and rule domains looking for matches
+            # if '*' is encountered then mark the rest of the domain as a pass
+            # if a part of the domain doesn't match then mark the rest of the domain as fail
+
+            rule_domain = iter(info.get('domain', []))
+            domain_parts = []
+            target_domain = reversed(domain.split('.'))
+
+            while True:
+                try:
+                    source = rule_domain.__next__()
+                except StopIteration:
+                    source = ''
+
+                try:
+                    target = target_domain.__next__()
+                except StopIteration:
+                    break
+
+                if source.lower() == target.lower():
+                    domain_parts.append("<span foreground='green'>" + source + "</span>")
+                    continue
+
+                # Get the rest of the target
+                parts = [target]
+                while True:
+                    try:
+                        parts.append(target_domain.__next__())
+                    except StopIteration:
+                        break
+
+                rest = '.'.join(reversed(parts))
+                if source == '*':
+                    # We match everything from here further down green
+                    domain_parts.append("<span foreground='green'>" + rest + "</span>")
+                else:
+                    # This and everything below does not match and is red
+                    domain_parts.append("<span foreground='red'>" + rest + "</span>")
+
+            self.arw['why_store'].set_value(rule_iter, WHY_COLUMN_DOMAIN, '.'.join(reversed(domain_parts)))
+
+            notes = ''
+            if not info.get('user', True):
+                notes += "<span foreground='red'>☹</span> "
+            else:
+                notes += "<span foreground='green'>☺</span> "
+
+            if 'time_condition' in info:
+                if not info.get('time_condition'):
+                    notes += "<span foreground='red'>⏰</span> "
+                else:
+                    notes += "<span foreground='green'>⏰</span> "
+
+            self.arw['why_store'].set_value(rule_iter, WHY_COLUMN_RULE_DISABLED, not info.get('enabled'))
+
+            if not info.get('valid', True):
+                self.arw['why_store'].set_value(rule_iter, WHY_COLUMN_RULE_INVALID, True)
+                notes = info.get('reason')
+
+            if 'action' in info:
+                if info['action']:
+                    self.arw['why_store'].set_value(rule_iter, WHY_COLUMN_RULE_TYPE, Gtk.STOCK_APPLY)
+                else:
+                    self.arw['why_store'].set_value(rule_iter, WHY_COLUMN_RULE_TYPE, Gtk.STOCK_CANCEL)
+            else:
+                self.arw['why_store'].set_value(rule_iter, WHY_COLUMN_RULE_TYPE, Gtk.STOCK_JUMP_TO)
+
+            self.arw['why_store'].set_value(rule_iter, WHY_COLUMN_INFO, notes)
 
     """ File editor   """
 
