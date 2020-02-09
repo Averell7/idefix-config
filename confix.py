@@ -36,7 +36,7 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 
 from groups_manager import GroupManager
-from myconfigparser import myConfigParser
+from configparser import ConfigParser
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
@@ -175,7 +175,7 @@ class Confix:
         # set check boxes in menu
         self.block_signals = True
         self.arw['menu_autoload_check'].set_active(
-            self.idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
+            self.idefix_config['__options'].get('auto_load', 0) == '1'
         )
         self.block_signals = False
 
@@ -224,7 +224,7 @@ class Confix:
         if configname == "":                            # No connexion profile chosen
             self.ftp_config = None
         else:
-            self.ftp_config = self.idefix_config['conf'][configname]
+            self.ftp_config = self.idefix_config[configname]
             ftp = self.open_connexion_profile()
         self.arw["configname"].set_text(configname)
 
@@ -324,26 +324,26 @@ class Confix:
 
 
         # user defined options
-        checkbox_config = self.idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+        checkbox_config = self.idefix_config['__options'].get('checkbox_config', 0) == '1'
         if checkbox_config:
             self.proxy_users.set_gui('check')
 
-        filter_tab = self.idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+        filter_tab = self.idefix_config['__options'].get('filter_tab', 0) == '1'
         if filter_tab:
             self.arw['notebook3'].set_current_page(1)
 
-        developper_menu = self.idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
+        developper_menu = self.idefix_config['__options'].get('developper_menu', 0) == '1'
         if developper_menu is False:
             self.arw['developper_menu'].set_sensitive(False)
             self.arw['developper_menu'].set_visible(False)
 
-        auto_load = self.idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
+        auto_load = self.idefix_config['__options'].get('auto_load', 0) == '1'
         if auto_load:
-            last_config = self.idefix_config['conf'].get('__options', {}).get('last_config')
+            last_config = self.idefix_config['__options'].get('last_config')
             if last_config:
                 configname = last_config[0]
                 if configname:
-                    self.ftp_config = self.idefix_config['conf'][configname]
+                    self.ftp_config = self.idefix_config[configname]
                     self.open_connexion_profile()
                     self.arw["configname"].set_text(configname)
 
@@ -362,12 +362,11 @@ class Confix:
         self.arw["configname"].set_text(configname)
         self.arw["save_button1"].set_sensitive(True)
         self.arw["save_button2"].set_sensitive(True)
-        self.ftp_config = self.idefix_config['conf'][configname]
-        if not self.idefix_config['conf'].get('__options'):
-            self.idefix_config['conf']['__options'] = {}
-        self.idefix_config['conf']['__options']["last_config"] = configname
-        parser.write(self.idefix_config['conf'], get_config_path('confix.cfg'))
-
+        self.ftp_config = self.idefix_config[configname]
+        if not self.idefix_config['__options']:
+            self.idefix_config['__options'] = {}
+        self.idefix_config['__options']["last_config"] = configname
+        self.profiles.profile_save_config()
         self.open_connexion_profile()
 
 
@@ -802,11 +801,11 @@ class Confix:
         auto_load = self.arw['menu_autoload_check'].get_active()
         developper_menu = self.arw['option_developper_check'].get_active()
 
-        self.idefix_config['conf']['__options'] = {
-            'checkbox_config': ['1' if gui_check else '0'],
-            'filter_tab': ['1' if filter_tab else '0'],
-            'auto_load': ['1' if auto_load else '0'],
-            'developper_menu': ['1' if developper_menu else '0'],
+        self.idefix_config['__options'] = {
+            'checkbox_config': '1' if gui_check else '0',
+            'filter_tab': '1' if filter_tab else '0',
+            'auto_load': '1' if auto_load else '0',
+            'developper_menu': '1' if developper_menu else '0',
         }
 
         if gui_check:
@@ -818,19 +817,19 @@ class Confix:
         self.arw['developper_menu'].set_visible(developper_menu)
 
         # Save to config
-        parser.write(self.idefix_config['conf'], get_config_path('confix.cfg'))
+        self.profiles.profile_save_config()
         self.arw['options_window'].hide()
 
     def show_options(self, widget):
         # Get options
         self.arw['option_checkbox_gui_check'].set_active(
-            self.idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+            self.idefix_config['__options'].get('checkbox_config', 0) == '1'
         )
         self.arw['option_filter_tab_check'].set_active(
-            self.idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+            self.idefix_config['__options'].get('filter_tab', 0) == '1'
         )
         self.arw['option_developper_check'].set_active(
-            self.idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
+            self.idefix_config['__options'].get('developper_menu', 0) == '1'
         )
         self.arw['options_window'].show_all()
 
@@ -1108,16 +1107,17 @@ class Confix:
 
 
 if __name__ == "__main__":
-    global win, parser, configname, load_locale
+    global win, configname, load_locale
 
-    parser = myConfigParser()
-    idefix_config = parser.read(get_config_path('confix.cfg'), "conf")
+    parser = ConfigParser(interpolation=None)
 
-    if not idefix_config:
+    if not os.path.exists(get_config_path('confix.cfg')):
         # Try write the default configuration
         path = write_default_config()
-        idefix_config = parser.read(path, "conf")
+        parser.read(path)
         configname = 'default'
+    else:
+        parser.read(get_config_path('confix.cfg'))
 
     # Get the configuration
     if len(sys.argv) > 1:  # if the config is indicated on the command line

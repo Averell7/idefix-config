@@ -1,10 +1,10 @@
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
+from configparser import ConfigParser
 
 from gi.repository import Gtk, Gdk
 
-from myconfigparser import myConfigParser
 from repository import fetch_repository_categories, search_repository_groups, upload_group
-from util import showwarning, askyesno, ask_text, ip_address_test
+from util import showwarning, askyesno, ask_text
 
 IMPORT_COLUMN_SELECTED = 0
 IMPORT_COLUMN_NAME = 1
@@ -179,12 +179,12 @@ class GroupManager:
 
     def read_config_data(self, data):
         """Read ini config data from an ini file into the group manager's groups store"""
-        for key in data:
-            tooltip = "\n".join(data[key].get('dest_domains', ''))
-            if data[key].get('dest_ip', ''):
-                if tooltip:
-                    tooltip += '\n'
-                tooltip += "\n".join(data[key].get('dest_ip', ''))
+        for key in data.sections():
+            if key.startswith('__'):
+                continue
+
+            domains = data[key].get('dest', [])
+            tooltip = "\n".join(domains)
             self.groups_store.append([key, tooltip])
 
     def save_groups(self, *args):
@@ -262,10 +262,10 @@ class GroupManager:
         dialog.show_all()
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
-
-            parser = myConfigParser()
-            data1 = parser.read(dialog.get_filename(), "groups", comments=True)['groups']
-            self.read_config_data(data1)
+            # TODO: This does not work
+            parser = ConfigParser(interpolation=None, default_section='__DEFAULT')
+            parser.read(dialog.get_filename())
+            self.read_config_data(parser)
             self.imported_groups = True
 
         dialog.destroy()
@@ -287,18 +287,14 @@ class GroupManager:
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
 
-            data = ''
+            data = ConfigParser(interpolation=None)
 
             for row in self.controller.groups_store:
-                data += '\n[%s]\n' % row[0]
                 for domain in row[1].split('\n'):
-                    if ip_address_test(domain):
-                        data += 'dest_ip = %s\n' % domain
-                    else:
-                        data += 'dest_domains = %s\n' % domain
+                    data[row[0]].get('dest', []).append(domain)
 
             with open(dialog.get_filename(), 'w', encoding="utf-8-sig", newline="\n") as f:
-                f.write(data)
+                data.write(f)
 
         dialog.destroy()
 
@@ -520,19 +516,18 @@ class GroupManager:
     def action_start_repository_import(self, widget):
         """Process the user selection and import the proxy groups"""
 
-        parser = myConfigParser()
-        groups = OrderedDict()
+        parser = ConfigParser(interpolation=None, default_section='__DEFAULT')
 
         for row in self.widgets['repository_store']:
+            # TODO: This bit needs to be updated
             for group_id, group_name, domains in self.walk_repository_tree(row.iterchildren()):
-                content = ('[%s]\n' % group_name) + domains
-                data = parser.read(content.split('\n'), 'groups', isdata=True, comments=True)
-                groups.update(data['groups'])
+                parser.add_section(group_name)
+                parser[group_name]['dest'] = domains.split('\n')
 
         self.buffer = Gtk.TextBuffer()
         self.widgets['groups_view'].set_buffer(self.buffer)
         self.groups_store.clear()
-        self.read_config_data(groups)
+        self.read_config_data(parser)
         self.imported_groups = True
         self.widgets['import_window'].hide()
 
