@@ -36,12 +36,10 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 
 from groups_manager import GroupManager
-from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
-    EMPTY_STORE, SignalHandler, get_config_path, write_default_config,
-    ip_address_test
+    EMPTY_STORE, SignalHandler, get_config_path, ip_address_test
 )
 from icons import (
     internet_full_icon, internet_filtered_icon, internet_denied_icon
@@ -322,6 +320,8 @@ class Confix:
         self.tvcolumn = gtk.TreeViewColumn(_('Users'), self.users.cell, text=0)
         self.arw2["manage_request_tree"].append_column(self.tvcolumn)
 
+        if not self.idefix_config['conf']:
+            self.assistant.show_assistant_first()
 
         # user defined options
         checkbox_config = self.idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
@@ -431,6 +431,7 @@ class Confix:
         # self.arw2["my_account"].set_text(self.myaccount)
 
     def update_gui(self):
+        self.profiles.list_configuration_profiles()
         self.maclist = self.users.create_maclist()
         self.users.populate_users()
         self.proxy_users.populate_proxy()
@@ -1110,6 +1111,7 @@ class Confix:
 if __name__ == "__main__":
     global win, parser, configname, load_locale
 
+    """
     parser = myConfigParser()
     idefix_config = parser.read(get_config_path('confix.cfg'), "conf")
 
@@ -1118,6 +1120,7 @@ if __name__ == "__main__":
         path = write_default_config()
         idefix_config = parser.read(path, "conf")
         configname = 'default'
+    """
 
     # Get the configuration
     if len(sys.argv) > 1:  # if the config is indicated on the command line

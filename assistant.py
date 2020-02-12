@@ -1,10 +1,13 @@
-from gi.repository import Gtk
-
+import configparser
+import ipaddress
+import json
 import re
+import webbrowser
 
 from gi.repository import Gtk
 
-from util import mac_address_test, ip_address_test, showwarning
+from ftp_client import ftp_connect
+from util import mac_address_test, ip_address_test, showwarning, ask_text, askyesno
 
 
 class Assistant:
@@ -17,6 +20,7 @@ class Assistant:
         self.controller = controller
         self.block_signals = False
         self.arw2["assistant_create_user"].set_forward_page_func(self.forward_func)
+
         # During development
         for name in ["proxy_rules2", "manage_request"]:
             self.arw2["assistant_create_user"].set_page_complete(self.arw2[name], True)
@@ -87,9 +91,15 @@ class Assistant:
         self.arw2["assistant_experiment"].show()
         self.arw2["assistant_experiment"].set_keep_above(True)
 
+    def show_assistant_first(self, widget=None):
+        self.arw2['first_use_assistant'].set_current_page(0)
+        self.arw2["first_use_assistant"].show()
+        self.arw2["first_use_assistant"].set_keep_above(True)
+
     def cancel (self, widget, a = None):
         self.arw2["assistant_create_user"].hide()
         self.arw2["assistant_experiment"].hide()
+        self.arw2['first_use_assistant'].hide()
 
     def forward_func(self, page):
         """ manage the page flow, depending of the choices made by the user """
@@ -408,9 +418,150 @@ class Assistant:
         #if user:
         #    self.controller.users.user_summary(user)
 
+    def connect_idefix(self, password='admin'):
+        """Check if idefix connects"""
+        model, iter = self.arw2['idefix_select_view'].get_selection().get_selected()
 
+        connection = ftp_connect(model.get_value(iter, 0), 'idefix', password)
+        if not connection:
+            # Prompt for password again
+            password = ask_text(self.arw2['first_use_assistant'], _("Enter idefix ftp password"), password=True)
+            if not password:
+                # Show the selection dialog
+                self.arw2['first_use_assistant'].set_current_page(2)
+                self.arw2['first_use_assistant'].commit()
+                return
+            return self.connect_idefix(password)
 
+        data = {
+            'default': {
+                'server': model.get_value(iter, 0),
+                'login': 'idefix',
+                'pass': password,
+            }
+        }
 
+        if askyesno(_("Automatically load?"), _("Automatically connect to this Idefix on startup?")):
+            data['__options'] = {
+                'auto_load': 1,
+                'last_config': 'default'
+            }
 
+        # Write the configuration
+        config = configparser.ConfigParser(interpolation=None)
+        config.read_dict(data)
+        with open(self.controller.profiles.filename, 'w') as f:
+            config.write(f)
 
+        self.controller.profiles.refresh_saved_profiles()
+        self.controller.ftp_config = self.controller.profiles.config['conf']['default']
 
+        # Load next page
+        self.arw2['first_use_assistant'].set_current_page(4)
+        self.arw2['first_use_assistant'].commit()
+        data = self.controller.information.get_infos('ftp', decode_json=True)
+        if data:
+            # Show page 4 with populated data
+            self.arw2['first_use_assistant'].set_current_page(5)
+            self.arw2['first_use_assistant'].commit()
+            self.arw2['ftp_config_host'].set_text(data.get('ftp'))
+            self.arw2['ftp_config_login'].set_text(data.get('login'))
+            self.arw2['ftp_config_password'].set_text(data.get('password'))
+        else:
+            self.finish_first_configuration()
+
+    def finish_first_configuration(self):
+        """Open connection profile and hide the assistant"""
+        self.controller.update_gui()
+        self.controller.profiles.refresh_saved_profiles()
+        self.arw["configname"].set_text("default")
+        self.controller.open_connexion_profile()
+        self.arw2['first_use_assistant'].hide()
+
+    def cancel_configuration(self, *args):
+        self.arw2['first_use_assistant'].set_current_page(0)
+        self.arw2['first_use_assistant'].hide()
+
+    def on_configuration_page_change(self, widget, page_widget):
+        """Called on page changing for first time assistant"""
+        page = widget.get_current_page()
+
+        if page == 1:
+            # Pop up dialog
+            self.arw2['finding_idefix'].show_all()
+            while Gtk.events_pending():
+                Gtk.main_iteration()
+            found = self.controller.information.find_idefix()
+            self.arw2['finding_idefix'].hide()
+            if not found:
+                # Warn the user that idefix was not found
+                showwarning(
+                    _("Idefix Not Found"),
+                    _("Idefix was not detected. Please make sure it is connected to this computer and try again"),
+                    msgtype=4
+                )
+                widget.set_current_page(0)
+                return
+
+            self.arw2['idefix_store'].clear()
+            ip_iter = None
+            for (ip, content) in found:
+                network = json.loads(content)
+                ip_iter = self.arw2['idefix_store'].append()
+                self.arw2['idefix_store'].set_value(ip_iter, 0, ip)
+
+                if network["idefix"].get("eth0", "") != "" and network["idefix"].get("eth1", "") != "":
+                    wan = ipaddress.ip_interface(network["idefix"]["eth0"] + "/" + network["idefix"]["netmask0"])
+                    lan = ipaddress.ip_interface(network["idefix"]["eth1"] + "/" + network["idefix"]["netmask1"])
+                    if lan.network.overlaps(wan.network):
+                        # Warn the user
+                        response = self.arw2['idefix_conflict_dialog'].run()
+                        if response == Gtk.ResponseType.ACCEPT:
+                            # Launch the browser if the user wants
+                            webbrowser.open('http://' + ip + ':10080/config-reseau.php')
+
+                        self.arw2['idefix_conflict_dialog'].hide()
+
+                        self.arw2['first_use_assistant'].set_current_page(0)
+                        self.arw2['first_use_assistant'].commit()
+                        return
+
+            if len(found) > 1:
+                # Show selection page
+                self.arw2['first_use_assistant'].set_current_page(2)
+                self.arw2['first_use_assistant'].commit()
+            else:
+                # Go straight to connection profile
+                self.arw2['idefix_select_view'].get_selection().select_iter(ip_iter)
+                self.arw2['first_use_assistant'].set_current_page(3)
+                self.arw2['first_use_assistant'].commit()
+        elif page == 3:
+            # Idefix config was selected
+            model, iter = self.arw2['idefix_select_view'].get_selection().get_selected()
+            if not iter:
+                showwarning(_("Please select"), _("Please select an Idefix to configure"))
+                self.arw2['first_use_assistant'].set_current_page(2)
+                return
+            self.arw2['first_use_assistant'].commit()
+            self.connect_idefix()
+
+    def finish_configuration(self, *args):
+        if not self.arw2['ftp_config_name'].get_text():
+            showwarning(_("Invalid Name"), _("Please enter a name"))
+            self.arw2['first_use_assistant'].set_current_page(5)
+            return
+
+        # Write configuration to ini file
+        config = configparser.ConfigParser(interpolation=None)
+        config.read(self.controller.profiles.filename)
+        config.read_dict({
+            self.arw2['ftp_config_name'].get_text(): {
+                'server': self.arw2['ftp_config_host'].get_text(),
+                'login': self.arw2['ftp_config_login'].get_text(),
+                'pass': self.arw2['ftp_config_password'].get_text(),
+            }
+        })
+        with open(self.controller.profiles.filename, 'w') as f:
+            config.write(f)
+
+        self.finish_first_configuration()

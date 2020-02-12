@@ -3,9 +3,9 @@ import os
 import re
 import sys
 import traceback
-import subprocess
 
 import gi
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
@@ -199,7 +199,7 @@ def askyesno(title, string):
     return rep
 
 
-def ask_text(parent, message, default=''):
+def ask_text(parent, message, default='', password=False):
     """
     Display a dialog with a text entry.
     Returns the text, or None if canceled.
@@ -211,6 +211,7 @@ def ask_text(parent, message, default=''):
                           message)
     entry = Gtk.Entry()
     entry.set_text(default)
+    entry.set_visibility(not password)
     entry.show()
     d.vbox.pack_end(entry, True, True, 0)
     entry.connect('activate', lambda _: d.response(Gtk.ResponseType.OK))

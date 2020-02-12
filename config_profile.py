@@ -71,7 +71,7 @@ def get_config(filename, password=DEFAULT_KEY):
 
     data = parser.read(filename, "conf")
     if not data:
-        return {}
+        return {'conf': {}}
     else:
         return decrypt_config(data, password)
 

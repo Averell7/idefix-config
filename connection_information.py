@@ -162,39 +162,47 @@ class Information:
 
     def find_idefix(self, widget = None):
 
+        # TODO: Speed this up somehow
+
         results = []
         checked = []
-        if os.name == "nt":
+        arp = []
+        try:
             arp = subprocess.check_output(["arp", "-a"])
             arp = arp.decode("cp850")
-            for line1 in arp.split("\n"):
-                result = get_ip_address(line1)
-                if result:
-                    ip = result.group(0)
-                    if ip in checked:       # no use to check a second time
-                        continue
-                    else:
-                        checked.append(ip)
-                    self.controller.arw["network_summary_status"].set_text(_("Connecting : " + ip))
-                    while Gtk.events_pending():
-                        Gtk.main_iteration()
-                    h1 = http.client.HTTPConnection(ip)
-                    try:
-                        h1.connect()
-                    except:
-                        h1.close()
-                        continue
-                    h1.request("GET","/network-info.php")
-                    res = h1.getresponse()
-                    if res.status == 200:
-                        content = res.read().decode("cp850")
-                        # some devices which are protected by a password will give a positive (200) answer to any file name.
-                        # We must check for a string which is specific to Idefix
-                        if "idefix network info" in content:
-                            h1.close()
-                            results.append([ip, content])
+        except FileNotFoundError:
+            self.controller.arw["network_summary_status"].set_text(
+                _("arp utility not found. Cannot detect Idefix")
+            )
+
+        for line1 in arp.split("\n"):
+            result = get_ip_address(line1)
+            if result:
+                ip = result.group(0)
+                if ip in checked:  # no use to check a second time
+                    continue
+                else:
+                    checked.append(ip)
+                self.controller.arw["network_summary_status"].set_text(_("Connecting : " + ip))
+                while Gtk.events_pending():
+                    Gtk.main_iteration()
+                h1 = http.client.HTTPConnection(ip, timeout=10)
+                try:
+                    h1.connect()
+                except:
                     h1.close()
-            return results
+                    continue
+                h1.request("GET", "/network-info.php")
+                res = h1.getresponse()
+                if res.status == 200:
+                    content = res.read().decode("cp850")
+                    # some devices which are protected by a password will give a positive (200) answer to any file name.
+                    # We must check for a string which is specific to Idefix
+                    if "idefix network info" in content:
+                        h1.close()
+                        results.append([ip, content])
+                h1.close()
+        return results
 
     def getmac(self, widget):
 
@@ -316,14 +324,12 @@ class Information:
                 message += "%s Ping Idefix eth0 (%s) from local computer : Failed %s" % ('\n<b><span foreground="red">', test_ip, '</span></b> \n')
             self.arw["network_summary_label3"].set_markup(message)
 
-
-
-    def get_infos(self, command, result = "result", progress = False, json = False):
+    def get_infos(self, command, result="result", progress=False, decode_json=False):
         # get infos from Idefix. The process is :
         #  - write a command in the 'trigger' file
         #  - the command is processed by Idefix, and the result is written in the 'result' file
         #  - the 'result' file is read, and data returned.
-        #  - if json is set, then the data is first decoded
+        #  - if decode_json is set, then the data is first decoded
         #  - if progress is set, data is sent every second
         #  @spin : the spin object
         #  @ progress : a label object
@@ -358,6 +364,10 @@ class Information:
 
         data1 = ftp_get(ftp, result)
         ftp.close()
+
+        if decode_json:
+            data1 = json.loads(data1)
+
         return data1
 
 
