@@ -4,7 +4,7 @@ import json
 import re
 import webbrowser
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
 from ftp_client import ftp_connect
 from util import mac_address_test, ip_address_test, showwarning, ask_text, askyesno
@@ -482,6 +482,52 @@ class Assistant:
         self.arw2['first_use_assistant'].set_current_page(0)
         self.arw2['first_use_assistant'].hide()
 
+    def start_finding_idefix(self):
+        found = self.controller.information.find_idefix()
+        self.arw2['finding_idefix'].hide()
+        if not found:
+            # Warn the user that idefix was not found
+            showwarning(
+                _("Idefix Not Found"),
+                _("Idefix was not detected. Please make sure it is connected to this computer and try again"),
+                msgtype=4
+            )
+            self.arw2['first_use_assistant'].set_current_page(0)
+            return
+
+        self.arw2['idefix_store'].clear()
+        ip_iter = None
+        for (ip, content) in found:
+            network = json.loads(content)
+            ip_iter = self.arw2['idefix_store'].append()
+            self.arw2['idefix_store'].set_value(ip_iter, 0, ip)
+
+            if network["idefix"].get("eth0", "") != "" and network["idefix"].get("eth1", "") != "":
+                wan = ipaddress.ip_interface(network["idefix"]["eth0"] + "/" + network["idefix"]["netmask0"])
+                lan = ipaddress.ip_interface(network["idefix"]["eth1"] + "/" + network["idefix"]["netmask1"])
+                if lan.network.overlaps(wan.network):
+                    # Warn the user
+                    response = self.arw2['idefix_conflict_dialog'].run()
+                    if response == Gtk.ResponseType.ACCEPT:
+                        # Launch the browser if the user wants
+                        webbrowser.open('http://' + ip + ':10080/config-reseau.php')
+
+                    self.arw2['idefix_conflict_dialog'].hide()
+
+                    self.arw2['first_use_assistant'].set_current_page(0)
+                    self.arw2['first_use_assistant'].commit()
+                    return
+
+        if len(found) > 1:
+            # Show selection page
+            self.arw2['first_use_assistant'].set_current_page(2)
+            self.arw2['first_use_assistant'].commit()
+        else:
+            # Go straight to connection profile
+            self.arw2['idefix_select_view'].get_selection().select_iter(ip_iter)
+            self.arw2['first_use_assistant'].set_current_page(3)
+            self.arw2['first_use_assistant'].commit()
+
     def on_configuration_page_change(self, widget, page_widget):
         """Called on page changing for first time assistant"""
         page = widget.get_current_page()
@@ -491,50 +537,8 @@ class Assistant:
             self.arw2['finding_idefix'].show_all()
             while Gtk.events_pending():
                 Gtk.main_iteration()
-            found = self.controller.information.find_idefix()
-            self.arw2['finding_idefix'].hide()
-            if not found:
-                # Warn the user that idefix was not found
-                showwarning(
-                    _("Idefix Not Found"),
-                    _("Idefix was not detected. Please make sure it is connected to this computer and try again"),
-                    msgtype=4
-                )
-                widget.set_current_page(0)
-                return
+            GObject.timeout_add(5, self.start_finding_idefix)
 
-            self.arw2['idefix_store'].clear()
-            ip_iter = None
-            for (ip, content) in found:
-                network = json.loads(content)
-                ip_iter = self.arw2['idefix_store'].append()
-                self.arw2['idefix_store'].set_value(ip_iter, 0, ip)
-
-                if network["idefix"].get("eth0", "") != "" and network["idefix"].get("eth1", "") != "":
-                    wan = ipaddress.ip_interface(network["idefix"]["eth0"] + "/" + network["idefix"]["netmask0"])
-                    lan = ipaddress.ip_interface(network["idefix"]["eth1"] + "/" + network["idefix"]["netmask1"])
-                    if lan.network.overlaps(wan.network):
-                        # Warn the user
-                        response = self.arw2['idefix_conflict_dialog'].run()
-                        if response == Gtk.ResponseType.ACCEPT:
-                            # Launch the browser if the user wants
-                            webbrowser.open('http://' + ip + ':10080/config-reseau.php')
-
-                        self.arw2['idefix_conflict_dialog'].hide()
-
-                        self.arw2['first_use_assistant'].set_current_page(0)
-                        self.arw2['first_use_assistant'].commit()
-                        return
-
-            if len(found) > 1:
-                # Show selection page
-                self.arw2['first_use_assistant'].set_current_page(2)
-                self.arw2['first_use_assistant'].commit()
-            else:
-                # Go straight to connection profile
-                self.arw2['idefix_select_view'].get_selection().select_iter(ip_iter)
-                self.arw2['first_use_assistant'].set_current_page(3)
-                self.arw2['first_use_assistant'].commit()
         elif page == 3:
             # Idefix config was selected
             model, iter = self.arw2['idefix_select_view'].get_selection().get_selected()

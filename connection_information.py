@@ -7,6 +7,7 @@ import os
 import subprocess
 import time
 from collections import OrderedDict
+from concurrent.futures.thread import ThreadPoolExecutor
 
 from gi.repository import Gtk
 
@@ -162,10 +163,7 @@ class Information:
 
     def find_idefix(self, widget = None):
 
-        # TODO: Speed this up somehow
-
         results = []
-        checked = []
         arp = []
         try:
             arp = subprocess.check_output(["arp", "-a"])
@@ -175,33 +173,42 @@ class Information:
                 _("arp utility not found. Cannot detect Idefix")
             )
 
+        valid_addresses = set()
+
+        # filter duplicate ip addresses
         for line1 in arp.split("\n"):
             result = get_ip_address(line1)
             if result:
-                ip = result.group(0)
-                if ip in checked:  # no use to check a second time
-                    continue
-                else:
-                    checked.append(ip)
-                self.controller.arw["network_summary_status"].set_text(_("Connecting : " + ip))
+                valid_addresses.add(result.group(0))
+
+        def try_connect(ip):
+            print("Trying: " + ip)
+            h1 = http.client.HTTPConnection(ip, timeout=10)
+            try:
+                h1.connect()
+            except:
+                h1.close()
+                return
+            h1.request("GET", "/network-info.php")
+            res = h1.getresponse()
+            if res.status == 200:
+                content = res.read().decode("cp850")
+                # some devices which are protected by a password will give a positive (200) answer to any file name.
+                # We must check for a string which is specific to Idefix
+                if "idefix network info" in content:
+                    h1.close()
+                    results.append([ip, content])
+            h1.close()
+
+        # Speeds up detection by trying multiple connections at the same time using threads
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            for ip, result in zip(valid_addresses, executor.map(try_connect, valid_addresses)):
                 while Gtk.events_pending():
                     Gtk.main_iteration()
-                h1 = http.client.HTTPConnection(ip, timeout=10)
-                try:
-                    h1.connect()
-                except:
-                    h1.close()
-                    continue
-                h1.request("GET", "/network-info.php")
-                res = h1.getresponse()
-                if res.status == 200:
-                    content = res.read().decode("cp850")
-                    # some devices which are protected by a password will give a positive (200) answer to any file name.
-                    # We must check for a string which is specific to Idefix
-                    if "idefix network info" in content:
-                        h1.close()
-                        results.append([ip, content])
-                h1.close()
+                self.controller.arw["network_summary_status"].set_text(_("Connected : " + ip))
+                if result:
+                    results.append(result)
+
         return results
 
     def getmac(self, widget):
