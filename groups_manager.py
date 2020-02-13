@@ -1,5 +1,5 @@
+import json
 from collections import defaultdict
-from configparser import ConfigParser
 
 from gi.repository import Gtk, Gdk
 
@@ -17,6 +17,17 @@ IMPORT_COLUMN_CATEGORY = 7
 IMPORT_COLUMN_GROUP = 8
 CATEGORY_TYPE = 0
 GROUP_TYPE = 1
+
+"""
+The groups manager uses a Json format to export and import groups. The format is:
+{
+   "groups": [{
+      "group": "GROUPNAME",             # Name of the group being imported
+      "group_id": "GROUPID",            # This is optional and may be None
+      "dest": ["domain", "domain2"],    # List of destination domains/ips
+   }]
+}
+"""
 
 
 class GroupManager:
@@ -178,12 +189,11 @@ class GroupManager:
         return True
 
     def read_config_data(self, data):
-        """Read ini config data from an ini file into the group manager's groups store"""
-        for key in data.sections():
-            if key.startswith('__'):
-                continue
+        """Read json data from file into the group manager's groups store"""
 
-            domains = data[key].get('dest', [])
+        for item in data.get('groups', []):
+            key = item.get('group')
+            domains = item.get('dest', [])
             tooltip = "\n".join(domains)
             self.groups_store.append([key, tooltip])
 
@@ -239,7 +249,7 @@ class GroupManager:
             self.groups_store.append((row[0], row[1]))
 
     def action_import_groups(self, widget):
-        """Imports groups from an ini file, first adds them into the tree view for later merging/replacing"""
+        """Imports groups from a json file, first adds them into the tree view for later merging/replacing"""
         if self.groups_changed:
             if askyesno(_("Save Changes"), _("Do you want to save your changes?")):
                 self.save_groups()
@@ -253,7 +263,7 @@ class GroupManager:
             (_("Import"), Gtk.ResponseType.ACCEPT),
         )
         file_filter = Gtk.FileFilter()
-        file_filter.add_pattern('*.ini')
+        file_filter.add_pattern('*.json')
         dialog.set_filter(file_filter)
 
         self.buffer = Gtk.TextBuffer()
@@ -262,10 +272,10 @@ class GroupManager:
         dialog.show_all()
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
-            # TODO: This does not work
-            parser = ConfigParser(interpolation=None, default_section='__DEFAULT')
-            parser.read(dialog.get_filename())
-            self.read_config_data(parser)
+            with open(dialog.get_filename(), 'r', encoding='utf-8-sig', newline='\n') as f:
+                data = json.load(f)
+
+            self.read_config_data(data)
             self.imported_groups = True
 
         dialog.destroy()
@@ -280,21 +290,27 @@ class GroupManager:
             (_("Export"), Gtk.ResponseType.ACCEPT),
         )
         file_filter = Gtk.FileFilter()
-        file_filter.add_pattern('*.ini')
+        file_filter.add_pattern('*.json')
         dialog.set_filter(file_filter)
 
         dialog.show_all()
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
 
-            data = ConfigParser(interpolation=None)
+            data = {
+                'groups': []
+            }
+            groups = data['groups']
 
             for row in self.controller.groups_store:
-                for domain in row[1].split('\n'):
-                    data[row[0]].get('dest', []).append(domain)
+                groups.append({
+                    'group': row[0],
+                    'group_id': None,
+                    'dest': row[1].split('\n')
+                })
 
-            with open(dialog.get_filename(), 'w', encoding="utf-8-sig", newline="\n") as f:
-                data.write(f)
+            with open(dialog.get_filename(), 'w', encoding='utf-8-sig', newline='\n') as f:
+                json.dump(data, f)
 
         dialog.destroy()
 
@@ -516,18 +532,22 @@ class GroupManager:
     def action_start_repository_import(self, widget):
         """Process the user selection and import the proxy groups"""
 
-        parser = ConfigParser(interpolation=None, default_section='__DEFAULT')
-
+        data = {
+            'groups': []
+        }
+        groups = data['groups']
         for row in self.widgets['repository_store']:
-            # TODO: This bit needs to be updated
             for group_id, group_name, domains in self.walk_repository_tree(row.iterchildren()):
-                parser.add_section(group_name)
-                parser[group_name]['dest'] = domains.split('\n')
+                groups.append({
+                    "group": group_name,
+                    "group_id": group_id,
+                    "dest": domains.split('\n'),
+                })
 
         self.buffer = Gtk.TextBuffer()
         self.widgets['groups_view'].set_buffer(self.buffer)
         self.groups_store.clear()
-        self.read_config_data(parser)
+        self.read_config_data(data)
         self.imported_groups = True
         self.widgets['import_window'].hide()
 
