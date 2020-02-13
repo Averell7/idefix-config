@@ -454,7 +454,7 @@ class Assistant:
             config.write(f)
 
         self.controller.profiles.refresh_saved_profiles()
-        self.controller.ftp_config = self.controller.profiles.config['conf']['default']
+        self.controller.ftp_config = self.controller.profiles.config['default']
 
         # Load next page
         self.arw2['first_use_assistant'].set_current_page(4)

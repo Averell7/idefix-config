@@ -1,10 +1,10 @@
 import binascii
-import configparser
+# from myconfigparser import myConfigParser
+from configparser import ConfigParser
 
 from gi.repository import Gdk
 
 import pyaes
-from myconfigparser import myConfigParser
 from util import askyesno, ask_text, get_config_path, alert
 
 COLUMN_NAME = 0
@@ -57,9 +57,9 @@ def encrypt_password(password, key=DEFAULT_KEY):
 
 
 def decrypt_config(cfg, password):
-    for key, value in cfg['conf'].items():
+    for key, value in cfg.items():
         if 'pass' in value:
-            value['pass'][0] = decrypt_password(value['pass'][0], password)
+            value['pass'] = decrypt_password(value['pass'], password)
 
     return cfg
 
@@ -67,13 +67,12 @@ def decrypt_config(cfg, password):
 def get_config(filename, password=DEFAULT_KEY):
     """Get the configuration for the given filename and decrypt any passwords. Optionally will return
      a default configuration if one does not already exist"""
-    parser = myConfigParser()
+    parser = ConfigParser(interpolation=None, default_section='__DEFAULT')
+    parser.read(filename)
+    if not parser.has_section('__options'):
+        parser.add_section('__options')
 
-    data = parser.read(filename, "conf")
-    if not data:
-        return {'conf': {}}
-    else:
-        return decrypt_config(data, password)
+    return decrypt_config(parser, password)
 
 
 class ConfigProfile:
@@ -104,25 +103,24 @@ class ConfigProfile:
 
     def refresh_saved_profiles(self):
         """Read the config file again and update the configuration profiles"""
-        config = get_config(self.filename, self.password)
-        self.config['conf'] = config['conf']
+        self.config = get_config(self.filename, self.password)
 
     def list_configuration_profiles(self):
         """Update the list view with all the configuration profiles found"""
         self.profiles_store.clear()
-        for key, config in self.config['conf'].items():
+        for key, config in self.config.items():
             if key.startswith('__'):
                 continue
             new_iter = self.profiles_store.append()
             self.profiles_store.set_value(new_iter, COLUMN_NAME, key)
             if 'mode' in config:
-                self.profiles_store.set_value(new_iter, COLUMN_MODE, config['mode'][0])
+                self.profiles_store.set_value(new_iter, COLUMN_MODE, config['mode'])
             if 'login' in config:
-                self.profiles_store.set_value(new_iter, COLUMN_USERNAME, config['login'][0])
+                self.profiles_store.set_value(new_iter, COLUMN_USERNAME, config['login'])
             if 'pass' in config:
-                self.profiles_store.set_value(new_iter, COLUMN_PASSWORD, config['pass'][0])
+                self.profiles_store.set_value(new_iter, COLUMN_PASSWORD, config['pass'])
             if 'server' in config:
-                self.profiles_store.set_value(new_iter, COLUMN_SERVER, config['server'][0])
+                self.profiles_store.set_value(new_iter, COLUMN_SERVER, config['server'])
 
     def profile_open_window(self, *args):
         """Show the profiles window"""
@@ -189,11 +187,11 @@ class ConfigProfile:
         if askyesno("Delete Profile", "Really delete %s?" % model.get_value(selected_iter, COLUMN_NAME)):
             model.remove(selected_iter)
 
-    def profile_save_config(self, widget):
+    def profile_save_config(self, widget=None):
         """Update the cfg file with the currently stored configuration"""
-        config = configparser.ConfigParser(interpolation=None)
+
         for row in self.profiles_store:
-            config[row[COLUMN_NAME]] = {
+            self.config[row[COLUMN_NAME]] = {
                 'server': row[COLUMN_SERVER],
                 'login': row[COLUMN_USERNAME] or '',
                 'pass': encrypt_password(row[COLUMN_PASSWORD] or '', self.password)
@@ -206,7 +204,7 @@ class ConfigProfile:
 ##            edit['pass']   = row[COLUMN_PASSWORD]
 ##            edit['mode']   = row[COLUMN_MODE]
         with open(self.filename, 'w') as f:
-            config.write(f)
+            self.config.write(f)
 
         #self.config = get_config(self.filename, self.password)
 

@@ -10,8 +10,8 @@ import json
 import os
 import sys
 import time
-from copy import deepcopy
 from collections import OrderedDict
+from copy import deepcopy
 from ftplib import FTP, all_errors as FTPError
 
 import gi
@@ -21,9 +21,8 @@ from groups_manager import GroupManager
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from gi.repository import Gdk
-from gi.repository import GdkPixbuf
 
-from myconfigparser import myConfigParser
+from configparser import ConfigParser
 #from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
@@ -1564,7 +1563,7 @@ class Confix:
 if __name__ == "__main__":
     global win, parser, configname, load_locale
 
-    parser = myConfigParser()
+    parser = ConfigParser()
     idefix_config = parser.read(get_config_path('confix.cfg'), "conf")
 
     if not idefix_config:
