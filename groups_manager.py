@@ -1,4 +1,5 @@
 import json
+import os
 from collections import defaultdict
 
 from gi.repository import Gtk, Gdk
@@ -27,6 +28,11 @@ The groups manager uses a Json format to export and import groups. The format is
       "dest": ["domain", "domain2"],    # List of destination domains/ips
    }]
 }
+
+There is also a simple way to import groups using a text file. If the user selects a .txt file then
+it will import with the group name equal to that of the file (ie: My Group.txt --> My Group). Each line
+of the text file will be a domain.
+
 """
 
 
@@ -264,6 +270,7 @@ class GroupManager:
         )
         file_filter = Gtk.FileFilter()
         file_filter.add_pattern('*.json')
+        file_filter.add_pattern('*.txt')
         dialog.set_filter(file_filter)
 
         self.buffer = Gtk.TextBuffer()
@@ -273,7 +280,18 @@ class GroupManager:
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
             with open(dialog.get_filename(), 'r', encoding='utf-8-sig', newline='\n') as f:
-                data = json.load(f)
+                if dialog.get_filename().lower().endswith('txt'):
+                    # Load the simple group format
+                    path, ext = os.path.splitext(dialog.get_filename())
+                    data = {
+                        'groups': [{
+                            'group': os.path.basename(path).title(),
+                            'group_id': '',
+                            'dest': [line.strip() for line in f.read().split('\n')]
+                        }]
+                    }
+                else:
+                    data = json.load(f)
 
             self.read_config_data(data)
             self.imported_groups = True
