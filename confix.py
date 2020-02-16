@@ -36,13 +36,11 @@ from gi.repository import Gdk
 from gi.repository import GdkPixbuf
 
 from groups_manager import GroupManager
-from myconfigparser import myConfigParser
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
-    EMPTY_STORE, SignalHandler, get_config_path, write_default_config,
-    ip_address_test
-)
+    EMPTY_STORE, SignalHandler, get_config_path, ip_address_test,
+    ask_text)
 from icons import (
     internet_full_icon, internet_filtered_icon, internet_denied_icon
 )
@@ -175,7 +173,7 @@ class Confix:
         # set check boxes in menu
         self.block_signals = True
         self.arw['menu_autoload_check'].set_active(
-            self.idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
+            self.idefix_config['__options'].get('auto_load', 0) == '1'
         )
         self.block_signals = False
 
@@ -224,7 +222,7 @@ class Confix:
         if configname == "":                            # No connexion profile chosen
             self.ftp_config = None
         else:
-            self.ftp_config = self.idefix_config['conf'][configname]
+            self.ftp_config = self.idefix_config[configname]
             ftp = self.open_connexion_profile()
         self.arw["configname"].set_text(configname)
 
@@ -322,28 +320,30 @@ class Confix:
         self.tvcolumn = gtk.TreeViewColumn(_('Users'), self.users.cell, text=0)
         self.arw2["manage_request_tree"].append_column(self.tvcolumn)
 
+        if not self.profiles.config_found:
+            self.assistant.show_assistant_first()
 
         # user defined options
-        checkbox_config = self.idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+        checkbox_config = self.idefix_config['__options'].get('checkbox_config', 0) == '1'
         if checkbox_config:
             self.proxy_users.set_gui('check')
 
-        filter_tab = self.idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+        filter_tab = self.idefix_config['__options'].get('filter_tab', 0) == '1'
         if filter_tab:
             self.arw['notebook3'].set_current_page(1)
 
-        developper_menu = self.idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
+        developper_menu = self.idefix_config['__options'].get('developper_menu', 0) == '1'
         if developper_menu is False:
             self.arw['developper_menu'].set_sensitive(False)
             self.arw['developper_menu'].set_visible(False)
 
-        auto_load = self.idefix_config['conf'].get('__options', {}).get('auto_load', [0])[0] == '1'
+        auto_load = self.idefix_config['__options'].get('auto_load', 0) == '1'
         if auto_load:
-            last_config = self.idefix_config['conf'].get('__options', {}).get('last_config')
+            last_config = self.idefix_config['__options'].get('last_config')
             if last_config:
-                configname = last_config[0]
+                configname = last_config
                 if configname:
-                    self.ftp_config = self.idefix_config['conf'][configname]
+                    self.ftp_config = self.idefix_config[configname]
                     self.open_connexion_profile()
                     self.arw["configname"].set_text(configname)
 
@@ -362,27 +362,27 @@ class Confix:
         self.arw["configname"].set_text(configname)
         self.arw["save_button1"].set_sensitive(True)
         self.arw["save_button2"].set_sensitive(True)
-        self.ftp_config = self.idefix_config['conf'][configname]
-        if not self.idefix_config['conf'].get('__options'):
-            self.idefix_config['conf']['__options'] = {}
-        self.idefix_config['conf']['__options']["last_config"] = configname
-        parser.write(self.idefix_config['conf'], get_config_path('confix.cfg'))
-
+        self.ftp_config = self.idefix_config[configname]
+        if not self.idefix_config['__options']:
+            self.idefix_config['__options'] = {}
+        self.idefix_config['__options']["last_config"] = configname
+        self.profiles.profile_save_config()
         self.open_connexion_profile()
 
 
     def open_connexion_profile(self):
 
+        self.mymac = None
         self.arw['loading_window'].show()
         while Gtk.events_pending():
             Gtk.main_iteration()
         # ftp connect
         ftp1 = self.ftp_config
-        self.ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0], self)
+        self.ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"], self)
         self.arw['loading_window'].hide()
 
         if not self.ftp:
-            alert(_("Could not connect to %s. \nVerify your cables or your configuration.") % ftp1["server"][0])
+            alert(_("Could not connect to %s. \nVerify your cables or your configuration.") % ftp1["server"])
         else:
             # retrieve files by ftp
             data0 = ftp_get(self.ftp, "idefix.json", json  = True)
@@ -398,8 +398,8 @@ class Confix:
             else:
                 self.load_defaults()
 
-        if ip_address_test(ftp1["server"][0]):
-            ip = ftp1["server"][0]
+        if ip_address_test(ftp1["server"]):
+            ip = ftp1["server"]
             try:
                 h1 = http.client.HTTPConnection(ip, timeout = 2)
                 h1.connect()
@@ -426,11 +426,49 @@ class Confix:
             except FTPError:
                 print("No ftp connection")
 
+        # Check our mac address exists
+        self.check_mac_and_create_config()
 
         # Experimental
         # self.arw2["my_account"].set_text(self.myaccount)
 
+    def check_mac_and_create_config(self):
+        """Check if there is a configuration for the user's mac address and optionally create a new configuration
+        for them"""
+
+        if not self.mymac or self.mymac in self.maclist:
+            return
+
+        # Mac Address does not yet exist, ask the user to create a configuration
+        self.arw['user_mac_address_dialog'].show()
+        response = self.arw['user_mac_address_dialog'].run()
+        self.arw['user_mac_address_dialog'].hide()
+        if response == Gtk.ResponseType.YES:
+            # Create default configuration
+            rule = ask_text(self.arw['window1'], _("Enter name for configuration"))
+            if not rule:
+                rule = 'default'
+
+            category_name = "Internet ouvert"
+            self.assistant.create_user(category_name, rule, self.mymac, enable_internet=1, enable_open=1)
+            self.assistant.create_internet_filter(rule, [rule], all_destinations=True)
+            self.proxy_users.load_proxy_user(None, None)
+            self.assistant.reset_assistant()
+
+            self.arw['newly_created_summary'].show()
+            self.arw['newly_created_summary'].run()
+            self.arw['newly_created_summary'].hide()
+
+            # Jump to the created rule
+            self.arw['notebook3'].set_current_page(1)
+            self.proxy_users.select_rule(rule)
+
+        elif response == Gtk.ResponseType.APPLY:
+            # Show the assistant
+            self.assistant.show_assistant_create_with_mac(self.mymac)
+
     def update_gui(self):
+        self.profiles.list_configuration_profiles()
         self.maclist = self.users.create_maclist()
         self.users.populate_users()
         self.proxy_users.populate_proxy()
@@ -802,11 +840,11 @@ class Confix:
         auto_load = self.arw['menu_autoload_check'].get_active()
         developper_menu = self.arw['option_developper_check'].get_active()
 
-        self.idefix_config['conf']['__options'] = {
-            'checkbox_config': ['1' if gui_check else '0'],
-            'filter_tab': ['1' if filter_tab else '0'],
-            'auto_load': ['1' if auto_load else '0'],
-            'developper_menu': ['1' if developper_menu else '0'],
+        self.idefix_config['__options'] = {
+            'checkbox_config': '1' if gui_check else '0',
+            'filter_tab': '1' if filter_tab else '0',
+            'auto_load': '1' if auto_load else '0',
+            'developper_menu': '1' if developper_menu else '0',
         }
 
         if gui_check:
@@ -818,19 +856,19 @@ class Confix:
         self.arw['developper_menu'].set_visible(developper_menu)
 
         # Save to config
-        parser.write(self.idefix_config['conf'], get_config_path('confix.cfg'))
+        self.profiles.profile_save_config()
         self.arw['options_window'].hide()
 
     def show_options(self, widget):
         # Get options
         self.arw['option_checkbox_gui_check'].set_active(
-            self.idefix_config['conf'].get('__options', {}).get('checkbox_config', [0])[0] == '1'
+            self.idefix_config['__options'].get('checkbox_config', 0) == '1'
         )
         self.arw['option_filter_tab_check'].set_active(
-            self.idefix_config['conf'].get('__options', {}).get('filter_tab', [0])[0] == '1'
+            self.idefix_config['__options'].get('filter_tab', 0) == '1'
         )
         self.arw['option_developper_check'].set_active(
-            self.idefix_config['conf'].get('__options', {}).get('developper_menu', [0])[0] == '1'
+            self.idefix_config['__options'].get('developper_menu', 0) == '1'
         )
         self.arw['options_window'].show_all()
 
@@ -1000,7 +1038,7 @@ class Confix:
         ftp1 = self.ftp_config
         msg = ""
         OK = True
-        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
         if ftp is None:
             msg += _("No FTP connexion")
             return
@@ -1110,6 +1148,7 @@ class Confix:
 if __name__ == "__main__":
     global win, parser, configname, load_locale
 
+    """
     parser = myConfigParser()
     idefix_config = parser.read(get_config_path('confix.cfg'), "conf")
 
@@ -1118,6 +1157,7 @@ if __name__ == "__main__":
         path = write_default_config()
         idefix_config = parser.read(path, "conf")
         configname = 'default'
+    """
 
     # Get the configuration
     if len(sys.argv) > 1:  # if the config is indicated on the command line

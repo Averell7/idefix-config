@@ -1,9 +1,9 @@
 import time
+from configparser import ConfigParser
 
 from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
-from myconfigparser import myConfigParser
 from util import askyesno, ask_text
 
 
@@ -81,7 +81,8 @@ class ProxyGroup:
             return
 
         # Start Importing
-        parser = myConfigParser()
+        parser = ConfigParser()
+        # TODO: This needs modification
         data = parser.read(
             buf.get_text(buf.get_start_iter(), buf.get_end_iter(), False).split('\n'),
             'groups',

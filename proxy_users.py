@@ -506,6 +506,14 @@ class ProxyUsers:
             path = model.get_string_from_iter(iter1)
             data.set_text(path, -1)
 
+    def select_rule(self, rulename):
+        """Select a rule by its name"""
+        for rule in self.filter_store:
+            if rule[0] == rulename:
+                self.arw['treeview3'].set_cursor(rule.path)
+                self.load_proxy_user(event=None, widget=None)
+                return
+
     def populate_proxy(self):
         self.filter_store.clear()
         data1 = self.controller.config["rules"]

@@ -1,10 +1,13 @@
-from gi.repository import Gtk
-
+import configparser
+import ipaddress
+import json
 import re
+import webbrowser
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GObject
 
-from util import mac_address_test, ip_address_test, showwarning
+from ftp_client import ftp_connect
+from util import mac_address_test, ip_address_test, showwarning, ask_text, askyesno
 
 
 class Assistant:
@@ -17,6 +20,7 @@ class Assistant:
         self.controller = controller
         self.block_signals = False
         self.arw2["assistant_create_user"].set_forward_page_func(self.forward_func)
+
         # During development
         for name in ["proxy_rules2", "manage_request"]:
             self.arw2["assistant_create_user"].set_page_complete(self.arw2[name], True)
@@ -77,7 +81,10 @@ class Assistant:
         self.tvcolumn = Gtk.TreeViewColumn(_('User'), self.cell, text=0)
         self.arw2["experiment_dest"].append_column(self.tvcolumn)
 
-
+    def show_assistant_create_with_mac(self, mac_address):
+        self.show_assistant_create()
+        self.arw2['new_user_mac'].get_buffer().set_text(mac_address)
+        self.arw2['assistant_create_user'].set_current_page(1)
 
     def show_assistant_create(self, widget = None):
         self.arw2["assistant_create_user"].show()
@@ -87,9 +94,15 @@ class Assistant:
         self.arw2["assistant_experiment"].show()
         self.arw2["assistant_experiment"].set_keep_above(True)
 
+    def show_assistant_first(self, widget=None):
+        self.arw2['first_use_assistant'].set_current_page(0)
+        self.arw2["first_use_assistant"].show()
+        self.arw2["first_use_assistant"].set_keep_above(True)
+
     def cancel (self, widget, a = None):
         self.arw2["assistant_create_user"].hide()
         self.arw2["assistant_experiment"].hide()
+        self.arw2['first_use_assistant'].hide()
 
     def forward_func(self, page):
         """ manage the page flow, depending of the choices made by the user """
@@ -248,42 +261,66 @@ class Assistant:
         message = _("%s will have a filtered Web access.\nDo you want to create a specific access rule for him ?" % self.username)
         self.arw2["label_specific_rule"].set_label(message)
 
-
     def choose_rules(self, widget, row):
         """ controls the toggle buttons column """
         self.controller.filter_store[row][19] = not self.controller.filter_store[row][19]
 
-    def summary(self, widget):
+    def create_user(self, category, username, mac, enable_email=0, enable_internet=0, enable_filter=0, enable_open=0):
+        """Adds a new user to the users store.
+            category = category name
+            username = user (level 2)
 
-
+            0 : section (level 1)  - user (level 2)
+            1 : options (text)    TODO : probably no longer used, verify
+            2 : email time condition
+            3 : internet time condition
+            4 : email (1/0)
+            5 : internet access (1/0)
+            6 : filtered (1/0)
+            7 : open (1/0)
+            8 :
+            9 :
+            10 : background color
+            11 : icon 1
+            12 : icon 2
+        """
         # TODO : create category if needed
-        """
-        0 : section (level 1)  - user (level 2)
-        1 : options (text)    TODO : probably no longer used, verify
-        2 : email time condition
-        3 : internet time condition
-        4 : email (1/0)
-        5 : internet access (1/0)
-        6 : filtered (1/0)
-        7 : open (1/0)
-        8 :
-        9 :
-        10 : background color
-        11 : icon 1
-        12 : icon 2
-        """
+
+        category_iter = None
+        for row in self.controller.users_store:
+            if row[0] == category:
+                category_iter = row.iter
+
+        iternew = self.controller.users_store.insert(
+            category_iter, 1, [
+                username, "", "", "",
+                enable_email, enable_internet, enable_filter, enable_open,
+                0, "", "#ffffff", None, None
+            ]
+        )
+        self.controller.maclist[username] = [mac]
+        self.controller.set_colors()
+        return iternew
+
+    def create_internet_filter(self, username, users, active=True, allow=True, all_users=False, all_destinations=False):
+        """Create a new entry in the filer store"""
+        return self.controller.filter_store.insert(
+            -1,
+            [username, "on" if active else "off", "allow" if allow else "deny", "", "",
+             '\n'.join(users), "", "", "", "", "", all_users, all_destinations, allow, active,
+             "#009900", "#ffffff", "", "", 0, 0])
+
+    def summary(self, widget):
         # create user
         # get the selected category
+        category = None
         for row1 in self.categories_store:
             if row1[3] == 1:
                 category = row1[0]
                 string1 = row1[2]
                 break
-        iter1 = self.controller.users_store.get_iter_from_string(string1)
-        iternew = self.controller.users_store.insert(iter1, 1,
-                        [self.username, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None])
-        self.controller.maclist[self.username] = [self.mac_address]
-        self.controller.set_colors()
+
+        iternew = self.create_user(category, self.username, self.mac_address)
 
         # if Web filter is not selected, show the first tab with the new user selected and close the assistant
         if self.arw2["proxy_rule_radio2"].get_active() == 1:
@@ -298,15 +335,13 @@ class Assistant:
             self.arw2["assistant_create_user"].hide()
             return
 
-
         # Proxy config
         iter1 = None
         memiter = None
 
         # create rule
         if self.arw2["proxy_rule_radio1"].get_active() == 1:
-            iter1 = self.controller.filter_store.insert(-1,
-                        [self.username, "on", "allow", "", "", self.username, "", "", "", "", "", 0, 0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
+            iter1 = self.create_internet_filter(self.username, [self.username], active=True, allow=True)
 
         # Add the user to the chosen rules
         for row in self.controller.filter_store:
@@ -326,7 +361,6 @@ class Assistant:
         self.arw["notebook3"].set_current_page(1)
         self.arw2["assistant_create_user"].hide()
         self.reset_assistant()
-
 
     def reset_assistant(self, widget = None):
         self.reset_mac_address()
@@ -408,9 +442,154 @@ class Assistant:
         #if user:
         #    self.controller.users.user_summary(user)
 
+    def connect_idefix(self, password='admin'):
+        """Check if idefix connects"""
+        model, iter = self.arw2['idefix_select_view'].get_selection().get_selected()
 
+        connection = ftp_connect(model.get_value(iter, 0), 'idefix', password)
+        if not connection:
+            # Prompt for password again
+            password = ask_text(self.arw2['first_use_assistant'], _("Enter idefix ftp password"), password=True)
+            if not password:
+                # Show the selection dialog
+                self.arw2['first_use_assistant'].set_current_page(2)
+                self.arw2['first_use_assistant'].commit()
+                return
+            return self.connect_idefix(password)
 
+        data = {
+            'default': {
+                'server': model.get_value(iter, 0),
+                'login': 'idefix',
+                'pass': password,
+            }
+        }
 
+        if askyesno(_("Automatically load?"), _("Automatically connect to this Idefix on startup?")):
+            data['__options'] = {
+                'auto_load': 1,
+                'last_config': 'default'
+            }
 
+        # Write the configuration
+        config = configparser.ConfigParser(interpolation=None)
+        config.read_dict(data)
+        with open(self.controller.profiles.filename, 'w') as f:
+            config.write(f)
 
+        self.controller.profiles.refresh_saved_profiles()
+        self.controller.ftp_config = self.controller.profiles.config['default']
 
+        # Load next page
+        self.arw2['first_use_assistant'].set_current_page(4)
+        self.arw2['first_use_assistant'].commit()
+        data = self.controller.information.get_infos('ftp', decode_json=True)
+        if data:
+            # Show page 4 with populated data
+            self.arw2['first_use_assistant'].set_current_page(5)
+            self.arw2['first_use_assistant'].commit()
+            self.arw2['ftp_config_host'].set_text(data.get('ftp'))
+            self.arw2['ftp_config_login'].set_text(data.get('login'))
+            self.arw2['ftp_config_password'].set_text(data.get('password'))
+        else:
+            self.finish_first_configuration()
+
+    def finish_first_configuration(self):
+        """Open connection profile and hide the assistant"""
+        self.controller.update_gui()
+        self.controller.profiles.refresh_saved_profiles()
+        self.arw["configname"].set_text("default")
+        self.controller.open_connexion_profile()
+        self.arw2['first_use_assistant'].hide()
+
+    def cancel_configuration(self, *args):
+        self.arw2['first_use_assistant'].set_current_page(0)
+        self.arw2['first_use_assistant'].hide()
+
+    def start_finding_idefix(self):
+        found = self.controller.information.find_idefix()
+        self.arw2['finding_idefix'].hide()
+        if not found:
+            # Warn the user that idefix was not found
+            showwarning(
+                _("Idefix Not Found"),
+                _("Idefix was not detected. Please make sure it is connected to this computer and try again"),
+                msgtype=4
+            )
+            self.arw2['first_use_assistant'].set_current_page(0)
+            return
+
+        self.arw2['idefix_store'].clear()
+        ip_iter = None
+        for (ip, content) in found:
+            network = json.loads(content)
+            ip_iter = self.arw2['idefix_store'].append()
+            self.arw2['idefix_store'].set_value(ip_iter, 0, ip)
+
+            if network["idefix"].get("eth0", "") != "" and network["idefix"].get("eth1", "") != "":
+                wan = ipaddress.ip_interface(network["idefix"]["eth0"] + "/" + network["idefix"]["netmask0"])
+                lan = ipaddress.ip_interface(network["idefix"]["eth1"] + "/" + network["idefix"]["netmask1"])
+                if lan.network.overlaps(wan.network):
+                    # Warn the user
+                    response = self.arw2['idefix_conflict_dialog'].run()
+                    if response == Gtk.ResponseType.ACCEPT:
+                        # Launch the browser if the user wants
+                        webbrowser.open('http://' + ip + ':10080/config-reseau.php')
+
+                    self.arw2['idefix_conflict_dialog'].hide()
+
+                    self.arw2['first_use_assistant'].set_current_page(0)
+                    self.arw2['first_use_assistant'].commit()
+                    return
+
+        if len(found) > 1:
+            # Show selection page
+            self.arw2['first_use_assistant'].set_current_page(2)
+            self.arw2['first_use_assistant'].commit()
+        else:
+            # Go straight to connection profile
+            self.arw2['idefix_select_view'].get_selection().select_iter(ip_iter)
+            self.arw2['first_use_assistant'].set_current_page(3)
+            self.arw2['first_use_assistant'].commit()
+
+    def on_configuration_page_change(self, widget, page_widget):
+        """Called on page changing for first time assistant"""
+        page = widget.get_current_page()
+
+        if page == 1:
+            # Pop up dialog
+            self.arw2['finding_idefix'].show_all()
+            while Gtk.events_pending():
+                Gtk.main_iteration()
+            GObject.timeout_add(5, self.start_finding_idefix)
+
+        elif page == 3:
+            # Idefix config was selected
+            model, iter = self.arw2['idefix_select_view'].get_selection().get_selected()
+            if not iter:
+                showwarning(_("Please select"), _("Please select an Idefix to configure"))
+                self.arw2['first_use_assistant'].set_current_page(2)
+                return
+            self.arw2['first_use_assistant'].commit()
+            self.connect_idefix()
+
+    def finish_configuration(self, *args):
+        if not self.arw2['ftp_config_name'].get_text():
+            showwarning(_("Invalid Name"), _("Please enter a name"))
+            self.arw2['first_use_assistant'].set_current_page(5)
+            return
+
+        # Write configuration to ini file
+        config = configparser.ConfigParser(interpolation=None)
+        config.read(self.controller.profiles.filename)
+        config.read_dict({
+            self.arw2['ftp_config_name'].get_text(): {
+                'server': self.arw2['ftp_config_host'].get_text(),
+                'login': self.arw2['ftp_config_login'].get_text(),
+                'pass': self.arw2['ftp_config_password'].get_text(),
+            }
+        })
+        with open(self.controller.profiles.filename, 'w') as f:
+            config.write(f)
+
+        self.finish_first_configuration()
