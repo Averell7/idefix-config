@@ -39,8 +39,8 @@ from groups_manager import GroupManager
 from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
-    EMPTY_STORE, SignalHandler, get_config_path, ip_address_test
-)
+    EMPTY_STORE, SignalHandler, get_config_path, ip_address_test,
+    ask_text)
 from icons import (
     internet_full_icon, internet_filtered_icon, internet_denied_icon
 )
@@ -320,7 +320,7 @@ class Confix:
         self.tvcolumn = gtk.TreeViewColumn(_('Users'), self.users.cell, text=0)
         self.arw2["manage_request_tree"].append_column(self.tvcolumn)
 
-        if not self.idefix_config:
+        if not self.profiles.config_found:
             self.assistant.show_assistant_first()
 
         # user defined options
@@ -341,7 +341,7 @@ class Confix:
         if auto_load:
             last_config = self.idefix_config['__options'].get('last_config')
             if last_config:
-                configname = last_config[0]
+                configname = last_config
                 if configname:
                     self.ftp_config = self.idefix_config[configname]
                     self.open_connexion_profile()
@@ -372,16 +372,17 @@ class Confix:
 
     def open_connexion_profile(self):
 
+        self.mymac = None
         self.arw['loading_window'].show()
         while Gtk.events_pending():
             Gtk.main_iteration()
         # ftp connect
         ftp1 = self.ftp_config
-        self.ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0], self)
+        self.ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"], self)
         self.arw['loading_window'].hide()
 
         if not self.ftp:
-            alert(_("Could not connect to %s. \nVerify your cables or your configuration.") % ftp1["server"][0])
+            alert(_("Could not connect to %s. \nVerify your cables or your configuration.") % ftp1["server"])
         else:
             # retrieve files by ftp
             data0 = ftp_get(self.ftp, "idefix.json", json  = True)
@@ -397,8 +398,8 @@ class Confix:
             else:
                 self.load_defaults()
 
-        if ip_address_test(ftp1["server"][0]):
-            ip = ftp1["server"][0]
+        if ip_address_test(ftp1["server"]):
+            ip = ftp1["server"]
             try:
                 h1 = http.client.HTTPConnection(ip, timeout = 2)
                 h1.connect()
@@ -425,9 +426,46 @@ class Confix:
             except FTPError:
                 print("No ftp connection")
 
+        # Check our mac address exists
+        self.check_mac_and_create_config()
 
         # Experimental
         # self.arw2["my_account"].set_text(self.myaccount)
+
+    def check_mac_and_create_config(self):
+        """Check if there is a configuration for the user's mac address and optionally create a new configuration
+        for them"""
+
+        if not self.mymac or self.mymac in self.maclist:
+            return
+
+        # Mac Address does not yet exist, ask the user to create a configuration
+        self.arw['user_mac_address_dialog'].show()
+        response = self.arw['user_mac_address_dialog'].run()
+        self.arw['user_mac_address_dialog'].hide()
+        if response == Gtk.ResponseType.YES:
+            # Create default configuration
+            rule = ask_text(self.arw['window1'], _("Enter name for configuration"))
+            if not rule:
+                rule = 'default'
+
+            category_name = "Internet ouvert"
+            self.assistant.create_user(category_name, rule, self.mymac, enable_internet=1, enable_open=1)
+            self.assistant.create_internet_filter(rule, [rule], all_destinations=True)
+            self.proxy_users.load_proxy_user(None, None)
+            self.assistant.reset_assistant()
+
+            self.arw['newly_created_summary'].show()
+            self.arw['newly_created_summary'].run()
+            self.arw['newly_created_summary'].hide()
+
+            # Jump to the created rule
+            self.arw['notebook3'].set_current_page(1)
+            self.proxy_users.select_rule(rule)
+
+        elif response == Gtk.ResponseType.APPLY:
+            # Show the assistant
+            self.assistant.show_assistant_create_with_mac(self.mymac)
 
     def update_gui(self):
         self.profiles.list_configuration_profiles()
@@ -1000,7 +1038,7 @@ class Confix:
         ftp1 = self.ftp_config
         msg = ""
         OK = True
-        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
         if ftp is None:
             msg += _("No FTP connexion")
             return

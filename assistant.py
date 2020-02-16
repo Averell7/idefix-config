@@ -81,7 +81,10 @@ class Assistant:
         self.tvcolumn = Gtk.TreeViewColumn(_('User'), self.cell, text=0)
         self.arw2["experiment_dest"].append_column(self.tvcolumn)
 
-
+    def show_assistant_create_with_mac(self, mac_address):
+        self.show_assistant_create()
+        self.arw2['new_user_mac'].get_buffer().set_text(mac_address)
+        self.arw2['assistant_create_user'].set_current_page(1)
 
     def show_assistant_create(self, widget = None):
         self.arw2["assistant_create_user"].show()
@@ -258,42 +261,66 @@ class Assistant:
         message = _("%s will have a filtered Web access.\nDo you want to create a specific access rule for him ?" % self.username)
         self.arw2["label_specific_rule"].set_label(message)
 
-
     def choose_rules(self, widget, row):
         """ controls the toggle buttons column """
         self.controller.filter_store[row][19] = not self.controller.filter_store[row][19]
 
-    def summary(self, widget):
+    def create_user(self, category, username, mac, enable_email=0, enable_internet=0, enable_filter=0, enable_open=0):
+        """Adds a new user to the users store.
+            category = category name
+            username = user (level 2)
 
-
+            0 : section (level 1)  - user (level 2)
+            1 : options (text)    TODO : probably no longer used, verify
+            2 : email time condition
+            3 : internet time condition
+            4 : email (1/0)
+            5 : internet access (1/0)
+            6 : filtered (1/0)
+            7 : open (1/0)
+            8 :
+            9 :
+            10 : background color
+            11 : icon 1
+            12 : icon 2
+        """
         # TODO : create category if needed
-        """
-        0 : section (level 1)  - user (level 2)
-        1 : options (text)    TODO : probably no longer used, verify
-        2 : email time condition
-        3 : internet time condition
-        4 : email (1/0)
-        5 : internet access (1/0)
-        6 : filtered (1/0)
-        7 : open (1/0)
-        8 :
-        9 :
-        10 : background color
-        11 : icon 1
-        12 : icon 2
-        """
+
+        category_iter = None
+        for row in self.controller.users_store:
+            if row[0] == category:
+                category_iter = row.iter
+
+        iternew = self.controller.users_store.insert(
+            category_iter, 1, [
+                username, "", "", "",
+                enable_email, enable_internet, enable_filter, enable_open,
+                0, "", "#ffffff", None, None
+            ]
+        )
+        self.controller.maclist[username] = [mac]
+        self.controller.set_colors()
+        return iternew
+
+    def create_internet_filter(self, username, users, active=True, allow=True, all_users=False, all_destinations=False):
+        """Create a new entry in the filer store"""
+        return self.controller.filter_store.insert(
+            -1,
+            [username, "on" if active else "off", "allow" if allow else "deny", "", "",
+             '\n'.join(users), "", "", "", "", "", all_users, all_destinations, allow, active,
+             "#009900", "#ffffff", "", "", 0, 0])
+
+    def summary(self, widget):
         # create user
         # get the selected category
+        category = None
         for row1 in self.categories_store:
             if row1[3] == 1:
                 category = row1[0]
                 string1 = row1[2]
                 break
-        iter1 = self.controller.users_store.get_iter_from_string(string1)
-        iternew = self.controller.users_store.insert(iter1, 1,
-                        [self.username, "", "", "", 0, 0, 0, 0, 0, "", "#ffffff", None, None])
-        self.controller.maclist[self.username] = [self.mac_address]
-        self.controller.set_colors()
+
+        iternew = self.create_user(category, self.username, self.mac_address)
 
         # if Web filter is not selected, show the first tab with the new user selected and close the assistant
         if self.arw2["proxy_rule_radio2"].get_active() == 1:
@@ -308,15 +335,13 @@ class Assistant:
             self.arw2["assistant_create_user"].hide()
             return
 
-
         # Proxy config
         iter1 = None
         memiter = None
 
         # create rule
         if self.arw2["proxy_rule_radio1"].get_active() == 1:
-            iter1 = self.controller.filter_store.insert(-1,
-                        [self.username, "on", "allow", "", "", self.username, "", "", "", "", "", 0, 0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
+            iter1 = self.create_internet_filter(self.username, [self.username], active=True, allow=True)
 
         # Add the user to the chosen rules
         for row in self.controller.filter_store:
@@ -336,7 +361,6 @@ class Assistant:
         self.arw["notebook3"].set_current_page(1)
         self.arw2["assistant_create_user"].hide()
         self.reset_assistant()
-
 
     def reset_assistant(self, widget = None):
         self.reset_mac_address()
