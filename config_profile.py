@@ -1,4 +1,5 @@
 import binascii
+import os
 # from myconfigparser import myConfigParser
 from configparser import ConfigParser
 
@@ -100,10 +101,12 @@ class ConfigProfile:
             mode_iter = self.arw['profile_mode_store'].iter_next(mode_iter)
 
         self.config = get_config(self.filename, self.password)
+        self.config_found = os.path.exists(self.filename)
 
     def refresh_saved_profiles(self):
         """Read the config file again and update the configuration profiles"""
         self.config = get_config(self.filename, self.password)
+        self.config_found = os.path.exists(self.filename)
 
     def list_configuration_profiles(self):
         """Update the list view with all the configuration profiles found"""

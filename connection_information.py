@@ -342,7 +342,7 @@ class Information:
         #  @ progress : a label object
 
         ftp1 = self.controller.ftp_config
-        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
         if not ftp:
             return False
         self.ftp = ftp
@@ -488,7 +488,7 @@ class Information:
     def update_display(self, widget):
         self.arw['why_stack'].set_visible_child_name('page0')
         ftp1 = self.controller.ftp_config
-        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
         data1 = ftp_get(ftp, "result")
         self.arw["infos_label"].set_markup(data1)
         ftp.close()
@@ -642,7 +642,7 @@ class Information:
         command_f = io.BytesIO()
         command_f.write(bytes(full_text, "utf-8")) #.replace(b'\r\n', b'\n'))
         ftp1 = self.controller.ftp_config
-        ftp = ftp_connect(ftp1["server"][0], ftp1["login"][0], ftp1["pass"][0])
+        ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
         command_f.seek(0)
         ftp.storbinary('STOR buffer', command_f)
         command_f = io.BytesIO()
