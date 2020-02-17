@@ -50,6 +50,9 @@ def encrypt_password(password, key=DEFAULT_KEY):
     if not password:
         return ''
 
+    if password.startswith('$aes'):
+        return password
+
     ctx = pyaes.AESModeOfOperationCTR(_get_aes_key(key))
     if len(password) % 16 != 0:
         # Pad with \0
@@ -60,7 +63,7 @@ def encrypt_password(password, key=DEFAULT_KEY):
 def decrypt_config(cfg, password):
     for key, value in cfg.items():
         if 'pass' in value:
-            value['pass'] = decrypt_password(value['pass'], password)
+            cfg[key]['pass'] = decrypt_password(value['pass'], password)
 
     return cfg
 
