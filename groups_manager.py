@@ -328,7 +328,7 @@ class GroupManager:
                 })
 
             with open(dialog.get_filename(), 'w', encoding='utf-8-sig', newline='\n') as f:
-                json.dump(data, f)
+                json.dump(data, f, indent=3)
 
         dialog.destroy()
 
