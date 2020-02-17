@@ -1,6 +1,6 @@
 import json
 import os
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 from gi.repository import Gtk, Gdk
 
@@ -291,7 +291,7 @@ class GroupManager:
                         }]
                     }
                 else:
-                    data = json.load(f)
+                    data = json.load(f, object_pairs_hook=OrderedDict)
 
             self.read_config_data(data)
             self.imported_groups = True
@@ -328,7 +328,7 @@ class GroupManager:
                 })
 
             with open(dialog.get_filename(), 'w', encoding='utf-8-sig', newline='\n') as f:
-                json.dump(data, f)
+                json.dump(data, f, indent=3)
 
         dialog.destroy()
 

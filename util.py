@@ -42,7 +42,7 @@ class AskForConfig:
         alignment = gtk.Align(1)
         self.label.set_halign(alignment)
 
-        for key in idefix_config["conf"]:
+        for key in idefix_config:
             if key.startswith('__'):
                 continue
             self.combo.append_text(key)

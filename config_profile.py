@@ -2,6 +2,7 @@ import binascii
 import os
 # from myconfigparser import myConfigParser
 from configparser import ConfigParser
+from copy import deepcopy
 
 from gi.repository import Gdk
 
@@ -50,6 +51,9 @@ def encrypt_password(password, key=DEFAULT_KEY):
     if not password:
         return ''
 
+    if password.startswith('$aes'):
+        return password
+
     ctx = pyaes.AESModeOfOperationCTR(_get_aes_key(key))
     if len(password) % 16 != 0:
         # Pad with \0
@@ -60,7 +64,7 @@ def encrypt_password(password, key=DEFAULT_KEY):
 def decrypt_config(cfg, password):
     for key, value in cfg.items():
         if 'pass' in value:
-            value['pass'] = decrypt_password(value['pass'], password)
+            cfg[key]['pass'] = decrypt_password(value['pass'], password)
 
     return cfg
 
@@ -193,8 +197,10 @@ class ConfigProfile:
     def profile_save_config(self, widget=None):
         """Update the cfg file with the currently stored configuration"""
 
+        c = deepcopy(self.config)
+
         for row in self.profiles_store:
-            self.config[row[COLUMN_NAME]] = {
+            c[row[COLUMN_NAME]] = {
                 'server': row[COLUMN_SERVER],
                 'login': row[COLUMN_USERNAME] or '',
                 'pass': encrypt_password(row[COLUMN_PASSWORD] or '', self.password)
@@ -207,7 +213,7 @@ class ConfigProfile:
 ##            edit['pass']   = row[COLUMN_PASSWORD]
 ##            edit['mode']   = row[COLUMN_MODE]
         with open(self.filename, 'w') as f:
-            self.config.write(f)
+            c.write(f)
 
         #self.config = get_config(self.filename, self.password)
 
