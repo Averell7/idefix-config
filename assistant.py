@@ -497,8 +497,8 @@ class Assistant:
     def finish_first_configuration(self):
         """Open connection profile and hide the assistant"""
         self.controller.update_gui()
-        self.controller.list_configuration_profiles()
-        self.controller.profiles.profile_save_config()  # ensures the passwords are stored encrypted
+        self.controller.profiles.refresh_saved_profiles()
+        self.controller.profiles.profile_save_config()
         self.arw["configname"].set_text("default")
         self.controller.open_connexion_profile()
         self.arw2['first_use_assistant'].hide()
