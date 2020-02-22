@@ -2,7 +2,6 @@ import binascii
 import os
 # from myconfigparser import myConfigParser
 from configparser import ConfigParser
-from copy import deepcopy
 
 from gi.repository import Gdk
 
@@ -197,7 +196,12 @@ class ConfigProfile:
     def profile_save_config(self, widget=None):
         """Update the cfg file with the currently stored configuration"""
 
-        c = deepcopy(self.config)
+        # Prevent overwriting the passwords in memory by creating a copy to write to disk
+        # Deepcopy cannot be used because there are errors in 3.4 deep copying the ConfigParser
+        # object.
+        c = {}
+        for key, value in self.config.items():
+            c[key] = dict(value)
 
         for row in self.profiles_store:
             c[row[COLUMN_NAME]] = {
@@ -206,14 +210,7 @@ class ConfigProfile:
                 'pass': encrypt_password(row[COLUMN_PASSWORD] or '', self.password)
             }
 
-##            # update self.config
-##            edit = self.config['conf'][row[COLUMN_NAME]]
-##            edit['server'] = row[COLUMN_SERVER]
-##            edit['login']  = row[COLUMN_USERNAME]
-##            edit['pass']   = row[COLUMN_PASSWORD]
-##            edit['mode']   = row[COLUMN_MODE]
         with open(self.filename, 'w') as f:
-            c.write(f)
-
-        #self.config = get_config(self.filename, self.password)
-
+            p = ConfigParser()
+            p.read_dict(c)
+            p.write(f)
