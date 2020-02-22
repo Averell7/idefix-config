@@ -529,7 +529,22 @@ class Information:
 
         self.arw['why_stack'].set_visible_child_name('why')
 
-        config = json.loads(open("unbound.json").read(), object_pairs_hook=OrderedDict)
+        # Retrieve the unbound json data from idefix
+        ftp = ftp_connect(
+            self.controller.ftp_config["server"], self.controller.ftp_config["login"],
+            self.controller.ftp_config["pass"]
+        )
+        if not ftp:
+            return False
+
+        data = ftp_get(ftp, 'unbound.json')
+        if not data:
+            showwarning(_("Could not get data"), _("Could not retrieve permission data from idefix"))
+            return False
+
+        ftp.close()
+
+        config = json.loads(data, object_pairs_hook=OrderedDict)
 
         self.arw['why_store'].clear()
 
