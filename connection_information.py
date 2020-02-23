@@ -1,9 +1,9 @@
 import http.client
-import http.client
 import io
 import ipaddress
 import json
 import os
+import re
 import subprocess
 import time
 from collections import OrderedDict
@@ -12,7 +12,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from gi.repository import Gtk
 
 from ftp_client import ftp_connect, ftp_get
-from util import showwarning, get_ip_address
+from util import showwarning, get_ip_address, extract_domain
 
 # version 2.3.19 - Edit files added
 
@@ -55,9 +55,12 @@ class ExportDiagnosticDialog:
         f1.close()
 
 class Information:
+    filter_log_domain = None
+
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
+        self.arw['filter_log_treeview'].get_model().set_visible_func(self.filter_log_filter)
 
     # the two following functions come from unbound-filter.py, and are slightly modified to add informations in the return
     def is_time_allowed(self, time_condition):
@@ -377,8 +380,53 @@ class Information:
 
         return data1
 
+    def idefix_filter_infos(self, widget):
+        """Retrieve filter log from idefix"""
+
+        self.arw['why_stack'].set_visible_child_name('filter_log')
+        spinner = self.arw["infos_spinner"]
+        if self.arw["infos_filter_dns"].get_active():
+            command = "unbound"
+        else:
+            command = "squid"
+
+        if not hasattr(self.controller, 'myip'):
+            showwarning(_("IP Not Found"), _("The command cannot be executed"))
+            return
+        else:
+            command += " " + self.controller.myip
+
+        spinner.start()
+        result = self.get_infos(command)
+
+        spinner.stop()
+        result = me(result)
+
+        self.arw['filter_log_store'].clear()
+        for line in result.split('\n'):
+            log_iter = self.arw['filter_log_store'].append()
+
+            text = ""
+            if "no match" in line:
+                text = '<span foreground="blue">' + line.strip() + "</span>"
+            elif "denied" in line:
+                text = '<span foreground="red">' + line.strip() + "</span>"
+            elif "allowed" in line:
+                text = '<span foreground="green">' + line.strip() + "</span>"
+            if "validation failure" in line:
+                text = '<span background="#ff9999">' + me(line.strip()) + "</span>"
+
+            # Extract the domain from the log
+            match = re.search(r"===&gt; ([^\s]+)", line)
+            if match:
+                domain = match.group(1)
+                if domain.endswith('.'):
+                    domain = domain[:len(domain) - 1]
+                self.arw['filter_log_store'].set_value(log_iter, 1, domain.lower())
+            self.arw['filter_log_store'].set_value(log_iter, 0, text)
 
     def idefix_infos(self, widget):
+        self.arw['filter_log_search_entry'].set_text('')
         self.arw['why_stack'].set_visible_child_name('page0')
         if isinstance(widget, str):
             action = widget
@@ -387,28 +435,16 @@ class Information:
 
         if action == "linux_command":                                          # launched by the Go button
             command = "linux " + self.arw["linux_command_entry"].get_text()      # get command from the entry
-        elif action == "infos_filter":
-            if self.arw["infos_filter_dns"].get_active():
-                command = "unbound"
-            else:
-                command = "squid"
         else:
             command = action.replace("infos_", "")
 
-        if command in ["unbound", "squid", "mac", "all"]:
+        if command in ["mac", "all"]:
             display_label = self.arw["infos_label"]
             spinner = self.arw["infos_spinner"]
         else:
             display_label = self.arw["infos_label2"]
             spinner = self.arw["infos_spinner2"]
             self.arw["display2_stack"].set_visible_child(self.arw["infos_page2_1"])
-
-        if command in["unbound", "squid"]:
-            try:
-                command += " " + self.controller.myip
-            except:
-                display_label.set_markup("ip not found. The command cannot be executed")
-                return
 
         spinner.start()
         if command in ("versions"):
@@ -425,23 +461,7 @@ class Information:
         else:
             # escape characters incompatible with pango markup
             result = me(result)
-
-            # set colors
-            if command.startswith("unbound"):
-                result2 = result.split("\n")
-                result3 = ""
-                for line in result2:
-                    if "no match" in line :
-                        line = '<span foreground="blue">' + line.strip() + "</span>"
-                    elif "denied" in line :
-                        line = '<span foreground="red">' + line.strip() + "</span>"
-                    elif "allowed" in line :
-                        line = '<span foreground="green">' + line.strip() + "</span>"
-                    if "validation failure" in line :
-                        line = '<span background="#ff9999">' + me(line.strip()) + "</span>\n"
-                    result3 += line + "\n"
-                result = result3
-            elif command == "mac":
+            if command == "mac":
                 result2 = result.split("\n")
                 result3 = ""
                 for line in result2:
@@ -453,6 +473,22 @@ class Information:
                 result = result3
 
             display_label.set_markup(result)
+
+    def search_filter_log(self, widget):
+        """Search the filter log given the user input"""
+        search_string = widget.get_text()
+        if not search_string:
+            self.filter_log_domain = None
+        else:
+            self.filter_log_domain = extract_domain(search_string).lower()
+        self.arw['filter_log_treeview'].get_model().refilter()
+
+    def filter_log_filter(self, model, iter, data):
+        """Filter results that don't match the given domain name"""
+        if not self.filter_log_domain:
+            return True
+        else:
+            return model.get_value(iter, 1).find(self.filter_log_domain) > -1
 
     def search(self, widget):
         self.arw['why_stack'].set_visible_child_name('page0')
