@@ -5,7 +5,7 @@ import ipaddress
 import json
 import os
 import subprocess
-import time
+import time, datetime
 from collections import OrderedDict
 from concurrent.futures.thread import ThreadPoolExecutor
 
@@ -680,3 +680,9 @@ class Information:
             os.startfile("http://%s:10080/visu-donnees-systeme.php" % self.idefix_ip)
         else:
             alert(_("Idefix was not found"))
+
+    def set_date(self, widget):
+        # this function will set the date and time of Idefix according to the time of the local computer
+        y = datetime.datetime.today()
+        z = y.strftime("%Y-%m-%d %H:%M")
+        self.get_infos("set_date " + z)
