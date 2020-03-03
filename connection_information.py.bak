@@ -462,7 +462,7 @@ class Information:
         if mac_search != "":
             for user in self.controller.maclist:
                 for mac in self.controller.maclist[user]:
-                    if mac_search in mac.lower():
+                    if mac_search in mac:
                         output1 += user + " : " + mac + "\n"
 
         domain_search = self.arw["search_domain"].get_text().strip().lower()
