@@ -11,8 +11,9 @@ from concurrent.futures.thread import ThreadPoolExecutor
 
 from gi.repository import Gtk
 
+from domain_util import extract_domain_parts, extract_domain
 from ftp_client import ftp_connect, ftp_get
-from util import showwarning, get_ip_address, extract_domain
+from util import showwarning, get_ip_address
 
 # version 2.3.19 - Edit files added
 
@@ -22,6 +23,12 @@ WHY_COLUMN_INFO = 2
 WHY_COLUMN_RULE_TYPE = 3
 WHY_COLUMN_RULE_DISABLED = 4
 WHY_COLUMN_RULE_INVALID = 5
+
+RULE_DESTINATION_COLUMN_NAME = 0
+RULE_DESTINATION_COLUMN_TYPE = 1
+RULE_DESTINATION_COLUMN_FOREGROUND = 2
+RULE_DESTINATION_COLUMN_BACKGROUND = 3
+RULE_DESTINATION_COLUMN_INDEX = 4
 
 
 def me(string) :   # Markup Escape
@@ -60,7 +67,6 @@ class Information:
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
-        self.arw['filter_log_treeview'].get_model().set_visible_func(self.filter_log_filter)
 
     # the two following functions come from unbound-filter.py, and are slightly modified to add informations in the return
     def is_time_allowed(self, time_condition):
@@ -380,6 +386,118 @@ class Information:
 
         return data1
 
+    def filter_log_selection_changed(self, widget):
+        """If the user has selected something allow the add button to be pressed"""
+        model, iter = widget.get_selected()
+        self.arw['filter_log_add_button'].set_sensitive(model and iter)
+
+    def filter_log_rule_update_add_button(self, widget):
+        """If the user has selected a domain/subdomain and a destination rule/group then allow continuing"""
+        model, iter = self.arw['filter_log_rule_destination_view'].get_selection().get_selected()
+        domain_iter = self.arw['filter_log_rule_domains_combo'].get_active_iter()
+        has_destination = False
+        if model and iter:
+            has_destination = model.iter_parent(iter)
+        self.arw['filter_log_add_rule_dialog_button'].set_sensitive(has_destination and domain_iter)
+
+    def filter_log_show_add_rule(self, widget):
+        """Show a dialog to allow the user to create a rule based on their selection"""
+
+        model, iter = self.arw['filter_log_treeview'].get_selection().get_selected()
+        if not model or not iter:
+            return
+
+        self.arw['filter_log_rule_domains_store'].clear()
+        self.arw['filter_log_rule_destination_store'].clear()
+
+        domain = model.get_value(iter, 1)
+        domain_parts = extract_domain_parts(domain)
+
+        if not domain_parts.subdomain:
+            # We got a top-level domain (eg. google.com)
+            iter = self.arw['filter_log_rule_domains_store'].append()
+            self.arw['filter_log_rule_domains_store'].set_value(iter, 0, domain)
+            self.arw['filter_log_rule_domains_store'].set_value(
+                iter, 1, _("Excludes any subdomains")
+            )
+        else:
+            # We got a sub-domain (eg: www.google.com)
+            subdomains = domain_parts.subdomain.split('.')
+            for n, subdomain in enumerate(reversed(subdomains)):
+                sd = '.'.join(subdomains[n:])
+
+                iter = self.arw['filter_log_rule_domains_store'].append()
+                self.arw['filter_log_rule_domains_store'].set_value(
+                    iter, 0, '*.' + sd + '.' + domain_parts.registered_domain
+                )
+                self.arw['filter_log_rule_domains_store'].set_value(
+                    iter, 1, _("Access limited to subdomain and below")
+                )
+                iter = self.arw['filter_log_rule_domains_store'].append()
+                self.arw['filter_log_rule_domains_store'].set_value(
+                    iter, 0, sd + '.' + domain_parts.registered_domain
+                )
+                self.arw['filter_log_rule_domains_store'].set_value(
+                    iter, 1, _("Access limited to subdomain only")
+                )
+
+        # Add wildcard for the top-level domain
+        iter = self.arw['filter_log_rule_domains_store'].append()
+        self.arw['filter_log_rule_domains_store'].set_value(iter, 0, '*.' + domain_parts.registered_domain)
+        self.arw['filter_log_rule_domains_store'].set_value(
+            iter, 1, _("Full access to %s") % domain_parts.registered_domain
+        )
+
+        # Populate the potential group/rules to add to
+        rule_iter = self.arw['filter_log_rule_destination_store'].append(None)
+        self.arw['filter_log_rule_destination_store'].set_value(rule_iter, 0, _("Rules"))
+        for index, item in enumerate(self.controller.proxy_users.filter_store):
+            iter = self.arw['filter_log_rule_destination_store'].append(rule_iter)
+            self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_NAME, item[0])
+            self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_TYPE, 'rule')
+            self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_FOREGROUND, item[15])
+            self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_BACKGROUND, item[16])
+            self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_INDEX, index)
+
+        group_iter = self.arw['filter_log_rule_destination_store'].append(None)
+        self.arw['filter_log_rule_destination_store'].set_value(group_iter, 0, _("Groups"))
+        for index, item in enumerate(self.controller.proxy_group.groups_store):
+            iter = self.arw['filter_log_rule_destination_store'].append(group_iter)
+            self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_NAME, item[0])
+            self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_TYPE, 'group')
+            self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_INDEX, index)
+
+        # Set the information
+        response = self.arw['filter_log_add_rule_dialog'].run()
+        if response == Gtk.ResponseType.OK:
+            active_iter = self.arw['filter_log_rule_domains_combo'].get_active_iter()
+            dest_model, dest_iter = self.arw['filter_log_rule_destination_view'].get_selection().get_selected()
+
+            index = dest_model.get_value(dest_iter, RULE_DESTINATION_COLUMN_INDEX)
+            type = dest_model.get_value(dest_iter, RULE_DESTINATION_COLUMN_TYPE)
+
+            domain_to_add = self.arw['filter_log_rule_domains_store'].get_value(active_iter, 0).replace('*', '')
+
+            # Add the rule to the correct place
+
+            if type == 'group':
+                current_domains = self.controller.proxy_group.groups_store[index][1].split('\n')
+
+                if domain_to_add in current_domains:
+                    showwarning(_("Domain Already Exists"), _("The domain already exists in the group. Skipping."))
+                else:
+                    current_domains.append(domain_to_add)
+                self.controller.proxy_group.groups_store[index][1] = '\n'.join(current_domains)
+            elif type == 'rule':
+                current_domains = self.controller.proxy_users.filter_store[index][8].split('\n')
+                if domain_to_add in current_domains:
+                    showwarning(_("Domain Already Exists"), _("The domain already exists in the rule. Skipping."))
+                else:
+                    current_domains.append(domain_to_add)
+                self.controller.proxy_users.filter_store[index][8] = '\n'.join(current_domains)
+
+        self.arw['filter_log_add_rule_dialog'].hide()
+
     def idefix_filter_infos(self, widget):
         """Retrieve filter log from idefix"""
 
@@ -481,14 +599,15 @@ class Information:
             self.filter_log_domain = None
         else:
             self.filter_log_domain = extract_domain(search_string).lower()
-        self.arw['filter_log_treeview'].get_model().refilter()
 
-    def filter_log_filter(self, model, iter, data):
-        """Filter results that don't match the given domain name"""
-        if not self.filter_log_domain:
-            return True
-        else:
-            return model.get_value(iter, 1).find(self.filter_log_domain) > -1
+        # Iterate through log
+        for row in self.arw['filter_log_store']:
+            if row[1] == self.filter_log_domain:
+                row[2] = 'light green'  # Exact Match
+            elif self.filter_log_domain in row[1]:
+                row[2] = 'yellow'  # Partial Match
+            else:
+                row[2] = 'white'  # No Match
 
     def search(self, widget):
         self.arw['why_stack'].set_visible_child_name('page0')

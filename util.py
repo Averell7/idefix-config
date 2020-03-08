@@ -3,7 +3,6 @@ import os
 import re
 import sys
 import traceback
-from urllib.parse import urlparse
 
 import gi
 
@@ -323,15 +322,6 @@ def format_domainline(dummy, line1):
 
 def format_name(name):
     return name.replace(" ", "_")
-
-
-def extract_domain(url):
-    """Extract the domain from the given full or partial URL"""
-
-    if '://' not in url:
-        url = '//' + url
-
-    return urlparse(url, scheme='http').netloc
 
 
 EMPTY_STORE = gtk.ListStore(str)

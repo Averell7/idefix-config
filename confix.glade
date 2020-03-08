@@ -565,16 +565,37 @@ and others</property>
       </object>
     </child>
   </object>
+  <object class="GtkTreeStore" id="filter_log_rule_destination_store">
+    <columns>
+      <!-- column-name name -->
+      <column type="gchararray"/>
+      <!-- column-name type -->
+      <column type="gchararray"/>
+      <!-- column-name foreground -->
+      <column type="gchararray"/>
+      <!-- column-name background -->
+      <column type="gchararray"/>
+      <!-- column-name index -->
+      <column type="gint"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="filter_log_rule_domains_store">
+    <columns>
+      <!-- column-name domain -->
+      <column type="gchararray"/>
+      <!-- column-name help -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkListStore" id="filter_log_store">
     <columns>
       <!-- column-name line -->
       <column type="gchararray"/>
       <!-- column-name domain -->
       <column type="gchararray"/>
+      <!-- column-name colour -->
+      <column type="gchararray"/>
     </columns>
-  </object>
-  <object class="GtkTreeModelFilter" id="filter_log_filter_store">
-    <property name="child_model">filter_log_store</property>
   </object>
   <object class="GtkImage" id="image1">
     <property name="visible">True</property>
@@ -3105,13 +3126,14 @@ Domain</property>
                                     <property name="can_focus">False</property>
                                     <property name="layout_style">spread</property>
                                     <child>
-                                      <object class="GtkButton">
+                                      <object class="GtkButton" id="filter_log_add_button">
                                         <property name="label">gtk-add</property>
                                         <property name="visible">True</property>
                                         <property name="sensitive">False</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">True</property>
                                         <property name="use_stock">True</property>
+                                        <signal name="clicked" handler="filter_log_show_add_rule" swapped="no"/>
                                       </object>
                                       <packing>
                                         <property name="expand">True</property>
@@ -3148,11 +3170,13 @@ Domain</property>
                                   <object class="GtkTreeView" id="filter_log_treeview">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
-                                    <property name="model">filter_log_filter_store</property>
+                                    <property name="model">filter_log_store</property>
                                     <property name="headers_visible">False</property>
                                     <property name="search_column">0</property>
                                     <child internal-child="selection">
-                                      <object class="GtkTreeSelection"/>
+                                      <object class="GtkTreeSelection">
+                                        <signal name="changed" handler="filter_log_selection_changed" swapped="no"/>
+                                      </object>
                                     </child>
                                     <child>
                                       <object class="GtkTreeViewColumn">
@@ -3160,6 +3184,7 @@ Domain</property>
                                         <child>
                                           <object class="GtkCellRendererText"/>
                                           <attributes>
+                                            <attribute name="background">2</attribute>
                                             <attribute name="markup">0</attribute>
                                           </attributes>
                                         </child>
@@ -3703,6 +3728,157 @@ Wrong parameters may crash your system</property>
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkDialog" id="filter_log_add_rule_dialog">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Add Rule from Filter</property>
+    <property name="default_width">400</property>
+    <property name="default_height">300</property>
+    <property name="type_hint">dialog</property>
+    <property name="transient_for">window1</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="filter_log_add_rule_dialog_button">
+                <property name="label">gtk-add</property>
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button10">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Select the subdomain you want to filter from the list below and select the destination group or rule.</property>
+                <property name="wrap">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="filter_log_rule_domains_combo">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="model">filter_log_rule_domains_store</property>
+                <property name="id_column">0</property>
+                <signal name="changed" handler="filter_log_rule_update_add_button" swapped="no"/>
+                <child>
+                  <object class="GtkCellRendererText"/>
+                  <attributes>
+                    <attribute name="text">0</attribute>
+                  </attributes>
+                </child>
+                <child>
+                  <object class="GtkCellRendererText"/>
+                  <attributes>
+                    <attribute name="markup">1</attribute>
+                  </attributes>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTreeView" id="filter_log_rule_destination_view">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="model">filter_log_rule_destination_store</property>
+                    <property name="headers_visible">False</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection">
+                        <signal name="changed" handler="filter_log_rule_update_add_button" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkTreeViewColumn">
+                        <property name="title" translatable="yes">column</property>
+                        <child>
+                          <object class="GtkCellRendererText"/>
+                          <attributes>
+                            <attribute name="background">3</attribute>
+                            <attribute name="foreground">2</attribute>
+                            <attribute name="markup">0</attribute>
+                          </attributes>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-5">filter_log_add_rule_dialog_button</action-widget>
+      <action-widget response="-6">button10</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkWindow" id="filter_time_conditions">
     <property name="can_focus">False</property>
