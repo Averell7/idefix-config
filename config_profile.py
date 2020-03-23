@@ -200,10 +200,20 @@ class ConfigProfile:
         # Deepcopy cannot be used because there are errors in 3.4 deep copying the ConfigParser
         # object.
         c = {}
-        for key, value in self.config.items():
-            c[key] = dict(value)
+        if '__options' in self.config:
+            c['__options'] = dict(self.config['__options'])
+
+        self.config.clear()
+        if '__options' in c:
+            self.config['__options'] = c['__options']
 
         for row in self.profiles_store:
+            self.config[row[COLUMN_NAME]] = {
+                'server': row[COLUMN_SERVER],
+                'login': row[COLUMN_USERNAME] or '',
+                'pass': row[COLUMN_PASSWORD] or ''
+            }
+
             c[row[COLUMN_NAME]] = {
                 'server': row[COLUMN_SERVER],
                 'login': row[COLUMN_USERNAME] or '',
