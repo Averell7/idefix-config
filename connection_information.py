@@ -1,3 +1,4 @@
+import datetime
 import http.client
 import io
 import ipaddress
@@ -5,7 +6,7 @@ import json
 import os
 import re
 import subprocess
-import time, datetime
+import time
 from collections import OrderedDict
 from concurrent.futures.thread import ThreadPoolExecutor
 
@@ -518,7 +519,13 @@ class Information:
         result = self.get_infos(command)
 
         spinner.stop()
+
+        result = """Jan 21 16:25:44 : denied ===> idefix64.fr. / 192.168.84.100 () - user unknown for mac 8c:16:45:d4:8a:4d
+        Jan 21 16:25:44 : denied ===> idefix64.fr. / 192.168.84.100 () - user unknown for mac 8c:16:45:d4:8a:4d
+        Feb 20 04:15:10 : validation failure >detectportal.firefox.com. AAAA IN< key for validation . is marked as invalid because of a previous validation failure &lt;mozilla.org. AAAA IN&gt;: signature before inception date from 195.46.39.39 for trust anchor . while building chain of trust"""
+
         result = me(result)
+
 
         self.arw['filter_log_store'].clear()
         for line in result.split('\n'):
@@ -532,15 +539,23 @@ class Information:
             elif "allowed" in line:
                 text = '<span foreground="green">' + line.strip() + "</span>"
             if "validation failure" in line:
-                text = '<span background="#ff9999">' + me(line.strip()) + "</span>"
+                text = '<span background="#ff9999">' + line.strip() + "</span>"
 
             # Extract the domain from the log
-            match = re.search(r"===&gt; ([^\s]+)", line)
-            if match:
-                domain = match.group(1)
-                if domain.endswith('.'):
-                    domain = domain[:len(domain) - 1]
-                self.arw['filter_log_store'].set_value(log_iter, 1, domain.lower())
+            if 'validation failure' in line:
+                match = re.search(r"&gt;([^\s]+)", line)
+                if match:
+                    domain = match.group(1)
+                    if domain.endswith('.'):
+                        domain = domain[:len(domain) - 1]
+                    self.arw['filter_log_store'].set_value(log_iter, 1, domain.lower())
+            else:
+                match = re.search(r"===&gt; ([^\s]+)", line)
+                if match:
+                    domain = match.group(1)
+                    if domain.endswith('.'):
+                        domain = domain[:len(domain) - 1]
+                    self.arw['filter_log_store'].set_value(log_iter, 1, domain.lower())
             self.arw['filter_log_store'].set_value(log_iter, 0, text)
 
     def idefix_infos(self, widget):
@@ -602,7 +617,9 @@ class Information:
 
         # Iterate through log
         for row in self.arw['filter_log_store']:
-            if row[1] == self.filter_log_domain:
+            if not self.filter_log_domain or not row[1]:
+                row[2] = 'white'  # No Match
+            elif row[1] == self.filter_log_domain:
                 row[2] = 'light green'  # Exact Match
             elif self.filter_log_domain in row[1]:
                 row[2] = 'yellow'  # Partial Match
