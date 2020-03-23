@@ -520,9 +520,9 @@ class Information:
 
         spinner.stop()
 
-        result = """Jan 21 16:25:44 : denied ===> idefix64.fr. / 192.168.84.100 () - user unknown for mac 8c:16:45:d4:8a:4d
-        Jan 21 16:25:44 : denied ===> idefix64.fr. / 192.168.84.100 () - user unknown for mac 8c:16:45:d4:8a:4d
-        Feb 20 04:15:10 : validation failure >detectportal.firefox.com. AAAA IN< key for validation . is marked as invalid because of a previous validation failure &lt;mozilla.org. AAAA IN&gt;: signature before inception date from 195.46.39.39 for trust anchor . while building chain of trust"""
+        #result = """Jan 21 16:25:44 : denied ===> idefix64.fr. / 192.168.84.100 () - user unknown for mac 8c:16:45:d4:8a:4d
+        #Jan 21 16:25:44 : denied ===> idefix64.fr. / 192.168.84.100 () - user unknown for mac 8c:16:45:d4:8a:4d
+        #Feb 20 04:15:10 : validation failure >detectportal.firefox.com. AAAA IN< key for validation . is marked as invalid because of a previous validation failure &lt;mozilla.org. AAAA IN&gt;: signature before inception date from 195.46.39.39 for trust anchor . while building chain of trust"""
 
         result = me(result)
 

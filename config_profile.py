@@ -1,5 +1,6 @@
 import binascii
 import os
+from collections import OrderedDict
 # from myconfigparser import myConfigParser
 from configparser import ConfigParser
 
@@ -199,7 +200,7 @@ class ConfigProfile:
         # Prevent overwriting the passwords in memory by creating a copy to write to disk
         # Deepcopy cannot be used because there are errors in 3.4 deep copying the ConfigParser
         # object.
-        c = {}
+        c = OrderedDict()
         if '__options' in self.config:
             c['__options'] = dict(self.config['__options'])
 

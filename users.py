@@ -280,6 +280,8 @@ class Users:
                     buffer.set_text("")
                     alert(_("No valid mac address for this user1 !"))
                 else :
+                    if not isinstance(macaddr, list):     # This may happen if the subuser name and the Identifier are identical
+                        macaddr = [macaddr]
                     data1 = "\n".join(macaddr)
                     buffer.set_text(data1)
             else:
@@ -289,9 +291,9 @@ class Users:
 
             # adapt the title of the frame for user/subuser
             if level == 3:
-                self.arw['user_summary_label'].set_label(_("Passwords"))         # subuser
+                self.arw['user_summary_label'].set_label(_("Identifier"))         # subuser
             else:
-                self.arw['user_summary_label'].set_label(_("Mac Addresses"))     # user
+                self.arw['user_summary_label'].set_label(_("Mac Address(es)"))     # user
 
             # fill the user summary
             self.user_summary(username, level)

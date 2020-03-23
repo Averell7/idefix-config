@@ -1,6 +1,10 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.4.4 - bug fixes
+# version 2.4.3 - Improve Informations/unbound log
+# version 2.4.2 - Why...
+# version 2.4.1 - first configuration
 # version 2.4.0
 # version 2.3.10 - restore from Idefix backups or FTP backups
 # version 2.3.9 - Network summary
@@ -57,7 +61,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog, ImportJsonFromIdefix
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.4.1"
+version = "2.4.4"
 
 
 gtk = Gtk
@@ -401,20 +405,23 @@ class Confix:
         if ip_address_test(ftp1["server"]):
             ip = ftp1["server"]
             try:
-                h1 = http.client.HTTPConnection(ip, timeout = 2)
+                h1 = http.client.HTTPConnection(ip)
                 h1.connect()
 
-                h1.request("GET","/network-info.php")
-                res = h1.getresponse()
-                if res.status == 200:
-                    data1 = res.read().decode("cp850")
-                    content = json.loads(data1)
-                    self.myip = content["client"]["ip"]
-                    self.mymac = content["client"]["mac"]
-                    if self.mymac in self.maclist:
-                        self.myaccount = self.maclist[self.mymac]
-                    else:
-                        self.myaccount = _("unknown")
+                try:
+                    h1.request("GET","/network-info.php")
+                    res = h1.getresponse()
+                    if res.status == 200:
+                        data1 = res.read().decode("cp850")
+                        content = json.loads(data1)
+                        self.myip = content["client"]["ip"]
+                        self.mymac = content["client"]["mac"]
+                        if self.mymac in self.maclist:
+                            self.myaccount = self.maclist[self.mymac]
+                        else:
+                            self.myaccount = _("unknown")
+                except FTPError:
+                    print("could not get network-info.php")
 
                 h1.request("GET","/request_account.json")
                 res = h1.getresponse()
@@ -440,6 +447,7 @@ class Confix:
             return
 
         # Mac Address does not yet exist, ask the user to create a configuration
+        self.arw["your_mac_address_label"].set_text(self.mymac)
         self.arw['user_mac_address_dialog'].show()
         response = self.arw['user_mac_address_dialog'].run()
         self.arw['user_mac_address_dialog'].hide()
@@ -969,7 +977,7 @@ class Confix:
                 else:
                     macaddress = self.maclist[user]
                     for address in macaddress:
-                        mac.append(address)
+                        mac.append(address.lower())
 
                 subusers = OrderedDict()
 
@@ -978,13 +986,17 @@ class Confix:
                     if subchild[0] in self.maclist:
                         submac = self.maclist[subchild[0]]
                         password = ""
+                        if not isinstance(submac, list):            # This may happen if the subuser name and the Identifier are identical
+                            submac = [submac]
                         for line in submac:
                             if line.strip() == "":
                                 continue
                             if line.strip().startswith("#"):
                                 continue
                             else:
-                                password = line.strip()
+                                password = line.split("#")[0]       # support inline comments
+                                password = password.strip()
+
                         subusers[subchild[0]] = password
 
 
