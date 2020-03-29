@@ -3,7 +3,9 @@ import ipaddress
 import json
 import re
 import webbrowser
+from random import getrandbits
 
+import requests
 from gi.repository import Gtk, GObject
 
 from ftp_client import ftp_connect
@@ -594,3 +596,42 @@ class Assistant:
             config.write(f)
 
         self.finish_first_configuration()
+
+    def auto_find_mac_address(self, widget=None):
+        """Automatically determine the MAC Address"""
+
+        # Step1: We submit to request_account_json.php
+        # generate a random code
+
+        code = self.arw2["new_user_entry"].get_text() + '-' + str(getrandbits(24))
+
+        # If we don't have an active configuration, try to use the default
+        # server ip.
+        host = '192.168.84.184'
+        if self.controller.ftp_config and self.controller.ftp_config.get('server'):
+            host = self.controller.ftp_config['server']
+
+        response = requests.post('http://' + host + '/request_account_json.php', {
+            'usercode': code,
+            'reset': '',
+        })
+
+        if not response.ok:
+            showwarning(_('Could not detect'), _("Could not contact the idefix server"))
+            return
+
+        response = requests.get('http://' + host + '/request_account.json')
+        if not response.ok:
+            showwarning(_('Could not detect'), _("Could not contact the idefix server"))
+            return
+
+        data = response.json()
+        for mac, user in data['account'].items():
+            if user == code:
+                # Retrieve the mac address
+                self.arw2['new_user_mac'].get_buffer().set_text(mac)
+                self.check_user_data(widget=None)
+                return
+
+        showwarning(_('Could not detect'), _("Could not find the MAC address"))
+        return

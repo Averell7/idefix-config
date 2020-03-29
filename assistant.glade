@@ -76,6 +76,9 @@
     <child>
       <placeholder/>
     </child>
+    <child>
+      <placeholder/>
+    </child>
   </object>
   <object class="GtkAssistant" id="assistant_experiment">
     <property name="height_request">600</property>
@@ -559,6 +562,7 @@ Don't forget to do this before you close the program ! </property>
       <packing>
         <property name="page_type">intro</property>
         <property name="complete">True</property>
+        <property name="has_padding">False</property>
       </packing>
     </child>
     <child>
@@ -569,6 +573,7 @@ Don't forget to do this before you close the program ! </property>
       </object>
       <packing>
         <property name="complete">True</property>
+        <property name="has_padding">False</property>
       </packing>
     </child>
     <child>
@@ -617,6 +622,7 @@ Don't forget to do this before you close the program ! </property>
       </object>
       <packing>
         <property name="complete">True</property>
+        <property name="has_padding">False</property>
       </packing>
     </child>
     <child>
@@ -628,6 +634,7 @@ Don't forget to do this before you close the program ! </property>
       <packing>
         <property name="page_type">progress</property>
         <property name="complete">True</property>
+        <property name="has_padding">False</property>
       </packing>
     </child>
     <child>
@@ -639,6 +646,7 @@ Don't forget to do this before you close the program ! </property>
       <packing>
         <property name="page_type">progress</property>
         <property name="complete">True</property>
+        <property name="has_padding">False</property>
       </packing>
     </child>
     <child>
@@ -781,7 +789,11 @@ Don't forget to do this before you close the program ! </property>
       <packing>
         <property name="page_type">confirm</property>
         <property name="complete">True</property>
+        <property name="has_padding">False</property>
       </packing>
+    </child>
+    <child>
+      <placeholder/>
     </child>
     <child>
       <placeholder/>
@@ -1069,6 +1081,21 @@ If you don't know it, it is possible to add it later  in the "Users and categori
               </packing>
             </child>
             <child>
+              <object class="GtkButton">
+                <property name="label" translatable="yes">Find Address Automatically</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="halign">center</property>
+                <signal name="clicked" handler="auto_find_mac_address" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -1264,7 +1291,7 @@ If you don't know it, it is possible to add it later  in the "Users and categori
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="padding">3</property>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
             <child>
@@ -1283,7 +1310,7 @@ If you don't know it, it is possible to add it later  in the "Users and categori
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
-                <property name="position">5</property>
+                <property name="position">6</property>
               </packing>
             </child>
             <child>
@@ -1340,7 +1367,7 @@ If you don't know it, it is possible to add it later  in the "Users and categori
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="padding">11</property>
-                <property name="position">6</property>
+                <property name="position">7</property>
               </packing>
             </child>
           </object>
@@ -1839,6 +1866,9 @@ Click on "Apply" to apply your choices. </property>
         <property name="complete">True</property>
         <property name="has_padding">False</property>
       </packing>
+    </child>
+    <child>
+      <placeholder/>
     </child>
     <child>
       <placeholder/>
