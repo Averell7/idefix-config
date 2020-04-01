@@ -1,4 +1,5 @@
 import configparser
+import http.client
 import ipaddress
 import json
 import re
@@ -8,13 +9,14 @@ from random import getrandbits
 import requests
 from gi.repository import Gtk, GObject
 
-from ftp_client import ftp_connect
+from ftp_client import FTPError, ftp_connect
 from util import mac_address_test, ip_address_test, showwarning, ask_text, askyesno
 
 
 class Assistant:
     mem_time = 0
     editing_iter = None
+    request_help_label_text = ''
 
     def __init__(self, arw, arw2, controller):
         self.arw = arw
@@ -24,6 +26,7 @@ class Assistant:
 
         self.arw2['create_user_window'].set_transient_for(self.arw['window1'])
         self.arw2['create_user_stack'].set_visible_child_name('0')
+        self.request_help_label_text = self.arw2['assistant_request_help_label'].get_label()
 
         """
         self.arw2["assistant_create_user"].set_forward_page_func(self.forward_func)
@@ -91,7 +94,7 @@ class Assistant:
 
     def show_assistant_create_with_mac(self, mac_address):
         self.show_assistant_create()
-        self.arw2['new_user_mac'].get_buffer().set_text(mac_address)
+        self.arw2['new_user_mac'].get_buffer().set_text(mac_address + '\n')
         self.refresh_assistant_flow(page=1)
 
     def show_assistant_create(self, widget = None):
@@ -116,6 +119,27 @@ class Assistant:
         self.arw2['create_user_window'].hide()
         self.reset_assistant()
 
+    def refresh_detect_list(self, widget=None):
+        """Refresh the account requests"""
+
+        if self.controller.ftp_config and ip_address_test(self.controller.ftp_config["server"]):
+            ip = self.controller.ftp_config["server"]
+            try:
+                h1 = http.client.HTTPConnection(ip)
+                h1.connect()
+                h1.request("GET", "/request_account.json")
+                res = h1.getresponse()
+                self.arw2['requests_liststore'].clear()
+                if res.status == 200:
+                    data1 = res.read().decode("cp850")
+                    requests = json.loads(data1)
+                    for mac, user in requests["account"].items():
+                        self.arw2["requests_liststore"].append([user, mac])
+            except FTPError:
+                print("No ftp connection")
+        elif widget:
+            showwarning(_("Not Connected"), _("Plese connect to idefix first"))
+
     def create_user_deny_next(self, *args):
         """Make the next button not sensitive"""
         self.arw2['create_user_next_button'].set_sensitive(False)
@@ -123,6 +147,10 @@ class Assistant:
     def create_user_allow_next(self, *args):
         """Make the next button sensitive"""
         self.arw2['create_user_next_button'].set_sensitive(True)
+
+    def change_create_assistant_option(self, *args):
+        """Automatically swap to the correct option on page 0 if user selects the text box"""
+        self.arw2['create_user_radio'].set_active(True)
 
     def validate_page(self, page_number):
         """Check to see if the next button can be pressed"""
@@ -145,7 +173,7 @@ class Assistant:
         elif page_number == 2:
             if self.arw2['manage_requests_radio2'].get_active():
                 model, node = self.arw2['manage_request_tree'].get_selection().get_selected()
-                if node:
+                if node and model.iter_parent(node):
                     self.create_user_allow_next()
             elif self.arw2['requested_user_entry'].get_text():
                 self.create_user_allow_next()
@@ -154,6 +182,41 @@ class Assistant:
             self.arw2['create_user_finish_button'].set_label(_("Save & Close"))
             self.arw2['create_user_next_button'].set_label(_("Save & New"))
             self.create_user_allow_next()
+
+            # Build the summary
+            label = self.username + ''
+            if self.arw2['manage_requests_radio'].get_active():
+                label += _(' (New User)')
+            else:
+                label += _(' (Adding to Existing User)')
+            self.arw2['summary_name_label'].set_label(label)
+
+            self.arw2['summary_mac_label'].set_label(self.mac_address)
+
+            internet = _('Open (Allow all traffic)')
+            if self.arw2['check_nothing'].get_active():
+                internet = _('No Internet Access')
+            elif self.arw2['check_filter'].get_active():
+                internet = _('Filtered Internet')
+            self.arw2['summary_internet_label'].set_label(internet)
+
+            rules = []
+            if self.arw2['proxy_rule_radio1'].get_active():
+                rules.append(self.username + _(' (New Rule)'))
+            for row in self.controller.filter_store:
+                if row[19] and (not row[11]):
+                    rules.append(row[0])
+            self.arw2['summary_filter_label'].set_label('\n'.join(rules))
+
+            category = None
+            for row1 in self.categories_store:
+                if row1[3] == 1:
+                    category = row1[0]
+                    break
+            if not category:
+                category = _('Default')
+            self.arw2['summary_category_label'].set_label(category)
+
         else:
             self.create_user_allow_next()
 
@@ -178,15 +241,29 @@ class Assistant:
                 self.arw2["new_user_entry"].set_text(self.arw2["new_user_entry1"].get_text())
                 page_number = 1
         elif page_number == 1:
-            # Verify the data before continuing
+            # Step1: Make sure that the mc addresses have been added to the list
+            self.add_address(widget=None, allowempty=True)
+            # Step2: Check that all the data is valid
             if self.check_user_data(None, nosuccess=True):
                 page_number = 3
             else:
                 return
         elif page_number == 2:
             # manage the requested account
-            self.username = self.arw2["requested_user_entry"].get_text()
-            page_number = 3
+            if self.arw2['manage_requests_radio2'].get_active():
+                # Existing user
+                model, node = self.arw2['manage_request_tree'].get_selection().get_selected()
+                if not node:
+                    showwarning(_("Select a user"), _("You must select an existing user"))
+                    return
+                elif not model.iter_parent(node):
+                    showwarning(_("Select a user"), _("You must select a user rather than a category"))
+                    return
+                self.username = model.get_value(node, 0)
+                page_number = 6
+            else:
+                self.username = self.arw2["requested_user_entry"].get_text()
+                page_number = 3
         elif page_number == 3:
             if not self.arw2['check_filter'].get_active():
                 # Jump to confirmation page
@@ -194,7 +271,7 @@ class Assistant:
             else:
                 page_number += 1
         elif page_number == 6:
-            self.summary("", hide_assistant=False)
+            self.finalise_create_user("", hide_assistant=False)
             page_number = 0
         else:
             page_number += 1
@@ -240,7 +317,7 @@ class Assistant:
         """Triggers if the 'finish' button is pushed"""
         page_number = int(self.arw2['create_user_stack'].get_visible_child_name())
         if page_number == 6:
-            self.summary("", hide_assistant=True)
+            self.finalise_create_user("", hide_assistant=True)
         else:
             # Go to summary
             self.arw2['create_user_stack'].set_visible_child_name('6')
@@ -248,7 +325,7 @@ class Assistant:
     def refresh_assistant_flow(self, page=None):
         """Manage the page flow of the create user assistant."""
         self.arw2['create_user_stack'].set_visible_child_name(str(6))
-        self.summary("", hide_assistant=False)
+        self.finalise_create_user("", hide_assistant=False)
 
     def assistant_check_nothing(self, widget):
         self.block_signals = True
@@ -281,16 +358,10 @@ class Assistant:
         self.categories_store.clear()
         webfilter = self.arw2["check_filter"].get_active()
         webfull = self.arw2["check_full"].get_active()
-        if webfilter or webfull:
-            web = True
-        else:
-            web = False
 
         # get category
         for row in self.controller.users_store:
-            if (row[5] == web
-                and row[6] == webfilter
-                and row[7] == webfull):
+            if (row[6] == webfilter and row[7] == webfull):
                 iter1 = row.iter
                 path1 = row.path.to_string()
                 name = row[0]
@@ -336,8 +407,8 @@ class Assistant:
         for index in["A", "B", "C", "D", "E", "F"]:
             self.arw2["mac_" + index].set_text("")
 
-    def add_address(self, widget = None):
-        address = self.get_mac_address()
+    def add_address(self, widget=None, allowempty=False):
+        address = self.get_mac_address(allowempty=allowempty)
         if address:
             self.reset_mac_address()
             self.arw2["new_user_mac"].get_buffer().insert_at_cursor(address + "\n")
@@ -366,9 +437,9 @@ class Assistant:
         # started by the button in the assistant
 
         self.username = self.arw2["new_user_entry"].get_text()
-        self.mac_address = self.get_mac_address(True)        # True will prevent an error message if the six entries are empty
+        mac_address = self.get_mac_address(True)  # True will prevent an error message if the six entries are empty
                                                         # because user has clicked on "Add another address"
-        if self.mac_address == False:                             # If address invalid let user correct
+        if mac_address == False:  # If address invalid let user correct
             self.create_user_deny_next()
             return
 
@@ -394,6 +465,10 @@ class Assistant:
         # prepare the following page
         message = _("%s will have a filtered Web access.\nDo you want to create a specific access rule for him ?" % self.username)
         self.arw2["label_specific_rule"].set_label(message)
+
+        buffer = self.arw2['new_user_mac'].get_buffer()
+        start_iter, end_iter = buffer.get_bounds()
+        self.mac_address = buffer.get_text(start_iter, end_iter, False)
         return True
 
     def choose_rules(self, widget, row):
@@ -433,7 +508,7 @@ class Assistant:
                 0, "", "#ffffff", None, None
             ]
         )
-        self.controller.maclist[username] = [mac]
+        self.controller.maclist[username] = mac.split('\n')
         self.controller.set_colors()
         return iternew
 
@@ -445,17 +520,45 @@ class Assistant:
              '\n'.join(users), "", "", "", "", "", all_users, all_destinations, allow, active,
              "#009900", "#ffffff", "", "", 0, 0])
 
-    def summary(self, widget, hide_assistant=True):
-        # create user
-        # get the selected category
-        category = None
-        for row1 in self.categories_store:
-            if row1[3] == 1:
-                category = row1[0]
-                string1 = row1[2]
-                break
+    def finalise_create_user(self, widget, hide_assistant=True):
 
-        iternew = self.create_user(category, self.username, self.mac_address)
+        if self.arw2['manage_requests_radio2'].get_active():
+            # This is an existing user, all we do is add the mac addresses
+            # to their user
+            if self.username not in self.controller.maclist:
+                self.controller.maclist[self.username] = []
+            self.controller.maclist[self.username].extend(self.mac_address.split('\n'))
+            self.controller.proxy_users.load_proxy_user(None, None)
+            if hide_assistant:
+                self.arw2["create_user_window"].hide()
+            self.reset_assistant()
+            return
+        else:
+            # create user
+            # get the selected category
+            category = None
+            for row1 in self.categories_store:
+                if row1[3] == 1:
+                    category = row1[0]
+                    string1 = row1[2]
+                    break
+
+            # if not category selected look for one named default
+            if not category:
+                for row1 in self.categories_store:
+                    if row1[0] == _('Default'):
+                        category = _('Default')
+                        break
+
+            # if default does not exist, create it
+            if not category:
+                # Create a new default category
+                self.controller.users_store.append(
+                    None, [_("Default"), "", "", "", 0, 0, 0, 0, 0, "", "", None, None]
+                )
+                category = _('Default')
+
+            iternew = self.create_user(category, self.username, self.mac_address)
 
         # if Web filter is not selected, show the first tab with the new user selected and close the assistant
         if self.arw2["proxy_rule_radio2"].get_active() == 1:
@@ -521,6 +624,12 @@ class Assistant:
             self.arw2[textview].get_buffer().set_text("")
         for checkbox in ["check_nothing", "check_filter", "check_full"]:
             self.arw2[checkbox].set_active(False)
+        self.arw2['check_nothing'].set_active(True)
+        if self.controller.ftp_config and ip_address_test(self.controller.ftp_config["server"]):
+            website = 'http://' + self.controller.ftp_config['server'] + '/request_account_json.php'
+            self.arw2['assistant_request_help_label'].set_label(self.request_help_label_text % website)
+        else:
+            self.arw2['assistant_request_help_label'].set_label(_("You must be connected to idefix to see this list"))
 
 
     """ Experiment user permissions """
