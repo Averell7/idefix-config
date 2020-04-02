@@ -143,7 +143,7 @@ class Assistant:
         if self.controller.ftp_config and ip_address_test(self.controller.ftp_config["server"]):
             ip = self.controller.ftp_config["server"]
             try:
-                h1 = http.client.HTTPConnection(ip)
+                h1 = http.client.HTTPConnection(ip, timeout=10)
                 h1.connect()
                 h1.request("GET", "/request_account.json")
                 res = h1.getresponse()
@@ -153,10 +153,13 @@ class Assistant:
                     requests = json.loads(data1)
                     for mac, user in requests["account"].items():
                         self.arw2["requests_liststore"].append([user, mac])
+                return
             except FTPError:
                 print("No ftp connection")
-        elif widget:
-            showwarning(_("Not Connected"), _("Plese connect to idefix first"))
+        elif not widget:
+            return
+
+        showwarning(_("Not Connected"), _("Plese connect to idefix first"))
 
     def create_user_deny_next(self, *args):
         """Make the next button not sensitive"""
