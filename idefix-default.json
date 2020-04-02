@@ -4,7 +4,7 @@
          "@_internet": "none",
          "#Hector": {
             "mac": [
-               "00:40:CA:3C:5F:33"
+               "00:40:ca:3c:5f:33"
             ]
          }
       },
@@ -12,17 +12,17 @@
          "@_internet": "filtered",
          "#Louis": {
             "mac": [
-               "00:17:A4:FC:5A:15",
-               "d8:50:e6:84:a2:b1\t#\t  Tablette",
-               "b8:27:eb:3c:3f:23\t#\t Raspberry pi",
+               "00:17:a4:fc:5a:15",
+               "d8:50:e6:84:a2:b1\t#\t  tablette",
+               "b8:27:eb:3c:3f:23\t#\t raspberry pi",
                "",
                ""
             ]
          },
          "#Etienne": {
             "mac": [
-               "00:21:70:F8:58:F1",
-               "98:3b:16:13:d9:9b\t#\t Wi-Fi"
+               "00:21:70:f8:58:f1",
+               "98:3b:16:13:d9:9b\t#\t wi-fi"
             ]
          }
       },
@@ -30,8 +30,8 @@
          "@_internet": "open",
          "#Nicolas": {
             "mac": [
-               "08:60:6E:89:A8:01",
-               "20:68:9d:ee:45:7a\t#\t  WIFI",
+               "08:60:6e:89:a8:01",
+               "20:68:9d:ee:45:7a\t#\t  wifi",
                "60:a4:4c:7b:1d:5f"
             ]
          }
@@ -132,7 +132,8 @@
             "vatican",
             "livres",
             "ebay",
-            "finances"
+            "finances",
+            "test"
          ],
          "dest_domains": [
             "*.openoffice.org",
@@ -146,7 +147,7 @@
    },
    "groups": {
       "technique": {
-         "dest_domain": [
+         "dest_domains": [
             "*.verisign.com",
             "*.ntp.org",
             "*.googleapis.com",
@@ -159,7 +160,7 @@
          ]
       },
       "antivirus": {
-         "dest_domain": [
+         "dest_domains": [
             "*.avg.com",
             "*.avg.fr",
             "*.avast.com",
@@ -179,7 +180,7 @@
          ]
       },
       "mozilla": {
-         "dest_domain": [
+         "dest_domains": [
             "*.mozillamessaging.com",
             "*.mozilla.com",
             "*.mozilla.org",
@@ -190,12 +191,12 @@
          ]
       },
       "skype": {
-         "dest_domain": [
+         "dest_domains": [
             "*.skype.com"
          ]
       },
       "transports": {
-         "dest_domain": [
+         "dest_domains": [
             "*.cff.ch",
             "*.sbb.ch",
             "*.transisere.fr",
@@ -214,7 +215,7 @@
          ]
       },
       "poste": {
-         "dest_domain": [
+         "dest_domains": [
             "*.coliposte.net",
             "*.colissimo.fr",
             "*.laposte.fr",
@@ -225,12 +226,12 @@
          ]
       },
       "telephone": {
-         "dest_domain": [
+         "dest_domains": [
             "*.ippi.com"
          ]
       },
       "transfert_fichiers": {
-         "dest_domain": [
+         "dest_domains": [
             "*.wetransfer.com",
             "*.wetransfer.net",
             "*.grosfichiers.com",
@@ -238,7 +239,7 @@
          ]
       },
       "meteo": {
-         "dest_domain": [
+         "dest_domains": [
             "*.meteosuisse.admin.ch",
             "*.meteosuisse.ch",
             "*.meteofrance.com",
@@ -246,14 +247,14 @@
          ]
       },
       "bible": {
-         "dest_domain": [
+         "dest_domains": [
             "*.saintebible.com",
             "*.biblemenus.com",
             "*.biblehub.net"
          ]
       },
       "traduction": {
-         "dest_domain": [
+         "dest_domains": [
             "translate.google.fr",
             "*.online-translator.com",
             "ajax.googleapis.com",
@@ -263,7 +264,7 @@
          ]
       },
       "livres": {
-         "dest_domain": [
+         "dest_domains": [
             "*.chapitre.com",
             "*.chapitrepro.com",
             "*.images-chapitre.com",
@@ -277,7 +278,7 @@
          ]
       },
       "ebay": {
-         "dest_domain": [
+         "dest_domains": [
             "*.ebay.fr",
             "*.ebay.co.uk",
             "*.ebay.com",
@@ -290,18 +291,19 @@
          ]
       },
       "finances": {
-         "dest_domain": [
+         "dest_domains": [
             "*.paypal.fr",
             "*.paypal.com",
             "*.paypalobjects.com",
             "*.xe.com",
             "*.xe.net",
             "*.westernunion.fr",
-            "*.lapostefinance.fr"
+            "*.lapostefinance.fr",
+            "FINANCE.com"
          ]
       },
       "vatican": {
-         "dest_domain": [
+         "dest_domains": [
             "*.vatican.va",
             "*.vaticanlibrary.va",
             "*.vatlib.it",
@@ -309,7 +311,7 @@
          ]
       },
       "wikipedia": {
-         "dest_domain": [
+         "dest_domains": [
             "*.wikibooks.org",
             "*.wikiquote.org",
             "*.wikisource.org",
@@ -320,24 +322,24 @@
          ]
       },
       "annuaires": {
-         "dest_domain": [
+         "dest_domains": [
             "*.pagesjaunes.fr"
          ]
       },
       "achats": {
-         "dest_domain": [
+         "dest_domains": [
             "*.amazon.co.uk",
             "*.amazon.fr"
          ]
       },
       "google": {
-         "dest_domain": [
+         "dest_domains": [
             "*.google.com",
             "*.google.fr"
          ]
       },
       "google_extensions": {
-         "dest_domain": [
+         "dest_domains": [
             "myaccount.google.com",
             "policies.google.com",
             "google.consents.com",
@@ -350,20 +352,20 @@
          ]
       },
       "cartes": {
-         "dest_domain": [
+         "dest_domains": [
             "*.mappy.com",
             "*.viamichelin.fr"
          ]
       },
       "chartreuse": {
-         "dest_domain": [
+         "dest_domains": [
             "*.chartreux.org",
             "*.vocatiochartreux.org",
             "*.cartoixamontalegre.net"
          ]
       },
       "religieux": {
-         "dest_domain": [
+         "dest_domains": [
             "*.viereligieuse.fr",
             "*.corref.com",
             "*.corref.fr",
@@ -375,7 +377,7 @@
          ]
       },
       "dictionnaires": {
-         "dest_domain": [
+         "dest_domains": [
             "*.dicolatin.com",
             "*.lexilogos.com",
             "*.wiktionary.org",
@@ -383,11 +385,16 @@
          ]
       },
       "lilo": {
-         "dest_domain": [
+         "dest_domains": [
             "*.lilo.org",
             "*.lilosearch.org"
          ]
+      },
+      "test": {
+         "dest_domains": [
+            "*.toto.com"
+         ]
       }
    },
-   "version": 24
+   "version": 25
 }

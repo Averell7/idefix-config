@@ -409,7 +409,7 @@ class Confix:
                 h1.connect()
 
                 try:
-                    h1.request("GET","/network-info.php")
+                    h1.request("GET", "/network-info.php")
                     res = h1.getresponse()
                     if res.status == 200:
                         data1 = res.read().decode("cp850")
@@ -422,16 +422,10 @@ class Confix:
                             self.myaccount = _("unknown")
                 except FTPError:
                     print("could not get network-info.php")
-
-                h1.request("GET","/request_account.json")
-                res = h1.getresponse()
-                if res.status == 200:
-                    data1 = res.read().decode("cp850")
-                    requests = json.loads(data1)
-                    for mac, user in requests["account"].items():
-                        self.arw2["requests_liststore"].append([user,mac])
             except FTPError:
                 print("No ftp connection")
+
+        self.assistant.refresh_detect_list()
 
         # Check our mac address exists
         self.check_mac_and_create_config()
