@@ -387,6 +387,7 @@ class Confix:
 
         if not self.ftp:
             alert(_("Could not connect to %s. \nVerify your cables or your configuration.") % ftp1["server"])
+            return
         else:
             # retrieve files by ftp
             data0 = ftp_get(self.ftp, "idefix.json", json  = True)
@@ -405,7 +406,7 @@ class Confix:
         if ip_address_test(ftp1["server"]):
             ip = ftp1["server"]
             try:
-                h1 = http.client.HTTPConnection(ip)
+                h1 = http.client.HTTPConnection(ip, timeout=10)
                 h1.connect()
 
                 try:

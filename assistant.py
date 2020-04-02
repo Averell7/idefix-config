@@ -4,7 +4,6 @@ import ipaddress
 import json
 import re
 import webbrowser
-from random import getrandbits
 
 import requests
 from gi.repository import Gtk, GObject
@@ -119,13 +118,32 @@ class Assistant:
         self.arw2['create_user_window'].hide()
         self.reset_assistant()
 
+    def remove_user_request(self, username):
+        """Remove a user request"""
+        if self.controller.ftp_config and ip_address_test(self.controller.ftp_config["server"]):
+            ip = self.controller.ftp_config["server"]
+            requests.get('http://' + ip + '/request_account_json.php', {
+                'usercode': username,
+                'reset': 'true',
+            }, timeout=15)
+
+        # Remove user from the list
+        iter = None
+        for row in self.arw2['requests_liststore']:
+            if row[0] == username:
+                iter = row.iter
+                break
+
+        if iter:
+            self.arw2['requests_liststore'].remove(iter)
+
     def refresh_detect_list(self, widget=None):
         """Refresh the account requests"""
 
         if self.controller.ftp_config and ip_address_test(self.controller.ftp_config["server"]):
             ip = self.controller.ftp_config["server"]
             try:
-                h1 = http.client.HTTPConnection(ip)
+                h1 = http.client.HTTPConnection(ip, timeout=10)
                 h1.connect()
                 h1.request("GET", "/request_account.json")
                 res = h1.getresponse()
@@ -135,10 +153,13 @@ class Assistant:
                     requests = json.loads(data1)
                     for mac, user in requests["account"].items():
                         self.arw2["requests_liststore"].append([user, mac])
+                return
             except FTPError:
                 print("No ftp connection")
-        elif widget:
-            showwarning(_("Not Connected"), _("Plese connect to idefix first"))
+        elif not widget:
+            return
+
+        showwarning(_("Not Connected"), _("Plese connect to idefix first"))
 
     def create_user_deny_next(self, *args):
         """Make the next button not sensitive"""
@@ -522,6 +543,10 @@ class Assistant:
 
     def finalise_create_user(self, widget, hide_assistant=True):
 
+        # Remove the user from the request list
+        if self.arw2['account_request_radio'].get_active():
+            self.remove_user_request(self.username)
+
         if self.arw2['manage_requests_radio2'].get_active():
             # This is an existing user, all we do is add the mac addresses
             # to their user
@@ -857,9 +882,7 @@ class Assistant:
         """Automatically determine the MAC Address"""
 
         # Step1: We submit to request_account_json.php
-        # generate a random code
-
-        code = self.arw2["new_user_entry"].get_text() + '-' + str(getrandbits(24))
+        code = self.arw2["new_user_entry"].get_text()
 
         # If we don't have an active configuration, try to use the default
         # server ip.
@@ -870,7 +893,7 @@ class Assistant:
         response = requests.post('http://' + host + '/request_account_json.php', {
             'usercode': code,
             'reset': '',
-        })
+        }, timeout=15)
 
         if not response.ok:
             showwarning(_('Could not detect'), _("Could not contact the idefix server"))
