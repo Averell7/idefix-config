@@ -451,12 +451,14 @@ class Confix:
             if not rule:
                 rule = 'default'
 
-            category_name = "Internet ouvert"
-            self.assistant.create_user(category_name, rule, self.mymac, enable_internet=1, enable_open=1)
-            self.assistant.create_internet_filter(rule, [rule], all_destinations=True)
-            self.proxy_users.load_proxy_user(None, None)
-            self.assistant.reset_assistant()
+            # Pre fill in details in the first-run assistant
+            self.assistant.show_assistant_create_pre_enter(
+                rule,
+                self.mymac,
+                rule
+            )
 
+            """
             self.arw['newly_created_summary'].show()
             self.arw['newly_created_summary'].run()
             self.arw['newly_created_summary'].hide()
@@ -464,6 +466,7 @@ class Confix:
             # Jump to the created rule
             self.arw['notebook3'].set_current_page(1)
             self.proxy_users.select_rule(rule)
+            """
 
         elif response == Gtk.ResponseType.APPLY:
             # Show the assistant

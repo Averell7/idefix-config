@@ -97,6 +97,15 @@ class Assistant:
         self.arw2['new_user_mac'].get_buffer().set_text(mac_address + '\n')
         self.refresh_assistant_flow(page=1)
 
+    def show_assistant_create_pre_enter(self, name, mac_address, filter):
+        self.show_assistant_create()
+        self.arw2['new_user_mac'].get_buffer().set_text(mac_address + '\n')
+        self.arw2['new_user_entry'].set_text(name)
+        self.arw2['requested_user_entry'].set_text(filter)
+        self.arw2['check_full'].set_active(True)
+        self.check_user_data(widget=None, nosuccess=True)
+        self.refresh_assistant_flow(page=3)
+
     def show_assistant_create(self, widget = None):
         self.arw2['create_user_window'].show()
         # self.arw2["assistant_create_user"].show()
@@ -346,8 +355,8 @@ class Assistant:
 
     def refresh_assistant_flow(self, page=None):
         """Manage the page flow of the create user assistant."""
-        self.arw2['create_user_stack'].set_visible_child_name(str(6))
-        self.finalise_create_user("", hide_assistant=False)
+        self.arw2['create_user_stack'].set_visible_child_name(str(page))
+        self.validate_page(page)
 
     def assistant_check_nothing(self, widget):
         self.block_signals = True
