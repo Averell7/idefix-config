@@ -1,4 +1,3 @@
-import configparser
 import http.client
 import ipaddress
 import json
@@ -9,13 +8,14 @@ import requests
 from gi.repository import Gtk, GObject
 
 from ftp_client import FTPError, ftp_connect
-from util import mac_address_test, ip_address_test, showwarning, ask_text, askyesno
+from util import mac_address_test, ip_address_test, showwarning, ask_text
 
 
 class Assistant:
     mem_time = 0
     editing_iter = None
     request_help_label_text = ''
+    first_use_label_text = ''
 
     def __init__(self, arw, arw2, controller):
         self.arw = arw
@@ -26,6 +26,7 @@ class Assistant:
         self.arw2['create_user_window'].set_transient_for(self.arw['window1'])
         self.arw2['create_user_stack'].set_visible_child_name('0')
         self.request_help_label_text = self.arw2['assistant_request_help_label'].get_label()
+        self.first_use_label_text = self.arw2['first_use_found_label'].get_label()
 
         """
         self.arw2["assistant_create_user"].set_forward_page_func(self.forward_func)
@@ -729,7 +730,10 @@ class Assistant:
         """Check if idefix connects"""
         model, iter = self.arw2['idefix_select_view'].get_selection().get_selected()
 
-        connection = ftp_connect(model.get_value(iter, 0), 'idefix', password)
+        idefix_ip = model.get_value(iter, 0)
+
+        print("Trying", idefix_ip)
+        connection = ftp_connect(idefix_ip, 'idefix', password)
         if not connection:
             # Prompt for password again
             password = ask_text(self.arw2['first_use_assistant'], _("Enter idefix ftp password"), password=True)
@@ -740,26 +744,21 @@ class Assistant:
                 return
             return self.connect_idefix(password)
 
-        data = {
-            'default': {
-                'server': model.get_value(iter, 0),
-                'login': 'idefix',
-                'pass': password,
-            }
-        }
+        self.arw2['first_use_found_label'].set_label(self.first_use_label_text % idefix_ip)
 
-        if askyesno(_("Automatically load?"), _("Automatically connect to this Idefix on startup?")):
-            data['__options'] = {
+        # Write the configuration
+        self.controller.profiles.config = {
+            '__options': {
                 'auto_load': 1,
                 'last_config': 'default'
             }
+        }
 
-        # Write the configuration
-        config = configparser.ConfigParser(interpolation=None)
-        config.read_dict(data)
-        with open(self.controller.profiles.filename, 'w') as f:
-            config.write(f)
+        self.controller.profiles.profiles_store.append(
+            ['default', 'local', 'idefix', password, model.get_value(iter, 0)]
+        )
 
+        self.controller.profiles.profile_save_config()
         self.controller.profiles.refresh_saved_profiles()
         self.controller.ftp_config = self.controller.profiles.config['default']
 
@@ -863,19 +862,15 @@ class Assistant:
             self.arw2['first_use_assistant'].set_current_page(5)
             return
 
-        # Write configuration to ini file
-        config = configparser.ConfigParser(interpolation=None)
-        config.read(self.controller.profiles.filename)
-        config.read_dict({
-            self.arw2['ftp_config_name'].get_text(): {
-                'server': self.arw2['ftp_config_host'].get_text(),
-                'login': self.arw2['ftp_config_login'].get_text(),
-                'pass': self.arw2['ftp_config_password'].get_text(),
-            }
-        })
-        with open(self.controller.profiles.filename, 'w') as f:
-            config.write(f)
-
+        self.controller.profiles.profiles_store.append([
+            self.arw2['ftp_config_name'].get_text(),
+            'remote',
+            self.arw2['ftp_config_login'].get_text(),
+            self.arw2['ftp_config_password'].get_text(),
+            self.arw2['ftp_config_host'].get_text()
+        ])
+        self.controller.profiles.profile_save_config()
+        self.controller.profiles.refresh_saved_profiles()
         self.finish_first_configuration()
 
     def auto_find_mac_address(self, widget=None):
