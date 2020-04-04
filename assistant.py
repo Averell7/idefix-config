@@ -578,38 +578,36 @@ class Assistant:
                     string1 = row1[2]
                     break
 
-            # if not category selected look for one named default
             if not category:
+                # If there is no category, choose the best matching one based on the user rules
+                # this should only happen if a defualt configuration has not been used
+                if self.arw2['check_full'].get_active():
+                    look_category = 'Internet ouvert'
+                    filtered = False
+                    open = True
+                elif self.arw2['check_filter'].get_active():
+                    look_category = 'Internet filtré'
+                    filtered = True
+                    open = False
+                else:
+                    look_category = 'internet fermé'
+                    filtered = False
+                    open = False
+
                 for row1 in self.categories_store:
-                    if row1[0] == _('Default'):
-                        category = _('Default')
+                    if row1[0] == look_category:
+                        category = look_category
                         break
 
-            # if default does not exist, create it
-            if not category:
-                # Create a new default category
-                self.controller.users_store.append(
-                    None, [_("Default"), "", "", "", 0, 0, 0, 0, 0, "", "", None, None]
-                )
-                category = _('Default')
+                # if default does not exist, create it
+                if not category:
+                    # Create a new default category
+                    self.controller.users_store.append(
+                        None, [look_category, "", "", "", 0, 0, filtered, open, 0, "", "", None, None]
+                    )
+                    category = look_category
 
             iternew = self.create_user(category, self.username, self.mac_address)
-
-        # if Web filter is not selected, show the first tab with the new user selected and close the assistant
-        if self.arw2["proxy_rule_radio2"].get_active() == 1:
-            model = self.controller.users_store
-            iterparent = model.iter_parent(iternew)
-            if iterparent:
-                path1 = model.get_path(iterparent)
-                self.arw["treeview1"].expand_row(path1, True)
-            sel = self.arw["treeview1"].get_selection()
-            sel.select_iter(iternew)
-            self.arw["notebook3"].set_current_page(0)
-            self.controller.users.load_user("","", iternew)
-            if hide_assistant:
-                self.reset_assistant()
-                self.arw2["create_user_window"].hide()
-            return
 
         # Proxy config
         iter1 = None
@@ -634,12 +632,29 @@ class Assistant:
         if iter1:
             sel.select_iter(iter1)
         self.controller.proxy_users.load_proxy_user(None, None)
-        self.arw["notebook3"].set_current_page(1)
+
+        # if Web filter is not selected, show the first tab with the new user selected and close the assistant
+        if self.arw2["proxy_rule_radio2"].get_active() == 1:
+            model = self.controller.users_store
+            iterparent = model.iter_parent(iternew)
+            if iterparent:
+                path1 = model.get_path(iterparent)
+                self.arw["treeview1"].expand_row(path1, True)
+            sel = self.arw["treeview1"].get_selection()
+            sel.select_iter(iternew)
+            self.arw["notebook3"].set_current_page(0)
+            self.controller.users.load_user("", "", iternew)
+        else:
+            self.arw["notebook3"].set_current_page(1)
+
         if hide_assistant:
             self.arw2["create_user_window"].hide()
         self.reset_assistant()
 
     def reset_assistant(self, widget = None):
+        self.arw2['create_user_finish_button'].set_label(_("Finish"))
+        self.arw2['create_user_next_button'].set_label(_("Next"))
+
         self.arw2['create_user_stack'].set_visible_child_name('0')
         self.arw2['create_user_back_button'].set_sensitive(False)
         self.arw2['create_user_finish_button'].set_sensitive(False)
