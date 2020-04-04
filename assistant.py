@@ -1,4 +1,3 @@
-import configparser
 import http.client
 import ipaddress
 import json
@@ -9,13 +8,14 @@ import requests
 from gi.repository import Gtk, GObject
 
 from ftp_client import FTPError, ftp_connect
-from util import mac_address_test, ip_address_test, showwarning, ask_text, askyesno
+from util import mac_address_test, ip_address_test, showwarning, ask_text
 
 
 class Assistant:
     mem_time = 0
     editing_iter = None
     request_help_label_text = ''
+    first_use_label_text = ''
 
     def __init__(self, arw, arw2, controller):
         self.arw = arw
@@ -26,6 +26,7 @@ class Assistant:
         self.arw2['create_user_window'].set_transient_for(self.arw['window1'])
         self.arw2['create_user_stack'].set_visible_child_name('0')
         self.request_help_label_text = self.arw2['assistant_request_help_label'].get_label()
+        self.first_use_label_text = self.arw2['first_use_found_label'].get_label()
 
         """
         self.arw2["assistant_create_user"].set_forward_page_func(self.forward_func)
@@ -95,6 +96,15 @@ class Assistant:
         self.show_assistant_create()
         self.arw2['new_user_mac'].get_buffer().set_text(mac_address + '\n')
         self.refresh_assistant_flow(page=1)
+
+    def show_assistant_create_pre_enter(self, name, mac_address, filter):
+        self.show_assistant_create()
+        self.arw2['new_user_mac'].get_buffer().set_text(mac_address + '\n')
+        self.arw2['new_user_entry'].set_text(name)
+        self.arw2['requested_user_entry'].set_text(filter)
+        self.arw2['check_full'].set_active(True)
+        self.check_user_data(widget=None, nosuccess=True)
+        self.refresh_assistant_flow(page=3)
 
     def show_assistant_create(self, widget = None):
         self.arw2['create_user_window'].show()
@@ -345,8 +355,8 @@ class Assistant:
 
     def refresh_assistant_flow(self, page=None):
         """Manage the page flow of the create user assistant."""
-        self.arw2['create_user_stack'].set_visible_child_name(str(6))
-        self.finalise_create_user("", hide_assistant=False)
+        self.arw2['create_user_stack'].set_visible_child_name(str(page))
+        self.validate_page(page)
 
     def assistant_check_nothing(self, widget):
         self.block_signals = True
@@ -729,7 +739,10 @@ class Assistant:
         """Check if idefix connects"""
         model, iter = self.arw2['idefix_select_view'].get_selection().get_selected()
 
-        connection = ftp_connect(model.get_value(iter, 0), 'idefix', password)
+        idefix_ip = model.get_value(iter, 0)
+
+        print("Trying", idefix_ip)
+        connection = ftp_connect(idefix_ip, 'idefix', password)
         if not connection:
             # Prompt for password again
             password = ask_text(self.arw2['first_use_assistant'], _("Enter idefix ftp password"), password=True)
@@ -740,26 +753,21 @@ class Assistant:
                 return
             return self.connect_idefix(password)
 
-        data = {
-            'default': {
-                'server': model.get_value(iter, 0),
-                'login': 'idefix',
-                'pass': password,
-            }
-        }
+        self.arw2['first_use_found_label'].set_label(self.first_use_label_text % idefix_ip)
 
-        if askyesno(_("Automatically load?"), _("Automatically connect to this Idefix on startup?")):
-            data['__options'] = {
+        # Write the configuration
+        self.controller.profiles.config = {
+            '__options': {
                 'auto_load': 1,
                 'last_config': 'default'
             }
+        }
 
-        # Write the configuration
-        config = configparser.ConfigParser(interpolation=None)
-        config.read_dict(data)
-        with open(self.controller.profiles.filename, 'w') as f:
-            config.write(f)
+        self.controller.profiles.profiles_store.append(
+            ['default', 'local', 'idefix', password, model.get_value(iter, 0)]
+        )
 
+        self.controller.profiles.profile_save_config()
         self.controller.profiles.refresh_saved_profiles()
         self.controller.ftp_config = self.controller.profiles.config['default']
 
@@ -863,19 +871,15 @@ class Assistant:
             self.arw2['first_use_assistant'].set_current_page(5)
             return
 
-        # Write configuration to ini file
-        config = configparser.ConfigParser(interpolation=None)
-        config.read(self.controller.profiles.filename)
-        config.read_dict({
-            self.arw2['ftp_config_name'].get_text(): {
-                'server': self.arw2['ftp_config_host'].get_text(),
-                'login': self.arw2['ftp_config_login'].get_text(),
-                'pass': self.arw2['ftp_config_password'].get_text(),
-            }
-        })
-        with open(self.controller.profiles.filename, 'w') as f:
-            config.write(f)
-
+        self.controller.profiles.profiles_store.append([
+            self.arw2['ftp_config_name'].get_text(),
+            'remote',
+            self.arw2['ftp_config_login'].get_text(),
+            self.arw2['ftp_config_password'].get_text(),
+            self.arw2['ftp_config_host'].get_text()
+        ])
+        self.controller.profiles.profile_save_config()
+        self.controller.profiles.refresh_saved_profiles()
         self.finish_first_configuration()
 
     def auto_find_mac_address(self, widget=None):

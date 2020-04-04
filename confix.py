@@ -171,13 +171,12 @@ class Confix:
         else:
             kargs = {}
         self.profiles = ConfigProfile(self.arw, self, **kargs)
-        self.idefix_config = self.profiles.config
         # à garder $$ self.ftp_config = self.idefix_config['conf'][active_config]
 
         # set check boxes in menu
         self.block_signals = True
         self.arw['menu_autoload_check'].set_active(
-            self.idefix_config['__options'].get('auto_load', 0) == '1'
+            self.profiles.config['__options'].get('auto_load', 0) == '1'
         )
         self.block_signals = False
 
@@ -226,7 +225,7 @@ class Confix:
         if configname == "":                            # No connexion profile chosen
             self.ftp_config = None
         else:
-            self.ftp_config = self.idefix_config[configname]
+            self.ftp_config = self.profiles.config[configname]
             ftp = self.open_connexion_profile()
         self.arw["configname"].set_text(configname)
 
@@ -328,33 +327,33 @@ class Confix:
             self.assistant.show_assistant_first()
 
         # user defined options
-        checkbox_config = self.idefix_config['__options'].get('checkbox_config', 0) == '1'
+        checkbox_config = self.profiles.config['__options'].get('checkbox_config', 0) == '1'
         if checkbox_config:
             self.proxy_users.set_gui('check')
 
-        filter_tab = self.idefix_config['__options'].get('filter_tab', 0) == '1'
+        filter_tab = self.profiles.config['__options'].get('filter_tab', 0) == '1'
         if filter_tab:
             self.arw['notebook3'].set_current_page(1)
 
-        developper_menu = self.idefix_config['__options'].get('developper_menu', 0) == '1'
+        developper_menu = self.profiles.config['__options'].get('developper_menu', 0) == '1'
         if developper_menu is False:
             self.arw['developper_menu'].set_sensitive(False)
             self.arw['developper_menu'].set_visible(False)
 
-        auto_load = self.idefix_config['__options'].get('auto_load', 0) == '1'
+        auto_load = self.profiles.config['__options'].get('auto_load', 0) == '1'
         if auto_load:
-            last_config = self.idefix_config['__options'].get('last_config')
+            last_config = self.profiles.config['__options'].get('last_config')
             if last_config:
                 configname = last_config
                 if configname:
-                    self.ftp_config = self.idefix_config[configname]
+                    self.ftp_config = self.profiles.config[configname]
                     self.open_connexion_profile()
                     self.arw["configname"].set_text(configname)
 
     def ask_for_profile(self, widget = None):
         # Refresh available configurations?
 
-        config_dialog = AskForConfig(self.idefix_config)
+        config_dialog = AskForConfig(self.profiles.config)
         configname = config_dialog.run()
         if not configname:
             return
@@ -366,10 +365,10 @@ class Confix:
         self.arw["configname"].set_text(configname)
         self.arw["save_button1"].set_sensitive(True)
         self.arw["save_button2"].set_sensitive(True)
-        self.ftp_config = self.idefix_config[configname]
-        if not self.idefix_config['__options']:
-            self.idefix_config['__options'] = {}
-        self.idefix_config['__options']["last_config"] = configname
+        self.ftp_config = self.profiles.config[configname]
+        if not self.profiles.config['__options']:
+            self.profiles.config['__options'] = {}
+        self.profiles.config['__options']["last_config"] = configname
         self.profiles.profile_save_config()
         self.open_connexion_profile()
 
@@ -452,12 +451,14 @@ class Confix:
             if not rule:
                 rule = 'default'
 
-            category_name = "Internet ouvert"
-            self.assistant.create_user(category_name, rule, self.mymac, enable_internet=1, enable_open=1)
-            self.assistant.create_internet_filter(rule, [rule], all_destinations=True)
-            self.proxy_users.load_proxy_user(None, None)
-            self.assistant.reset_assistant()
+            # Pre fill in details in the first-run assistant
+            self.assistant.show_assistant_create_pre_enter(
+                rule,
+                self.mymac,
+                rule
+            )
 
+            """
             self.arw['newly_created_summary'].show()
             self.arw['newly_created_summary'].run()
             self.arw['newly_created_summary'].hide()
@@ -465,6 +466,7 @@ class Confix:
             # Jump to the created rule
             self.arw['notebook3'].set_current_page(1)
             self.proxy_users.select_rule(rule)
+            """
 
         elif response == Gtk.ResponseType.APPLY:
             # Show the assistant
@@ -843,7 +845,7 @@ class Confix:
         auto_load = self.arw['menu_autoload_check'].get_active()
         developper_menu = self.arw['option_developper_check'].get_active()
 
-        self.idefix_config['__options'] = {
+        self.profiles.config['__options'] = {
             'checkbox_config': '1' if gui_check else '0',
             'filter_tab': '1' if filter_tab else '0',
             'auto_load': '1' if auto_load else '0',
@@ -865,13 +867,13 @@ class Confix:
     def show_options(self, widget):
         # Get options
         self.arw['option_checkbox_gui_check'].set_active(
-            self.idefix_config['__options'].get('checkbox_config', 0) == '1'
+            self.profiles.config['__options'].get('checkbox_config', 0) == '1'
         )
         self.arw['option_filter_tab_check'].set_active(
-            self.idefix_config['__options'].get('filter_tab', 0) == '1'
+            self.profiles.config['__options'].get('filter_tab', 0) == '1'
         )
         self.arw['option_developper_check'].set_active(
-            self.idefix_config['__options'].get('developper_menu', 0) == '1'
+            self.profiles.config['__options'].get('developper_menu', 0) == '1'
         )
         self.arw['options_window'].show_all()
 
