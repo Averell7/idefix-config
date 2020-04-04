@@ -609,22 +609,6 @@ class Assistant:
 
             iternew = self.create_user(category, self.username, self.mac_address)
 
-        # if Web filter is not selected, show the first tab with the new user selected and close the assistant
-        if self.arw2["proxy_rule_radio2"].get_active() == 1:
-            model = self.controller.users_store
-            iterparent = model.iter_parent(iternew)
-            if iterparent:
-                path1 = model.get_path(iterparent)
-                self.arw["treeview1"].expand_row(path1, True)
-            sel = self.arw["treeview1"].get_selection()
-            sel.select_iter(iternew)
-            self.arw["notebook3"].set_current_page(0)
-            self.controller.users.load_user("","", iternew)
-            if hide_assistant:
-                self.reset_assistant()
-                self.arw2["create_user_window"].hide()
-            return
-
         # Proxy config
         iter1 = None
         memiter = None
@@ -648,7 +632,21 @@ class Assistant:
         if iter1:
             sel.select_iter(iter1)
         self.controller.proxy_users.load_proxy_user(None, None)
-        self.arw["notebook3"].set_current_page(1)
+
+        # if Web filter is not selected, show the first tab with the new user selected and close the assistant
+        if self.arw2["proxy_rule_radio2"].get_active() == 1:
+            model = self.controller.users_store
+            iterparent = model.iter_parent(iternew)
+            if iterparent:
+                path1 = model.get_path(iterparent)
+                self.arw["treeview1"].expand_row(path1, True)
+            sel = self.arw["treeview1"].get_selection()
+            sel.select_iter(iternew)
+            self.arw["notebook3"].set_current_page(0)
+            self.controller.users.load_user("", "", iternew)
+        else:
+            self.arw["notebook3"].set_current_page(1)
+
         if hide_assistant:
             self.arw2["create_user_window"].hide()
         self.reset_assistant()
