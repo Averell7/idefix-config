@@ -949,6 +949,9 @@ After clicking close, you will be shown the internet filter rule created for you
       <column type="gchararray"/>
     </columns>
   </object>
+  <object class="GtkTreeModelSort" id="proxy_groups_sort">
+    <property name="model">proxy_groups_store</property>
+  </object>
   <object class="GtkMenu" id="proxy_profiles_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -2529,7 +2532,7 @@ to all users</property>
                                               <object class="GtkTreeView" id="proxy_group">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
-                                                <property name="model">proxy_groups_store</property>
+                                                <property name="model">proxy_groups_sort</property>
                                                 <property name="headers_visible">False</property>
                                                 <property name="search_column">0</property>
                                                 <property name="tooltip_column">1</property>

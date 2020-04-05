@@ -4,7 +4,7 @@ from configparser import ConfigParser
 from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
-from util import askyesno, ask_text
+from util import askyesno, ask_text, name_sorter
 
 
 class ProxyGroup:
@@ -21,6 +21,7 @@ class ProxyGroup:
         self.arw['proxy_group'].drag_dest_set(Gtk.DestDefaults.DROP, [], DRAG_ACTION)
         self.arw['proxy_group'].drag_dest_add_text_targets()
         self.arw['proxy_group'].connect("drag-data-received", self.update_proxy_group_list_view)
+        self.arw['proxy_group'].get_model().set_default_sort_func(name_sorter)
         self.proxy_group_domain_store = self.arw['proxy_group_domain_store']
 
         # The store for the proxy_groups in a particular proxy
@@ -34,6 +35,10 @@ class ProxyGroup:
     def proxy_group_data_get(self, treeview, drag_context, data, info, time):
 
         (model, iter1) = treeview.get_selection().get_selected()
+
+        iter1 = model.convert_iter_to_child_iter(iter1)
+        model = model.get_model(model)
+
         if iter1:
             path = model.get_string_from_iter(iter1)
             data.set_text(path, -1)
@@ -154,6 +159,7 @@ class ProxyGroup:
             iter_source = None
             values = None
 
+        """
         dest = widget.get_dest_row_at_pos(x, y)
         if dest:
             drop_path, position = dest
@@ -165,7 +171,9 @@ class ProxyGroup:
             else:
                 iter_dest = model.insert_after(iter1, ['' for x in range(model.get_n_columns())])
         else:
-            iter_dest = model.insert(-1)
+        """
+        model = model.get_model()
+        iter_dest = model.insert(-1)
 
         if iter_source:
             for i in range(model.get_n_columns()):

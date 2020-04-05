@@ -5,7 +5,7 @@ from collections import defaultdict, OrderedDict
 from gi.repository import Gtk, Gdk
 
 from repository import fetch_repository_categories, search_repository_groups, upload_group
-from util import showwarning, askyesno, ask_text
+from util import showwarning, askyesno, ask_text, name_sorter
 
 IMPORT_COLUMN_SELECTED = 0
 IMPORT_COLUMN_NAME = 1
@@ -34,17 +34,6 @@ it will import with the group name equal to that of the file (ie: My Group.txt -
 of the text file will be a domain.
 
 """
-
-
-def name_sorter(model, a, b, data):
-    namea = model.get_value(a, 0)
-    nameb = model.get_value(b, 0)
-    if namea == nameb:
-        return 0
-    elif namea > nameb:
-        return 1
-    else:
-        return -1
 
 
 class GroupManager:

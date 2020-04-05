@@ -399,3 +399,15 @@ def write_default_config():
 # LOCALISATION ############################################################
 ###########################################################################
 elib_intl3.install("confix", "share/locale")
+
+
+def name_sorter(model, a, b, data):
+    namea = model.get_value(a, 0)
+    nameb = model.get_value(b, 0)
+
+    if namea == nameb:
+        return 0
+    elif namea and nameb and namea > nameb:
+        return 1
+    else:
+        return -1
