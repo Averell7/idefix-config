@@ -36,6 +36,17 @@ of the text file will be a domain.
 """
 
 
+def name_sorter(model, a, b, data):
+    namea = model.get_value(a, 0)
+    nameb = model.get_value(b, 0)
+    if namea == nameb:
+        return 0
+    elif namea > nameb:
+        return 1
+    else:
+        return -1
+
+
 class GroupManager:
     groups_store = None
     groups_changed = False
@@ -81,6 +92,7 @@ class GroupManager:
         self.groups_changed = False
         self.buffer = None
         self.imported_groups = False
+        self.widgets['groups_tree'].get_model().set_default_sort_func(name_sorter)
         self.widgets['import_tree'].get_model().get_model().set_sort_column_id(
             IMPORT_COLUMN_NAME, Gtk.SortType.ASCENDING
         )
