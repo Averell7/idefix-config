@@ -80,6 +80,27 @@ def get_config(filename, password=DEFAULT_KEY):
     return decrypt_config(parser, password)
 
 
+def requires_password(configname):
+    if not configname:
+        configname = get_config_path('confix.cfg')
+    parser = ConfigParser(interpolation=None, default_section='__DEFAULT')
+    parser.read(configname)
+    if parser.has_section('__options'):
+        return 'password' in parser['__options']
+    return False
+
+
+def test_decrypt_config(configname, password):
+    if not configname:
+        configname = get_config_path('confix.cfg')
+    parser = ConfigParser(interpolation=None, default_section='__DEFAULT')
+    parser.read(configname)
+    if parser.has_section('__options'):
+        return decrypt_password(parser['__options'].get('password'), password) == password
+
+    return True
+
+
 class ConfigProfile:
     """Read and write different configuration profiles"""
 
