@@ -44,7 +44,7 @@ from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
     EMPTY_STORE, SignalHandler, get_config_path, ip_address_test,
-    ask_text)
+    ask_text, PasswordDialog)
 from icons import (
     internet_full_icon, internet_filtered_icon, internet_denied_icon
 )
@@ -52,7 +52,7 @@ from proxy_users import ProxyUsers
 from proxy_group import ProxyGroup
 from firewall import Firewall
 from users import Users
-from config_profile import ConfigProfile
+from config_profile import ConfigProfile, requires_password, test_decrypt_config, encrypt_password, DEFAULT_KEY
 from assistant import Assistant
 from json_config import ImportJsonDialog, ExportJsonDialog, ImportJsonFromIdefix, ImportJsonFromFTP
 
@@ -334,6 +334,11 @@ class Confix:
         filter_tab = self.profiles.config['__options'].get('filter_tab', 0) == '1'
         if filter_tab:
             self.arw['notebook3'].set_current_page(1)
+
+        password_option = self.profiles.config['__options'].get('password')
+        if password_option:
+            self.arw['option_password_check'].set_active(True)
+            self.arw['option_password_entry'].set_text(config_password)
 
         developper_menu = self.profiles.config['__options'].get('developper_menu', 0) == '1'
         if developper_menu is False:
@@ -840,6 +845,11 @@ class Confix:
     def save_options(self, widget):
         if self.block_signals:
             return
+
+        if self.arw['option_password_check'].get_active() and not self.arw['option_password_entry'].get_text():
+            showwarning(_("No Password"), _("Please enter a password"))
+            return
+
         gui_check = self.arw['option_checkbox_gui_check'].get_active()
         filter_tab = self.arw['option_filter_tab_check'].get_active()
         auto_load = self.arw['menu_autoload_check'].get_active()
@@ -851,6 +861,16 @@ class Confix:
             'auto_load': '1' if auto_load else '0',
             'developper_menu': '1' if developper_menu else '0',
         }
+
+        if self.arw['option_password_check'].get_active():
+            self.profiles.config['__options']['password'] = encrypt_password(
+                self.arw['option_password_entry'].get_text(),
+                self.arw['option_password_entry'].get_text()
+            )
+            self.profiles.password = self.arw['option_password_entry'].get_text()
+        else:
+            self.profiles.password = DEFAULT_KEY
+            self.arw['option_password_entry'].set_text('')
 
         if gui_check:
             self.proxy_users.set_gui('check')
@@ -875,7 +895,11 @@ class Confix:
         self.arw['option_developper_check'].set_active(
             self.profiles.config['__options'].get('developper_menu', 0) == '1'
         )
+
         self.arw['options_window'].show_all()
+
+    def toggle_password_entry(self, widget):
+        self.arw['option_password_entry'].set_sensitive(widget.get_active())
 
     """ User Management """
 
@@ -1157,17 +1181,6 @@ class Confix:
 if __name__ == "__main__":
     global win, parser, configname, load_locale
 
-    """
-    parser = myConfigParser()
-    idefix_config = parser.read(get_config_path('confix.cfg'), "conf")
-
-    if not idefix_config:
-        # Try write the default configuration
-        path = write_default_config()
-        idefix_config = parser.read(path, "conf")
-        configname = 'default'
-    """
-
     # Get the configuration
     if len(sys.argv) > 1:  # if the config is indicated on the command line
         if len(sys.argv[1].strip()) > 0:
@@ -1175,9 +1188,22 @@ if __name__ == "__main__":
     else:
         configname = ""
 
-    #dialog = PasswordDialog()
-    #password = dialog.run()
     password = ""
+
+    if requires_password(configname):
+        dialog = PasswordDialog()
+        password = dialog.run()
+        while password:
+            if test_decrypt_config(configname, password):
+                break
+            showwarning(_("Password"), _("Entered password is incorrect"))
+            password = dialog.run()
+
+        if not password:
+            showwarning(_("Cancelling"), _("No password entered, quitting"))
+            sys.exit(1)
+
+        dialog.destroy()
 
     win = Confix(configname, password)
     gtk.main()

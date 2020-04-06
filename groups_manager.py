@@ -5,7 +5,7 @@ from collections import defaultdict, OrderedDict
 from gi.repository import Gtk, Gdk
 
 from repository import fetch_repository_categories, search_repository_groups, upload_group
-from util import showwarning, askyesno, ask_text
+from util import showwarning, askyesno, ask_text, name_sorter
 
 IMPORT_COLUMN_SELECTED = 0
 IMPORT_COLUMN_NAME = 1
@@ -81,6 +81,7 @@ class GroupManager:
         self.groups_changed = False
         self.buffer = None
         self.imported_groups = False
+        self.widgets['groups_tree'].get_model().set_default_sort_func(name_sorter)
         self.widgets['import_tree'].get_model().get_model().set_sort_column_id(
             IMPORT_COLUMN_NAME, Gtk.SortType.ASCENDING
         )

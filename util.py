@@ -65,18 +65,27 @@ class PasswordDialog:
     def __init__(self):
         # dialog = gtk.Dialog(title=None, parent=None, flags=0, buttons=None)
         self.dialog = gtk.Dialog(title='Config Password', parent=None, flags=gtk.DialogFlags.MODAL,
-                                 buttons=("OK", 1, "Cancel", 0))
+                                 buttons=("OK", gtk.ResponseType.OK, "Cancel", gtk.ResponseType.CANCEL))
         self.entry = gtk.Entry()
         self.entry.set_visibility(False)
-        # self.entry.set_invisible_char('*')
+        self.dialog.vbox.pack_start(
+            Gtk.Label(_("Your configuration is password protected.\nPlease enter password below:")), 0, 0, 0
+        )
         self.dialog.vbox.pack_start(self.entry, 0, 0, 0)
         self.dialog.show_all()
 
     def run(self):
-        self.dialog.run()
+        self.dialog.show_all()
+        self.entry.set_text('')
+        r = self.dialog.run()
+        if r == gtk.ResponseType.CANCEL:
+            return None
         data = self.entry.get_text()
-        self.dialog.destroy()
+        self.dialog.hide()
         return data
+
+    def destroy(self):
+        self.dialog.destroy()
 
 
 def print_except():
@@ -390,3 +399,15 @@ def write_default_config():
 # LOCALISATION ############################################################
 ###########################################################################
 elib_intl3.install("confix", "share/locale")
+
+
+def name_sorter(model, a, b, data):
+    namea = model.get_value(a, 0)
+    nameb = model.get_value(b, 0)
+
+    if namea == nameb:
+        return 0
+    elif namea and nameb and namea > nameb:
+        return 1
+    else:
+        return -1
