@@ -567,6 +567,12 @@ class Assistant:
             if hide_assistant:
                 self.arw2["create_user_window"].hide()
             self.reset_assistant()
+
+            # If connected, then save
+            if self.controller.ftp_config:
+                # Save config
+                self.controller.build_files()
+
             return
         else:
             # create user
@@ -650,6 +656,11 @@ class Assistant:
         if hide_assistant:
             self.arw2["create_user_window"].hide()
         self.reset_assistant()
+
+        # If connected, then save
+        if self.controller.ftp_config:
+            # Save config
+            self.controller.build_files()
 
     def reset_assistant(self, widget = None):
         self.arw2['create_user_finish_button'].set_label(_("Finish"))
