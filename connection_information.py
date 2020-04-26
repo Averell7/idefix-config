@@ -10,6 +10,8 @@ import time
 from collections import OrderedDict
 from concurrent.futures.thread import ThreadPoolExecutor
 
+import gi
+gi.require_version('Gtk', '3.0')   # to prevent a warning message
 from gi.repository import Gtk
 
 from domain_util import extract_domain_parts, extract_domain
@@ -298,9 +300,11 @@ class Information:
             self.controller.arw["network_summary_status"].set_text(_("Ping gateway from Idefix "))
             while Gtk.events_pending():
                 Gtk.main_iteration()
-            ping_data = json.loads(self.get_infos("ping"))
+            ping_info = self.get_infos("ping")
+
             self.arw["network_summary_spinner"].stop()
-            if ping_data:
+            if ping_info:
+                ping_data = json.loads(ping_info)
                 message = "\n<b>Internet connexion : for %s </b>\n" % self.controller.ftp_config["server"]
                 for test in ping_data:
                     message1 = "ping %s (%s) : " % (test, ping_data[test]["id"])

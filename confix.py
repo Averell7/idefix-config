@@ -1,6 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.4.6 - improved create user assistant and first use assistant
+# version 2.4.5 - password protection
 # version 2.4.4 - bug fixes
 # version 2.4.3 - Improve Informations/unbound log
 # version 2.4.2 - Why...
@@ -61,7 +63,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog, ImportJsonFromIdefix
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.4.4"
+version = "2.4.6"
 
 
 gtk = Gtk
