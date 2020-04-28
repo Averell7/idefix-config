@@ -745,18 +745,7 @@ class Confix:
 ##            )
 ##        self.arw['internet_time_condition'].set_sensitive(self.users_store[self.iter_user][7])
 
-    def update_time(self, widget, x=None):
-        # TODO  this function is not very well written.
-        if widget.name in ["filter_time_condition_days", "filter_time_condition_from", "filter_time_condition_to"]:
-            time_condition = self.arw["filter_time_condition_days"].get_text() + " "
-            if time_condition.strip() == "":
-                time_condition = "1234567 "
-            time_condition += self.arw["filter_time_condition_from"].get_text().strip() + "-"
-            time_condition += self.arw["filter_time_condition_to"].get_text().strip()
-            if time_condition == "1234567 -":
-                time_condition = ""
-            self.filter_store[self.iter_filter][3] = time_condition
-
+    def update_time(self, widget):
         if widget.name in ["users_time_days_email", "users_time_from_email", "users_time_to_email"]:
             time_condition = self.arw["users_time_days_email"].get_text() + " "
             if time_condition.strip() == "":
