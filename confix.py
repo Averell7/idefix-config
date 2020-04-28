@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.4.7 - export the three configuration files (idefix.json, idefix2_conf.json, confix.cfg)
 # version 2.4.6 - improved create user assistant and first use assistant
 # version 2.4.5 - password protection
 # version 2.4.4 - bug fixes
@@ -63,7 +64,7 @@ from json_config import ImportJsonDialog, ExportJsonDialog, ImportJsonFromIdefix
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.4.6"
+version = "2.4.7"
 
 
 gtk = Gtk
@@ -514,7 +515,8 @@ class Confix:
         self.export_json.run(offline = True)
 
     def import_config(self, widget):
-        self.import_json.run()
+        param = widget.name.split("@")[1]
+        self.import_json.run(param)
 
     def import_config_from_idefix_backup(self, widget):
         self.import_json_from_idefix.run()

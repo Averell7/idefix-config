@@ -225,6 +225,7 @@ def ask_text(parent, message, default='', password=False):
     d.vbox.pack_end(entry, True, True, 0)
     entry.connect('activate', lambda _: d.response(Gtk.ResponseType.OK))
     d.set_default_response(Gtk.ResponseType.OK)
+    d.set_keep_above(True)
 
     r = d.run()
     text = entry.get_text()

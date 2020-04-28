@@ -4,7 +4,9 @@ import json
 import re
 import webbrowser
 
-import requests
+# import requests
+import http_client as requests
+from http_client import get
 from gi.repository import Gtk, GObject
 
 from ftp_client import FTPError, ftp_connect
@@ -132,7 +134,7 @@ class Assistant:
         """Remove a user request"""
         if self.controller.ftp_config and ip_address_test(self.controller.ftp_config["server"]):
             ip = self.controller.ftp_config["server"]
-            requests.get('http://' + ip + '/request_account_json.php', {
+            requests.get(ip, '/request_account_json.php', {
                 'usercode': username,
                 'reset': 'true',
             }, timeout=15)
@@ -660,7 +662,7 @@ class Assistant:
         # If connected, then save
         if self.controller.ftp_config:
             # Save config
-            self.controller.build_files()
+            self.controller.build_files("")
 
     def reset_assistant(self, widget = None):
         self.arw2['create_user_finish_button'].set_label(_("Finish"))
@@ -817,9 +819,8 @@ class Assistant:
         self.controller.profiles.refresh_saved_profiles()
         self.controller.profiles.profile_save_config()
         self.arw["configname"].set_text("default")
-        self.controller.open_connexion_profile()
         self.arw2['first_use_assistant'].hide()
-
+        self.controller.open_connexion_profile()
     def cancel_configuration(self, *args):
         self.arw2['first_use_assistant'].set_current_page(0)
         self.arw2['first_use_assistant'].hide()
@@ -929,7 +930,7 @@ class Assistant:
             showwarning(_('Could not detect'), _("Could not contact the idefix server"))
             return
 
-        response = requests.get('http://' + host + '/request_account.json', timeout=15)
+        response = requests.get(host, '/request_account.json', timeout=15)
         if not response.ok:
             showwarning(_('Could not detect'), _("Could not contact the idefix server"))
             return

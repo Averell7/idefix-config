@@ -9,7 +9,9 @@ from gi.repository import Gtk
 
 from util import get_config_path, alert
 from connection_information import Information
-from ftp_client import ftp_connect, ftp_get
+from ftp_client import ftp_connect, ftp_get, ftp_send
+
+
 
 
 class ImportJsonDialog:
@@ -20,9 +22,10 @@ class ImportJsonDialog:
 
         self.file_filter = Gtk.FileFilter()
         self.file_filter.add_pattern('*.json')
+        self.file_filter.add_pattern('*.zip')
         self.configpath = ""
 
-    def run(self, offline = False):
+    def run(self, type1, offline = False):
         if not offline:
             if not hasattr(self.controller, 'ftp') or not self.controller.ftp:
                 alert(_("You cannot Restore a configuration without a connexion. \nIf you want to work offline, \nuse «Open Configuration on disk...» \nin the developper menu"))
@@ -38,11 +41,30 @@ class ImportJsonDialog:
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
             self.configpath = dialog.get_filename()
-            configname = os.path.split(self.configpath)[1]
-            config = json.load(
-                open(self.configpath, 'r'),
-                object_pairs_hook=OrderedDict
-            )
+            zf = zipfile.ZipFile(self.configpath)
+            if type1 == "permissions":
+                data1 = zf.open("idefix.json").read().decode("ascii")
+                configname = os.path.split(self.configpath)[1]
+                config = json.loads(
+                    data1,
+                    object_pairs_hook=OrderedDict
+                )
+                self.controller.config = config
+                self.controller.update()
+                self.update_gui()
+
+            elif type1 == "network":
+                # TODO : how to get rid of the Windows newlines ?
+                file1 = zf.open("idefix2_conf.json")
+                ftp1 = self.controller.ftp_config
+                ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
+                ftp_send(ftp, file_object=file1, dest_name="idefix2_conf.json" )
+                command_f = io.BytesIO()
+                command_f.write(bytes("restore_config", "utf-8"))
+                command_f.seek(0)
+                # send command
+                ftp.storlines('STOR trigger', command_f)
+                ftp.close()
 
             if offline :
                 self.controller.offline = True
@@ -57,9 +79,7 @@ class ImportJsonDialog:
                 self.controller.arw["configname"].set_text(configname)
 
 
-            self.controller.config = config
-            self.controller.update()
-            self.update_gui()
+
         dialog.destroy()
 
     def update_gui(self):
@@ -212,9 +232,19 @@ class ExportJsonDialog:
                 configpath =    dialog.get_filename()
             dialog.destroy()
 
-        f1 = open(configpath, "w", newline = "\n")
+##        f1 = open(configpath, "w", newline = "\n")
         config2 = self.controller.rebuild_config()
-        f1.write(json.dumps(config2, indent = 3))
-        f1.close()
-        alert(_("Configuration saved"))
+        config2_str = json.dumps(config2, indent = 3)
+##        f1.write(config2_str)
+##        f1.close()
 
+
+        # temporary code to be improved. We save here the three configuration files
+        zf = zipfile.ZipFile(os.path.splitext(configpath)[0] + ".zip", 'w')
+        x = Information.get_infos(self, "get_conf")
+        conf_list = json.loads(x)
+        zf.writestr("idefix2_conf.json", conf_list["idefix2_conf.json"])
+        zf.writestr("idefix.json", config2_str)
+        zf.write(get_config_path('confix.cfg'), 'confix.cfg')
+        zf.close()
+        alert(_("Configuration saved"))
