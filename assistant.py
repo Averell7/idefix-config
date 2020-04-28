@@ -4,11 +4,10 @@ import json
 import re
 import webbrowser
 
-# import requests
-import http_client as requests
-from http_client import get
 from gi.repository import Gtk, GObject
 
+# import requests
+import http_client as requests
 from ftp_client import FTPError, ftp_connect
 from util import mac_address_test, ip_address_test, showwarning, ask_text
 
@@ -921,21 +920,22 @@ class Assistant:
         if self.controller.ftp_config and self.controller.ftp_config.get('server'):
             host = self.controller.ftp_config['server']
 
-        response = requests.post('http://' + host + '/request_account_json.php', {
+        response = requests.post(host, '/request_account_json.php', {
             'usercode': code,
             'reset': '',
         }, timeout=15)
 
-        if not response.ok:
+        if not response:
             showwarning(_('Could not detect'), _("Could not contact the idefix server"))
             return
 
         response = requests.get(host, '/request_account.json', timeout=15)
-        if not response.ok:
+        if not response:
             showwarning(_('Could not detect'), _("Could not contact the idefix server"))
             return
+        else:
+            data = json.loads(response)
 
-        data = response.json()
         for mac, user in data['account'].items():
             if user == code:
                 # Retrieve the mac address
