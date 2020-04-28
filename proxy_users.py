@@ -11,6 +11,7 @@ from util import (
 # 3 - proxy
 class ProxyUsers:
     mem_time = 0
+    block_signals = False
 
     def __init__(self, arw, controller):
         self.arw = arw
@@ -382,7 +383,7 @@ class ProxyUsers:
             self.arw["filter_time_condition_to"].set_text("")
             self.arw["time_button_label"].set_text(_("All day\nand week"))
 
-        elif len(data1) > 8:
+        elif ' ' in data1:
             try:
                 tmp1 = data1.split()
                 tmp2 = tmp1[1].split("-")
@@ -491,9 +492,61 @@ class ProxyUsers:
 
     def show_time_conditions_window(self, widget):
         self.arw["filter_time_conditions"].show()
+
     def hide_time_conditions_window(self, widget):
         self.arw["filter_time_conditions"].hide()
-        self.load_proxy_user("","")
+        self.load_proxy_user("", "")
+
+    def update_time_resort(self, widget, *args):
+
+        widget.set_text(''.join(sorted(filter(lambda x: x.isdigit(), widget.get_text()))))
+
+    def update_time_days(self, widget, *args):
+        """Update the checkboxes based on the user's input"""
+
+        self.block_signals = True
+        for n in range(1, 8):
+            self.arw['time_checkbutton' + str(n)].set_active(False)
+
+        for char in widget.get_text():
+            try:
+                n = int(char)
+            except ValueError:
+                continue
+
+            checkbox = self.arw.get('time_checkbutton' + str(n))
+            if checkbox:
+                checkbox.set_active(True)
+
+        self.block_signals = False
+
+    def update_time_checkbox(self, widget):
+        """Update the text box based on the checkboxes"""
+        if self.block_signals:
+            return
+
+        text = ''
+
+        for n in range(1, 8):
+            if self.arw['time_checkbutton' + str(n)].get_active():
+                text += str(n)
+
+        self.arw['filter_time_condition_days'].set_text(text)
+
+    def save_time_conditions_window(self, widget):
+        time_condition = self.arw["filter_time_condition_days"].get_text() + " "
+        if time_condition.strip() == "":
+            time_condition = "1234567 "
+
+        time_condition += self.arw["filter_time_condition_from"].get_text().strip() + "-"
+        time_condition += self.arw["filter_time_condition_to"].get_text().strip()
+        if time_condition == "1234567 -":
+            time_condition = ""
+
+        self.filter_store[self.controller.iter_filter][3] = time_condition
+
+        self.arw["filter_time_conditions"].hide()
+        self.load_proxy_user("", "")
 
     def proxy_profile_select(self, widget, event):
         if event.type == Gdk.EventType.BUTTON_RELEASE:

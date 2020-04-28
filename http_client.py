@@ -31,7 +31,6 @@ def post(ip, address, data, timeout=15):
         data = {}
 
     data = urlencode(data)
-    address = address + "?" + data
     print("====>", address)
 
     h1 = http.client.HTTPConnection(ip, timeout=timeout)

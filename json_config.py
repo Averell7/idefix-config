@@ -1,17 +1,14 @@
-import json
-import shutil
-import os
 import io
-from collections import OrderedDict
+import json
+import os
 import zipfile
+from collections import OrderedDict
 
 from gi.repository import Gtk
 
-from util import get_config_path, alert
 from connection_information import Information
 from ftp_client import ftp_connect, ftp_get, ftp_send
-
-
+from util import get_config_path, alert
 
 
 class ImportJsonDialog:
@@ -25,7 +22,7 @@ class ImportJsonDialog:
         self.file_filter.add_pattern('*.zip')
         self.configpath = ""
 
-    def run(self, type1, offline = False):
+    def run(self, type1='permissions', offline=False):
         if not offline:
             if not hasattr(self.controller, 'ftp') or not self.controller.ftp:
                 alert(_("You cannot Restore a configuration without a connexion. \nIf you want to work offline, \nuse «Open Configuration on disk...» \nin the developper menu"))
