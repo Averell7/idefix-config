@@ -383,7 +383,7 @@ class ProxyUsers:
             self.arw["filter_time_condition_to"].set_text("")
             self.arw["time_button_label"].set_text(_("All day\nand week"))
 
-        elif len(data1) > 8:
+        elif ' ' in data1:
             try:
                 tmp1 = data1.split()
                 tmp2 = tmp1[1].split("-")
