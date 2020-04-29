@@ -491,6 +491,21 @@ class ProxyUsers:
             self.arw['internet_filter_paned'].set_position(self.arw['internet_filter_paned'].get_allocated_height() / 2)
 
     def show_time_conditions_window(self, widget):
+        # Get the current time condition
+        time_condition = self.filter_store[self.controller.iter_filter][3]
+        self.arw['filter_time_condition_days'].set_text('')
+        self.arw['filter_time_condition_from'].set_text('')
+        self.arw['filter_time_condition_to'].set_text('')
+
+        if time_condition:
+            splitted = time_condition.split(' ')
+            self.update_time_days(text=splitted[0])
+            from_time, to_time = splitted[1].split('-')
+            self.arw['filter_time_condition_from'].set_text(from_time)
+            self.arw['filter_time_condition_to'].set_text(to_time)
+        else:
+            self.update_time_days(text='')
+
         self.arw["filter_time_conditions"].show()
 
     def hide_time_conditions_window(self, widget):
@@ -498,17 +513,19 @@ class ProxyUsers:
         self.load_proxy_user("", "")
 
     def update_time_resort(self, widget, *args):
-
         widget.set_text(''.join(sorted(filter(lambda x: x.isdigit(), widget.get_text()))))
 
-    def update_time_days(self, widget, *args):
+    def update_time_days(self, widget=None, text=None, *args):
         """Update the checkboxes based on the user's input"""
+
+        if text is None:
+            text = widget.get_text()
 
         self.block_signals = True
         for n in range(1, 8):
             self.arw['time_checkbutton' + str(n)].set_active(False)
 
-        for char in widget.get_text():
+        for char in text:
             try:
                 n = int(char)
             except ValueError:
