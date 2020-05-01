@@ -57,7 +57,7 @@ from firewall import Firewall
 from users import Users
 from config_profile import ConfigProfile, requires_password, test_decrypt_config, encrypt_password, DEFAULT_KEY
 from assistant import Assistant
-from json_config import ImportJsonDialog, ExportJsonDialog, ImportJsonFromIdefix, ImportJsonFromFTP
+from json_config import RestoreDialog, ExportJsonDialog, ImportJsonDialog
 
 ###########################################################################
 # CONFIGURATION ###########################################################
@@ -124,8 +124,9 @@ class Confix:
                 pass
 
         self.import_json = ImportJsonDialog(self.arw, self)
-        self.import_json_from_idefix = ImportJsonFromIdefix(self.arw, self)
-        self.import_json_from_ftp = ImportJsonFromFTP(self.arw, self)
+        # self.import_json_from_idefix = ImportJsonFromIdefix(self.arw, self)
+        # self.import_json_from_ftp = ImportJsonFromFTP(self.arw, self)
+        self.restore_dialog = RestoreDialog(self.arw, self)
         self.export_json = ExportJsonDialog(self.arw, self)
         self.offline = False
 
@@ -506,26 +507,26 @@ class Confix:
 
 
     def open_config(self, widget):
-        self.import_json.run(offline = True)
+        self.import_json.run(offline=True)
 
     def save_config(self, widget):
-        self.export_json.run(configpath = self.import_json.configpath, offline = True)
+        self.export_json.run(configpath=self.restore_dialog.configpath, offline=True, to_json=True)
 
     def save_config_as(self, widget):
-        self.export_json.run(offline = True)
+        self.export_json.run(offline=True, to_json=True)
 
     def import_config(self, widget):
-        param = widget.name.split("@")[1]
-        self.import_json.run(param)
+        self.restore_dialog.run(source='local', offline=True)
 
     def import_config_from_idefix_backup(self, widget):
-        self.import_json_from_idefix.run()
+        self.restore_dialog.run(source='idefix')
 
     def import_config_from_ftp_backup(self, widget):
-        self.import_json_from_ftp.run()
+        self.restore_dialog.run(source='ftp')
 
     def export_config(self, widget):
-        self.export_json.run()
+        offline = self.profiles.config['__options'].get('developper_menu', 0) == '1'
+        self.export_json.run(offline=offline)
 
     def show_help_colors(self, widget):
         self.arw2["help_colors_window"].show()
