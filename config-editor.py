@@ -752,7 +752,7 @@ class Confix:
         self.import_json.run()
 
     def save_config(self, widget):
-        self.export_json.run()
+        self.export_json.run(to_json=True)
 
     def show_help(self, widget):
         self.arw2["help_window"].show()
