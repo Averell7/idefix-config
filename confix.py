@@ -207,7 +207,7 @@ class Confix:
 
         self.signal_handler = SignalHandler([
             self, self.proxy_users, self.proxy_group, self.firewall, self.users, self.profiles, self.assistant,
-            self.information
+            self.information, self.information.services
         ])
         self.widgets.connect_signals(self.signal_handler)
         self.widgets2.connect_signals(self.signal_handler)
@@ -516,7 +516,7 @@ class Confix:
         self.export_json.run(offline=True, to_json=True)
 
     def import_config(self, widget):
-        self.restore_dialog.run(source='local', offline=True)
+        self.restore_dialog.run(source='local')
 
     def import_config_from_idefix_backup(self, widget):
         self.restore_dialog.run(source='idefix')

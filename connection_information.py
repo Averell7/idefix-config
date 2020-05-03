@@ -11,6 +11,9 @@ from collections import OrderedDict
 from concurrent.futures.thread import ThreadPoolExecutor
 
 import gi
+
+from services import ServicesPanel
+
 gi.require_version('Gtk', '3.0')   # to prevent a warning message
 from gi.repository import Gtk
 
@@ -70,6 +73,7 @@ class Information:
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
+        self.services = ServicesPanel(arw, controller, self)
 
     # the two following functions come from unbound-filter.py, and are slightly modified to add informations in the return
     def is_time_allowed(self, time_condition):
@@ -598,18 +602,92 @@ class Information:
         else:
             # escape characters incompatible with pango markup
             result = me(result)
-            if command == "mac":
-                result2 = result.split("\n")
-                result3 = ""
-                for line in result2:
-                    if "expired" in line :
-                        line = '<span foreground="red">' + line.strip() + "</span>"
-                    elif "active" in line :
-                        line = '<span foreground="green">' + line.strip() + "</span>"
-                    result3 += line +"\n"
-                result = result3
-
             display_label.set_markup(result)
+
+    def view_connected_users(self, widget):
+        """Gets the connected users and displays it in a list for the user"""
+        self.arw['why_stack'].set_visible_child_name('connected_users')
+        self.arw['add_connected_user_button'].set_sensitive(False)
+        self.arw['update_connected_user_button'].set_sensitive(False)
+        self.arw['connected_users_store'].clear()
+        spinner = self.arw["infos_spinner"]
+        spinner.start()
+        result = self.get_infos('mac')
+        spinner.stop()
+
+        line_regex = re.compile(
+            r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*\-\s*(([0-9a-f]{2}:){5}[0-9a-f]{2})\s*\-\s*([a-z]+)\s*(\-\s"(.+)"\s*)?\((.+)\)'
+        )
+
+        for line in result.split("\n"):
+            groups = line_regex.match(line)
+            if not groups:
+                continue
+
+            ip_address = groups.group(1)
+            mac_address = groups.group(2)
+            status = groups.group(4)
+            hostname = groups.group(6) or ''
+            user = groups.group(7).strip()
+
+            if not user:
+                for name, addresses in self.controller.maclist.items():
+                    if mac_address in addresses:
+                        user = name
+                        break
+
+            colour = None
+            if status == 'expired':
+                colour = 'red'
+            elif status == 'active':
+                colour = 'green'
+
+            self.arw['connected_users_store'].append(
+                (mac_address, ip_address, colour, status, user, hostname)
+            )
+
+    def change_connected_user_selection(self, widget):
+        """Update the sensitivites of the buttons for the selected user"""
+
+        self.arw['add_connected_user_button'].set_sensitive(False)
+        self.arw['update_connected_user_button'].set_sensitive(False)
+
+        model, iter = widget.get_selected()
+
+        if not iter:
+            return
+
+        if not model.get_value(iter, 4):
+            self.arw['add_connected_user_button'].set_sensitive(True)
+            self.arw['update_connected_user_button'].set_sensitive(True)
+
+    def update_selected_connected_user(self, widget):
+        """Add the selected mac address to an existing user"""
+        model, iter = self.arw['connected_users_list'].get_selection().get_selected()
+        mac_address = model.get_value(iter, 0)
+
+        self.refresh_users()
+        response = self.arw['select_user_dialog'].run()
+        self.arw['select_user_dialog'].hide()
+        if response == Gtk.ResponseType.OK:
+            model, iter = self.arw['select_user_view'].get_selection().get_selected()
+            if not iter:
+                return
+            username = model.get_value(iter, 0)
+            self.controller.maclist.get(username, []).append(mac_address)
+
+            showwarning(_("User updated"), _("Mac address was added to the user"))
+            self.controller.build_files(None)
+
+    def add_selected_connected_user(self, widget):
+        """Open the assistant with the mac address already specified"""
+        model, iter = self.arw['connected_users_list'].get_selection().get_selected()
+        mac_address = model.get_value(iter, 0)
+        self.controller.assistant.show_assistant_create_with_mac(mac_address)
+
+    def show_services_window(self, widget):
+        """Show the services control panel"""
+        self.services.show_services()
 
     def search_filter_log(self, widget):
         """Search the filter log given the user input"""
@@ -669,9 +747,7 @@ class Information:
         self.arw["infos_label"].set_markup(data1)
         ftp.close()
 
-    def check_permissions(self, widget):
-        """Run the permissions check after the check permission dialog has been completed"""
-
+    def refresh_users(self):
         # Recreate the store
         self.arw['permission_user_store'].clear()
         for item in self.controller.users.users_store:
@@ -679,6 +755,10 @@ class Information:
                 self.arw['permission_user_store'].append([user[0]])
                 for subuser in user.iterchildren():
                     self.arw['permission_user_store'].append([subuser[0]])
+
+    def check_permissions(self, widget):
+        """Run the permissions check after the check permission dialog has been completed"""
+        self.refresh_users()
 
         # Show the selection dialog
         dialog = self.arw['permission_check_dialog']
