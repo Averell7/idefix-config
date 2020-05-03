@@ -207,7 +207,7 @@ class Confix:
 
         self.signal_handler = SignalHandler([
             self, self.proxy_users, self.proxy_group, self.firewall, self.users, self.profiles, self.assistant,
-            self.information
+            self.information, self.information.services
         ])
         self.widgets.connect_signals(self.signal_handler)
         self.widgets2.connect_signals(self.signal_handler)

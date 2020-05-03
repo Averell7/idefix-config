@@ -12,6 +12,8 @@ from concurrent.futures.thread import ThreadPoolExecutor
 
 import gi
 
+from services import ServicesPanel
+
 gi.require_version('Gtk', '3.0')   # to prevent a warning message
 from gi.repository import Gtk
 
@@ -71,6 +73,7 @@ class Information:
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
+        self.services = ServicesPanel(arw, controller, self)
 
     # the two following functions come from unbound-filter.py, and are slightly modified to add informations in the return
     def is_time_allowed(self, time_condition):
@@ -681,6 +684,10 @@ class Information:
         model, iter = self.arw['connected_users_list'].get_selection().get_selected()
         mac_address = model.get_value(iter, 0)
         self.controller.assistant.show_assistant_create_with_mac(mac_address)
+
+    def show_services_window(self, widget):
+        """Show the services control panel"""
+        self.services.show_services()
 
     def search_filter_log(self, widget):
         """Search the filter log given the user input"""
