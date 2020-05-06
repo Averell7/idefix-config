@@ -195,7 +195,7 @@ class ProxyUsers:
     def add_rule_below(self, widget):
         # add rule in the proxy tab
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
-        x = ask_text(self.arw["window1"], "Name of the new rule :", "")
+        x = ask_text(self.arw["window1"], _("Name of the new rule :"), "")
         if x is None:
             return
         else:
@@ -233,7 +233,7 @@ class ProxyUsers:
         if name not in names:
             return
 
-        res = askyesno("Remove user", "Do you want to remove user %s?" % name)
+        res = askyesno(_("Remove user"), _("Do you want to remove user %s?") % name)
         if not res:
             return
 

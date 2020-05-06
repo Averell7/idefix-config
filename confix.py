@@ -1,6 +1,9 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+
+# version 2.4.9 - control panel for services
+# version 2.4.8 - Informations "connected users" allow to create user
 # version 2.4.7 - export the three configuration files (idefix.json, idefix2_conf.json, confix.cfg)
 # version 2.4.6 - improved create user assistant and first use assistant
 # version 2.4.5 - password protection
@@ -64,7 +67,7 @@ from json_config import RestoreDialog, ExportJsonDialog, ImportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.4.7"
+version = "2.4.9"
 
 
 gtk = Gtk

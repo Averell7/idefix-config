@@ -162,8 +162,11 @@ class Assistant:
                 if res.status == 200:
                     data1 = res.read().decode("cp850")
                     requests = json.loads(data1)
-                    for mac, user in requests["account"].items():
-                        self.arw2["requests_liststore"].append([user, mac])
+                    if len(requests["account"]) > 0:   # necessary, because if the dictionary is empty, 
+                                                       # json encodes [] instead of {}, and this will create the error : 
+                                                       # list object has no attribute "items"
+                        for mac, user in requests["account"].items():
+                            self.arw2["requests_liststore"].append([user, mac])
                 return
             except FTPError:
                 print("No ftp connection")
@@ -802,10 +805,11 @@ class Assistant:
         self.arw2['first_use_assistant'].set_current_page(4)
         self.arw2['first_use_assistant'].commit()
         data = self.controller.information.get_infos('ftp', decode_json=True)
-        if data:
+        if data and (data.get('ftp') != "" or data.get('ftp') != "" or data.get('ftp') != ""):
             # Show page 4 with populated data
             self.arw2['first_use_assistant'].set_current_page(5)
             self.arw2['first_use_assistant'].commit()
+            self.arw2['ftp_config_name'].set_text("Idefix in the cloud")
             self.arw2['ftp_config_host'].set_text(data.get('ftp'))
             self.arw2['ftp_config_login'].set_text(data.get('login'))
             self.arw2['ftp_config_password'].set_text(data.get('password'))

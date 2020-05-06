@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-05-02 03:26+0200\n"
+"POT-Creation-Date: 2020-05-05 18:58+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,116 +16,491 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: confix.py:91
-msgid "No ftp connection"
-msgstr ""
-
-#: confix.py:99 confix.py:104
-#, python-format
-msgid "We got an error with %s. Is it present on the server?"
-msgstr ""
-
-#: confix.py:113
-msgid "received OK."
-msgstr ""
-
-#: confix.py:119
-msgid "could not get "
-msgstr ""
-
-#: confix.py:197 confix.glade:1157
+#: confix.py:139 confix.glade:1603
 msgid "Confix"
 msgstr ""
 
-#: confix.py:302
-msgid "Update Configuration"
+#: confix.py:279
+msgid "Groups Drag and Drop"
 msgstr ""
 
-#: confix.py:302
-msgid "Could not connect to FTP. Edit Configuration?"
+#: confix.py:287
+msgid "Users Drag and Drop"
 msgstr ""
 
-#: confix.py:306
-msgid "Restart"
+#: confix.py:293
+msgid "Firewall"
 msgstr ""
 
-#: confix.py:306
-msgid "Please restart idefix to use new configuration"
+#: confix.py:330 confix.glade:2440 confix.glade:2738
+msgid "Users"
 msgstr ""
 
-#: confix.py:340
+#: confix.py:400
+#, python-format
+msgid ""
+"Could not connect to %s. \n"
+"Verify your cables or your configuration."
+msgstr ""
+
+#: confix.py:434
+msgid "unknown"
+msgstr ""
+
+#: confix.py:462
+msgid "Enter name for configuration"
+msgstr ""
+
+#: confix.py:500
 msgid "No user data"
 msgstr ""
 
-#: confix.py:341
+#: confix.py:501
 msgid ""
 "There is no user data present. \n"
 "Do you want to create standard categories ?"
 msgstr ""
 
-#: confix.py:377
-msgid "Groups Drag and Drop"
+#: confix.py:847
+msgid "No Password"
 msgstr ""
 
-#: confix.py:383
-msgid "Users Drag and Drop"
+#: confix.py:847
+msgid "Please enter a password"
 msgstr ""
 
-#: confix.py:389
-msgid "Firewall"
+#: confix.py:994
+#, python-format
+msgid "User %s has no mac address !"
 msgstr ""
 
-#: confix.py:406 confix.glade:361 confix.glade:617
-msgid "---"
-msgstr ""
-
-#: confix.py:1082
+#: confix.py:1073
 msgid "No FTP connexion"
 msgstr ""
 
-#: confix.py:1093
+#: confix.py:1080
 msgid " sent\n"
 msgstr ""
 
-#: firewall.py:52 proxy_users.py:68
+#: confix.py:1104
+msgid "Save and Quit"
+msgstr ""
+
+#: confix.py:1105
+msgid "Quit without saving"
+msgstr ""
+
+#: confix.py:1106
+msgid ""
+"Data has been changed. \n"
+"Do you want to save your changes ?"
+msgstr ""
+
+#: confix.py:1196 confix.glade:5396 assistant.glade:852
+msgid "Password"
+msgstr ""
+
+#: confix.py:1196
+msgid "Entered password is incorrect"
+msgstr ""
+
+#: confix.py:1200
+msgid "Cancelling"
+msgstr ""
+
+#: confix.py:1200
+msgid "No password entered, quitting"
+msgstr ""
+
+#: assistant.py:48 assistant.py:75 firewall.py:55 proxy_users.py:68
 msgid "Key"
 msgstr ""
 
-#: firewall.py:57
+#: assistant.py:51 assistant.py:80 confix.glade:360 confix.glade:715
+#: confix.glade:4274
+msgid "---"
+msgstr ""
+
+#: assistant.py:93 confix.glade:3534
+msgid "User"
+msgstr ""
+
+#: assistant.py:174
+msgid "Not Connected"
+msgstr ""
+
+#: assistant.py:174
+msgid "Plese connect to idefix first"
+msgstr ""
+
+#: assistant.py:192 assistant.py:668 assistant.glade:1064
+msgid "Finish"
+msgstr ""
+
+#: assistant.py:193 assistant.py:669 assistant.glade:1079
+msgid "Next"
+msgstr ""
+
+#: assistant.py:215
+msgid "Save & Close"
+msgstr ""
+
+#: assistant.py:216
+msgid "Save & New"
+msgstr ""
+
+#: assistant.py:222
+msgid " (New User)"
+msgstr ""
+
+#: assistant.py:224
+msgid " (Adding to Existing User)"
+msgstr ""
+
+#: assistant.py:229
+msgid "Open (Allow all traffic)"
+msgstr ""
+
+#: assistant.py:231
+msgid "No Internet Access"
+msgstr ""
+
+#: assistant.py:233
+msgid "Filtered Internet"
+msgstr ""
+
+#: assistant.py:238
+msgid " (New Rule)"
+msgstr ""
+
+#: assistant.py:250
+msgid "Default"
+msgstr ""
+
+#: assistant.py:290 assistant.py:293
+msgid "Select a user"
+msgstr ""
+
+#: assistant.py:290
+msgid "You must select an existing user"
+msgstr ""
+
+#: assistant.py:293
+msgid "You must select a user rather than a category"
+msgstr ""
+
+#: assistant.py:435 groups_manager.py:353
+msgid "Error"
+msgstr ""
+
+#: assistant.py:435
+msgid "Invalid Mac address, please correct and retry"
+msgstr ""
+
+#: assistant.py:462 users.py:525
+msgid "Address Invalid"
+msgstr ""
+
+#: assistant.py:462 users.py:525
+#, python-format
+msgid ""
+"The address \n"
+"%s\n"
+" entered is not valid"
+msgstr ""
+
+#: assistant.py:466 users.py:528
+msgid "Addresses OK"
+msgstr ""
+
+#: assistant.py:466 users.py:528
+msgid "All addresses are valid"
+msgstr ""
+
+#: assistant.py:481
+msgid "Name must be given"
+msgstr ""
+
+#: assistant.py:482
+msgid "You must set a name for this user"
+msgstr ""
+
+#: assistant.py:493
+msgid "Name already used"
+msgstr ""
+
+#: assistant.py:494
+#, python-format
+msgid ""
+"The name %s is already in use.\n"
+"Please choose another one."
+msgstr ""
+
+#: assistant.py:499
+#, python-format
+msgid ""
+"%s will have a filtered Web access.\n"
+"Do you want to create a specific access rule for him ?"
+msgstr ""
+
+#: assistant.py:695
+msgid "You must be connected to idefix to see this list"
+msgstr ""
+
+#: assistant.py:710
+msgid "Incvalid configuration"
+msgstr ""
+
+#: assistant.py:710
+msgid ""
+"You cannot experiment yourself! \n"
+" Please choose another user."
+msgstr ""
+
+#: assistant.py:776
+msgid "Enter idefix ftp password"
+msgstr ""
+
+#: assistant.py:835
+msgid "Idefix Not Found"
+msgstr ""
+
+#: assistant.py:836
+msgid ""
+"Idefix was not detected. Please make sure it is connected to this computer "
+"and try again"
+msgstr ""
+
+#: assistant.py:890
+msgid "Please select"
+msgstr ""
+
+#: assistant.py:890
+msgid "Please select an Idefix to configure"
+msgstr ""
+
+#: assistant.py:898
+msgid "Invalid Name"
+msgstr ""
+
+#: assistant.py:898
+msgid "Please enter a name"
+msgstr ""
+
+#: assistant.py:931 assistant.py:936 assistant.py:948
+msgid "Could not detect"
+msgstr ""
+
+#: assistant.py:931 assistant.py:936
+msgid "Could not contact the idefix server"
+msgstr ""
+
+#: assistant.py:948
+msgid "Could not find the MAC address"
+msgstr ""
+
+#: firewall.py:60
 msgid "Accept/Drop"
 msgstr ""
 
-#: firewall.py:60 proxy_users.py:78
+#: firewall.py:63 proxy_users.py:78
 msgid "On/Off"
 msgstr ""
 
-#: proxy_group.py:64 proxy_group.py:244
+#: groups_manager.py:100 groups_manager.py:125
+msgid "Merge"
+msgstr ""
+
+#: groups_manager.py:101 groups_manager.py:123
+msgid "Replace"
+msgstr ""
+
+#: groups_manager.py:102 groups_manager.py:127 confix.glade:4938
+#: confix.glade:5245 groups_manager.glade:251 groups_manager.glade:488
+msgid "Cancel"
+msgstr ""
+
+#: groups_manager.py:103
+msgid "Do you want to merge groups or replace existing?"
+msgstr ""
+
+#: groups_manager.py:124
+msgid "Replace all"
+msgstr ""
+
+#: groups_manager.py:126
+msgid "Merge all"
+msgstr ""
+
+#: groups_manager.py:128
+#, python-format
+msgid "Duplicate group %s found"
+msgstr ""
+
+#: groups_manager.py:215 confix.glade:4603 confix.glade:4952 confix.glade:5259
+#: groups_manager.glade:265
+msgid "Save"
+msgstr ""
+
+#: groups_manager.py:215
+msgid "Don't forget to save"
+msgstr ""
+
+#: groups_manager.py:244 groups_manager.py:261 groups_manager.py:343
+#: groups_manager.py:357
+msgid "Save Changes"
+msgstr ""
+
+#: groups_manager.py:244 groups_manager.py:261 groups_manager.py:343
+#: groups_manager.py:357
+msgid "Do you want to save your changes?"
+msgstr ""
+
+#: groups_manager.py:267
+msgid "Import File"
+msgstr ""
+
+#: groups_manager.py:270 json_config.py:30 json_config.py:128
+#: groups_manager.glade:502
+msgid "Import"
+msgstr ""
+
+#: groups_manager.py:306
+msgid "Export File"
+msgstr ""
+
+#: groups_manager.py:309 json_config.py:330 groups_manager.glade:93
+msgid "Export"
+msgstr ""
+
+#: groups_manager.py:349
+msgid "Export Group"
+msgstr ""
+
+#: groups_manager.py:349
+msgid "Are you sure you want to send this group to the repository?"
+msgstr ""
+
+#: groups_manager.py:351
+msgid "Exported"
+msgstr ""
+
+#: groups_manager.py:351
+msgid "Thank you for sending us the group details"
+msgstr ""
+
+#: groups_manager.py:353
+msgid "Please try again"
+msgstr ""
+
+#: groups_manager.py:368
+msgid "Repository"
+msgstr ""
+
+#: groups_manager.py:368
+msgid "Could not get files from server"
+msgstr ""
+
+#: groups_manager.py:580
+msgid "Add Group"
+msgstr ""
+
+#: groups_manager.py:599
+msgid "Rename Group"
+msgstr ""
+
+#: groups_manager.py:609
+msgid "Delete Group"
+msgstr ""
+
+#: groups_manager.py:609
+#, python-format
+msgid "Do you want to delete %s?"
+msgstr ""
+
+#: json_config.py:27 json_config.py:125
+msgid "Import Config"
+msgstr ""
+
+#: json_config.py:86
+msgid ""
+"You cannot Restore a configuration without a connexion. \n"
+"If you want to work offline, \n"
+"use Â«Open Configuration on disk...Â» \n"
+"in the developper menu"
+msgstr ""
+
+#: json_config.py:117
+msgid "You must choose at least one option to restore"
+msgstr ""
+
+#: json_config.py:138 json_config.py:179 json_config.py:212
+msgid "Zip file could not be read"
+msgstr ""
+
+#: json_config.py:166
+msgid "Could not get FTP connection"
+msgstr ""
+
+#: json_config.py:236
+msgid "Permissions file does not exist in backup"
+msgstr ""
+
+#: json_config.py:248
+msgid "Network file does not exist in backup"
+msgstr ""
+
+#: json_config.py:268
+msgid "Connections file not exist in backup"
+msgstr ""
+
+#: json_config.py:285
+msgid "Some files were not restored"
+msgstr ""
+
+#: json_config.py:302
+msgid "Please restart Confix to use your restored profiles"
+msgstr ""
+
+#: json_config.py:327
+msgid "Export Config"
+msgstr ""
+
+#: json_config.py:361
+msgid "Cannot retrieve network configuration from Idefix"
+msgstr ""
+
+#: json_config.py:367
+msgid "Configuration saved"
+msgstr ""
+
+#: proxy_group.py:75 proxy_group.py:261
 msgid "(error)"
 msgstr ""
 
-#: proxy_group.py:201
+#: proxy_group.py:218
 #, python-format
 msgid "Editing %s"
 msgstr ""
 
-#: proxy_group.py:205
+#: proxy_group.py:222
 msgid "New group name"
 msgstr ""
 
-#: proxy_group.py:215
+#: proxy_group.py:232
 msgid "Enter a domain name"
 msgstr ""
 
-#: proxy_group.py:227
+#: proxy_group.py:244
 msgid "Remove domain?"
 msgstr ""
 
-#: proxy_group.py:227
+#: proxy_group.py:244
 #, python-format
 msgid "Remove domain: %s"
 msgstr ""
 
-#: proxy_group.py:234
+#: proxy_group.py:251
 msgid "Edit domain name"
 msgstr ""
 
@@ -147,42 +522,54 @@ msgid ""
 "Deny"
 msgstr ""
 
-#: proxy_users.py:368 confix.glade:2221
+#: proxy_users.py:198
+msgid "Name of the new rule :"
+msgstr ""
+
+#: proxy_users.py:266
+msgid "Not Supported"
+msgstr ""
+
+#: proxy_users.py:266
+msgid "Choosing a category is not yet supported"
+msgstr ""
+
+#: proxy_users.py:384 confix.glade:2355
 msgid ""
 "All day\n"
 "and week"
 msgstr ""
 
-#: proxy_users.py:433
+#: proxy_users.py:449
 msgid ""
 "All destinations \n"
 "allowed."
 msgstr ""
 
-#: proxy_users.py:435
+#: proxy_users.py:451
 msgid "Allowed Groups"
 msgstr ""
 
-#: proxy_users.py:436
+#: proxy_users.py:452
 msgid "Allowed Sites"
 msgstr ""
 
-#: proxy_users.py:440
+#: proxy_users.py:456
 msgid ""
 "All connections\n"
 "to Internet\n"
 "are prohibited."
 msgstr ""
 
-#: proxy_users.py:442
+#: proxy_users.py:458
 msgid "Denied Groups"
 msgstr ""
 
-#: proxy_users.py:443
+#: proxy_users.py:459
 msgid "Denied Sites"
 msgstr ""
 
-#: proxy_users.py:453
+#: proxy_users.py:471
 msgid "Mo,Tu,We,Th,Fr,Sa,Su"
 msgstr ""
 
@@ -190,101 +577,113 @@ msgstr ""
 msgid "Filename"
 msgstr ""
 
-#: users.py:229
-msgid "No valid mac address for this user !"
+#: users.py:281
+msgid "No valid mac address for this user1 !"
 msgstr ""
 
-#: users.py:236
-msgid "No mac address for this user !"
+#: users.py:290
+msgid "No mac address for this user2 !"
 msgstr ""
 
-#: users.py:264
+#: users.py:294
+msgid "Identifier"
+msgstr ""
+
+#: users.py:296
+msgid "Mac Address(es)"
+msgstr ""
+
+#: users.py:325
 msgid "Name of the new category"
 msgstr ""
 
-#: users.py:266
+#: users.py:327
 msgid "Name of the new user"
 msgstr ""
 
-#: users.py:299
+#: users.py:357 users.py:388
 msgid "User Exists"
 msgstr ""
 
-#: users.py:299
+#: users.py:357 users.py:388
 msgid "Username exists"
 msgstr ""
 
-#: users.py:319
+#: users.py:411
 msgid "Enter address"
 msgstr ""
 
-#: users.py:319
+#: users.py:411
 msgid "Please, enter the Mac or IP address for this user"
 msgstr ""
 
-#: users.py:339
+#: users.py:431
 msgid "Category Exists"
 msgstr ""
 
-#: users.py:339
+#: users.py:431
 msgid "The category name already exists"
 msgstr ""
 
-#: users.py:416
-msgid "Address Invalid"
-msgstr ""
-
-#: users.py:416
-#, python-format
-msgid ""
-"The address \n"
-"%s\n"
-" entered is not valid"
-msgstr ""
-
-#: users.py:419
-msgid "Addresses OK"
-msgstr ""
-
-#: users.py:419
-msgid "All addresses are valid"
-msgstr ""
-
-#: users.py:431
+#: users.py:542
 msgid "Summary For "
 msgstr ""
 
-#: users.py:435
-msgid "# No mac address for this user"
+#: users.py:546
+msgid "# No mac address for this user3"
 msgstr ""
 
-#: users.py:554
+#: users.py:565
+msgid ""
+"<b><span color='green' size='x-large'>Access to Internet is limited for this "
+"user</span></b>"
+msgstr ""
+
+#: users.py:568
+msgid ""
+"<b><span color='blue' size='x-large'>This user has full Internet access</"
+"span></b>"
+msgstr ""
+
+#: users.py:571
+msgid ""
+"<b><span color='red' size='x-large'>This user has no Internet access</span></"
+"b>"
+msgstr ""
+
+#: users.py:706
 msgid ""
 "The user summary is not editable. \n"
 " See the Internet Filter tab."
 msgstr ""
 
-#: users.py:555
+#: users.py:707
 msgid "Not editable"
 msgstr ""
 
-#: confix.glade:91 confix.glade:2082 confix.glade:2828
+#: util.py:72
+msgid ""
+"Your configuration is password protected.\n"
+"Please enter password below:"
+msgstr ""
+
+#: confix.glade:92 confix.glade:5340
 msgid "SAVE"
 msgstr ""
 
-#: confix.glade:111
+#: confix.glade:112
 msgid "Disabled"
 msgstr ""
 
-#: confix.glade:158
+#: confix.glade:159
 msgid "<b>Ports</b>"
 msgstr ""
 
-#: confix.glade:192 confix.glade:2397
+#: confix.glade:193 confix.glade:2532
 msgid "<b>Users</b>"
 msgstr ""
 
-#: confix.glade:222
+#: confix.glade:223
 msgid "time condition"
 msgstr ""
 
@@ -292,505 +691,761 @@ msgstr ""
 msgid "<b>Comments</b>"
 msgstr ""
 
-#: confix.glade:292
+#: confix.glade:291
 msgid "from"
 msgstr ""
 
-#: confix.glade:303
+#: confix.glade:302
 msgid "to"
 msgstr ""
 
-#: confix.glade:314
+#: confix.glade:313
 msgid "Format 12:00"
 msgstr ""
 
-#: confix.glade:379 confix.glade:550
+#: confix.glade:377
+msgid "August 2019"
+msgstr ""
+
+#: confix.glade:379
+msgid "Website (presently in French)"
+msgstr ""
+
+#: confix.glade:514
+msgid "backup"
+msgstr ""
+
+#: confix.glade:553 confix.glade:944
 msgid "edit"
 msgstr ""
 
-#: confix.glade:387 confix.glade:559
+#: confix.glade:561 confix.glade:953
 msgid "new"
 msgstr ""
 
-#: confix.glade:399
+#: confix.glade:628
+msgid "New Mac Address Configuration"
+msgstr ""
+
+#: confix.glade:658
+msgid "Create Default"
+msgstr ""
+
+#: confix.glade:672
+msgid "Create with Assistant"
+msgstr ""
+
+#: confix.glade:700
+msgid "No Configuration For Your Mac Address"
+msgstr ""
+
+#: confix.glade:727
+msgid "Your mac address was not found in the configuration. Create a new user?"
+msgstr ""
+
+#: confix.glade:798
+msgid "Configuration Finished"
+msgstr ""
+
+#: confix.glade:813
+msgid ""
+"Congratulations! You have configured this computer to have full internet "
+"access:\n"
+"\n"
+"If you have other devices (such as Tablet, Phone), you must add these mac "
+"addresses in order to use them\n"
+"\n"
+"After clicking close, you will be shown the internet filter rule created for "
+"you to edit."
+msgstr ""
+
+#: confix.glade:864
 msgid "Add New"
 msgstr ""
 
-#: confix.glade:408
+#: confix.glade:873
 msgid "Remove"
 msgstr ""
 
-#: confix.glade:452 confix.glade:542 confix.glade:861 confix.glade:3149
+#: confix.glade:917 confix.glade:936 confix.glade:1007 confix.glade:1284
 msgid "delete"
 msgstr ""
 
-#: confix.glade:579
+#: confix.glade:976
 msgid "add rule"
 msgstr ""
 
-#: confix.glade:588
+#: confix.glade:985
 msgid "delete rule"
 msgstr ""
 
-#: confix.glade:597
+#: confix.glade:994
 msgid "rename rule"
 msgstr ""
 
-#: confix.glade:653
-msgid "Comments"
+#: confix.glade:1020
+msgid "Restore Configuration"
 msgstr ""
 
-#: confix.glade:668
-msgid "from :"
+#: confix.glade:1080
+msgid ""
+"Select the file which you wish to restore, click the options to restore and "
+"click apply"
 msgstr ""
 
-#: confix.glade:679
-msgid "to :"
+#: confix.glade:1102
+msgid "Select Options to Restore:"
 msgstr ""
 
-#: confix.glade:703
-msgid "1234567"
+#: confix.glade:1118
+msgid "Permissions"
 msgstr ""
 
-#: confix.glade:715
-msgid "Days :"
+#: confix.glade:1132
+msgid "Network"
 msgstr ""
 
-#: confix.glade:724 assistant.glade:1245
-msgid "Close the window"
+#: confix.glade:1146
+msgid "Connexion Profiles"
 msgstr ""
 
-#: confix.glade:739
-msgid "What you type is automatically saved in memory."
+#: confix.glade:1223
+msgid "add user above"
 msgstr ""
 
-#: confix.glade:886 confix.glade:1193 assistant.glade:893 assistant.glade:924
-msgid "label"
+#: confix.glade:1231
+msgid "add user below"
 msgstr ""
 
-#: confix.glade:947
-msgid "Close"
+#: confix.glade:1239
+msgid "add sub user"
 msgstr ""
 
-#: confix.glade:1005
-msgid "_File"
+#: confix.glade:1248
+msgid "rename user"
 msgstr ""
 
-#: confix.glade:1016
-msgid "_Import..."
+#: confix.glade:1257
+msgid "add new category"
 msgstr ""
 
-#: confix.glade:1026
-msgid "_Export..."
+#: confix.glade:1266
+msgid "add new user"
 msgstr ""
 
-#: confix.glade:1054
-msgid "System"
+#: confix.glade:1275
+msgid "rename category"
 msgstr ""
 
-#: confix.glade:1064
-msgid "Profiles"
+#: confix.glade:1292
+msgid "move user to category..."
 msgstr ""
 
-#: confix.glade:1073
-msgid "switch interface"
+#: confix.glade:1336
+msgid "_Connection"
 msgstr ""
 
-#: confix.glade:1086
-msgid "Groups"
+#: confix.glade:1346
+msgid "_open connexion"
 msgstr ""
 
-#: confix.glade:1096
-msgid "Import Proxy Group"
+#: confix.glade:1355
+msgid "auto load last configuration"
 msgstr ""
 
-#: confix.glade:1105
-msgid "Manage groups"
+#: confix.glade:1364
+msgid "Connections Profiles"
 msgstr ""
 
-#: confix.glade:1117
-msgid "_Help"
+#: confix.glade:1379
+msgid "_Restore Configuration..."
 msgstr ""
 
-#: confix.glade:1127
-msgid "Assistant"
+#: confix.glade:1389
+msgid "from Idefix"
 msgstr ""
 
-#: confix.glade:1180
-msgid "Active configuration :"
+#: confix.glade:1398
+msgid "from FTP connection"
 msgstr ""
 
-#: confix.glade:1209 confix.glade:1794 confix.glade:2319 confix.glade:2622
-#: assistant.glade:1210
-msgid "page0"
+#: confix.glade:1407
+msgid "from file"
 msgstr ""
 
-#: confix.glade:1226
-msgid "Experimenting..."
-msgstr ""
-
-#: confix.glade:1246
-msgid "User..."
-msgstr ""
-
-#: confix.glade:1263 confix.glade:2017 confix.glade:2336 confix.glade:2639
-#: assistant.glade:1221
-msgid "page1"
-msgstr ""
-
-#: confix.glade:1434
-msgid "email"
+#: confix.glade:1420
+msgid "_Backup Configuration..."
 msgstr ""
 
 #: confix.glade:1449
+msgid "Developper"
+msgstr ""
+
+#: confix.glade:1459
+msgid "Open configuration on disk..."
+msgstr ""
+
+#: confix.glade:1468
+msgid "Save Configuration on disk..."
+msgstr ""
+
+#: confix.glade:1477
+msgid "Save Configuration as..."
+msgstr ""
+
+#: confix.glade:1490
+msgid "Tools"
+msgstr ""
+
+#: confix.glade:1500 groups_manager.glade:143
+msgid "Groups Manager"
+msgstr ""
+
+#: confix.glade:1509
+msgid "Assistants"
+msgstr ""
+
+#: confix.glade:1519
+msgid "Create user"
+msgstr ""
+
+#: confix.glade:1528
+msgid "Experiment user permissions"
+msgstr ""
+
+#: confix.glade:1541
+msgid "Network Summary"
+msgstr ""
+
+#: confix.glade:1550 confix.glade:4821
+msgid "Options"
+msgstr ""
+
+#: confix.glade:1563
+msgid "_Help"
+msgstr ""
+
+#: confix.glade:1573
+msgid "Colors"
+msgstr ""
+
+#: confix.glade:1626
+msgid "Active configuration :"
+msgstr ""
+
+#: confix.glade:1639 confix.glade:3137 confix.glade:3923 confix.glade:3998
+#: confix.glade:4683 confix.glade:4695 confix.glade:4707 confix.glade:4734
+#: confix.glade:5879 assistant.glade:258 assistant.glade:288
+#: groups_manager.glade:236
+msgid "label"
+msgstr ""
+
+#: confix.glade:1655 confix.glade:1902 confix.glade:2454 confix.glade:2758
+#: confix.glade:3177 confix.glade:3570 confix.glade:4009 assistant.glade:544
+#: assistant.glade:1279
+msgid "page0"
+msgstr ""
+
+#: confix.glade:1672
+msgid "Experimenting..."
+msgstr ""
+
+#: confix.glade:1692
+msgid "User..."
+msgstr ""
+
+#: confix.glade:1709 confix.glade:2167 confix.glade:2471 confix.glade:2775
+#: confix.glade:3556 confix.glade:3950 confix.glade:4062 assistant.glade:555
+#: assistant.glade:1622
+msgid "page1"
+msgstr ""
+
+#: confix.glade:1845
 msgid "open access"
 msgstr ""
 
-#: confix.glade:1463
+#: confix.glade:1860
 msgid "filtered access"
 msgstr ""
 
-#: confix.glade:1481
+#: confix.glade:1882
 msgid "<b>Internet access</b>"
 msgstr ""
 
-#: confix.glade:1538 confix.glade:1665
-msgid "à"
-msgstr ""
-
-#: confix.glade:1570 confix.glade:1696
-msgid "de "
-msgstr ""
-
-#: confix.glade:1584 confix.glade:1710
-msgid "Jours"
-msgstr ""
-
-#: confix.glade:1620
-msgid "<b>for email</b>"
-msgstr ""
-
-#: confix.glade:1746
-msgid "<b>for Internet</b>"
-msgstr ""
-
-#: confix.glade:1761
-msgid ""
-"Date Format: 1 - Monday, 7 - Sunday. Time Format : 18:30\n"
-"Eg: 123 (Monday, Tuesday, Wednesday)"
-msgstr ""
-
-#: confix.glade:1777
-msgid "<b>Time condition</b>"
-msgstr ""
-
-#: confix.glade:1839
+#: confix.glade:1947
 msgid "Mac Addresses"
 msgstr ""
 
-#: confix.glade:1936
+#: confix.glade:2048
+msgid "        "
+msgstr ""
+
+#: confix.glade:2086
 msgid "Filter Name"
 msgstr ""
 
-#: confix.glade:1961
+#: confix.glade:2111
 msgid "Times"
 msgstr ""
 
-#: confix.glade:1983
+#: confix.glade:2133
 msgid "  Right click a line to edit  "
 msgstr ""
 
-#: confix.glade:2037
+#: confix.glade:2187
 msgid "Users and Categories"
 msgstr ""
 
-#: confix.glade:2183 confix.glade:2450
+#: confix.glade:2317 confix.glade:2585
 msgid "List / All"
 msgstr ""
 
-#: confix.glade:2305 confix.glade:2602
-msgid "Users"
-msgstr ""
-
-#: confix.glade:2326
+#: confix.glade:2461
 msgid ""
 "This rule applies\n"
 "to all users"
 msgstr ""
 
-#: confix.glade:2472
+#: confix.glade:2607
 msgid "Allow / Deny"
 msgstr ""
 
-#: confix.glade:2556
+#: confix.glade:2692
 msgid "Allowed groups"
 msgstr ""
 
-#: confix.glade:2570
+#: confix.glade:2706
 msgid "Allowed sites"
 msgstr ""
 
-#: confix.glade:2629
+#: confix.glade:2765
 msgid ""
 "All destinations \n"
 "allowed"
 msgstr ""
 
-#: confix.glade:2702
+#: confix.glade:2838
 msgid "<b>Permissions</b>"
 msgstr ""
 
-#: confix.glade:2728
+#: confix.glade:2864
 msgid "Internet Filter"
 msgstr ""
 
-#: confix.glade:2749
-msgid "Loading"
+#: confix.glade:2886
+msgid "Filter log"
 msgstr ""
 
-#: confix.glade:2766
-msgid "Loading remote configuration. Please wait"
+#: confix.glade:2905
+msgid "DNS"
 msgstr ""
 
-#: confix.glade:2772
-msgid "Edit Profiles"
+#: confix.glade:2920
+msgid "Proxy"
 msgstr ""
 
-#: confix.glade:2810 confix.glade:2860
-msgid "Name"
+#: confix.glade:2943
+msgid "Why..."
 msgstr ""
 
-#: confix.glade:2872
-msgid "Mode"
+#: confix.glade:2957
+msgid "Connected Users"
 msgstr ""
 
-#: confix.glade:2884
-msgid "Username"
+#: confix.glade:2971
+msgid "Diagnostic"
 msgstr ""
 
-#: confix.glade:2896
-msgid "Password"
+#: confix.glade:3002
+msgid ""
+"\n"
+"<b>Search</b>\n"
 msgstr ""
 
-#: confix.glade:2962
-msgid "Server"
+#: confix.glade:3017
+msgid "Mac Address"
 msgstr ""
 
-#: confix.glade:2993
-msgid "Edit Proxy Group"
+#: confix.glade:3041
+msgid ""
+"\n"
+"Domain"
 msgstr ""
 
-#: confix.glade:3031
+#: confix.glade:3064
+msgid "Start Search"
+msgstr ""
+
+#: confix.glade:3090
+msgid "Advanced"
+msgstr ""
+
+#: confix.glade:3217
+msgid "Group Name"
+msgstr ""
+
+#: confix.glade:3238
+msgid "Match Domain"
+msgstr ""
+
+#: confix.glade:3249
+msgid "Allow/Deny"
+msgstr ""
+
+#: confix.glade:3282
+msgid "Why"
+msgstr ""
+
+#: confix.glade:3303
+msgid "Search:"
+msgstr ""
+
+#: confix.glade:3390 confix.glade:4215 confix.glade:5194 confix.glade:5519
+#: confix.glade:5667 groups_manager.glade:173
 msgid "column"
 msgstr ""
 
-#: confix.glade:3054
+#: confix.glade:3412
+msgid "Filter Log"
+msgstr ""
+
+#: confix.glade:3429
+msgid "Add as New User"
+msgstr ""
+
+#: confix.glade:3444
+msgid "Add to Existing User"
+msgstr ""
+
+#: confix.glade:3482
+msgid "IP Address"
+msgstr ""
+
+#: confix.glade:3495 assistant.glade:1209
+msgid "MAC Address"
+msgstr ""
+
+#: confix.glade:3508 confix.glade:5813
+msgid "Status"
+msgstr ""
+
+#: confix.glade:3521
+msgid "Hostname"
+msgstr ""
+
+#: confix.glade:3611
+msgid "_Edit"
+msgstr ""
+
+#: confix.glade:3621
+msgid "eth0"
+msgstr ""
+
+#: confix.glade:3630
+msgid "eth1"
+msgstr ""
+
+#: confix.glade:3639
+msgid "idefix.conf"
+msgstr ""
+
+#: confix.glade:3648
+msgid "idefix2_conf.json"
+msgstr ""
+
+#: confix.glade:3663
+msgid "ddclient.conf"
+msgstr ""
+
+#: confix.glade:3678
+msgid "Save file"
+msgstr ""
+
+#: confix.glade:3687
+msgid "reconfigure"
+msgstr ""
+
+#: confix.glade:3700
+msgid "Information"
+msgstr ""
+
+#: confix.glade:3710
+msgid "Apache log"
+msgstr ""
+
+#: confix.glade:3719
+msgid "Cron log"
+msgstr ""
+
+#: confix.glade:3728
+msgid "Syslog"
+msgstr ""
+
+#: confix.glade:3743
+msgid "configuration files"
+msgstr ""
+
+#: confix.glade:3752
+msgid "Directories"
+msgstr ""
+
+#: confix.glade:3761
+msgid "Versions"
+msgstr ""
+
+#: confix.glade:3776
+msgid "Network status"
+msgstr ""
+
+#: confix.glade:3785
+msgid "Ping"
+msgstr ""
+
+#: confix.glade:3794
+msgid "services status"
+msgstr ""
+
+#: confix.glade:3813
+msgid "_Actions"
+msgstr ""
+
+#: confix.glade:3823
+msgid "Manage Services"
+msgstr ""
+
+#: confix.glade:3856
+msgid "command"
+msgstr ""
+
+#: confix.glade:3877
+msgid "Go"
+msgstr ""
+
+#: confix.glade:3891
+msgid "Update"
+msgstr ""
+
+#: confix.glade:3962
+msgid ""
+"WARNING !!!  Be VERY careful :\n"
+"Wrong parameters may crash your system"
+msgstr ""
+
+#: confix.glade:4027
+msgid "Close editor"
+msgstr ""
+
+#: confix.glade:4075
+msgid "Informations"
+msgstr ""
+
+#: confix.glade:4100
+msgid "Add Rule from Filter"
+msgstr ""
+
+#: confix.glade:4162
+msgid ""
+"Select the subdomain you want to filter from the list below and select the "
+"destination group or rule."
+msgstr ""
+
+#: confix.glade:4252
+msgid "Time Conditions"
+msgstr ""
+
+#: confix.glade:4309
+msgid "Comments"
+msgstr ""
+
+#: confix.glade:4324
+msgid "from :"
+msgstr ""
+
+#: confix.glade:4335
+msgid "to :"
+msgstr ""
+
+#: confix.glade:4359
+msgid "1234567"
+msgstr ""
+
+#: confix.glade:4373
+msgid "Days :"
+msgstr ""
+
+#: confix.glade:4490
+msgid "Mo"
+msgstr ""
+
+#: confix.glade:4502
+msgid "Tu"
+msgstr ""
+
+#: confix.glade:4514
+msgid "We"
+msgstr ""
+
+#: confix.glade:4526
+msgid "Th"
+msgstr ""
+
+#: confix.glade:4538
+msgid "Fr"
+msgstr ""
+
+#: confix.glade:4550
+msgid "Sa"
+msgstr ""
+
+#: confix.glade:4562
+msgid "Su"
+msgstr ""
+
+#: confix.glade:4589 confix.glade:5912 assistant.glade:1024
+msgid "Close"
+msgstr ""
+
+#: confix.glade:4630
+msgid "Loading"
+msgstr ""
+
+#: confix.glade:4647
+msgid "Loading remote configuration. Please wait"
+msgstr ""
+
+#: confix.glade:4768
+msgid "Set Idefix time"
+msgstr ""
+
+#: confix.glade:4782
+msgid "Supervix"
+msgstr ""
+
+#: confix.glade:4844
+msgid "Check Box Gui"
+msgstr ""
+
+#: confix.glade:4857
+msgid "Show Filter Tab on Startup"
+msgstr ""
+
+#: confix.glade:4870
+msgid "Show Developper Menu"
+msgstr ""
+
+#: confix.glade:4887
+msgid "Password Protect: "
+msgstr ""
+
+#: confix.glade:4978
+msgid "Check Permissions"
+msgstr ""
+
+#: confix.glade:5039
+msgid "Select a user and enter a domain to check"
+msgstr ""
+
+#: confix.glade:5055
+msgid "Domain:"
+msgstr ""
+
+#: confix.glade:5100 confix.glade:5322 confix.glade:5372
+#: groups_manager.glade:419
+msgid "Name"
+msgstr ""
+
+#: confix.glade:5157
+msgid ""
+"Don’t modify theses values \n"
+"unless you know exactly what you are doing.\n"
+"Improper values can ruin your filtering scheme. "
+msgstr ""
+
+#: confix.glade:5283
+msgid "Connections : Edit Profiles"
+msgstr ""
+
+#: confix.glade:5384
+msgid "Username"
+msgstr ""
+
+#: confix.glade:5444 assistant.glade:828
+msgid "Server"
+msgstr ""
+
+#: confix.glade:5481
+msgid "Edit Proxy Group"
+msgstr ""
+
+#: confix.glade:5542 groups_manager.glade:12
 msgid "Add"
 msgstr ""
 
-#: confix.glade:3068
+#: confix.glade:5556
 msgid "Finished"
 msgstr ""
 
-#: confix.glade:3097
-msgid "add user above"
+#: confix.glade:5582
+msgid "Select User"
 msgstr ""
 
-#: confix.glade:3105
-msgid "add user below"
+#: confix.glade:5643
+msgid "Select a user to add MAC address to"
 msgstr ""
 
-#: confix.glade:3113
-msgid "rename user"
+#: confix.glade:5703
+msgid "Services Control Panel"
 msgstr ""
 
-#: confix.glade:3122
-msgid "add new category"
+#: confix.glade:5723
+msgid "Refresh"
 msgstr ""
 
-#: confix.glade:3131
-msgid "add new user"
+#: confix.glade:5737
+msgid "Start Selected"
 msgstr ""
 
-#: confix.glade:3140
-msgid "rename category"
+#: confix.glade:5751
+msgid "Stop Selected"
 msgstr ""
 
-#: confix.glade:3157
-msgid "move user to category..."
+#: confix.glade:5801
+msgid "Service"
 msgstr ""
 
-#: assistant.glade:25
-msgid ""
-"\n"
-"Cet assistant vous aidera à réaliser les tâches suivantes :\n"
+#: confix.glade:5899
+msgid "Load backup"
 msgstr ""
 
-#: assistant.glade:43
-msgid "Create a new user"
+#: assistant.glade:12
+msgid "Page d’introduction"
 msgstr ""
 
-#: assistant.glade:58
-msgid "Experiment the permissions of another user"
+#: assistant.glade:23
+msgid "Page de contenu"
 msgstr ""
 
-#: assistant.glade:79
-msgid "Choose an option and click \"Next\""
+#: assistant.glade:33
+msgid "Page de confirmation"
 msgstr ""
 
-#: assistant.glade:95
-msgid "Introduction"
-msgstr ""
-
-#: assistant.glade:114
-msgid "Name of the new user (assistant 1)"
-msgstr ""
-
-#: assistant.glade:129
-msgid "Please, enter the name of the new user : "
-msgstr ""
-
-#: assistant.glade:159
-msgid ""
-"Now you must add its Mac address.\n"
-"If you don't know it, it is possible to add it later  in the \"Users and "
-"categories tab."
-msgstr ""
-
-#: assistant.glade:192 assistant.glade:220 assistant.glade:247
-#: assistant.glade:274 assistant.glade:301
-msgid ":"
-msgstr ""
-
-#: assistant.glade:326
-msgid "Add another address"
-msgstr ""
-
-#: assistant.glade:396
-msgid "Click on the "
-msgstr ""
-
-#: assistant.glade:424
-msgid "button to validate your data, and then click \"Next\""
-msgstr ""
-
-#: assistant.glade:453
-msgid "New User"
-msgstr ""
-
-#: assistant.glade:471
-msgid "Choose the services you want to activate for this user  (page 3 V2)"
-msgstr ""
-
-#: assistant.glade:488
-msgid "He will have access to :"
-msgstr ""
-
-#: assistant.glade:504
-msgid "Email"
-msgstr ""
-
-#: assistant.glade:518 assistant.glade:736 assistant.glade:1169
-msgid "Filtered Web access"
-msgstr ""
-
-#: assistant.glade:537
-msgid ""
-"This option gives access for email clients \n"
-"running on the computer.\n"
-"It includes the permissions necessary \n"
-"for antivirus update, but not for Webmail. "
-msgstr ""
-
-#: assistant.glade:553
-msgid ""
-"This option gives access to a limited list \n"
-"of websites which you will define later. "
-msgstr ""
-
-#: assistant.glade:563
-msgid "Full Web access"
-msgstr ""
-
-#: assistant.glade:582
-msgid ""
-"This option gives access to all Internet ressources\n"
-"without limitations, e-mail, Web, etc."
-msgstr ""
-
-#: assistant.glade:592
-msgid "Nothing at all. No email and no Web."
-msgstr ""
-
-#: assistant.glade:659
-msgid ""
-"(This page will appear only if Filtered Internet access was chosen)\n"
-"\n"
-"This user will have a limited Web access. \n"
-"You can :"
-msgstr ""
-
-#: assistant.glade:672
-msgid "Create a specific access rule for him"
-msgstr ""
-
-#: assistant.glade:689
-msgid ""
-"You can join him to existent rules in the list below.\n"
-"Lines in italics cannot be unselected, because they are defined for all "
-"users. "
-msgstr ""
-
-#: assistant.glade:723
-msgid "  "
-msgstr ""
-
-#: assistant.glade:750
-msgid "Confirmation page. "
-msgstr ""
-
-#: assistant.glade:767
-msgid ""
-"This page is unfinished. The message below should be adapted\n"
-"to the choices made by the user."
-msgstr ""
-
-#: assistant.glade:781
-msgid ""
-"You will be redirected to the Internet Filter page,\n"
-"where you will have to add the permissions given to the new user. \n"
-"Click on \"Apply\" to apply your choices. "
-msgstr ""
-
-#: assistant.glade:801
-msgid "confirmation"
-msgstr ""
-
-#: assistant.glade:815
+#: assistant.glade:215
 msgid "User permissions experiment"
 msgstr ""
 
-#: assistant.glade:831
-msgid ""
-"This function will work <b>only</b> if you are connected directly to the "
-"same network \n"
-"than the user whose persmissions you want to experiment. "
-msgstr ""
-
-#: assistant.glade:847
+#: assistant.glade:234
 msgid ""
 "First, select your own account in the left list\n"
 "Then select the user you want to test in the right list"
 msgstr ""
 
-#: assistant.glade:909
+#: assistant.glade:274
 msgid ""
-"will experiment \n"
-"the permissions \n"
+"will experiment  the permissions \n"
 "of --->"
 msgstr ""
 
-#: assistant.glade:977
+#: assistant.glade:341
 msgid ""
 "Once you have applied, a red button will appear in the top of the window. \n"
 "Click on this button to end the experiment and reset the situation to "
@@ -798,23 +1453,27 @@ msgid ""
 "Don't forget to do this before you close the program ! "
 msgstr ""
 
-#: assistant.glade:1000
+#: assistant.glade:364
 msgid "start experimentation"
 msgstr ""
 
-#: assistant.glade:1078
+#: assistant.glade:412
 msgid "Help system"
 msgstr ""
 
-#: assistant.glade:1142
+#: assistant.glade:476
 msgid "e-mail"
 msgstr ""
 
-#: assistant.glade:1156
+#: assistant.glade:490
 msgid "full Internet access (includes e-mail and Web)"
 msgstr ""
 
-#: assistant.glade:1189
+#: assistant.glade:503 assistant.glade:1794
+msgid "Filtered Web access"
+msgstr ""
+
+#: assistant.glade:523
 msgid ""
 "<b>Colors legend :</b>\n"
 "\n"
@@ -827,6 +1486,328 @@ msgid ""
 "span>"
 msgstr ""
 
-#: assistant.glade:1217
+#: assistant.glade:551
 msgid "label page2"
+msgstr ""
+
+#: assistant.glade:579
+msgid "Close the window"
+msgstr ""
+
+#: assistant.glade:606
+msgid "There is a problem with your Idefix configuration"
+msgstr ""
+
+#: assistant.glade:607
+msgid "eth0 and eth1 must have different subets."
+msgstr ""
+
+#: assistant.glade:623
+msgid "Fix in Idefix"
+msgstr ""
+
+#: assistant.glade:655
+msgid "First Use Assistant"
+msgstr ""
+
+#: assistant.glade:667
+msgid ""
+"Welcome to first run of Confix. Please make sure your Idefix is turned on "
+"and your computer is connected to the network"
+msgstr ""
+
+#: assistant.glade:680 assistant.glade:968
+msgid "Detecting Idefix..."
+msgstr ""
+
+#: assistant.glade:696
+msgid "Select idefix to configure:"
+msgstr ""
+
+#: assistant.glade:740
+msgid "Connecting to Idefix...."
+msgstr ""
+
+#: assistant.glade:752
+msgid "Reading FTP configuration..."
+msgstr ""
+
+#: assistant.glade:769
+msgid ""
+"An Idefix module has been found on address: %s\n"
+"A connection profile has been created for it with the name: default.\n"
+"A FTP configuration has been found. Please modify the name if you want, and "
+"Apply. "
+msgstr ""
+
+#: assistant.glade:786
+msgid "Enter the name for this ftp connection profile"
+msgstr ""
+
+#: assistant.glade:840
+msgid "Login"
+msgstr ""
+
+#: assistant.glade:903
+msgid "Connection Information"
+msgstr ""
+
+#: assistant.glade:952
+msgid "Detecting..."
+msgstr ""
+
+#: assistant.glade:1002
+msgid "Create User Assistant"
+msgstr ""
+
+#: assistant.glade:1038
+msgid "Back"
+msgstr ""
+
+#: assistant.glade:1114
+msgid ""
+"\n"
+"This assistant will help you to create a new user :"
+msgstr ""
+
+#: assistant.glade:1131
+msgid "Select an account request from the list"
+msgstr ""
+
+#: assistant.glade:1154
+msgid ""
+"Ask your user visit: %s\n"
+"then refresh this list to automatically add them."
+msgstr ""
+
+#: assistant.glade:1166
+msgid "Refresh List"
+msgstr ""
+
+#: assistant.glade:1198
+msgid "User Name"
+msgstr ""
+
+#: assistant.glade:1227
+msgid "Or create a new user name"
+msgstr ""
+
+#: assistant.glade:1261
+msgid ""
+"Choose an option, \n"
+"select a line or type a name, \n"
+"and click \"Next\""
+msgstr ""
+
+#: assistant.glade:1296
+msgid "Create a new user"
+msgstr ""
+
+#: assistant.glade:1311
+msgid "Please, enter the name of the new user : "
+msgstr ""
+
+#: assistant.glade:1339
+msgid ""
+"Now you must add its Mac address. You\n"
+"If you don't know it, it is possible to add it later  in the \"Users and "
+"categories tab."
+msgstr ""
+
+#: assistant.glade:1351
+msgid "Find Address Automatically"
+msgstr ""
+
+#: assistant.glade:1387 assistant.glade:1415 assistant.glade:1442
+#: assistant.glade:1469 assistant.glade:1496
+msgid ":"
+msgstr ""
+
+#: assistant.glade:1521
+msgid "Add another address"
+msgstr ""
+
+#: assistant.glade:1592
+msgid "Enter one or more addresses and then click \"Next\""
+msgstr ""
+
+#: assistant.glade:1635
+msgid "Do you want to : "
+msgstr ""
+
+#: assistant.glade:1645
+msgid "Create a new account for this user"
+msgstr ""
+
+#: assistant.glade:1671
+msgid "Add a permission for a new device to an existing account"
+msgstr ""
+
+#: assistant.glade:1709
+msgid ""
+"Choose an option, \n"
+"Correct the name, if desired, \n"
+"or select a line,\n"
+"and click \"Next\""
+msgstr ""
+
+#: assistant.glade:1728
+msgid "page2"
+msgstr ""
+
+#: assistant.glade:1746
+msgid "Choose the services you want to activate"
+msgstr ""
+
+#: assistant.glade:1763
+msgid "He will have access to :"
+msgstr ""
+
+#: assistant.glade:1779
+msgid "Nothing at all. No email and no Web."
+msgstr ""
+
+#: assistant.glade:1812
+msgid ""
+"This option gives access to a limited list \n"
+"of websites which you will define later. "
+msgstr ""
+
+#: assistant.glade:1822
+msgid "Full Web access"
+msgstr ""
+
+#: assistant.glade:1840
+msgid ""
+"This option gives access to all Internet ressources\n"
+"without limitations, e-mail, Web, etc."
+msgstr ""
+
+#: assistant.glade:1891
+msgid "page3"
+msgstr ""
+
+#: assistant.glade:1904
+msgid ""
+"This user will have a filtered Web access. \n"
+"Do you want to create a specific access rule for him ? "
+msgstr ""
+
+#: assistant.glade:1915
+msgid "Yes"
+msgstr ""
+
+#: assistant.glade:1930
+msgid "No"
+msgstr ""
+
+#: assistant.glade:1947
+msgid ""
+"Choose an option, \n"
+"and click \"Next\""
+msgstr ""
+
+#: assistant.glade:1965
+msgid "  "
+msgstr ""
+
+#: assistant.glade:1979
+msgid "page4"
+msgstr ""
+
+#: assistant.glade:1992
+msgid ""
+"You can join him to existent rules in the list below.\n"
+"Lines in italics cannot be unselected, because they are defined for all "
+"users. "
+msgstr ""
+
+#: assistant.glade:2026
+msgid ""
+"Select lines, if desired\n"
+"and click \"Next\""
+msgstr ""
+
+#: assistant.glade:2043
+msgid "page5"
+msgstr ""
+
+#: assistant.glade:2056
+msgid "Confirmation page. "
+msgstr ""
+
+#: assistant.glade:2081
+msgid "User:"
+msgstr ""
+
+#: assistant.glade:2094
+msgid "Mac Address:"
+msgstr ""
+
+#: assistant.glade:2106
+msgid "Internet Access:"
+msgstr ""
+
+#: assistant.glade:2119
+msgid "Filter Rules:"
+msgstr ""
+
+#: assistant.glade:2201
+msgid "Category: "
+msgstr ""
+
+#: assistant.glade:2229
+msgid ""
+"You will be redirected to the Internet Filter page,\n"
+"where you will have to add the permissions given to the new user. \n"
+"Click on \"Save & Close\" to apply your choices\n"
+"or \"Save & New\" to create another user"
+msgstr ""
+
+#: assistant.glade:2247
+msgid "page6"
+msgstr ""
+
+#: groups_manager.glade:20
+msgid "Rename"
+msgstr ""
+
+#: groups_manager.glade:28
+msgid "Delete"
+msgstr ""
+
+#: groups_manager.glade:65
+msgid "Edit groups"
+msgstr ""
+
+#: groups_manager.glade:79
+msgid "Import..."
+msgstr ""
+
+#: groups_manager.glade:107
+msgid "Import from Repository"
+msgstr ""
+
+#: groups_manager.glade:121
+msgid "Export to Repository"
+msgstr ""
+
+#: groups_manager.glade:214
+msgid "Groups"
+msgstr ""
+
+#: groups_manager.glade:225
+msgid "Domains"
+msgstr ""
+
+#: groups_manager.glade:317
+msgid "Search for groups to import"
+msgstr ""
+
+#: groups_manager.glade:337
+msgid " Search: "
+msgstr ""
+
+#: groups_manager.glade:358
+msgid "Search"
 msgstr ""
