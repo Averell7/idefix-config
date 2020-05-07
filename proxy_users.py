@@ -5,7 +5,7 @@ from gi.repository import Gdk, Gtk
 from actions import DRAG_ACTION
 from util import (
     askyesno, ask_text, format_name,
-    showwarning)
+    showwarning, cleanhtml)
 
 
 # 3 - proxy
@@ -213,13 +213,15 @@ class ProxyUsers:
     def edit_rule(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
         name = model.get_value(node, 0)
-        x = ask_text(self.arw["window1"], "Name of the rule :", name)
+        x = ask_text(self.arw["window1"], "Name of the rule :", cleanhtml(name))
         if x is None:
             return
         else:
             x = format_name(x)
+            # Set format:
+            if model.get_value(node, 1) == 'off':
+                x = '<s>' + x + '</s>'
             self.controller.filter_store.set(node, [0], [x])
-
 
     def proxy_user_has_any(self):
         """Return True if the proxy user has any"""

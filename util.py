@@ -412,3 +412,7 @@ def name_sorter(model, a, b, data):
         return 1
     else:
         return -1
+
+
+def cleanhtml(html):
+    return re.sub(r'<.*?>', '', html)
