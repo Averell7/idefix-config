@@ -451,7 +451,7 @@ class Users:
         else:
             # Rename all existing entries in the filter_store
             for item in self.controller.filter_store:
-                users = item[5].split('\n')
+                users = (item[5] or '').split('\n')
                 if name in users:
                     i = users.index(name)
                     users[i] = x
