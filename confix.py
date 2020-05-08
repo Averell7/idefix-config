@@ -30,11 +30,11 @@ import http.client
 import json
 import os
 import sys
-import time
 from collections import OrderedDict
 from copy import deepcopy
 
 import gi
+import time
 
 from connection_information import Information
 from ftp_client import ftp_connect, ftp_get, ftp_send, FTPError
@@ -276,24 +276,24 @@ class Confix:
         # 4 - True if category, False is user
         self.chooser_users_store = gtk.TreeStore(str, str, bool, bool)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('Groups Drag and Drop'), self.users.cell, text=0)
-        self.arw["chooser"].append_column(self.tvcolumn)
+        tvcolumn = gtk.TreeViewColumn(_('Groups Drag and Drop'), Gtk.CellRendererText(), text=0)
+        self.arw["chooser"].append_column(tvcolumn)
         self.arw["chooser"].get_selection()
         self.chooser_sort = Gtk.TreeModelSort.sort_new_with_model(self.groups_store)
         self.chooser_sort.set_sort_column_id(0, Gtk.SortType.ASCENDING)
         self.arw["chooser"].set_model(self.chooser_sort)
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('Users Drag and Drop'), self.users.cell, text=0)
-        self.arw["chooser1"].append_column(self.tvcolumn)
+        tvcolumn = gtk.TreeViewColumn(_('Users Drag and Drop'), Gtk.CellRendererText(), text=0)
+        self.arw["chooser1"].append_column(tvcolumn)
         self.arw["chooser1"].get_selection()
         self.arw["chooser1"].set_model(self.chooser_users_store)
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
-        self.tvcolumn = gtk.TreeViewColumn(_('Firewall'), self.users.cell, text=0)
-        self.arw["chooser2"].append_column(self.tvcolumn)
-        self.arw["chooser2"].get_selection()
+        tvcolumn = gtk.TreeViewColumn(_('Firewall'), Gtk.CellRendererText(), text=0)
+        self.arw["chooser2"].append_column(tvcolumn)
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
+        self.arw["chooser2"].get_selection()
 
         self.ports_store = gtk.ListStore(str)  #
         self.empty_store = EMPTY_STORE
@@ -320,7 +320,6 @@ class Confix:
         self.set_check_boxes()
         self.set_colors()
         self.profiles.list_configuration_profiles()
-        self.load_chooser("")
         self.assistant.disable_simulated_user()     # In case the previous user has not disabled simulation before shutting down
 
 
@@ -785,44 +784,6 @@ class Confix:
             self.arw["treeview1"].expand_all()
         else:
             self.arw["treeview1"].collapse_all()
-
-
-    def load_chooser(self, widget, event=None):          # TODO no longer used
-        for scroll in ['proxy_users_scroll_window', 'chooser1_frame'] :
-            ctx = self.arw[scroll].get_style_context()
-            ctx.add_class('chosen_list1')
-
-        for scroll in ['proxy_group_scroll_window', 'chooser_frame'] :
-            ctx = self.arw[scroll].get_style_context()
-            ctx.add_class('chosen_list')
-
-        return
-
-        if widget.name in ["filter_users"]:
-            self.active_chooser = 'filter_users'
-            self.arw["chooser"].set_model(self.chooser_users_store)
-            ctx = self.arw['proxy_users_scroll_window'].get_style_context()
-            ctx.add_class('chosen_list')
-
-            ctx = self.arw['proxy_group_scroll_window'].get_style_context()
-            ctx.remove_class('chosen_list')
-        elif widget.name == "firewall_users":
-            self.arw["chooser2"].set_model(self.users_store)
-        elif widget.name in ["proxy_group"]:
-            self.active_chooser = 'proxy_group'
-            self.arw["chooser"].set_model(self.groups_store)
-            ctx = self.arw['proxy_group_scroll_window'].get_style_context()
-            ctx.add_class('chosen_list')
-
-            ctx = self.arw['proxy_users_scroll_window'].get_style_context()
-            ctx.remove_class('chosen_list')
-        elif widget.name in ["firewall_ports"]:
-            self.arw["chooser2"].set_model(self.ports_store)
-
-        else:
-            self.arw["chooser"].set_model(self.empty_store)
-            self.arw["chooser2"].set_model(self.empty_store)
-            self.active_chooser = None
 
     def on_permissions_tab_change(self, widget, a, page):
         # launched by the switch page signal of notebook2

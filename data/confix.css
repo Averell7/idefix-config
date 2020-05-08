@@ -20,12 +20,14 @@
 */
 
 .chosen_list {
-    border: 2px #880000 solid;
-    
+    background: rgba(255, 0, 0, 0.35);
+    /*border: 2px #880000 solid;*/
+
 }
 
 .chosen_list1 {
-    border: 2px #000099 solid;
+    background: rgba(0, 0, 255, 0.35);
+    /*border: 2px #000099 solid;*/
 }
 /*
 #toggle_proxy_user_open_button,

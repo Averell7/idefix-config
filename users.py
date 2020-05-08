@@ -69,6 +69,11 @@ class Users:
         self.arw["treeview1"].drag_dest_add_text_targets()
         self.arw["treeview1"].connect("drag-data-received", self.users_drag_data_received)
 
+        self.users_store.connect('row-changed', lambda *args: self.controller.populate_users_chooser())
+        self.users_store.connect('row-deleted', lambda *args: self.controller.populate_users_chooser())
+        self.users_store.connect('rows-reordered', lambda *args: self.controller.populate_users_chooser())
+        self.users_store.connect('row-inserted', lambda *args: self.controller.populate_users_chooser())
+
 
     def create_maclist(self):
         maclist = {}
@@ -451,7 +456,7 @@ class Users:
         else:
             # Rename all existing entries in the filter_store
             for item in self.controller.filter_store:
-                users = item[5].split('\n')
+                users = (item[5] or '').split('\n')
                 if name in users:
                     i = users.index(name)
                     users[i] = x
@@ -770,6 +775,7 @@ class Users:
                 child = model.iter_next(child)
 
         drop_info = treeview.get_dest_row_at_pos(x, y)
+        iter_dest = None
 
         if source_level == 1:
             # Move an entire Category
@@ -817,8 +823,13 @@ class Users:
 
                 for subuser in sub_users:
                     model.append(new_iter, subuser)
+
+                iter_dest = new_iter
             else:
-                model.append([data])
+                iter_dest = model.append([data])
+
+        if iter_dest:
+            self.arw['treeview1'].get_selection().select_iter(iter_dest)
 
     #        if drag_context.get_actions() == Gdk.DragAction.MOVE:
     #            drag_context.finish(True, True, etime)
