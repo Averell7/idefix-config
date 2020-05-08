@@ -69,6 +69,11 @@ class Users:
         self.arw["treeview1"].drag_dest_add_text_targets()
         self.arw["treeview1"].connect("drag-data-received", self.users_drag_data_received)
 
+        self.users_store.connect('row-changed', lambda *args: self.controller.populate_users_chooser())
+        self.users_store.connect('row-deleted', lambda *args: self.controller.populate_users_chooser())
+        self.users_store.connect('rows-reordered', lambda *args: self.controller.populate_users_chooser())
+        self.users_store.connect('row-inserted', lambda *args: self.controller.populate_users_chooser())
+
 
     def create_maclist(self):
         maclist = {}
