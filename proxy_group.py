@@ -1,6 +1,6 @@
-import time
 from configparser import ConfigParser
 
+import time
 from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
@@ -31,6 +31,10 @@ class ProxyGroup:
         self.groups_store = Gtk.ListStore(str, str)
 
         self.proxy_group_window = self.arw['proxy_group_window']
+
+        for scroll in ['proxy_group', 'chooser']:
+            ctx = self.arw[scroll].get_style_context()
+            ctx.add_class('chosen_list')
 
     def proxy_group_data_get(self, treeview, drag_context, data, info, time):
 

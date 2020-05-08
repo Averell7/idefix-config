@@ -147,7 +147,6 @@
                       <object class="GtkTextView" id="firewall_ports">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <signal name="button-press-event" handler="load_chooser" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -181,7 +180,6 @@
                       <object class="GtkTextView" id="firewall_users">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <signal name="button-press-event" handler="load_chooser" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -2430,7 +2428,6 @@ and week</property>
                                                 <property name="model">proxy_users_store</property>
                                                 <property name="headers_visible">False</property>
                                                 <property name="search_column">0</property>
-                                                <signal name="button-press-event" handler="load_chooser" swapped="no"/>
                                                 <signal name="button-release-event" handler="proxy_user_select" swapped="no"/>
                                                 <child internal-child="selection">
                                                   <object class="GtkTreeSelection"/>
@@ -2669,13 +2666,11 @@ to all users</property>
                                             <property name="hexpand">True</property>
                                             <property name="vexpand">True</property>
                                             <property name="shadow_type">in</property>
-                                            <signal name="key-press-event" handler="load_chooser" swapped="no"/>
                                             <child>
                                               <object class="GtkTextView" id="proxy_dest">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="left_margin">5</property>
-                                                <signal name="button-press-event" handler="load_chooser" swapped="no"/>
                                               </object>
                                             </child>
                                           </object>
@@ -2727,7 +2722,6 @@ to all users</property>
                                                 <property name="headers_visible">False</property>
                                                 <property name="search_column">0</property>
                                                 <property name="tooltip_column">1</property>
-                                                <signal name="button-press-event" handler="load_chooser" swapped="no"/>
                                                 <signal name="button-release-event" handler="proxy_group_select" swapped="no"/>
                                                 <child internal-child="selection">
                                                   <object class="GtkTreeSelection"/>

@@ -320,7 +320,6 @@ class Confix:
         self.set_check_boxes()
         self.set_colors()
         self.profiles.list_configuration_profiles()
-        self.load_chooser("")
         self.assistant.disable_simulated_user()     # In case the previous user has not disabled simulation before shutting down
 
 
@@ -785,44 +784,6 @@ class Confix:
             self.arw["treeview1"].expand_all()
         else:
             self.arw["treeview1"].collapse_all()
-
-
-    def load_chooser(self, widget, event=None):          # TODO no longer used
-        for scroll in ['proxy_users_scroll_window', 'chooser1_frame'] :
-            ctx = self.arw[scroll].get_style_context()
-            ctx.add_class('chosen_list1')
-
-        for scroll in ['proxy_group_scroll_window', 'chooser_frame'] :
-            ctx = self.arw[scroll].get_style_context()
-            ctx.add_class('chosen_list')
-
-        return
-
-        if widget.name in ["filter_users"]:
-            self.active_chooser = 'filter_users'
-            self.arw["chooser"].set_model(self.chooser_users_store)
-            ctx = self.arw['proxy_users_scroll_window'].get_style_context()
-            ctx.add_class('chosen_list')
-
-            ctx = self.arw['proxy_group_scroll_window'].get_style_context()
-            ctx.remove_class('chosen_list')
-        elif widget.name == "firewall_users":
-            self.arw["chooser2"].set_model(self.users_store)
-        elif widget.name in ["proxy_group"]:
-            self.active_chooser = 'proxy_group'
-            self.arw["chooser"].set_model(self.groups_store)
-            ctx = self.arw['proxy_group_scroll_window'].get_style_context()
-            ctx.add_class('chosen_list')
-
-            ctx = self.arw['proxy_users_scroll_window'].get_style_context()
-            ctx.remove_class('chosen_list')
-        elif widget.name in ["firewall_ports"]:
-            self.arw["chooser2"].set_model(self.ports_store)
-
-        else:
-            self.arw["chooser"].set_model(self.empty_store)
-            self.arw["chooser2"].set_model(self.empty_store)
-            self.active_chooser = None
 
     def on_permissions_tab_change(self, widget, a, page):
         # launched by the switch page signal of notebook2

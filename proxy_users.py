@@ -1,5 +1,4 @@
 import time
-
 from gi.repository import Gdk, Gtk
 
 from actions import DRAG_ACTION
@@ -77,6 +76,9 @@ class ProxyUsers:
         self.treeview3.append_column(self.tvcolumn)
         self.tvcolumn = Gtk.TreeViewColumn(_('On/Off'), self.check2, active=14)
         self.treeview3.append_column(self.tvcolumn)
+        for scroll in ['filter_users', 'chooser1']:
+            ctx = self.arw[scroll].get_style_context()
+            ctx.add_class('chosen_list1')
 
         self.switch_gui()
 
@@ -225,13 +227,20 @@ class ProxyUsers:
 
     def proxy_user_has_any(self):
         """Return True if the proxy user has any"""
-        return 'any' in self.filter_store.get_value(self.controller.iter_filter, 5).split('\n')
+        text = self.filter_store.get_value(self.controller.iter_filter, 5)
+        if not text:
+            return False
+        return 'any' in text.split('\n')
 
     def delete_proxy_user(self, widget):
         model, iter = self.arw['filter_users'].get_selection().get_selected()
         name = model.get_value(iter, 0).strip()
 
-        names = self.filter_store.get_value(self.controller.iter_filter, 5).split('\n')
+        value = self.filter_store.get_value(self.controller.iter_filter, 5)
+        if not value:
+            names = []
+        else:
+            names = value.split('\n')
         if name not in names:
             return
 
