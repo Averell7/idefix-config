@@ -775,6 +775,7 @@ class Users:
                 child = model.iter_next(child)
 
         drop_info = treeview.get_dest_row_at_pos(x, y)
+        iter_dest = None
 
         if source_level == 1:
             # Move an entire Category
@@ -822,8 +823,13 @@ class Users:
 
                 for subuser in sub_users:
                     model.append(new_iter, subuser)
+
+                iter_dest = new_iter
             else:
-                model.append([data])
+                iter_dest = model.append([data])
+
+        if iter_dest:
+            self.arw['treeview1'].get_selection().select_iter(iter_dest)
 
     #        if drag_context.get_actions() == Gdk.DragAction.MOVE:
     #            drag_context.finish(True, True, etime)
