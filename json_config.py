@@ -86,37 +86,8 @@ class RestoreDialog:
                     "You cannot Restore a configuration without a connexion. \nIf you want to work offline, \nuse «Open Configuration on disk...» \nin the developper menu"))
                 return
 
-        self.arw['restore_config_permission_check'].set_active(False)
-        self.arw['restore_config_network_check'].set_active(False)
-        self.arw['restore_config_confix_check'].set_active(False)
-
-        if type:
-            response = Gtk.ResponseType.OK
-            if 'permissions' in type:
-                self.arw['restore_config_permission_check'].set_active(True)
-            if 'network' in type:
-                self.arw['restore_config_network_check'].set_active(True)
-            if 'restore_config_confix_check' in type:
-                self.arw['restore_config_confix_check'].set_active(True)
-
-        else:
-            response = self.arw['restore_config_dialog'].run()
-
-        if response != Gtk.ResponseType.OK:
-            self.arw['restore_config_dialog'].hide()
-            return
-
         zf = None
         path_prefix = ''
-
-        import_permissions = self.arw['restore_config_permission_check'].get_active()
-        import_network = self.arw['restore_config_network_check'].get_active()
-        import_confix = self.arw['restore_config_confix_check'].get_active()
-
-        if not import_confix and not import_network and not import_permissions:
-            alert(_("You must choose at least one option to restore"))
-            self.arw['restore_config_dialog'].hide()
-            return
 
         if source == 'local':
             # Ask the user to select a file to restore
@@ -222,6 +193,35 @@ class RestoreDialog:
             return
 
         if not zf:
+            self.arw['restore_config_dialog'].hide()
+            return
+
+        self.arw['restore_config_permission_check'].set_active(False)
+        self.arw['restore_config_network_check'].set_active(False)
+        self.arw['restore_config_confix_check'].set_active(False)
+
+        if type:
+            response = Gtk.ResponseType.OK
+            if 'permissions' in type:
+                self.arw['restore_config_permission_check'].set_active(True)
+            if 'network' in type:
+                self.arw['restore_config_network_check'].set_active(True)
+            if 'restore_config_confix_check' in type:
+                self.arw['restore_config_confix_check'].set_active(True)
+
+        else:
+            response = self.arw['restore_config_dialog'].run()
+
+        if response != Gtk.ResponseType.OK:
+            self.arw['restore_config_dialog'].hide()
+            return
+
+        import_permissions = self.arw['restore_config_permission_check'].get_active()
+        import_network = self.arw['restore_config_network_check'].get_active()
+        import_confix = self.arw['restore_config_confix_check'].get_active()
+
+        if not import_confix and not import_network and not import_permissions:
+            alert(_("You must choose at least one option to restore"))
             self.arw['restore_config_dialog'].hide()
             return
 
