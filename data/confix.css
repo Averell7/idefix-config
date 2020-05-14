@@ -21,14 +21,27 @@
 
 .chosen_list {
     background: rgba(255, 0, 0, 0.35);
+    color: #000;
     /*border: 2px #880000 solid;*/
 
 }
 
+.chosen_list:selected {
+    background: rgba(255, 0, 0, 1);
+    color: #fff;
+}
+
 .chosen_list1 {
     background: rgba(0, 0, 255, 0.35);
+    color: #000;
     /*border: 2px #000099 solid;*/
 }
+
+.chosen_list1:selected {
+    background: rgba(0, 0, 255, 1);
+    color: #fff;
+}
+
 /*
 #toggle_proxy_user_open_button,
 #toggle_proxy_open_button,
