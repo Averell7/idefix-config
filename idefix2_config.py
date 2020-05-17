@@ -161,7 +161,7 @@ class Idefix2Config:
             _("Open Template"),
             self.arw['idefix2_config_window'],
             Gtk.FileChooserAction.OPEN,
-            (_("Open"), Gtk.ResponseType.ACCEPT),
+            (_("Cancel"), Gtk.ResponseType.CLOSE, _("Open"), Gtk.ResponseType.ACCEPT),
         )
         file_filter = Gtk.FileFilter()
         file_filter.add_pattern('*.json')
@@ -477,6 +477,7 @@ class Idefix2Config:
 
             if not wlan_ip or not wlan:
                 alert(_("WLAN IP must be set"))
+                return
 
             if wlan_ip not in wlan:
                 alert(_("WLAN IP address must be in WLAN network"))
@@ -493,6 +494,10 @@ class Idefix2Config:
             alert(_("DHCP Range invalid"))
             return
 
+        if not self.config['ftp']['ftp']:
+            alert(_("No FTP Settings"))
+            return
+
         return True
 
     def idefix2_create_config(self, *args):
@@ -503,8 +508,9 @@ class Idefix2Config:
             _("Export Configuration"),
             self.arw['idefix2_config_window'],
             Gtk.FileChooserAction.SAVE,
-            (_("Export"), Gtk.ResponseType.ACCEPT),
+            (_("Cancel"), Gtk.ResponseType.CLOSE, _("Export"), Gtk.ResponseType.ACCEPT)
         )
+        dialog.set_current_name('idefix2_config.conf')
         file_filter = Gtk.FileFilter()
         file_filter.add_pattern('*.json')
         dialog.set_filter(file_filter)
