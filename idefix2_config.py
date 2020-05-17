@@ -1,4 +1,5 @@
 import json
+from collections import OrderedDict
 
 from gi.repository import Gtk
 import ipaddress
@@ -9,23 +10,30 @@ from util import alert, showwarning
 DD_HANDLERS = [
     {
         'name': _('Automatic'),
-        'value': 'automatic',
+        'value': 'auto',
         'server': '',
         'web': '',
         'protocol': '',
     },
     {
         'name': _('NoIP'),
-        'value': 'NoIP',
-        'server': '',
-        'web': '',
-        'protocol': '',
+        'value': 'noip',
+        'server': 'dynupdate.no-ip.com',
+        'web': "checkip.dyndns.com/,web-skip='IP Address'",
+        'protocol': 'dyndns2',
     },
     {
         'name': _('SafeDNS'),
         'value': 'SafeDNS',
         'server': 'www.safedns.com',
         'web': 'http://www.safedns.com/nic/myip',
+        'protocol': 'dyndns2',
+    },
+    {
+        'name': _('OpenDNS'),
+        'value': 'OpenDNS',
+        'server': 'updates.opendns.com',
+        'web': 'http://myip.dnsomatic.com',
         'protocol': 'dyndns2',
     },
     {
@@ -91,62 +99,81 @@ class Idefix2Config:
 
     def idefix2_show_config(self, *args):
         """Load default configuration"""
-        self.config = {
+        self.config = OrderedDict({
             "general": {
                 "idefix_id": "version 2.4.0"
             },
             "eth0": {
                 "wan_ip_type": "dhcp",
-                "wan_ip": "10.10.10.11",
-                "wan_netmask": "255.255.252.0",
-                "wan_subnet": "10.10.8.0/22",
-                "wan_network": "10.10.8.0",
-                "wan_broadcast": "10.10.11.255",
-                "wan_gateway": "10.10.10.100"
+                "wan_ip": "",
+                "wan_netmask": "",
+                "wan_subnet": "",
+                "wan_network": "",
+                "wan_broadcast": "",
+                "wan_gateway": ""
             },
             "eth1": {
-                "lan_ip": "192.168.84.184",
-                "lan_netmask": "255.255.255.0",
-                "lan_subnet": "192.168.84.0/24",
-                "lan_network": "192.168.84.0",
-                "lan_broadcast": "192.168.84.255"
+                "lan_ip": "",
+                "lan_netmask": "",
+                "lan_subnet": "",
+                "lan_network": "",
+                "lan_broadcast": ""
             },
             "wlan0": {
-                "wifi_used": "yes",
-                "wifi_ip": "10.10.84.1",
-                "wifi_netmask": "255.255.255.0",
-                "wifi_subnet": "10.10.84.0/24",
-                "wifi_network": "10.10.84.0",
-                "wifi_broadcast": "10.10.84.255"
+                "wifi_used": "no",
+                "wifi_ip": "",
+                "wifi_netmask": "",
+                "wifi_subnet": "",
+                "wifi_network": "",
+                "wifi_broadcast": ""
             },
             "dhcp": {
-                "dhcp_begin": "192.168.84.200",
-                "dhcp_end": "192.168.84.253"
+                "dhcp_begin": "",
+                "dhcp_end": ""
             },
             "ftp": {
                 "effacement": "false",
-                "ftp": "ftp.online.net",
+                "ftp": "",
                 "login": "",
                 "password": ""
             },
             "dns": {
-                "dns_filtering": "SafeDNS",
-                "dns_nameserver1": "195.46.39.39",
-                "dns_nameserver2": "195.46.39.40"
+                "dns_filtering": "",
+                "dns_nameserver1": "",
+                "dns_nameserver2": ""
             },
             "ddclient": {
-                "ip_type": "dynamic",
-                "dyn_ip_handler": "SafeDNS",
+                "ip_type": "static",
+                "dyn_ip_handler": "",
                 "ddclient_login": "",
                 "ddclient_password": "",
                 "ddclient_domain": "",
-                "ddclient_server": "www.safedns.com",
-                "ddclient_web": "http://www.safedns.com/nic/myip",
-                "protocol": "dyndns2"
+                "ddclient_server": "",
+                "ddclient_web": "",
+                "protocol": ""
             }
-        }
+        })
         self.set_text_values()
         self.arw['idefix2_config_window'].show_all()
+
+    def idefix2_load_template(self, *args):
+        dialog = Gtk.FileChooserDialog(
+            _("Open Template"),
+            self.arw['idefix2_config_window'],
+            Gtk.FileChooserAction.OPEN,
+            (_("Open"), Gtk.ResponseType.ACCEPT),
+        )
+        file_filter = Gtk.FileFilter()
+        file_filter.add_pattern('*.json')
+        dialog.set_filter(file_filter)
+
+        dialog.show_all()
+        response = dialog.run()
+        if response == Gtk.ResponseType.ACCEPT:
+            with open(dialog.get_filename(), 'r', encoding='utf-8-sig', newline='\n') as f:
+                self.config = json.load(f, object_pairs_hook=OrderedDict)
+            self.set_text_values()
+        dialog.destroy()
 
     def set_text_values(self):
         """Sets the gui entry values based on the config dict"""
