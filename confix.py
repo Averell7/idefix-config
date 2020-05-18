@@ -38,6 +38,7 @@ import time
 
 from connection_information import Information
 from ftp_client import ftp_connect, ftp_get, ftp_send, FTPError
+from idefix2_config import Idefix2Config
 
 gi.require_version('Gtk', '3.0')
 
@@ -202,6 +203,7 @@ class Confix:
         self.users = Users(self.arw, self)
         self.assistant = Assistant(self.arw, self.arw2, self)
         self.information = Information(self.arw, self)
+        self.idefix2_config = Idefix2Config(self.arw, self)
 
         self.users_store = self.users.users_store
         self.filter_store = self.proxy_users.filter_store
@@ -210,7 +212,7 @@ class Confix:
 
         self.signal_handler = SignalHandler([
             self, self.proxy_users, self.proxy_group, self.firewall, self.users, self.profiles, self.assistant,
-            self.information, self.information.services
+            self.information, self.information.services, self.idefix2_config
         ])
         self.widgets.connect_signals(self.signal_handler)
         self.widgets2.connect_signals(self.signal_handler)
