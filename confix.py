@@ -358,8 +358,8 @@ class Confix:
                 configname = last_config
                 if configname:
                     self.ftp_config = self.profiles.config[configname]
-                    self.open_connexion_profile()
-                    self.arw["configname"].set_text(configname)
+                    if self.open_connexion_profile(configname):
+                        self.arw["configname"].set_text(configname)
 
     def ask_for_profile(self, widget = None):
         # Refresh available configurations?
@@ -373,18 +373,23 @@ class Confix:
             # TODO : finish this dialog
             self.offline = False
 
-        self.arw["configname"].set_text(configname)
-        self.arw["save_button1"].set_sensitive(True)
-        self.arw["save_button2"].set_sensitive(True)
+
         self.ftp_config = self.profiles.config[configname]
         if not self.profiles.config['__options']:
             self.profiles.config['__options'] = {}
         self.profiles.config['__options']["last_config"] = configname
         self.profiles.profile_save_config()
-        self.open_connexion_profile()
+        if self.open_connexion_profile(configname):
+            self.arw["configname"].set_text(configname)
+            self.arw["save_button1"].set_sensitive(True)
+            self.arw["save_button2"].set_sensitive(True)
+        else:
+            self.arw["configname"].set_text("---")
+            self.arw["save_button1"].set_sensitive(False)
+            self.arw["save_button2"].set_sensitive(False)
 
 
-    def open_connexion_profile(self):
+    def open_connexion_profile(self, configname = ""):
 
         self.mymac = None
         self.arw['loading_window'].show()
@@ -396,8 +401,8 @@ class Confix:
         self.arw['loading_window'].hide()
 
         if not self.ftp:
-            alert(_("Could not connect to %s. \nVerify your cables or your configuration.") % ftp1["server"])
-            return
+            alert(_("Could not connect to %s (%s). \nVerify your cables or your configuration.") % (ftp1["server"], configname))
+            return False
         else:
             # retrieve files by ftp
             data0 = ftp_get(self.ftp, "idefix.json", json  = True)
@@ -408,7 +413,7 @@ class Confix:
                     self.update()
                     self.update_gui()
                 except:
-                    alert("Unable to load configuration. Please import another one.")
+                    alert("Unable to load configuration %s. Please import another one." % configname)
                 self.ftp.close()
             else:
                 self.load_defaults()
@@ -443,6 +448,8 @@ class Confix:
 
         # Experimental
         # self.arw2["my_account"].set_text(self.myaccount)
+
+        return True
 
     def check_mac_and_create_config(self):
         """Check if there is a configuration for the user's mac address and optionally create a new configuration

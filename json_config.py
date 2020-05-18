@@ -354,6 +354,8 @@ class ExportJsonDialog:
                 x = Information.get_infos(self, "get_conf")
                 conf_list = json.loads(x)
                 zf.writestr("idefix2_conf.json", conf_list["idefix2_conf.json"])
+                if "idefix_auto.conf" in conf_list:
+                    zf.writestr("idefix_auto.conf", conf_list["idefix_auto.conf"])
             except TypeError:
                 if offline:
                     print("No connection, skipping idefix2_conf.json")
