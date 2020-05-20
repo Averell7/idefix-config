@@ -113,6 +113,7 @@ class Idefix2Config:
                 "wan_gateway": ""
             },
             "eth1": {
+                "lan_used": "no",
                 "lan_ip": "",
                 "lan_netmask": "",
                 "lan_subnet": "",
@@ -129,7 +130,9 @@ class Idefix2Config:
             },
             "dhcp": {
                 "dhcp_begin": "",
-                "dhcp_end": ""
+                "dhcp_end": "",
+                "wifi_dhcp_begin": "",
+                "wifi_dhcp_end": "",
             },
             "ftp": {
                 "effacement": "false",
@@ -186,15 +189,18 @@ class Idefix2Config:
                 self.arw['idefix2_wan_type'].set_active_iter(item.iter)
                 break
 
+        self.arw['idefix2_lan_enabled'].set_active(self.config['eth1'].get('wifi_used', 'yes') == 'yes')
         self.arw['idefix2_lan_ip'].set_text(self.config['eth1']['lan_ip'])
         self.arw['idefix2_lan_subnet'].set_text(self.config['eth1']['lan_netmask'])
 
-        self.arw['idefix2_wifi_enabled'].set_active(self.config['wlan0']['wifi_used'] == 'yes')
-        self.arw['idefix2_wifi_ip'].set_text(self.config['wlan0']['wifi_ip'])
-        self.arw['idefix2_wifi_subnet'].set_text(self.config['wlan0']['wifi_netmask'])
+        self.arw['idefix2_wifi_enabled'].set_active(self.config.get('wlan0', {}).get('wifi_used') == 'yes')
+        self.arw['idefix2_wifi_ip'].set_text(self.config.get('wlan0', {}).get('wifi_ip', ''))
+        self.arw['idefix2_wifi_subnet'].set_text(self.config.get('wlan0', {}).get('wifi_netmask', ''))
 
-        self.arw['idefix2_dhcp_start'].set_text(self.config['dhcp']['dhcp_begin'])
-        self.arw['idefix2_dhcp_end'].set_text(self.config['dhcp']['dhcp_end'])
+        self.arw['idefix2_dhcp_start'].set_text(self.config['dhcp'].get('dhcp_begin', ''))
+        self.arw['idefix2_dhcp_end'].set_text(self.config['dhcp'].get('dhcp_end', ''))
+        self.arw['idefix2_dhcp_start'].set_text(self.config['dhcp'].get('wifi_dhcp_begin', ''))
+        self.arw['idefix2_dhcp_end'].set_text(self.config['dhcp'].get('wifi_dhcp_end', ''))
 
         self.arw['idefix2_ftp_host'].set_text(self.config['ftp']['ftp'])
         self.arw['idefix2_ftp_username'].set_text(self.config['ftp']['login'])
@@ -251,20 +257,48 @@ class Idefix2Config:
             self.arw['idefix2_wan_subnet'].set_sensitive(True)
             self.recalculate_ip_settings('eth0', 'wan')
 
-        self.recalculate_ip_settings('eth1', 'lan')
+        if self.arw['idefix2_lan_enabled'].get_active():
+            self.arw['idefix2_lan_ip'].set_sensitive(True)
+            self.arw['idefix2_lan_subnet'].set_sensitive(True)
+            self.arw['idefix2_dhcp_start'].set_sensitive(True)
+            self.arw['idefix2_dhcp_end'].set_sensitive(True)
+            if 'eth1' not in self.config:
+                self.config['eth1'] = {}
+            self.config['eth1']['lan_used'] = 'yes'
+            self.recalculate_ip_settings('eth1', 'lan')
+        else:
+            self.arw['idefix2_lan_ip'].set_sensitive(False)
+            self.arw['idefix2_lan_ip'].set_text('')
+            self.arw['idefix2_lan_subnet'].set_text('')
+            self.arw['idefix2_lan_subnet'].set_sensitive(False)
+            self.arw['idefix2_dhcp_start'].set_sensitive(False)
+            self.arw['idefix2_dhcp_end'].set_sensitive(False)
+            self.config['eth1'] = {
+                'lan_used': 'no',
+                'lan_ip': '',
+                'lan_subnet': '',
+                'lan_netmask': '',
+                'lan_broadcast': '',
+            }
 
         if self.arw['idefix2_wifi_enabled'].get_active():
             self.arw['idefix2_wifi_ip'].set_sensitive(True)
             self.arw['idefix2_wifi_subnet'].set_sensitive(True)
+            self.arw['idefix2_dhcpwifi_start'].set_sensitive(True)
+            self.arw['idefix2_dhcpwifi_end'].set_sensitive(True)
+            if 'wlan0' not in self.config:
+                self.config['wlan0'] = {}
             self.config['wlan0']['wifi_used'] = 'yes'
             self.recalculate_ip_settings('wlan0', 'wifi')
         else:
+            self.arw['idefix2_dhcpwifi_start'].set_sensitive(False)
+            self.arw['idefix2_dhcpwifi_end'].set_sensitive(False)
             self.arw['idefix2_wifi_ip'].set_sensitive(False)
             self.arw['idefix2_wifi_ip'].set_text('')
             self.arw['idefix2_wifi_subnet'].set_text('')
             self.arw['idefix2_wifi_subnet'].set_sensitive(False)
             self.config['wlan0'] = {
-                'wifi_used': '',
+                'wifi_used': 'no',
                 'wifi_ip': '',
                 'wifi_subnet': '',
                 'wifi_netmask': '',
@@ -288,7 +322,6 @@ class Idefix2Config:
         }
 
     def recalculate_dhcp(self):
-        start_ip = ''
         try:
             start_ip = ipaddress.IPv4Address(self.arw['idefix2_dhcp_start'].get_text())
             self.config['dhcp']['dhcp_begin'] = str(start_ip)
@@ -296,7 +329,6 @@ class Idefix2Config:
             self.arw['idefix2_dhcp_start'].set_text('')
             self.config['dhcp']['dhcp_begin'] = ''
 
-        end_ip = ''
         try:
             end_ip = ipaddress.IPv4Address(self.arw['idefix2_dhcp_end'].get_text())
             self.config['dhcp']['dhcp_end'] = str(end_ip)
@@ -304,8 +336,19 @@ class Idefix2Config:
             self.arw['idefix2_dhcp_end'].set_text('')
             self.config['dhcp']['dhcp_end'] = ''
 
-        if not start_ip or not end_ip:
-            return
+        try:
+            start_ip_wifi = ipaddress.IPv4Address(self.arw['idefix2_dhcpwifi_start'].get_text())
+            self.config['dhcp']['wifi_dhcp_begin'] = str(start_ip_wifi)
+        except ipaddress.AddressValueError:
+            self.arw['idefix2_dhcp_start'].set_text('')
+            self.config['dhcp']['wifi_dhcp_begin'] = ''
+
+        try:
+            end_ip_wifi = ipaddress.IPv4Address(self.arw['idefix2_dhcpwifi_end'].get_text())
+            self.config['dhcp']['wifi_dhcp_end'] = str(end_ip_wifi)
+        except ipaddress.AddressValueError:
+            self.arw['idefix2_dhcp_end'].set_text('')
+            self.config['dhcp']['wifi_dhcp_end'] = ''
 
     def recalculate_ip_settings(self, interface='eth0', type='wan'):
         ip = '0.0.0.0'
@@ -416,11 +459,14 @@ class Idefix2Config:
         """Validate that the config makes sense"""
         # Check WAN settings make sense
 
-        try:
-            lan_ip = ipaddress.IPv4Address(self.config['eth1']['lan_ip'])
-        except ipaddress.AddressValueError:
-            alert(_("LAN IP invalid"))
-            return
+        if self.config['eth1'].get('lan_used', 'yes') == 'yes':
+            try:
+                lan_ip = ipaddress.IPv4Address(self.config['eth1']['lan_ip'])
+            except ipaddress.AddressValueError:
+                alert(_("LAN IP invalid"))
+                return
+        else:
+            lan_ip = None
 
         if self.config['wlan0']['wifi_used'] == 'yes':
             try:
@@ -452,30 +498,31 @@ class Idefix2Config:
                 alert(_("WAN Gateway must be in the WAN network"))
                 return
 
-            if lan_ip in wan:
+            if lan_ip and lan_ip in wan:
                 alert(_("LAN must be in a different network to WAN"))
                 return
 
-            if self.config['wlan0']['wifi_used'] == 'yes':
-                if wlan_ip in wan:
-                    alert(_("WLAN must be in a different network to WAN"))
-                    return
+            if wlan_ip and wlan_ip in wan:
+                alert(_("WLAN must be in a different network to WAN"))
+                return
 
         # Check LAN settings make sense
-        lan = ipaddress.IPv4Network(self.config['eth1']['lan_subnet'])
+        if lan_ip:
+            lan = ipaddress.IPv4Network(self.config['eth1']['lan_subnet'])
 
-        if lan_ip.is_unspecified or lan.is_unspecified:
-            alert(_("LAN IP must be set"))
+            if lan_ip.is_unspecified or lan.is_unspecified:
+                alert(_("LAN IP must be set"))
+                return
 
-        if lan_ip not in lan:
-            alert(_("LAN IP address must be in LAN network"))
-            return
+            if lan_ip not in lan:
+                alert(_("LAN IP address must be in LAN network"))
+                return
 
         # Check WLAN settings make sense
-        if self.config['wlan0']['wifi_used'] == 'yes':
+        if wlan_ip:
             wlan = ipaddress.IPv4Network(self.config['wlan0']['wifi_subnet'])
 
-            if not wlan_ip or not wlan:
+            if wlan_ip.is_unspecified or wlan.is_unspecified:
                 alert(_("WLAN IP must be set"))
                 return
 
@@ -483,16 +530,41 @@ class Idefix2Config:
                 alert(_("WLAN IP address must be in WLAN network"))
                 return
 
-        # Check DHCP settings make sense
-        dhcp_start = ipaddress.IPv4Address(self.config['dhcp']['dhcp_begin'])
-        dhcp_end = ipaddress.IPv4Address(self.config['dhcp']['dhcp_end'])
-        if not dhcp_start or not dhcp_end:
-            alert(_("DHCP range must be set"))
+        if not lan_ip and not wlan_ip:
+            alert(_("Either LAN or WLAN must be enabled"))
             return
 
-        if dhcp_start > dhcp_end:
-            alert(_("DHCP Range invalid"))
-            return
+        # Check DHCP settings make sense
+        if lan_ip:
+            try:
+                dhcp_start = ipaddress.IPv4Address(self.config['dhcp']['dhcp_begin'])
+                dhcp_end = ipaddress.IPv4Address(self.config['dhcp']['dhcp_end'])
+            except ipaddress.AddressValueError:
+                dhcp_start = None
+                dhcp_end = None
+            if not dhcp_start or not dhcp_end:
+                alert(_("LAN DHCP range must be set"))
+                return
+
+            if dhcp_start > dhcp_end:
+                alert(_("LAN DHCP Range invalid"))
+                return
+
+        if wlan_ip:
+            try:
+                dhcp_start = ipaddress.IPv4Address(self.config['dhcp']['wifi_dhcp_begin'])
+                dhcp_end = ipaddress.IPv4Address(self.config['dhcp']['wifi_dhcp_begin'])
+            except ipaddress.AddressValueError:
+                dhcp_start = None
+                dhcp_end = None
+
+            if not dhcp_start or not dhcp_end:
+                alert(_("WLAN DHCP range must be set"))
+                return
+
+            if dhcp_start > dhcp_end:
+                alert(_("WLAN DHCP Range invalid"))
+                return
 
         if not self.config['ftp']['ftp']:
             alert(_("No FTP Settings"))
@@ -510,7 +582,7 @@ class Idefix2Config:
             Gtk.FileChooserAction.SAVE,
             (_("Cancel"), Gtk.ResponseType.CLOSE, _("Export"), Gtk.ResponseType.ACCEPT)
         )
-        dialog.set_current_name('idefix2_config.conf')
+        dialog.set_current_name('idefix2_config.json')
         file_filter = Gtk.FileFilter()
         file_filter.add_pattern('*.json')
         dialog.set_filter(file_filter)

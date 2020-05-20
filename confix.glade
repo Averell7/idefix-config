@@ -4818,7 +4818,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">5</property>
+                <property name="top_attach">6</property>
               </packing>
             </child>
             <child>
@@ -4829,18 +4829,18 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
-                <property name="top_attach">5</property>
+                <property name="top_attach">6</property>
               </packing>
             </child>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">DHCP Settings</property>
+                <property name="label" translatable="yes">DHCP Settings (wlan0 - Raspberry Pi)</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">9</property>
+                <property name="top_attach">12</property>
                 <property name="width">4</property>
               </packing>
             </child>
@@ -4852,7 +4852,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">10</property>
+                <property name="top_attach">13</property>
               </packing>
             </child>
             <child>
@@ -4863,7 +4863,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
-                <property name="top_attach">10</property>
+                <property name="top_attach">13</property>
               </packing>
             </child>
             <child>
@@ -4871,51 +4871,6 @@ Wrong parameters may crash your system</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">FTP Settings</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">11</property>
-                <property name="width">4</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Username</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">13</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Password</property>
-              </object>
-              <packing>
-                <property name="left_attach">2</property>
-                <property name="top_attach">13</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Host</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">12</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">DNS Settings</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4927,18 +4882,7 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">DNS Filtering</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">15</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Nameserver 1</property>
+                <property name="label" translatable="yes">Username</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4949,7 +4893,7 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Namserver 2</property>
+                <property name="label" translatable="yes">Password</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -4960,7 +4904,18 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">DDClient Settings</property>
+                <property name="label" translatable="yes">Host</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">15</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">DNS Settings</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4972,11 +4927,56 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Type</property>
+                <property name="label" translatable="yes">DNS Filtering</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">18</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Nameserver 1</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">19</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Namserver 2</property>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="top_attach">19</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">DDClient Settings</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">20</property>
+                <property name="width">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Type</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">21</property>
               </packing>
             </child>
             <child>
@@ -4987,7 +4987,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
-                <property name="top_attach">18</property>
+                <property name="top_attach">21</property>
               </packing>
             </child>
             <child>
@@ -4998,7 +4998,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">19</property>
+                <property name="top_attach">22</property>
               </packing>
             </child>
             <child>
@@ -5009,7 +5009,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
-                <property name="top_attach">19</property>
+                <property name="top_attach">22</property>
               </packing>
             </child>
             <child>
@@ -5020,7 +5020,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">20</property>
+                <property name="top_attach">23</property>
               </packing>
             </child>
             <child>
@@ -5068,7 +5068,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">5</property>
+                <property name="top_attach">6</property>
               </packing>
             </child>
             <child>
@@ -5080,11 +5080,11 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
-                <property name="top_attach">5</property>
+                <property name="top_attach">6</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="idefix2_dhcp_start">
+              <object class="GtkEntry" id="idefix2_dhcpwifi_start">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="input_purpose">url</property>
@@ -5092,11 +5092,11 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">10</property>
+                <property name="top_attach">13</property>
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="idefix2_dhcp_end">
+              <object class="GtkEntry" id="idefix2_dhcpwifi_end">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="input_purpose">url</property>
@@ -5104,7 +5104,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
-                <property name="top_attach">10</property>
+                <property name="top_attach">13</property>
               </packing>
             </child>
             <child>
@@ -5116,7 +5116,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">12</property>
+                <property name="top_attach">15</property>
               </packing>
             </child>
             <child>
@@ -5127,7 +5127,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">13</property>
+                <property name="top_attach">16</property>
               </packing>
             </child>
             <child>
@@ -5142,7 +5142,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
-                <property name="top_attach">13</property>
+                <property name="top_attach">16</property>
               </packing>
             </child>
             <child>
@@ -5155,7 +5155,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">16</property>
+                <property name="top_attach">19</property>
               </packing>
             </child>
             <child>
@@ -5168,7 +5168,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
-                <property name="top_attach">16</property>
+                <property name="top_attach">19</property>
               </packing>
             </child>
             <child>
@@ -5180,7 +5180,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">19</property>
+                <property name="top_attach">22</property>
               </packing>
             </child>
             <child>
@@ -5193,7 +5193,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">20</property>
+                <property name="top_attach">23</property>
               </packing>
             </child>
             <child>
@@ -5207,7 +5207,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
-                <property name="top_attach">19</property>
+                <property name="top_attach">22</property>
               </packing>
             </child>
             <child>
@@ -5247,7 +5247,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">15</property>
+                <property name="top_attach">18</property>
               </packing>
             </child>
             <child>
@@ -5267,7 +5267,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">18</property>
+                <property name="top_attach">21</property>
               </packing>
             </child>
             <child>
@@ -5287,7 +5287,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
-                <property name="top_attach">18</property>
+                <property name="top_attach">21</property>
               </packing>
             </child>
             <child>
@@ -5298,7 +5298,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">6</property>
+                <property name="top_attach">9</property>
                 <property name="width">4</property>
               </packing>
             </child>
@@ -5310,7 +5310,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">7</property>
+                <property name="top_attach">10</property>
               </packing>
             </child>
             <child>
@@ -5324,7 +5324,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">7</property>
+                <property name="top_attach">10</property>
               </packing>
             </child>
             <child>
@@ -5335,7 +5335,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">8</property>
+                <property name="top_attach">11</property>
               </packing>
             </child>
             <child>
@@ -5347,7 +5347,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">8</property>
+                <property name="top_attach">11</property>
               </packing>
             </child>
             <child>
@@ -5358,7 +5358,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
-                <property name="top_attach">8</property>
+                <property name="top_attach">11</property>
               </packing>
             </child>
             <child>
@@ -5370,14 +5370,91 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
+                <property name="top_attach">11</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Enabled</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="idefix2_lan_enabled">
+                <property name="label" translatable="yes"> </property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+                <signal name="toggled" handler="idefix2_entry_changed" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">5</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">DHCP Settings (eth1)</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">7</property>
+                <property name="width">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Start Address</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
                 <property name="top_attach">8</property>
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">End Address</property>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="top_attach">8</property>
+              </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkEntry" id="idefix2_dhcp_start">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="input_purpose">url</property>
+                <signal name="focus-out-event" handler="idefix2_entry_changed" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">8</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="idefix2_dhcp_end">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="input_purpose">url</property>
+                <signal name="focus-out-event" handler="idefix2_entry_changed" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">3</property>
+                <property name="top_attach">8</property>
+              </packing>
             </child>
             <child>
               <placeholder/>
