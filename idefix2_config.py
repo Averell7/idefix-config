@@ -199,8 +199,8 @@ class Idefix2Config:
 
         self.arw['idefix2_dhcp_start'].set_text(self.config['dhcp'].get('dhcp_begin', ''))
         self.arw['idefix2_dhcp_end'].set_text(self.config['dhcp'].get('dhcp_end', ''))
-        self.arw['idefix2_dhcp_start'].set_text(self.config['dhcp'].get('wifi_dhcp_begin', ''))
-        self.arw['idefix2_dhcp_end'].set_text(self.config['dhcp'].get('wifi_dhcp_end', ''))
+        self.arw['idefix2_dhcpwifi_start'].set_text(self.config['dhcp'].get('wifi_dhcp_begin', ''))
+        self.arw['idefix2_dhcpwifi_end'].set_text(self.config['dhcp'].get('wifi_dhcp_end', ''))
 
         self.arw['idefix2_ftp_host'].set_text(self.config['ftp']['ftp'])
         self.arw['idefix2_ftp_username'].set_text(self.config['ftp']['login'])
@@ -340,14 +340,14 @@ class Idefix2Config:
             start_ip_wifi = ipaddress.IPv4Address(self.arw['idefix2_dhcpwifi_start'].get_text())
             self.config['dhcp']['wifi_dhcp_begin'] = str(start_ip_wifi)
         except ipaddress.AddressValueError:
-            self.arw['idefix2_dhcp_start'].set_text('')
+            self.arw['idefix2_dhcpwifi_start'].set_text('')
             self.config['dhcp']['wifi_dhcp_begin'] = ''
 
         try:
             end_ip_wifi = ipaddress.IPv4Address(self.arw['idefix2_dhcpwifi_end'].get_text())
             self.config['dhcp']['wifi_dhcp_end'] = str(end_ip_wifi)
         except ipaddress.AddressValueError:
-            self.arw['idefix2_dhcp_end'].set_text('')
+            self.arw['idefix2_dhcpwifi_end'].set_text('')
             self.config['dhcp']['wifi_dhcp_end'] = ''
 
     def recalculate_ip_settings(self, interface='eth0', type='wan'):
