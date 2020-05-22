@@ -113,7 +113,7 @@ class Idefix2Config:
                 "wan_gateway": ""
             },
             "eth1": {
-                "lan_used": "no",
+                "lan_used": "yes",
                 "lan_ip": "",
                 "lan_netmask": "",
                 "lan_subnet": "",
@@ -406,8 +406,8 @@ class Idefix2Config:
             except ipaddress.AddressValueError:
                 self.arw['idefix2_dns_ns2'].set_text('')
 
-            self.config['dns']['ns1'] = str(ns1)
-            self.config['dns']['ns2'] = str(ns2)
+            self.config['dns']['dns_nameserver1'] = str(ns1)
+            self.config['dns']['dns_nameserver2'] = str(ns2)
 
     def recalculate_ddclient(self):
         iter = self.arw['idefix2_dd_type'].get_active_iter()
