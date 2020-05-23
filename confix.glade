@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <object class="GtkWindow">
@@ -1532,28 +1532,6 @@ After clicking close, you will be shown the internet filter rule created for you
                             <property name="label" translatable="yes">Save Configuration as...</property>
                             <property name="use_underline">True</property>
                             <signal name="activate" handler="save_config_as" swapped="no"/>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkSeparatorMenuItem">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkMenuItem" id="menu_network_configuration">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Network Configuration</property>
-                            <signal name="activate" handler="idefix2_show_config" swapped="no"/>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkMenuItem" id="menu_manage_services">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Manage Services</property>
-                            <signal name="activate" handler="show_services_window" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -3872,6 +3850,38 @@ Domain</property>
                                       <object class="GtkSeparatorMenuItem">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkMenuItem">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">_Actions</property>
+                                <property name="use_underline">True</property>
+                                <child type="submenu">
+                                  <object class="GtkMenu">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <child>
+                                      <object class="GtkMenuItem">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Manage Services</property>
+                                        <property name="use_underline">True</property>
+                                        <signal name="activate" handler="show_services_window" swapped="no"/>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkMenuItem">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Network Configuration</property>
+                                        <property name="use_underline">True</property>
+                                        <signal name="activate" handler="idefix2_show_config" swapped="no"/>
                                       </object>
                                     </child>
                                   </object>
