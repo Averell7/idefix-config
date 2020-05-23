@@ -4736,7 +4736,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">WAN Connection (eth0)</property>
+                <property name="label" translatable="yes">  WAN Connection (eth0)  </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#e9e9b9b96e6e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4792,7 +4796,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">LAN Connection (eth1)</property>
+                <property name="label" translatable="yes">  LAN Connection (eth1)  </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4827,6 +4835,9 @@ Wrong parameters may crash your system</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">DHCP Settings (wlan0 - Raspberry Pi)</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4860,7 +4871,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">FTP Settings</property>
+                <property name="label" translatable="yes">   FTP Settings   </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4905,7 +4920,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">DNS Settings</property>
+                <property name="label" translatable="yes">   DNS Settings   </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4950,7 +4969,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">DDClient Settings</property>
+                <property name="label" translatable="yes">   DDClient Settings   </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -5284,7 +5307,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">WLAN Connection (wlan0 - Raspberry Pi)</property>
+                <property name="label" translatable="yes">  WLAN Connection (wlan0 - Raspberry Pi)  </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -5393,6 +5420,9 @@ Wrong parameters may crash your system</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">DHCP Settings (eth1)</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
