@@ -451,6 +451,9 @@ class Confix:
         # Experimental
         # self.arw2["my_account"].set_text(self.myaccount)
 
+        # Check if the date is correct and if not, update it
+        self.information.check_date()
+
         return True
 
     def check_mac_and_create_config(self):
