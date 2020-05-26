@@ -1,4 +1,7 @@
 import datetime
+import dateutil.utils
+import dateutil.parser
+import tzlocal
 import http.client
 import io
 import ipaddress
@@ -19,7 +22,7 @@ from gi.repository import Gtk
 
 from domain_util import extract_domain_parts, extract_domain
 from ftp_client import ftp_connect, ftp_get
-from util import showwarning, get_ip_address
+from util import showwarning, get_ip_address, askyesno, alert
 
 # version 2.3.19 - Edit files added
 
@@ -36,9 +39,12 @@ RULE_DESTINATION_COLUMN_FOREGROUND = 2
 RULE_DESTINATION_COLUMN_BACKGROUND = 3
 RULE_DESTINATION_COLUMN_INDEX = 4
 
+DATE_THRESHOLD = datetime.timedelta(hours=6)
+
 
 def me(string) :   # Markup Escape
     return string.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
 
 class ExportDiagnosticDialog:
     def __init__(self, arw, controller):
@@ -937,8 +943,48 @@ class Information:
         else:
             alert(_("Idefix was not found"))
 
-    def set_date(self, widget):
+    def set_date(self, widget=None):
         # this function will set the date and time of Idefix according to the time of the local computer
-        y = datetime.datetime.today()
+        y = datetime.datetime.now()
         z = y.strftime("%Y-%m-%d %H:%M")
-        self.get_infos("set_date " + z)
+        self.get_infos("set_date " + z + ' ' + tzlocal.get_localzone().zone)
+
+    def check_date(self):
+        """Test if idefix date is out and if it is then update it"""
+
+        # infos_system must return date/time from: date --iso-8601=seconds
+        data = self.get_infos('infos_system')
+        if not data:
+            return
+
+        local_tz = tzlocal.get_localzone()
+
+        lines = data.decode('cp860').split('\n')
+        idefix_date = dateutil.parser.parse(lines[0])
+        idefix_tz = lines[1]
+
+        now = datetime.datetime.now(tz=local_tz)
+
+        if not dateutil.utils.within_delta(now, idefix_date, DATE_THRESHOLD):
+            # The time is over six hours out, ask the user if we should change time
+            answer = askyesno(
+                _("Idefix date/time might be incorrect"),
+                _("The time set on your Idefix is: %s\nYour computer's time is %s.\n\nUpdate the idefix time?") % (
+                    idefix_date.strftime('%X %x'),
+                    now.astimezone().strftime('%X %x')
+                )
+            )
+            if answer:
+                self.set_date()
+        elif idefix_tz != local_tz.zone:
+            # Check if the timezone between the two are different
+            answer = askyesno(
+                _("Idefix timezone different"),
+                _("The timezone on your idefix does not match your system timezone.\nIdefix: %s\nComputer: %s\n\n" +
+                  "Update the timezone?") % (
+                    idefix_tz,
+                    local_tz.zone
+                )
+            )
+            if answer:
+                self.set_date()
