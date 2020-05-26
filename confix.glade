@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.2 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <object class="GtkWindow">
@@ -1532,6 +1532,28 @@ After clicking close, you will be shown the internet filter rule created for you
                             <property name="label" translatable="yes">Save Configuration as...</property>
                             <property name="use_underline">True</property>
                             <signal name="activate" handler="save_config_as" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkSeparatorMenuItem">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkMenuItem" id="menu_network_configuration">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Network Configuration</property>
+                            <signal name="activate" handler="idefix2_show_config" swapped="no"/>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkMenuItem" id="menu_manage_services">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Manage Services</property>
+                            <signal name="activate" handler="show_services_window" swapped="no"/>
                           </object>
                         </child>
                       </object>
@@ -3856,38 +3878,6 @@ Domain</property>
                                 </child>
                               </object>
                             </child>
-                            <child>
-                              <object class="GtkMenuItem">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">_Actions</property>
-                                <property name="use_underline">True</property>
-                                <child type="submenu">
-                                  <object class="GtkMenu">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <child>
-                                      <object class="GtkMenuItem">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Manage Services</property>
-                                        <property name="use_underline">True</property>
-                                        <signal name="activate" handler="show_services_window" swapped="no"/>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GtkMenuItem">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="label" translatable="yes">Network Configuration</property>
-                                        <property name="use_underline">True</property>
-                                        <signal name="activate" handler="idefix2_show_config" swapped="no"/>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -4746,7 +4736,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">WAN Connection (eth0)</property>
+                <property name="label" translatable="yes">  WAN Connection (eth0)  </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#e9e9b9b96e6e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4802,7 +4796,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">LAN Connection (eth1)</property>
+                <property name="label" translatable="yes">  LAN Connection (eth1)  </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4837,6 +4835,9 @@ Wrong parameters may crash your system</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">DHCP Settings (wlan0 - Raspberry Pi)</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4870,7 +4871,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">FTP Settings</property>
+                <property name="label" translatable="yes">   FTP Settings   </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4915,7 +4920,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">DNS Settings</property>
+                <property name="label" translatable="yes">   DNS Settings   </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -4960,7 +4969,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">DDClient Settings</property>
+                <property name="label" translatable="yes">   DDClient Settings   </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -5294,7 +5307,11 @@ Wrong parameters may crash your system</property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">WLAN Connection (wlan0 - Raspberry Pi)</property>
+                <property name="label" translatable="yes">  WLAN Connection (wlan0 - Raspberry Pi)  </property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                  <attribute name="background" value="#fcfcafaf3e3e"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -5403,6 +5420,9 @@ Wrong parameters may crash your system</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">DHCP Settings (eth1)</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
               </object>
               <packing>
                 <property name="left_attach">0</property>
