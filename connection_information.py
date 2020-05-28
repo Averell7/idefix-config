@@ -1,6 +1,7 @@
 import datetime
 import dateutil.utils
 import dateutil.parser
+import pytz
 import tzlocal
 import http.client
 import io
@@ -952,16 +953,18 @@ class Information:
     def check_date(self):
         """Test if idefix date is out and if it is then update it"""
 
-        # infos_system must return date/time from: date --iso-8601=seconds
         data = self.get_infos('infos_system')
         if not data:
             return
 
         local_tz = tzlocal.get_localzone()
 
-        lines = data.decode('cp860').split('\n')
-        idefix_date = dateutil.parser.parse(lines[0])
-        idefix_tz = lines[1]
+        try:
+            lines = data.decode('cp860').split('\n')
+            timestamp, idefix_tz = lines[0:2]
+            idefix_date = datetime.datetime.fromtimestamp(int(timestamp), tz=pytz.timezone(idefix_tz))
+        except:
+            return
 
         now = datetime.datetime.now(tz=local_tz)
 
@@ -970,8 +973,8 @@ class Information:
             answer = askyesno(
                 _("Idefix date/time might be incorrect"),
                 _("The time set on your Idefix is: %s\nYour computer's time is %s.\n\nUpdate the idefix time?") % (
-                    idefix_date.strftime('%X %x'),
-                    now.astimezone().strftime('%X %x')
+                    idefix_date.strftime('%X %x %Z'),
+                    now.astimezone().strftime('%X %x %Z')
                 )
             )
             if answer:
@@ -980,7 +983,7 @@ class Information:
             # Check if the timezone between the two are different
             answer = askyesno(
                 _("Idefix timezone different"),
-                _("The timezone on your idefix does not match your system timezone.\nIdefix: %s\nComputer: %s\n\n" +
+                _("The timezone on your idefix does not match your system timezone. \nIdefix: %s\nComputer: %s\n\n" +
                   "Update the timezone?") % (
                     idefix_tz,
                     local_tz.zone
