@@ -492,7 +492,7 @@ class Information:
             index = dest_model.get_value(dest_iter, RULE_DESTINATION_COLUMN_INDEX)
             type = dest_model.get_value(dest_iter, RULE_DESTINATION_COLUMN_TYPE)
 
-            domain_to_add = self.arw['filter_log_rule_domains_store'].get_value(active_iter, 0).replace('*', '')
+            domain_to_add = self.arw['filter_log_rule_domains_store'].get_value(active_iter, 0)
 
             # Add the rule to the correct place
 
@@ -505,7 +505,7 @@ class Information:
                     current_domains.append(domain_to_add)
                 self.controller.proxy_group.groups_store[index][1] = '\n'.join(current_domains)
             elif type == 'rule':
-                current_domains = self.controller.proxy_users.filter_store[index][8].split('\n')
+                current_domains = self.controller.proxy_users.filter_store[index][8].strip().split('\n')
                 if domain_to_add in current_domains:
                     showwarning(_("Domain Already Exists"), _("The domain already exists in the rule. Skipping."))
                 else:
@@ -623,7 +623,7 @@ class Information:
         spinner.stop()
 
         line_regex = re.compile(
-            r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*\-\s*(([0-9a-f]{2}:){5}[0-9a-f]{2})\s*\-\s*([a-z]+)\s*(\-\s"(.+)"\s*)?\((.+)\)'
+            r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*\-\s*(([0-9a-f]{2}:){5}[0-9a-f]{2})\s*\-\s*([.a-z]+)\s*(\-\s"(.+)"\s*)?\((.+)\)'
         )
 
         for line in result.split("\n"):
@@ -964,6 +964,7 @@ class Information:
             timestamp, idefix_tz = lines[0:2]
             idefix_date = datetime.datetime.fromtimestamp(int(timestamp), tz=pytz.timezone(idefix_tz))
         except:
+            print("Confix cannot check the date of Idefix. Perhaps a too old version of trigger.py")
             return
 
         now = datetime.datetime.now(tz=local_tz)

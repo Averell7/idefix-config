@@ -161,9 +161,13 @@ class Assistant:
                 self.arw2['requests_liststore'].clear()
                 if res.status == 200:
                     data1 = res.read().decode("cp850")
-                    requests = json.loads(data1)
-                    if len(requests["account"]) > 0:   # necessary, because if the dictionary is empty, 
-                                                       # json encodes [] instead of {}, and this will create the error : 
+                    try:                               # this feature is not critical and should not block Confix
+                        requests = json.loads(data1)
+                    except:
+                        print("WARNING : there is a problem with the request_account.json file")
+                        return
+                    if len(requests["account"]) > 0:   # necessary, because if the dictionary is empty,
+                                                       # json encodes [] instead of {}, and this will create the error :
                                                        # list object has no attribute "items"
                         for mac, user in requests["account"].items():
                             self.arw2["requests_liststore"].append([user, mac])

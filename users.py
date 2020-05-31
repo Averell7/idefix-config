@@ -568,12 +568,18 @@ class Users:
         if internet_filtered:
             self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_filtered_icon)
             self.arw["user_summary_category_label"].set_markup(_("<b><span color='green' size='x-large'>Access to Internet is limited for this user</span></b>"))
+            self.arw["user_summary_tree_view"].show()
+            self.arw["user_summary_footnote"].show()
         elif internet_open:
             self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_full_icon)
             self.arw["user_summary_category_label"].set_markup(_("<b><span color='blue' size='x-large'>This user has full Internet access</span></b>"))
+            self.arw["user_summary_tree_view"].hide()
+            self.arw["user_summary_footnote"].hide()
         else:
             self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_denied_icon)
             self.arw["user_summary_category_label"].set_markup(_("<b><span color='red' size='x-large'>This user has no Internet access</span></b>"))
+            self.arw["user_summary_tree_view"].hide()
+            self.arw["user_summary_footnote"].hide()
 ##
 ##        # internet time conditions
 ##        if internet_time_conditions:

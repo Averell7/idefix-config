@@ -371,8 +371,8 @@
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="program_name">Confix</property>
-    <property name="version">1.0</property>
-    <property name="comments" translatable="yes">August 2019</property>
+    <property name="version">2.4.10</property>
+    <property name="comments" translatable="yes">June 2020</property>
     <property name="website">http://idefix64.fr</property>
     <property name="website_label" translatable="yes">Website (presently in French)</property>
     <property name="authors">Daniel Pot
@@ -1912,7 +1912,7 @@ After clicking close, you will be shown the internet filter rule created for you
                           <object class="GtkFrame" id="frame1">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label_xalign">0</property>
+                            <property name="label_xalign">0.019999999552965164</property>
                             <child>
                               <object class="GtkGrid" id="grid4">
                                 <property name="visible">True</property>
@@ -1966,9 +1966,6 @@ After clicking close, you will be shown the internet filter rule created for you
                             <property name="fill">False</property>
                             <property name="position">0</property>
                           </packing>
-                        </child>
-                        <child>
-                          <placeholder/>
                         </child>
                         <child>
                           <placeholder/>
@@ -2096,7 +2093,7 @@ After clicking close, you will be shown the internet filter rule created for you
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkBox">
+                              <object class="GtkBox" id="user_summary_box">
                                 <property name="height_request">200</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
@@ -2204,7 +2201,7 @@ After clicking close, you will be shown the internet filter rule created for you
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkLabel">
+                                  <object class="GtkLabel" id="user_summary_footnote">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="label" translatable="yes">  Right click a line to edit  </property>
