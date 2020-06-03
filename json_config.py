@@ -9,7 +9,7 @@ from gi.repository import Gtk
 
 from connection_information import Information
 from ftp_client import ftp_connect, ftp_get, ftp_send
-from util import get_config_path, alert, showwarning
+from util import get_config_path, alert, showwarning, askyesno
 
 
 class ImportJsonDialog:
@@ -34,26 +34,31 @@ class ImportJsonDialog:
         response = dialog.run()
         if response == Gtk.ResponseType.ACCEPT:
             self.configpath = dialog.get_filename()
-            configname = os.path.split(self.configpath)[1]
-            config = json.load(
-                open(self.configpath, 'r'),
-                object_pairs_hook=OrderedDict
-            )
-            self.controller.config = config
-            self.controller.update()
-            self.update_gui()
-            if offline:
-                self.controller.offline = True
-                # close ftp connection
-                try:
-                    self.controller.ftp.close()
-                except:
-                    pass
-                # disable the save button
-                self.controller.arw["save_button1"].set_sensitive(False)
-                self.controller.arw["save_button2"].set_sensitive(False)
-                self.controller.arw["configname"].set_text(configname)
+            self.import_config(self.configpath, offline)
+
         dialog.destroy()
+
+    def import_config(self, configpath, offline=False):
+
+        configname = os.path.split(configpath)[1]
+        config = json.load(
+            open(configpath, 'r'),
+            object_pairs_hook=OrderedDict
+        )
+        self.controller.config = config
+        self.controller.update()
+        self.update_gui()
+        if offline:
+            self.controller.offline = True
+            # close ftp connection
+            try:
+                self.controller.ftp.close()
+            except:
+                pass
+            # disable the save button
+            self.controller.arw["save_button1"].set_sensitive(False)
+            self.controller.arw["save_button2"].set_sensitive(False)
+            self.controller.arw["configname"].set_text(configname)
 
     def update_gui(self):
         self.controller.maclist = self.controller.users.create_maclist()
@@ -73,6 +78,7 @@ class RestoreDialog:
         self.controller = controller
         self.configpath = ''
         self.file_filter = Gtk.FileFilter()
+        self.file_filter.add_pattern('*.json')
         self.file_filter.add_pattern('*.zip')
 
     def run(self, source='local', offline=False, type=None):
@@ -87,7 +93,6 @@ class RestoreDialog:
                 return
 
         zf = None
-        path_prefix = ''
 
         if source == 'local':
             # Ask the user to select a file to restore
@@ -103,11 +108,22 @@ class RestoreDialog:
             response = dialog.run()
             if response == Gtk.ResponseType.ACCEPT:
                 self.configpath = dialog.get_filename()
-                try:
-                    zf = zipfile.ZipFile(self.configpath)
-                except zipfile.BadZipFile:
-                    alert(_("Zip file could not be read"))
-                path_prefix = ''
+                if self.configpath.lower().endswith('json'):
+                    # Detect if we are importing permissions or network configuration
+                    with open(self.configpath, 'rb') as f:
+                        raw_data = f.read().decode('utf-8-sig')
+                        data = json.loads(raw_data)
+                        if 'users' in data or 'groups' in data:
+                            self.import_permissions(raw_data)
+                        elif 'eth0' in data or 'ftp' in data:
+                            self.import_network(raw_data)
+                    dialog.destroy()
+                    return
+                else:
+                    try:
+                        zf = zipfile.ZipFile(self.configpath)
+                    except zipfile.BadZipFile:
+                        alert(_("Zip file could not be read"))
                 dialog.destroy()
             else:
                 dialog.destroy()
@@ -148,8 +164,6 @@ class RestoreDialog:
                     zf = zipfile.ZipFile(backup_f)
                 except zipfile.BadZipFile:
                     alert(_("Zip file could not be read"))
-
-                path_prefix = 'home/rock64/idefix/'
                 self.arw["backup_restore"].hide()
             else:
                 self.arw["backup_restore"].hide()
@@ -181,7 +195,6 @@ class RestoreDialog:
                     zf = zipfile.ZipFile(backup_f)
                 except zipfile.BadZipFile as e:
                     alert(_("Zip file could not be read"))
-                path_prefix = 'home/rock64/idefix/'
                 self.arw["backup_restore"].hide()
             else:
                 self.arw["backup_restore"].hide()
@@ -195,6 +208,14 @@ class RestoreDialog:
         if not zf:
             self.arw['restore_config_dialog'].hide()
             return
+
+        permission_path = self.find_in_zip(zf, 'idefix.json')
+        network_path = self.find_in_zip(zf, 'idefix2_conf.json')
+        confix_path = self.find_in_zip(zf, 'confix.cfg')
+
+        self.arw['restore_config_permission_check'].set_sensitive(permission_path is not None)
+        self.arw['restore_config_network_check'].set_sensitive(network_path is not None)
+        self.arw['restore_config_confix_check'].set_sensitive(confix_path is not None)
 
         self.arw['restore_config_permission_check'].set_active(False)
         self.arw['restore_config_network_check'].set_active(False)
@@ -231,39 +252,23 @@ class RestoreDialog:
 
         if import_permissions:
             try:
-                data1 = zf.open(path_prefix + "idefix.json").read().decode("cp850")
+                data1 = zf.open(permission_path).read().decode("cp850")
             except KeyError:
                 skip_permissions = _("Permissions file does not exist in backup")
             else:
-                config = json.loads(
-                    data1,
-                    object_pairs_hook=OrderedDict
-                )
-                self.controller.config = config
+                self.import_permissions(data1)
 
         if import_network:
             try:
-                data1 = zf.open(path_prefix + "idefix2_conf.json").read().decode("cp850").replace('\r\n', '\n')
+                data1 = zf.open(network_path).read().decode("cp850").replace('\r\n', '\n')
             except KeyError:
                 skip_network = _("Network file does not exist in backup")
             else:
-                ftp1 = self.controller.ftp_config
-                ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
-                tmp_file = get_config_path('tmp_idefix2_conf.json')
-                with open(tmp_file, 'w') as f:
-                    f.write(data1)
-                ftp_send(ftp, filepath=tmp_file, dest_name="idefix2_conf.json")
-                command_f = io.BytesIO()
-                command_f.write(bytes("restore_config", "utf-8"))
-                command_f.seek(0)
-                # send command
-                ftp.storlines('STOR trigger', command_f)
-                ftp.close()
-                os.unlink(tmp_file)
+                self.import_network(data1)
 
         if import_confix:
             try:
-                data1 = zf.open(path_prefix + "confix.cfg").read().decode("cp850")
+                data1 = zf.open(confix_path).read().decode("cp850")
             except KeyError:
                 skip_confix = _("Connections file not exist in backup")
             else:
@@ -301,6 +306,36 @@ class RestoreDialog:
         if import_confix and not skip_confix:
             alert(_("Please restart Confix to use your restored profiles"))
             sys.exit(1)
+
+    def find_in_zip(self, zf, filename):
+        """Tries different paths to find the correct file to restore"""
+        paths = [filename, 'home/rock64/idefix/' + filename, 'etc/idefix/' + filename]
+        for path in paths:
+            if path in zf.NameToInfo:
+                return path
+        return None
+
+    def import_permissions(self, data):
+        config = json.loads(
+            data,
+            object_pairs_hook=OrderedDict
+        )
+        self.controller.config = config
+
+    def import_network(self, data):
+        ftp1 = self.controller.ftp_config
+        ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
+        tmp_file = get_config_path('tmp_idefix2_conf.json')
+        with open(tmp_file, 'w') as f:
+            f.write(data)
+        ftp_send(ftp, filepath=tmp_file, dest_name="idefix2_conf.json")
+        command_f = io.BytesIO()
+        command_f.write(bytes("restore_config", "utf-8"))
+        command_f.seek(0)
+        # send command
+        ftp.storlines('STOR trigger', command_f)
+        ftp.close()
+        os.unlink(tmp_file)
 
     def update_gui(self):
         self.controller.maclist = self.controller.users.create_maclist()
