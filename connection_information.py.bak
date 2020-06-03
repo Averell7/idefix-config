@@ -414,8 +414,6 @@ class Information:
         has_destination = False
         if model and iter:
             has_destination = model.iter_parent(iter)
-            if has_destination == None:
-                has_destination = False    # to prevent a possible (non critical) error in the following line
         self.arw['filter_log_add_rule_dialog_button'].set_sensitive(has_destination and domain_iter)
 
     def filter_log_show_add_rule(self, widget):

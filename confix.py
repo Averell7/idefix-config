@@ -2,6 +2,7 @@
 # coding: utf-8
 
 
+# version 2.4.10b- check the date of Idefix at startup - correct if necessary
 # version 2.4.9 - control panel for services
 # version 2.4.8 - Informations "connected users" allow to create user
 # version 2.4.7 - export the three configuration files (idefix.json, idefix2_conf.json, confix.cfg)
@@ -68,7 +69,7 @@ from json_config import RestoreDialog, ExportJsonDialog, ImportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.4.9"
+version = "2.4.10b"
 
 
 gtk = Gtk
@@ -1036,6 +1037,7 @@ class Confix:
                 config2['groups'][row[0]]['dest_ip'] = ip
 
         return config2
+
 
     def ftp_upload(self, uploadlist=None, message=True):
         ftp1 = self.ftp_config
