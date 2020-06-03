@@ -9,7 +9,7 @@ from gi.repository import Gtk
 
 from connection_information import Information
 from ftp_client import ftp_connect, ftp_get, ftp_send
-from util import get_config_path, alert, showwarning
+from util import get_config_path, alert, showwarning, askyesno
 
 
 class ImportJsonDialog:
@@ -109,8 +109,14 @@ class RestoreDialog:
             if response == Gtk.ResponseType.ACCEPT:
                 self.configpath = dialog.get_filename()
                 if self.configpath.lower().endswith('json'):
-                    # Json file provided, switch to loading config
-                    self.controller.import_json.import_config(self.configpath)
+                    # Detect if we are importing permissions or network configuration
+                    with open(self.configpath, 'rb') as f:
+                        raw_data = f.read().decode('utf-8-sig')
+                        data = json.loads(raw_data)
+                        if 'users' in data or 'groups' in data:
+                            self.import_permissions(raw_data)
+                        elif 'eth0' in data or 'ftp' in data:
+                            self.import_network(raw_data)
                     dialog.destroy()
                     return
                 else:
@@ -250,11 +256,7 @@ class RestoreDialog:
             except KeyError:
                 skip_permissions = _("Permissions file does not exist in backup")
             else:
-                config = json.loads(
-                    data1,
-                    object_pairs_hook=OrderedDict
-                )
-                self.controller.config = config
+                self.import_permissions(data1)
 
         if import_network:
             try:
@@ -262,19 +264,7 @@ class RestoreDialog:
             except KeyError:
                 skip_network = _("Network file does not exist in backup")
             else:
-                ftp1 = self.controller.ftp_config
-                ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
-                tmp_file = get_config_path('tmp_idefix2_conf.json')
-                with open(tmp_file, 'w') as f:
-                    f.write(data1)
-                ftp_send(ftp, filepath=tmp_file, dest_name="idefix2_conf.json")
-                command_f = io.BytesIO()
-                command_f.write(bytes("restore_config", "utf-8"))
-                command_f.seek(0)
-                # send command
-                ftp.storlines('STOR trigger', command_f)
-                ftp.close()
-                os.unlink(tmp_file)
+                self.import_network(data1)
 
         if import_confix:
             try:
@@ -324,6 +314,28 @@ class RestoreDialog:
             if path in zf.NameToInfo:
                 return path
         return None
+
+    def import_permissions(self, data):
+        config = json.loads(
+            data,
+            object_pairs_hook=OrderedDict
+        )
+        self.controller.config = config
+
+    def import_network(self, data):
+        ftp1 = self.controller.ftp_config
+        ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
+        tmp_file = get_config_path('tmp_idefix2_conf.json')
+        with open(tmp_file, 'w') as f:
+            f.write(data)
+        ftp_send(ftp, filepath=tmp_file, dest_name="idefix2_conf.json")
+        command_f = io.BytesIO()
+        command_f.write(bytes("restore_config", "utf-8"))
+        command_f.seek(0)
+        # send command
+        ftp.storlines('STOR trigger', command_f)
+        ftp.close()
+        os.unlink(tmp_file)
 
     def update_gui(self):
         self.controller.maclist = self.controller.users.create_maclist()
