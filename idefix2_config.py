@@ -157,6 +157,9 @@ class Idefix2Config:
             }
         })
         self.set_text_values()
+        self.arw['idefix2_send_idefix_button'].set_sensitive(self.controller.ftp_config is not None)
+        self.arw['idefix2_load_idefix_button'].set_sensitive(self.controller.ftp_config is not None)
+
         self.arw['idefix2_config_window'].show_all()
 
     def idefix2_load_template(self, *args):
@@ -605,3 +608,24 @@ class Idefix2Config:
 
     def idefix2_close_window(self, *args):
         self.arw['idefix2_config_window'].hide()
+
+    def idefix2_load_from_idefix(self, widget=None):
+        """Load configuration from idefix (if connected)"""
+        data = self.controller.information.get_infos('get_conf')
+        conf_list = json.loads(data)
+        if 'idefix2_conf.json' not in conf_list:
+            alert(_("No idefix2 config found"))
+            return
+        self.config = json.loads(conf_list['idefix2_conf.json'])
+        self.set_text_values()
+
+    def idefix2_send_config(self, widget=None):
+        """Send configuration to idefix (if connected)"""
+        if not self.validate_config():
+            return
+        self.controller.restore_dialog.import_network(json.dumps(self.config, indent=3))
+        alert(_("Sent configuration to idefix"))
+
+    def idefix2_load_default(self):
+        """Load default configuration from 'defaults' directory"""
+        pass
