@@ -626,6 +626,8 @@ class Idefix2Config:
         self.controller.restore_dialog.import_network(json.dumps(self.config, indent=3))
         alert(_("Sent configuration to idefix"))
 
-    def idefix2_load_default(self):
+    def idefix2_load_default(self, widget=None):
         """Load default configuration from 'defaults' directory"""
-        pass
+        with open('defaults/idefix2_conf.json', 'rb') as f:
+            self.config = json.load(f, object_pairs_hook=OrderedDict)
+        self.set_text_values()

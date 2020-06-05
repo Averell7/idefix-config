@@ -801,7 +801,7 @@ and others</property>
   <object class="GtkImage" id="image3">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="stock">gtk-add</property>
+    <property name="stock">gtk-save-as</property>
   </object>
   <object class="GtkDialog" id="newly_created_summary">
     <property name="width_request">200</property>
@@ -4694,7 +4694,6 @@ Wrong parameters may crash your system</property>
               <object class="GtkButton">
                 <property name="label" translatable="yes">Load Default</property>
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="idefix2_load_default" swapped="no"/>
@@ -5557,7 +5556,7 @@ Wrong parameters may crash your system</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">12</property>
-            <property name="layout_style">end</property>
+            <property name="layout_style">spread</property>
             <child>
               <object class="GtkButton">
                 <property name="label" translatable="yes">Test FTP</property>
@@ -5589,7 +5588,7 @@ Wrong parameters may crash your system</property>
             </child>
             <child>
               <object class="GtkButton">
-                <property name="label" translatable="yes">Create</property>
+                <property name="label" translatable="yes">Save</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
