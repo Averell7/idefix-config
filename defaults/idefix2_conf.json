@@ -1,0 +1,56 @@
+{
+    "general": {
+        "idefix_id": "Idefix Rock 64"
+    },
+    "eth0": {
+        "wan_ip_type": "dhcp",
+        "wan_ip": "",
+        "wan_netmask": "255.255.255.0",
+        "wan_subnet": "",
+        "wan_network": "",
+        "wan_broadcast": "",
+        "wan_gateway": ""
+    },
+    "eth1": {
+        "lan_used": "yes",
+        "lan_ip": "192.168.84.184",
+        "lan_netmask": "255.255.255.0",
+        "lan_subnet": "192.168.84.0\/24",
+        "lan_network": "192.168.84.0",
+        "lan_broadcast": "192.168.84.255"
+    },
+    "wlan0": {
+        "wifi_used": "yes",
+        "wifi_ip": "10.10.84.1",
+        "wifi_netmask": "255.255.255.0",
+        "wifi_subnet": "10.10.84.0\/24",
+        "wifi_network": "10.10.84.0",
+        "wifi_broadcast": "10.10.84.255"
+    },
+    "dhcp": {
+        "dhcp_begin": "192.168.84.200",
+        "dhcp_end": "192.168.84.253",
+        "wifi_dhcp_begin": "10.10.84.10",
+        "wifi_dhcp_end": "10.10.84.200"
+    },
+    "ftp": {
+        "ftp": "",
+        "login": "",
+        "password": ""
+    },
+    "dns": {
+        "dns_filtering": "None",
+        "dns_nameserver1": "1.1.1.1",
+        "dns_nameserver2": "8.8.8.8"
+    },
+    "ddclient": {
+        "ip_type": "dynamic",
+        "dyn_ip_handler": "None",
+        "ddclient_login": "",
+        "ddclient_password": "",
+        "ddclient_domain": "",
+        "ddclient_server": "",
+        "ddclient_web": "",
+        "protocol": "dyndns2"
+    }
+}
