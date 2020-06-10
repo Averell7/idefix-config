@@ -334,6 +334,9 @@ class ProxyUsers:
         if not proxy_iter:
             proxy_iter = self.controller.iter_filter
 
+        if not proxy_iter:
+            return
+
         self.arw['proxy_users_store'].clear()
 
         # add users
