@@ -74,7 +74,6 @@ class Users:
         self.users_store.connect('rows-reordered', lambda *args: self.controller.populate_users_chooser())
         self.users_store.connect('row-inserted', lambda *args: self.controller.populate_users_chooser())
 
-
     def create_maclist(self):
         maclist = {}
         data1 = self.controller.config["users"]
@@ -447,6 +446,22 @@ class Users:
         if res:
             self.users_store.remove(node)
 
+            # User should be removed from the maclist too
+            if name in self.controller.maclist:
+                del self.controller.maclist[name]
+
+            # Remove user from the filter_store
+            for item in self.controller.filter_store:
+                users = (item[5] or '').split('\n')
+                try:
+                    users.remove(name)
+                except ValueError:
+                    continue
+                self.controller.filter_store.set_value(item.iter, 5, '\n'.join(users))
+
+            # Refresh the proxy users list
+            self.controller.proxy_users.update_proxy_user_list()
+
     def rename_user(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
         name = model.get_value(node, 0)
@@ -465,6 +480,9 @@ class Users:
             # update the mac list
             self.controller.maclist[x] = self.controller.maclist[name]
             del self.controller.maclist[name]
+
+            # Refresh the proxy users list
+            self.controller.proxy_users.update_proxy_user_list()
 
             self.users_store.set(node, [0], [x])
 
