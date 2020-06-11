@@ -267,7 +267,7 @@ class RestoreDialog:
             else:
                 # Check if idefix_auto is present in the zip file and restore it.
                 try:
-                    data2 = zf.open(autoconf_path).read().decode('cp850').replace('\r\n', '\n')
+                    data2 = zf.open(autoconf_path).read().decode('utf-8').replace('\r\n', '\n')
                 except KeyError:
                     data2 = None
 
@@ -345,6 +345,7 @@ class RestoreDialog:
             with open(tmp_file, 'w') as f:
                 f.write(auto_data)
             ftp_send(ftp, filepath=tmp_file, dest_name="idefix_auto.conf")
+            os.unlink(tmp_file)
 
         command_f = io.BytesIO()
         command_f.write(bytes("restore_config", "utf-8"))
