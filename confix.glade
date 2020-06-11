@@ -5014,7 +5014,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">21</property>
+                <property name="top_attach">22</property>
               </packing>
             </child>
             <child>
@@ -5025,7 +5025,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
-                <property name="top_attach">21</property>
+                <property name="top_attach">22</property>
               </packing>
             </child>
             <child>
@@ -5036,7 +5036,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">22</property>
+                <property name="top_attach">23</property>
               </packing>
             </child>
             <child>
@@ -5047,7 +5047,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
-                <property name="top_attach">22</property>
+                <property name="top_attach">23</property>
               </packing>
             </child>
             <child>
@@ -5058,7 +5058,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
-                <property name="top_attach">23</property>
+                <property name="top_attach">24</property>
               </packing>
             </child>
             <child>
@@ -5218,7 +5218,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">22</property>
+                <property name="top_attach">23</property>
               </packing>
             </child>
             <child>
@@ -5231,7 +5231,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">23</property>
+                <property name="top_attach">24</property>
               </packing>
             </child>
             <child>
@@ -5245,7 +5245,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
-                <property name="top_attach">22</property>
+                <property name="top_attach">23</property>
               </packing>
             </child>
             <child>
@@ -5305,7 +5305,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="top_attach">21</property>
+                <property name="top_attach">22</property>
               </packing>
             </child>
             <child>
@@ -5325,7 +5325,7 @@ Wrong parameters may crash your system</property>
               </object>
               <packing>
                 <property name="left_attach">3</property>
-                <property name="top_attach">21</property>
+                <property name="top_attach">22</property>
               </packing>
             </child>
             <child>
@@ -5500,6 +5500,29 @@ Wrong parameters may crash your system</property>
                 <property name="left_attach">3</property>
                 <property name="top_attach">8</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="idefix2_ddclient_auto_config_checkbox">
+                <property name="label" translatable="yes">Create Automatic Settings</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+                <signal name="toggled" handler="idefix2_entry_changed" swapped="no"/>
+              </object>
+              <packing>
+                <property name="left_attach">3</property>
+                <property name="top_attach">21</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
             <child>
               <placeholder/>
