@@ -212,6 +212,7 @@ class RestoreDialog:
         permission_path = self.find_in_zip(zf, 'idefix.json')
         network_path = self.find_in_zip(zf, 'idefix2_conf.json')
         confix_path = self.find_in_zip(zf, 'confix.cfg')
+        autoconf_path = self.find_in_zip(zf, 'idefix_auto.conf')
 
         self.arw['restore_config_permission_check'].set_sensitive(permission_path is not None)
         self.arw['restore_config_network_check'].set_sensitive(network_path is not None)
@@ -264,7 +265,13 @@ class RestoreDialog:
             except KeyError:
                 skip_network = _("Network file does not exist in backup")
             else:
-                self.import_network(data1)
+                # Check if idefix_auto is present in the zip file and restore it.
+                try:
+                    data2 = zf.open(autoconf_path).read().decode('utf-8').replace('\r\n', '\n')
+                except KeyError:
+                    data2 = None
+
+                self.import_network(data1, data2)
 
         if import_confix:
             try:
@@ -322,20 +329,30 @@ class RestoreDialog:
         )
         self.controller.config = config
 
-    def import_network(self, data):
+    def import_network(self, data, auto_data=None):
         ftp1 = self.controller.ftp_config
         ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
+
         tmp_file = get_config_path('tmp_idefix2_conf.json')
         with open(tmp_file, 'w') as f:
             f.write(data)
         ftp_send(ftp, filepath=tmp_file, dest_name="idefix2_conf.json")
+        os.unlink(tmp_file)
+
+        if auto_data:
+            # Optionally restore idefix_auto.conf if it was provided
+            tmp_file = get_config_path('tmp_idefix_auto.conf')
+            with open(tmp_file, 'w') as f:
+                f.write(auto_data)
+            ftp_send(ftp, filepath=tmp_file, dest_name="idefix_auto.conf")
+            os.unlink(tmp_file)
+
         command_f = io.BytesIO()
         command_f.write(bytes("restore_config", "utf-8"))
         command_f.seek(0)
         # send command
         ftp.storlines('STOR trigger', command_f)
         ftp.close()
-        os.unlink(tmp_file)
 
     def update_gui(self):
         self.controller.maclist = self.controller.users.create_maclist()

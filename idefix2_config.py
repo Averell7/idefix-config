@@ -1,5 +1,7 @@
 import json
+import configparser
 from collections import OrderedDict
+from io import StringIO
 
 from gi.repository import Gtk
 import ipaddress
@@ -13,7 +15,7 @@ DD_HANDLERS = [
         'value': 'auto',
         'server': '',
         'web': '',
-        'protocol': '',
+        'protocol': 'dyndns2',
     },
     {
         'name': _('NoIP'),
@@ -43,6 +45,13 @@ DD_HANDLERS = [
         'web': '',
         'protocol': '',
     },
+    {
+        'name': _('None'),
+        'value': 'None',
+        'server': '',
+        'web': '',
+        'protocol': '',
+    }
 ]
 
 DNS_TYPES = [
@@ -92,6 +101,7 @@ class Idefix2Config:
         self.controller = controller
         self.config = {}
         self.block_signals = False
+        self.autoddclient_config = None
         for type in DNS_TYPES:
             self.arw['idefix2_dns_type_store'].append((type['name'], type['value']))
         for type in DD_HANDLERS:
@@ -99,6 +109,7 @@ class Idefix2Config:
 
     def idefix2_show_config(self, *args):
         """Load default configuration"""
+        self.autoddclient_config = None
         self.config = OrderedDict({
             "general": {
                 "idefix_id": "version 2.4.0"
@@ -156,11 +167,10 @@ class Idefix2Config:
                 "protocol": ""
             }
         })
+        self.arw['idefix2_config_window'].show_all()
         self.set_text_values()
         self.arw['idefix2_send_idefix_button'].set_sensitive(self.controller.ftp_config is not None)
         self.arw['idefix2_load_idefix_button'].set_sensitive(self.controller.ftp_config is not None)
-
-        self.arw['idefix2_config_window'].show_all()
 
     def idefix2_load_template(self, *args):
         dialog = Gtk.FileChooserDialog(
@@ -419,10 +429,60 @@ class Idefix2Config:
         else:
             dd_type = 'dynamic'
 
-        if dd_type == 'static':
+        iter = self.arw['idefix2_dd_handler'].get_active_iter()
+        if iter:
+            dd_handler = self.arw['idefix2_dd_handler_store'].get_value(iter, 1)
+        else:
+            dd_handler = 'None'
+
+        if dd_handler == 'auto':
+            if self.arw['idefix2_ddclient_auto_config_checkbox'].get_active():
+                self.arw['idefix2_dd_login'].set_sensitive(True)
+                self.arw['idefix2_dd_password'].set_sensitive(True)
+                self.arw['idefix2_dd_domain'].set_sensitive(True)
+                self.arw['idefix2_dd_handler'].set_sensitive(True)
+            else:
+                self.arw['idefix2_dd_login'].set_sensitive(False)
+                self.arw['idefix2_dd_password'].set_sensitive(False)
+                self.arw['idefix2_dd_domain'].set_sensitive(False)
+                self.arw['idefix2_dd_type'].set_sensitive(False)
+        else:
+            self.arw['idefix2_dd_type'].set_sensitive(True)
+
+            if dd_type == 'static':
+                self.config['ddclient'] = {
+                    'ip_type': 'static',
+                    'dyn_ip_handler': '',
+                    'ddclient_login': '',
+                    'ddclient_password': '',
+                    'ddclient_domain': '',
+                    'ddclient_server': '',
+                    'ddclient_web': '',
+                    'protocol': ''
+                }
+                self.arw['idefix2_dd_login'].set_sensitive(False)
+                self.arw['idefix2_dd_password'].set_sensitive(False)
+                self.arw['idefix2_dd_domain'].set_sensitive(False)
+                return
+            else:
+                self.arw['idefix2_dd_login'].set_sensitive(True)
+                self.arw['idefix2_dd_password'].set_sensitive(True)
+                self.arw['idefix2_dd_domain'].set_sensitive(True)
+
+        dd = get_by_value(DD_HANDLERS, dd_handler)
+
+        if self.arw['idefix2_ddclient_auto_config_checkbox'].get_active():
+            self.autoddclient_config = {
+                'ddclient_login': self.arw['idefix2_dd_login'].get_text(),
+                'ddclient_password': self.arw['idefix2_dd_password'].get_text(),
+                'ddclient_domain': self.arw['idefix2_dd_domain'].get_text(),
+                'ddclient_server': dd['server'],
+                'ddclient_web': dd['web'],
+                'protocol': dd['protocol']
+            }
             self.config['ddclient'] = {
-                'ip_type': 'static',
-                'dyn_ip_handler': '',
+                'ip_type': 'dynamic',
+                'dyn_ip_handler': 'auto',
                 'ddclient_login': '',
                 'ddclient_password': '',
                 'ddclient_domain': '',
@@ -430,33 +490,18 @@ class Idefix2Config:
                 'ddclient_web': '',
                 'protocol': ''
             }
-            self.arw['idefix2_dd_login'].set_sensitive(False)
-            self.arw['idefix2_dd_password'].set_sensitive(False)
-            self.arw['idefix2_dd_domain'].set_sensitive(False)
-            return
-
-        self.arw['idefix2_dd_login'].set_sensitive(True)
-        self.arw['idefix2_dd_password'].set_sensitive(True)
-        self.arw['idefix2_dd_domain'].set_sensitive(True)
-
-        iter = self.arw['idefix2_dd_handler'].get_active_iter()
-        if iter:
-            dd_handler = self.arw['idefix2_dd_handler_store'].get_value(iter, 1)
         else:
-            dd_handler = 'SafeDNS'
-
-        dd = get_by_value(DD_HANDLERS, dd_handler)
-
-        self.config['ddclient'] = {
-            'ip_type': 'dynamic',
-            'dyn_ip_handler': dd_handler,
-            'ddclient_login': self.arw['idefix2_dd_login'].get_text(),
-            'ddclient_password': self.arw['idefix2_dd_password'].get_text(),
-            'ddclient_domain': self.arw['idefix2_dd_domain'].get_text(),
-            'ddclient_server': dd['server'],
-            'ddclient_web': dd['web'],
-            'protocol': dd['protocol']
-        }
+            self.autoddclient_config = None
+            self.config['ddclient'] = {
+                'ip_type': 'dynamic',
+                'dyn_ip_handler': dd_handler,
+                'ddclient_login': self.arw['idefix2_dd_login'].get_text(),
+                'ddclient_password': self.arw['idefix2_dd_password'].get_text(),
+                'ddclient_domain': self.arw['idefix2_dd_domain'].get_text(),
+                'ddclient_server': dd['server'],
+                'ddclient_web': dd['web'],
+                'protocol': dd['protocol']
+            }
 
     def validate_config(self):
         """Validate that the config makes sense"""
@@ -573,6 +618,16 @@ class Idefix2Config:
             alert(_("No FTP Settings"))
             return
 
+        if self.arw['idefix2_ddclient_auto_config_checkbox'].get_active():
+            dd_iter = self.arw['idefix2_dd_handler'].get_active_iter()
+            if not dd_iter:
+                alert(_("DDclient handler must be set for automatic configuration"))
+                return
+            value = self.arw['idefix2_dd_handler'].get_model().get_value(dd_iter, 1)
+            if value in ['auto', 'None']:
+                alert(_("DDClient handler must be set for automatic configuration"))
+                return
+
         return True
 
     def idefix2_create_config(self, *args):
@@ -597,7 +652,42 @@ class Idefix2Config:
                 json.dump(self.config, f, indent=3)
             self.arw['idefix2_config_window'].hide()
 
+            if self.autoddclient_config:
+                dialog.destroy()
+                dialog = Gtk.FileChooserDialog(
+                    _("Export Auto DDClient Configuration"),
+                    self.arw['idefix2_config_window'],
+                    Gtk.FileChooserAction.SAVE,
+                    (_("Cancel"), Gtk.ResponseType.CLOSE, _("Export"), Gtk.ResponseType.ACCEPT)
+                )
+                dialog.set_current_name('idefix_auto.conf')
+                file_filter = Gtk.FileFilter()
+                file_filter.add_pattern('*.conf')
+                dialog.set_filter(file_filter)
+
+                dialog.show_all()
+                response = dialog.run()
+                if response == Gtk.ResponseType.ACCEPT:
+                    conf = self.get_auto_ddclient_config()
+                    with open(dialog.get_filename(), 'w', encoding='utf-8-sig', newline='\n') as f:
+                        f.write(conf)
+                    self.arw['idefix2_config_window'].hide()
+
         dialog.destroy()
+
+    def get_auto_ddclient_config(self):
+        if not self.autoddclient_config:
+            return ''
+
+        parser = configparser.RawConfigParser()
+        parser.add_section('default')
+        parser['default'] = self.autoddclient_config
+        data = ''
+        with StringIO() as f:
+            parser.write(f)
+            f.seek(0)
+            data = f.read()
+        return '\n'.join(data.split('\n')[1:])
 
     def idefix2_test_ftp(self, *args):
         valid = ftp_connect(self.config['ftp']['ftp'], self.config['ftp']['login'], self.config['ftp']['password'])
@@ -623,7 +713,12 @@ class Idefix2Config:
         """Send configuration to idefix (if connected)"""
         if not self.validate_config():
             return
-        self.controller.restore_dialog.import_network(json.dumps(self.config, indent=3))
+
+        auto_conf = None
+        if self.autoddclient_config:
+            auto_conf = self.get_auto_ddclient_config()
+
+        self.controller.restore_dialog.import_network(json.dumps(self.config, indent=3), auto_conf)
         alert(_("Sent configuration to idefix"))
 
     def idefix2_load_default(self, widget=None):
