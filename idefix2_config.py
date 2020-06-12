@@ -723,6 +723,6 @@ class Idefix2Config:
 
     def idefix2_load_default(self, widget=None):
         """Load default configuration from 'defaults' directory"""
-        with open('defaults/idefix2_conf.json', 'rb') as f:
+        with open('defaults/idefix2_conf.json', 'r') as f:
             self.config = json.load(f, object_pairs_hook=OrderedDict)
         self.set_text_values()
