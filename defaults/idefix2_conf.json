@@ -52,5 +52,42 @@
         "ddclient_server": "",
         "ddclient_web": "",
         "protocol": "dyndns2"
-    }
+    },
+    "ddclient_options": [
+        {
+            "name": "Automatic",
+            "value": "auto",
+            "server": "",
+            "web": "",
+            "protocol": "dyndns2"
+        },
+        {
+            "name": "NoIP",
+            "value": "noip",
+            "server": "dynupdate.no-ip.com",
+            "web": "checkip.dyndns.com/, web-skip='IP Address'",
+            "protocol": "dyndns2"
+        },
+        {
+            "name": "SafeDNS",
+            "value": "SafeDNS",
+            "server": "www.safedns.com",
+            "web": "http://www.safedns.com/nic/myip",
+            "protocol": "dyndns2"
+        },
+        {
+            "name": "OpenDNS",
+            "value": "OpenDNS",
+            "server": "updates.opendns.com",
+            "web": "http://myip.dnsomatic.com",
+            "protocol": "dyndns2"
+        },
+        {
+            "name": "None",
+            "value": "None",
+            "server": "",
+            "web": "",
+            "protocol": ""
+        }
+    ]
 }

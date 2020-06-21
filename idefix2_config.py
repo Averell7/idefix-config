@@ -9,51 +9,6 @@ import ipaddress
 from ftp_client import ftp_connect
 from util import alert, showwarning
 
-DD_HANDLERS = [
-    {
-        'name': _('Automatic'),
-        'value': 'auto',
-        'server': '',
-        'web': '',
-        'protocol': 'dyndns2',
-    },
-    {
-        'name': _('NoIP'),
-        'value': 'noip',
-        'server': 'dynupdate.no-ip.com',
-        'web': "checkip.dyndns.com/,web-skip='IP Address'",
-        'protocol': 'dyndns2',
-    },
-    {
-        'name': _('SafeDNS'),
-        'value': 'SafeDNS',
-        'server': 'www.safedns.com',
-        'web': 'http://www.safedns.com/nic/myip',
-        'protocol': 'dyndns2',
-    },
-    {
-        'name': _('OpenDNS'),
-        'value': 'OpenDNS',
-        'server': 'updates.opendns.com',
-        'web': 'http://myip.dnsomatic.com',
-        'protocol': 'dyndns2',
-    },
-    {
-        'name': _('Aucun'),
-        'value': 'Aucun',
-        'server': '',
-        'web': '',
-        'protocol': '',
-    },
-    {
-        'name': _('None'),
-        'value': 'None',
-        'server': '',
-        'web': '',
-        'protocol': '',
-    }
-]
-
 DNS_TYPES = [
     {
         'name': _('Automatic'),
@@ -104,8 +59,12 @@ class Idefix2Config:
         self.autoddclient_config = None
         for type in DNS_TYPES:
             self.arw['idefix2_dns_type_store'].append((type['name'], type['value']))
-        for type in DD_HANDLERS:
-            self.arw['idefix2_dd_handler_store'].append((type['name'], type['value']))
+
+        with open('./defaults/idefix2_conf.json', 'r') as f:
+            data = json.load(f)
+            self.ddclient_options = data.get('ddclient_options', [])
+            for type in self.ddclient_options:
+                self.arw['idefix2_dd_handler_store'].append((type['name'], type['value']))
 
     def idefix2_show_config(self, *args):
         """Load default configuration"""
@@ -469,7 +428,7 @@ class Idefix2Config:
                 self.arw['idefix2_dd_password'].set_sensitive(True)
                 self.arw['idefix2_dd_domain'].set_sensitive(True)
 
-        dd = get_by_value(DD_HANDLERS, dd_handler)
+        dd = get_by_value(self.ddclient_options, dd_handler)
 
         if self.arw['idefix2_ddclient_auto_config_checkbox'].get_active():
             self.autoddclient_config = {
@@ -647,6 +606,10 @@ class Idefix2Config:
 
         dialog.show_all()
         response = dialog.run()
+
+        if 'ddclient_options' in self.config:
+            del self.config['ddclient_options']
+
         if response == Gtk.ResponseType.ACCEPT:
             with open(dialog.get_filename(), 'w', encoding='utf-8-sig', newline='\n') as f:
                 json.dump(self.config, f, indent=3)
@@ -717,6 +680,9 @@ class Idefix2Config:
         auto_conf = None
         if self.autoddclient_config:
             auto_conf = self.get_auto_ddclient_config()
+
+        if 'ddclient_options' in self.config:
+            del self.config['ddclient_options']
 
         self.controller.restore_dialog.import_network(json.dumps(self.config, indent=3), auto_conf)
         alert(_("Sent configuration to idefix"))
