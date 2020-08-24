@@ -1021,7 +1021,7 @@ After clicking close, you will be shown the internet filter rule created for you
   <object class="GtkTreeModelSort" id="proxy_groups_sort">
     <property name="model">proxy_groups_store</property>
   </object>
-  <object class="GtkMenu" id="proxy_profiles_menu">
+  <object class="GtkMenu" id="filter_profiles_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
@@ -1052,7 +1052,7 @@ After clicking close, you will be shown the internet filter rule created for you
       </object>
     </child>
   </object>
-  <object class="GtkMenu" id="proxy_users_menu">
+  <object class="GtkMenu" id="filter_users_menu">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
@@ -1060,11 +1060,11 @@ After clicking close, you will be shown the internet filter rule created for you
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">delete</property>
-        <signal name="activate" handler="delete_proxy_user" swapped="no"/>
+        <signal name="activate" handler="delete_filter_user" swapped="no"/>
       </object>
     </child>
   </object>
-  <object class="GtkListStore" id="proxy_users_store">
+  <object class="GtkListStore" id="filter_users_store">
     <columns>
       <!-- column-name name -->
       <column type="gchararray"/>
@@ -2269,7 +2269,7 @@ After clicking close, you will be shown the internet filter rule created for you
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkBox" id="proxy_users_box">
+                  <object class="GtkBox" id="filter_users_box">
                     <property name="width_request">400</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -2284,7 +2284,7 @@ After clicking close, you will be shown the internet filter rule created for you
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="reorderable">True</property>
-                            <signal name="button-release-event" handler="proxy_profile_select" swapped="no"/>
+                            <signal name="button-release-event" handler="filter_profile_select" swapped="no"/>
                             <child internal-child="selection">
                               <object class="GtkTreeSelection"/>
                             </child>
@@ -2378,8 +2378,8 @@ After clicking close, you will be shown the internet filter rule created for you
                                             <property name="valign">start</property>
                                             <property name="homogeneous">True</property>
                                             <child>
-                                              <object class="GtkButton" id="toggle_proxy_user_open_button">
-                                                <property name="name">toggle_proxy_user_open_button</property>
+                                              <object class="GtkButton" id="toggle_filter_user_open_button">
+                                                <property name="name">toggle_filter_user_open_button</property>
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="receives_default">True</property>
@@ -2485,11 +2485,11 @@ and week</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkStack" id="proxy_users_stack">
+                                      <object class="GtkStack" id="filter_users_stack">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <child>
-                                          <object class="GtkScrolledWindow" id="proxy_users_scroll_window">
+                                          <object class="GtkScrolledWindow" id="filter_users_scroll_window">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="hscrollbar_policy">always</property>
@@ -2501,10 +2501,10 @@ and week</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="hscroll_policy">natural</property>
                                                 <property name="vscroll_policy">natural</property>
-                                                <property name="model">proxy_users_store</property>
+                                                <property name="model">filter_users_store</property>
                                                 <property name="headers_visible">False</property>
                                                 <property name="search_column">0</property>
-                                                <signal name="button-release-event" handler="proxy_user_select" swapped="no"/>
+                                                <signal name="button-release-event" handler="filter_user_select" swapped="no"/>
                                                 <child internal-child="selection">
                                                   <object class="GtkTreeSelection"/>
                                                 </child>
@@ -2528,7 +2528,7 @@ and week</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkLabel" id="proxy_users_all">
+                                          <object class="GtkLabel" id="filter_users_all">
                                             <property name="visible">True</property>
                                             <property name="can_focus">False</property>
                                             <property name="label" translatable="yes">This rule applies
@@ -2644,8 +2644,8 @@ to all users</property>
                                         <property name="halign">start</property>
                                         <property name="valign">start</property>
                                         <child>
-                                          <object class="GtkButton" id="toggle_proxy_open_button">
-                                            <property name="name">toggle_proxy_open_button</property>
+                                          <object class="GtkButton" id="toggle_filter_open_button">
+                                            <property name="name">toggle_filter_open_button</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">True</property>
@@ -2666,8 +2666,8 @@ to all users</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkButton" id="toggle_proxy_allow_button">
-                                            <property name="name">toggle_proxy_allow_button</property>
+                                          <object class="GtkButton" id="toggle_filter_allow_button">
+                                            <property name="name">toggle_filter_allow_button</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">True</property>
@@ -2726,13 +2726,13 @@ to all users</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkStack" id="proxy_dest_stack">
+                                  <object class="GtkStack" id="rule_dest_stack">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="transition_duration">500</property>
                                     <property name="transition_type">crossfade</property>
                                     <child>
-                                      <object class="GtkGrid" id="proxy_dest_grid">
+                                      <object class="GtkGrid" id="rule_dest_grid">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <child>
@@ -2743,7 +2743,7 @@ to all users</property>
                                             <property name="vexpand">True</property>
                                             <property name="shadow_type">in</property>
                                             <child>
-                                              <object class="GtkTextView" id="proxy_dest">
+                                              <object class="GtkTextView" id="rule_dest">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
                                                 <property name="left_margin">5</property>
@@ -2828,7 +2828,7 @@ to all users</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkLabel" id="proxy_dest_all">
+                                      <object class="GtkLabel" id="rule_dest_all">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
                                         <property name="label" translatable="yes">All destinations 

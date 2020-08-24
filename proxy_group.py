@@ -125,7 +125,7 @@ class ProxyGroup:
         model, iter = self.arw['proxy_group'].get_selection().get_selected()
         name = model.get_value(iter, 0).strip()
 
-        names = self.controller.proxy_users.filter_store.get_value(self.controller.iter_filter, 7).split('\n')
+        names = self.controller.filter_rules.filter_store.get_value(self.controller.iter_filter, 7).split('\n')
         if name not in names or name == 'any':
             return
 
@@ -135,7 +135,7 @@ class ProxyGroup:
 
         names.remove(name)
 
-        self.controller.proxy_users.filter_store.set_value(self.controller.iter_filter, 7, '\n'.join(names))
+        self.controller.filter_rules.filter_store.set_value(self.controller.iter_filter, 7, '\n'.join(names))
         self.update_proxy_group_list()
 
     def update_proxy_group_list_view(self, widget, ctx, x, y, data, info, etime):
@@ -187,16 +187,16 @@ class ProxyGroup:
             names = [name[0] for name in model]
             if names is None:
                 names = ['']
-            self.controller.proxy_users.filter_store.set_value(self.controller.iter_filter, 7, '\n'.join(names))
+            self.controller.filter_rules.filter_store.set_value(self.controller.iter_filter, 7, '\n'.join(names))
             return
 
         new_name = data.get_text().strip()
 
-        names = self.controller.proxy_users.filter_store.get_value(self.controller.iter_filter, 7).split('\n')
+        names = self.controller.filter_rules.filter_store.get_value(self.controller.iter_filter, 7).split('\n')
         if new_name in names:
             return
         names.append(new_name)
-        self.controller.proxy_users.filter_store.set_value(self.controller.iter_filter, 7, '\n'.join(names))
+        self.controller.filter_rules.filter_store.set_value(self.controller.iter_filter, 7, '\n'.join(names))
         self.update_proxy_group_list(self.controller.iter_filter)
 
     def edit_proxy_group(self, widget):

@@ -460,7 +460,7 @@ class Users:
                 self.controller.filter_store.set_value(item.iter, 5, '\n'.join(users))
 
             # Refresh the proxy users list
-            self.controller.proxy_users.update_proxy_user_list()
+            self.controller.filter_rules.update_filter_user_list()
 
     def rename_user(self, widget):
         (model, node) = self.arw["treeview1"].get_selection().get_selected()
@@ -476,13 +476,13 @@ class Users:
                     i = users.index(name)
                     users[i] = x
                 self.controller.filter_store.set_value(item.iter, 5, '\n'.join(users))
-                #self.controller.load_proxy_user(self.arw['treeview3'], event=None)
+                #self.controller.load_filter_user(self.arw['treeview3'], event=None)
             # update the mac list
             self.controller.maclist[x] = self.controller.maclist[name]
             del self.controller.maclist[name]
 
             # Refresh the proxy users list
-            self.controller.proxy_users.update_proxy_user_list()
+            self.controller.filter_rules.update_filter_user_list()
 
             self.users_store.set(node, [0], [x])
 
@@ -755,7 +755,7 @@ class Users:
                     sel = self.arw["treeview3"].get_selection()
                     sel.select_path(int(text))
                     self.arw["notebook3"].set_current_page(1)
-                    self.controller.proxy_users.load_proxy_user(None, None)
+                    self.controller.filter_rules.load_filter_user(None, None)
 
 
 

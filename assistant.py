@@ -53,7 +53,7 @@ class Assistant:
 
 
         # Listview
-        self.arw2["assistant_proxy_rules"].set_model(self.controller.proxy_users.filter_store)
+        self.arw2["assistant_proxy_rules"].set_model(self.controller.filter_rules.filter_store)
 
         self.cell = Gtk.CellRendererText()
         self.check = Gtk.CellRendererToggle(xalign=0.5)
@@ -571,7 +571,7 @@ class Assistant:
             if self.username not in self.controller.maclist:
                 self.controller.maclist[self.username] = []
             self.controller.maclist[self.username].extend(self.mac_address.split('\n'))
-            self.controller.proxy_users.load_proxy_user(None, None)
+            self.controller.filter_rules.load_filter_user(None, None)
             if hide_assistant:
                 self.arw2["create_user_window"].hide()
             self.reset_assistant()
@@ -645,7 +645,7 @@ class Assistant:
         sel = self.arw["treeview3"].get_selection()
         if iter1:
             sel.select_iter(iter1)
-        self.controller.proxy_users.load_proxy_user(None, None)
+        self.controller.filter_rules.load_filter_user(None, None)
 
         # if Web filter is not selected, show the first tab with the new user selected and close the assistant
         if self.arw2["proxy_rule_radio2"].get_active() == 1:

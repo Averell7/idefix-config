@@ -56,7 +56,7 @@ from util import (
 from icons import (
     internet_full_icon, internet_filtered_icon, internet_denied_icon
 )
-from proxy_users import ProxyUsers
+from filter_rules import FilterRules
 from proxy_group import ProxyGroup
 from firewall import Firewall
 from users import Users
@@ -198,7 +198,7 @@ class Confix:
                                               Gtk.STYLE_PROVIDER_PRIORITY_USER)
 
         # autoconnect signals for self functions
-        self.proxy_users = ProxyUsers(self.arw, self)
+        self.filter_rules = FilterRules(self.arw, self)
         self.proxy_group = ProxyGroup(self.arw, self)
         self.firewall = Firewall(self.arw, self)
         self.users = Users(self.arw, self)
@@ -207,12 +207,13 @@ class Confix:
         self.idefix2_config = Idefix2Config(self.arw, self)
 
         self.users_store = self.users.users_store
-        self.filter_store = self.proxy_users.filter_store
+        self.filter_store = self.filter_rules.filter_store
+        self.proxy_rules_store = self.filter_rules.proxy_rules_store
         self.groups_store = self.proxy_group.groups_store
         self.firewall_store = self.firewall.firewall_store
 
         self.signal_handler = SignalHandler([
-            self, self.proxy_users, self.proxy_group, self.firewall, self.users, self.profiles, self.assistant,
+            self, self.filter_rules, self.proxy_group, self.firewall, self.users, self.profiles, self.assistant,
             self.information, self.information.services, self.idefix2_config
         ])
         self.widgets.connect_signals(self.signal_handler)
@@ -221,7 +222,7 @@ class Confix:
         # autosave textview buffers when typing (see also drag and drop below)
         # and when drag is received
         for textView in ["maclist",
-                         "proxy_dest", "filter_#comments",
+                         "rule_dest", "filter_#comments",
                          "firewall_ports", "firewall_users", "firewall_comments"]:
             self.arw[textView].connect("key-release-event", self.update_tv)
             self.arw[textView].connect("drag-data-received", self.on_drag_data_received)
@@ -252,7 +253,7 @@ class Confix:
                     alert("Unable to load configuration. Please import another one.")
 
 
-        for category in ["firewall", "rules", "ports", "groups"]:
+        for category in ["firewall", "rules", "proxy-rules", "ports-rules", "ports", "groups"]:
             if category not in self.config:
                 self.config[category] = OrderedDict()
 
@@ -315,7 +316,7 @@ class Confix:
 
         self.maclist = self.users.create_maclist()
         self.users.populate_users()
-        self.proxy_users.populate_proxy()
+        self.filter_rules.populate_rules()
         self.populate_ports()
         self.populate_groups()
         self.populate_users_chooser()
@@ -338,7 +339,7 @@ class Confix:
         # user defined options
         checkbox_config = self.profiles.config['__options'].get('checkbox_config', 0) == '1'
         if checkbox_config:
-            self.proxy_users.set_gui('check')
+            self.filter_rules.set_gui('check')
 
         filter_tab = self.profiles.config['__options'].get('filter_tab', 0) == '1'
         if filter_tab:
@@ -500,7 +501,7 @@ class Confix:
         self.profiles.list_configuration_profiles()
         self.maclist = self.users.create_maclist()
         self.users.populate_users()
-        self.proxy_users.populate_proxy()
+        self.filter_rules.populate_rules()
         #self.populate_ports()
         self.populate_groups()
         self.populate_users_chooser()
@@ -695,7 +696,7 @@ class Confix:
         text1 = text_buffer.get_text(start_iter, end_iter, False) + text
         widget = text_view
 
-        if widget.name == "proxy_dest":
+        if widget.name == "rule_dest":
             self.filter_store.set(self.iter_filter, 8, text1)
         elif widget.name == "filter_#comments":
             self.filter_store.set(self.iter_filter, 4, text1)
@@ -844,9 +845,9 @@ class Confix:
             self.arw['option_password_entry'].set_text('')
 
         if gui_check:
-            self.proxy_users.set_gui('check')
+            self.filter_rules.set_gui('check')
         else:
-            self.proxy_users.set_gui('buttons')
+            self.filter_rules.set_gui('buttons')
 
         self.arw['developper_menu'].set_sensitive(developper_menu)
         self.arw['developper_menu'].set_visible(developper_menu)
@@ -946,7 +947,7 @@ class Confix:
 
     def rebuild_config(self) :
         config2 = OrderedDict()
-        for section in ["users", "rules", "groups"] :
+        for section in ["users", "rules", "proxy-rules", "ports-rules", "groups"]:
             config2[section] = OrderedDict()
         config2["version"] = self.config.get("version")
 
@@ -999,7 +1000,24 @@ class Confix:
                 pass
 
         # proxy store
-        for row in self.filter_store :
+        for row in self.filter_store:
+            name = row[0]
+            for code in["<i>", "</i>", "<s>", "</s>"]:  # remove codes which are only for display
+                name = name.replace(code, "")
+            config2["rules"][name] = OrderedDict()
+            config2["rules"][name]["active"] = row[1]
+            config2["rules"][name]["action"] = row[2]
+            config2["rules"][name]["time_condition"] = row[3]
+            config2["rules"][name]["comments"] = row[4]
+            config2["rules"][name]["users"] = self.format_row(row[5])
+            config2["rules"][name]["dest_groups"] = self.format_row(row[7])
+            config2["rules"][name]["dest_domains"] = self.format_domain_row(row[8])
+            config2["rules"][name]["any_user"] = row[11]
+            config2["rules"][name]["any_destination"] = row[12]
+            config2["rules"][name]["allow_deny"] = row[13]
+
+        # proxy rules store
+        for row in self.proxy_rules_store:
             name = row[0]
             for code in["<i>", "</i>", "<s>", "</s>"]:  # remove codes which are only for display
                 name = name.replace(code, "")

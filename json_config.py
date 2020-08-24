@@ -63,7 +63,7 @@ class ImportJsonDialog:
     def update_gui(self):
         self.controller.maclist = self.controller.users.create_maclist()
         self.controller.users.populate_users()
-        self.controller.proxy_users.populate_proxy()
+        self.controller.filter_rules.populate_rules()
         # self.controller.populate_ports()
         self.controller.populate_groups()
         self.controller.populate_users_chooser()
@@ -357,7 +357,7 @@ class RestoreDialog:
     def update_gui(self):
         self.controller.maclist = self.controller.users.create_maclist()
         self.controller.users.populate_users()
-        self.controller.proxy_users.populate_proxy()
+        self.controller.filter_rules.populate_rules()
         #self.controller.populate_ports()
         self.controller.populate_groups()
         self.controller.populate_users_chooser()
