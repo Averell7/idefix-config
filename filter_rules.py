@@ -53,7 +53,10 @@ class FilterRules:
         self.proxy_rules_store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, int, int, int,
                                                int, str, str, str, str, int, int)  #
 
-        self._active_store = 'rules'
+        self.port_rules_store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, int, int, int,
+                                              int, str, str, str, str, int, int)  #
+
+        self._active_store = 'dns'
 
         self.cell3 = Gtk.CellRendererText()
         self.check2 = Gtk.CellRendererToggle(activatable=True, xalign=0.5)
@@ -90,10 +93,23 @@ class FilterRules:
 
     @property
     def current_store(self):
-        if self._active_store == 'rules':
+        """Returns the currently selected store"""
+        if self._active_store == 'dns':
             return self.filter_store
-        else:
+        elif self._active_store == 'proxy':
             return self.proxy_rules_store
+        elif self._active_store == 'port':
+            return self.port_rules_store
+
+    def update_selected_filter_option(self, *args):
+        """Update which current store"""
+        if self.arw['dns_filter_rules_option'].get_active():
+            self._active_store = 'dns'
+        elif self.arw['proxy_filter_rules_option'].get_active():
+            self._active_store = 'proxy'
+        elif self.arw['port_filter_rules_option'].get_active():
+            self._active_store = 'port'
+        self.treeview3.set_model(self.current_store)
 
     def switch_gui(self,widget = None):
 
@@ -216,15 +232,15 @@ class FilterRules:
             return
         else:
             name = format_name(x)
-            iter1 = self.controller.filter_store.insert_after(node,
-                                                             [name, "on", "allow", "", "", "", "", "", "", "", "", 0,
-                                                              0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
+            iter1 = self.current_store.insert_after(node,
+                                                    [name, "on", "allow", "", "", "", "", "", "", "", "", 0,
+                                                    0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
 
     def delete_rule(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
         name = model.get_value(node, 0)
         if askyesno("Remove filter rule", "Do you want to remove %s?" % name):
-            self.controller.filter_store.remove(node)
+            self.current_store.remove(node)
 
     def edit_rule(self, widget):
         (model, node) = self.arw["treeview3"].get_selection().get_selected()
@@ -237,11 +253,11 @@ class FilterRules:
             # Set format:
             if model.get_value(node, 1) == 'off':
                 x = '<s>' + x + '</s>'
-            self.controller.filter_store.set(node, [0], [x])
+            self.current_store.set(node, [0], [x])
 
     def filter_user_has_any(self):
         """Return True if the filter user has any in the list of rules"""
-        text = self.filter_store.get_value(self.controller.iter_filter, 5)
+        text = self.current_store.get_value(self.controller.iter_filter, 5)
         if not text:
             return False
         return 'any' in text.split('\n')
@@ -250,7 +266,7 @@ class FilterRules:
         model, iter = self.arw['filter_users'].get_selection().get_selected()
         name = model.get_value(iter, 0).strip()
 
-        value = self.filter_store.get_value(self.controller.iter_filter, 5)
+        value = self.current_store.get_value(self.controller.iter_filter, 5)
         if not value:
             names = []
         else:
@@ -264,7 +280,7 @@ class FilterRules:
 
         names.remove(name)
 
-        self.filter_store.set_value(self.controller.iter_filter, 5, '\n'.join(names))
+        self.current_store.set_value(self.controller.iter_filter, 5, '\n'.join(names))
         self.update_filter_user_list()
 
     def update_filter_user_list_view(self, widget, ctx, x, y, data, info, etime):
@@ -328,14 +344,14 @@ class FilterRules:
             if source_model == model:       # move row in the list
                 model.remove(iter_source)
             names = [name[0] for name in model]
-            self.filter_store.set_value(self.controller.iter_filter, 5, '\n'.join(names))
+            self.current_store.set_value(self.controller.iter_filter, 5, '\n'.join(names))
             return
 
-        names = self.filter_store.get_value(self.controller.iter_filter, 5).split('\n')
+        names = self.current_store.get_value(self.controller.iter_filter, 5).split('\n')
         if new_name in names:
             return
         names.append(new_name)
-        self.filter_store.set_value(self.controller.iter_filter, 5, '\n'.join(names))
+        self.current_store.set_value(self.controller.iter_filter, 5, '\n'.join(names))
         self.update_filter_user_list(self.controller.iter_filter)
 
     def filter_user_select(self, widget, event):
@@ -355,7 +371,7 @@ class FilterRules:
         self.arw['filter_users_store'].clear()
 
         # add users
-        users = self.filter_store[proxy_iter][5]  # user
+        users = self.current_store[proxy_iter][5]  # user
         if not users:
             return None
 
@@ -365,9 +381,9 @@ class FilterRules:
                 self.arw['filter_users_store'].set_value(iter, 0, name)
 
         # add mac, if any
-        users += self.filter_store[proxy_iter][6]  # mac
+        users += self.current_store[proxy_iter][6]  # mac
 
-        for name in self.filter_store[proxy_iter][6].split('\n'):
+        for name in self.current_store[proxy_iter][6].split('\n'):
             if name:
                 iter = self.arw['filter_users_store'].append()
                 self.arw['filter_users_store'].set_value(iter, 0, name)
@@ -386,7 +402,7 @@ class FilterRules:
                 sel = self.arw["treeview3"].get_selection()
                 sel.unselect_all()
                 return
-            iter1 = self.filter_store.get_iter(path[0])
+            iter1 = self.current_store.get_iter(path[0])
         else:
             model, iter1 = self.arw["treeview3"].get_selection().get_selected()
             if not iter1:
@@ -405,7 +421,7 @@ class FilterRules:
         self.controller.iter_filter = iter1
 
         # time conditions
-        data1 = self.filter_store[iter1][3].strip()
+        data1 = self.current_store[iter1][3].strip()
         if data1 == "":
             self.arw["filter_time_condition_days"].set_text("")
             self.arw["filter_time_condition_from"].set_text("")
@@ -420,11 +436,11 @@ class FilterRules:
                 human_days = self.convert_days_to_local(days)
                 time_from = tmp2[0].strip()
                 time_to = tmp2[1].strip()
-                if self.filter_store[self.controller.iter_filter][13] == 1:      # change colour for deny or allow
-                    color =  'foreground="#008800"'
+                if self.current_store[self.controller.iter_filter][13] == 1:      # change colour for deny or allow
+                    color = 'foreground="#008800"'
                 else :
                     color = 'foreground="#ee0000"'
-                button_text ='<span ' + color + ' weight="bold" >'    # size="large" deleted
+                button_text = '<span ' + color + ' weight="bold" >'    # size="large" deleted
                 button_text += human_days + '\n  <span size="large">' + time_from + "-" + time_to + "</span></span>"
                 self.arw["filter_time_condition_days"].set_text(days)
                 self.arw["filter_time_condition_from"].set_text(time_from)
@@ -436,15 +452,15 @@ class FilterRules:
         else:
             print("Invalid time :", data1)
 
-        self.arw["filter_#comments"].get_buffer().set_text(self.filter_store[iter1][4])
+        self.arw["filter_#comments"].get_buffer().set_text(self.current_store[iter1][4])
 
         self.update_filter_user_list(iter1)
         self.controller.proxy_group.update_proxy_group_list(iter1)
 
         # add dest_domains
-        data1 = self.filter_store[iter1][8]  # dest_domains
+        data1 = self.current_store[iter1][8]  # dest_domains
         # add dest_ip, if any
-        data1 += self.filter_store[iter1][9]  # dest_ip
+        data1 += self.current_store[iter1][9]  # dest_ip
         self.arw["rule_dest"].get_buffer().set_text(data1)
         self.load_filter_user2()
 
@@ -452,7 +468,7 @@ class FilterRules:
         # used by the function above, and by the buttons of the filter tab
         list_color = Gdk.Color(red=50535, green=50535, blue=60535)
 
-        if self.filter_store[self.controller.iter_filter][11] == 1:
+        if self.current_store[self.controller.iter_filter][11] == 1:
             self.arw["filter_users_stack"].set_visible_child(self.arw["filter_users_all"])
             x = self.arw["toggle_filter_user_open_button"]
             self.arw["toggle_filter_user_open_button"].set_image(self.controller.all_button)
@@ -463,7 +479,7 @@ class FilterRules:
 
 
         # set full access
-        if self.filter_store[self.controller.iter_filter][12] == 1:
+        if self.current_store[self.controller.iter_filter][12] == 1:
             self.arw["rule_dest_stack"].set_visible_child(self.arw["rule_dest_all"])
             self.arw["toggle_filter_open_button"].set_image(self.controller.all2_button)
 
@@ -473,7 +489,7 @@ class FilterRules:
 
 
         # set allow/deny button
-        if self.filter_store[self.controller.iter_filter][13] == 1:
+        if self.current_store[self.controller.iter_filter][13] == 1:
             self.arw["toggle_filter_allow_button"].set_image(self.controller.allow_button)
             message = '<span foreground="#00aa00">' + _("All destinations \nallowed.") +  '</span>'
             self.arw["rule_dest_all"].set_markup(message)
@@ -487,7 +503,6 @@ class FilterRules:
             self.arw["allow_deny_groups"].set_markup('<span foreground="#ff0000">' + _("Denied Groups") +  '</span>')
             self.arw["allow_deny_sites"].set_markup('<span foreground="#ff0000">' + _("Denied Sites") +  '</span>')
 
-
     def convert_days_to_local(self, days):
         locale = _("Mo,Tu,We,Th,Fr,Sa,Su").split(",")
         days_locale = []
@@ -495,7 +510,6 @@ class FilterRules:
             days_locale.append(locale[int(day) - 1])
         days_locale = " ".join(days_locale)
         return days_locale
-
 
     def expand_users_view(self, widget):
         if widget.get_active():
@@ -513,7 +527,7 @@ class FilterRules:
 
     def show_time_conditions_window(self, widget):
         # Get the current time condition
-        time_condition = self.filter_store[self.controller.iter_filter][3]
+        time_condition = self.current_store[self.controller.iter_filter][3]
         self.arw['filter_time_condition_days'].set_text('')
         self.arw['filter_time_condition_from'].set_text('')
         self.arw['filter_time_condition_to'].set_text('')
@@ -581,7 +595,7 @@ class FilterRules:
         if time_condition == "1234567 -":
             time_condition = ""
 
-        self.filter_store[self.controller.iter_filter][3] = time_condition
+        self.current_store[self.controller.iter_filter][3] = time_condition
 
         self.arw["filter_time_conditions"].hide()
         self.load_filter_user("", "")
@@ -599,15 +613,21 @@ class FilterRules:
 
     def select_rule(self, rulename):
         """Select a rule by its name"""
-        for rule in self.filter_store:
+        for rule in self.current_store:
             if rule[0] == rulename:
                 self.arw['treeview3'].set_cursor(rule.path)
                 self.load_filter_user(event=None, widget=None)
                 return
 
     def populate_rules(self):
-        self.filter_store.clear()
-        data1 = self.controller.config["rules"]
+        self.populate_filter_rules(self.filter_store, self.controller.config['rules'])
+        if 'proxy-rules' in self.controller.config:
+            self.populate_filter_rules(self.proxy_rules_store, self.controller.config['proxy-rules'])
+        if 'ports-rules' in self.controller.config:
+            self.populate_filter_rules(self.port_rules_store, self.controller.config['ports-rules'])
+
+    def populate_filter_rules(self, store, data1):
+        store.clear()
         keys = ["active", "action", "time_condition", "#comments",
                 "users", "",
                 "dest_groups", "dest_domains", "", "",
@@ -622,7 +642,7 @@ class FilterRules:
             else:
                 name = section
             if data2.get("active") == 'off':
-                 name = "<s>" + name + "</s>"
+                name = "<s>" + name + "</s>"
             out = [name]
 
             for key in keys:
@@ -657,5 +677,5 @@ class FilterRules:
             if not out[13]:
                 out[13] = 0
 
-            self.filter_store.append(out)
+            store.append(out)
 

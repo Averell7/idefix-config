@@ -355,6 +355,9 @@ class Confix:
             self.arw['developper_menu'].set_sensitive(False)
             self.arw['developper_menu'].set_visible(False)
 
+        advanced_filter = self.profiles.config['__options'].get('advanced_filter', 0 ) == '1'
+        self.arw['filter_rules_box'].set_visible(advanced_filter)
+
         auto_load = self.profiles.config['__options'].get('auto_load', 0) == '1'
         if auto_load:
             last_config = self.profiles.config['__options'].get('last_config')
@@ -826,12 +829,14 @@ class Confix:
         filter_tab = self.arw['option_filter_tab_check'].get_active()
         auto_load = self.arw['menu_autoload_check'].get_active()
         developper_menu = self.arw['option_developper_check'].get_active()
+        advanced_filter = self.arw['option_advanced_filter_check'].get_active()
 
         self.profiles.config['__options'] = {
             'checkbox_config': '1' if gui_check else '0',
             'filter_tab': '1' if filter_tab else '0',
             'auto_load': '1' if auto_load else '0',
             'developper_menu': '1' if developper_menu else '0',
+            'advanced_filter': '1' if advanced_filter else '0',
         }
 
         if self.arw['option_password_check'].get_active():
@@ -852,6 +857,8 @@ class Confix:
         self.arw['developper_menu'].set_sensitive(developper_menu)
         self.arw['developper_menu'].set_visible(developper_menu)
 
+        self.arw['filter_rules_box'].set_visible(advanced_filter)
+
         # Save to config
         self.profiles.profile_save_config()
         self.arw['options_window'].hide()
@@ -866,6 +873,9 @@ class Confix:
         )
         self.arw['option_developper_check'].set_active(
             self.profiles.config['__options'].get('developper_menu', 0) == '1'
+        )
+        self.arw['option_advanced_filter_check'].set_active(
+            self.profiles.config['__options'].get('advanced_filter', 0) == '1'
         )
 
         self.arw['options_window'].show_all()
@@ -999,39 +1009,28 @@ class Confix:
                     config2["users"][row[0]][user]["subusers"] = subusers
                 pass
 
-        # proxy store
-        for row in self.filter_store:
-            name = row[0]
-            for code in["<i>", "</i>", "<s>", "</s>"]:  # remove codes which are only for display
-                name = name.replace(code, "")
-            config2["rules"][name] = OrderedDict()
-            config2["rules"][name]["active"] = row[1]
-            config2["rules"][name]["action"] = row[2]
-            config2["rules"][name]["time_condition"] = row[3]
-            config2["rules"][name]["comments"] = row[4]
-            config2["rules"][name]["users"] = self.format_row(row[5])
-            config2["rules"][name]["dest_groups"] = self.format_row(row[7])
-            config2["rules"][name]["dest_domains"] = self.format_domain_row(row[8])
-            config2["rules"][name]["any_user"] = row[11]
-            config2["rules"][name]["any_destination"] = row[12]
-            config2["rules"][name]["allow_deny"] = row[13]
-
-        # proxy rules store
-        for row in self.proxy_rules_store:
-            name = row[0]
-            for code in["<i>", "</i>", "<s>", "</s>"]:  # remove codes which are only for display
-                name = name.replace(code, "")
-            config2["rules"][name] = OrderedDict()
-            config2["rules"][name]["active"] = row[1]
-            config2["rules"][name]["action"] = row[2]
-            config2["rules"][name]["time_condition"] = row[3]
-            config2["rules"][name]["comments"] = row[4]
-            config2["rules"][name]["users"] = self.format_row(row[5])
-            config2["rules"][name]["dest_groups"] = self.format_row(row[7])
-            config2["rules"][name]["dest_domains"] = self.format_domain_row(row[8])
-            config2["rules"][name]["any_user"] = row[11]
-            config2["rules"][name]["any_destination"] = row[12]
-            config2["rules"][name]["allow_deny"] = row[13]
+        # dns filter rules store
+        rule_stores = [
+            ('rules', self.filter_store),
+            ('proxy-rules', self.filter_rules.proxy_rules_store),
+            ('ports-rules', self.filter_rules.port_rules_store)
+        ]
+        for rule_name, store in rule_stores:
+            for row in store:
+                name = row[0]
+                for code in["<i>", "</i>", "<s>", "</s>"]:  # remove codes which are only for display
+                    name = name.replace(code, "")
+                config2[rule_name][name] = OrderedDict()
+                config2[rule_name][name]["active"] = row[1]
+                config2[rule_name][name]["action"] = row[2]
+                config2[rule_name][name]["time_condition"] = row[3]
+                config2[rule_name][name]["comments"] = row[4]
+                config2[rule_name][name]["users"] = self.format_row(row[5])
+                config2[rule_name][name]["dest_groups"] = self.format_row(row[7])
+                config2[rule_name][name]["dest_domains"] = self.format_domain_row(row[8])
+                config2[rule_name][name]["any_user"] = row[11]
+                config2[rule_name][name]["any_destination"] = row[12]
+                config2[rule_name][name]["allow_deny"] = row[13]
 
         for row in self.firewall_store:
             config2["firewall"][row[0]] = OrderedDict()
