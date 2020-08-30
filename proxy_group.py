@@ -14,6 +14,7 @@ class ProxyGroup:
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
+        self._active_store = 'proxy'
 
         self.arw["proxy_group"].enable_model_drag_source(Gdk.ModifierType.BUTTON1_MASK, [], DRAG_ACTION)
         self.arw['proxy_group'].drag_source_add_text_targets()
@@ -29,12 +30,33 @@ class ProxyGroup:
 
         # The store for each proxy group
         self.groups_store = Gtk.ListStore(str, str)
+        self.ports_store = Gtk.ListStore(str, str)
+        self.chooser_sort = Gtk.TreeModelSort.sort_new_with_model(self.groups_store)
 
         self.proxy_group_window = self.arw['proxy_group_window']
 
         for scroll in ['proxy_group', 'chooser']:
             ctx = self.arw[scroll].get_style_context()
             ctx.add_class('chosen_list')
+
+    @property
+    def current_store(self):
+        """Returns the currently selected store"""
+        if self._active_store == 'proxy':
+            return self.groups_store
+        elif self._active_store == 'port':
+            return self.ports_store
+
+    def set_group_store(self, name='proxy'):
+        if name == 'proxy':
+            self.chooser_sort = Gtk.TreeModelSort.sort_new_with_model(self.groups_store)
+            self._active_store = 'proxy'
+        elif name == 'port':
+            self.chooser_sort = Gtk.TreeModelSort.sort_new_with_model(self.ports_store)
+            self._active_store = 'port'
+
+        self.chooser_sort.set_sort_column_id(0, Gtk.SortType.ASCENDING)
+        self.arw["chooser"].set_model(self.chooser_sort)
 
     def proxy_group_data_get(self, treeview, drag_context, data, info, time):
 
@@ -57,8 +79,11 @@ class ProxyGroup:
         if not proxy_iter:
             proxy_iter = self.controller.iter_filter
 
+        if not proxy_iter:
+            return None
+
         domains = {}
-        for row in self.groups_store:
+        for row in self.current_store:
             domains[row[0]] = row[1]
 
         self.proxy_group_store.clear()
@@ -115,9 +140,9 @@ class ProxyGroup:
                     tooltip += '\n'
                 tooltip += data['groups'][key]['lines']
 
-            new_iter = self.groups_store.append()
-            self.groups_store.set_value(new_iter, 0, key)
-            self.groups_store.set_value(new_iter, 1, tooltip)
+            new_iter = self.current_store.append()
+            self.current_store.set_value(new_iter, 0, key)
+            self.current_store.set_value(new_iter, 1, tooltip)
 
         self.arw['import_proxy_group_dialog'].hide()
 
@@ -141,6 +166,8 @@ class ProxyGroup:
     def update_proxy_group_list_view(self, widget, ctx, x, y, data, info, etime):
         """Add a proxy group to the list"""
         position = None
+        if not self.controller.iter_filter:
+            return
 
         if time.time() - self.mem_time < 1:  # dirty workaround to prevent two drags
             return
@@ -202,10 +229,13 @@ class ProxyGroup:
     def edit_proxy_group(self, widget):
         """Edit proxy group selected in proxy_group or chooser tree"""
         model, iter = widget.get_selection().get_selected()
+        if not iter:
+            return
+
         name = model.get_value(iter, 0)
 
         # Find the name in the proxy_group_store
-        for proxy_row in self.groups_store:
+        for proxy_row in self.current_store:
             if proxy_row[0] == name:
                 self.edit_group(proxy_row.iter)
 
@@ -213,22 +243,22 @@ class ProxyGroup:
         """Open the proxy_window for editing with the given iter"""
         self.editing_iter = iter
         self.proxy_group_domain_store.clear()
-        for domain in self.groups_store.get_value(iter, 1).split('\n'):
+        for domain in self.current_store.get_value(iter, 1).split('\n'):
             if not domain or domain.startswith('('):
                 continue
             new_iter = self.proxy_group_domain_store.append()
             self.proxy_group_domain_store.set_value(new_iter, 0, domain)
         self.proxy_group_window.show_all()
-        self.arw['proxy_group_message_label'].set_label(_("Editing %s") % self.groups_store.get_value(iter, 0))
+        self.arw['proxy_group_message_label'].set_label(_("Editing %s") % self.current_store.get_value(iter, 0))
 
     def new_proxy_group(self, widget):
         """Create a new proxy group and open it for editing"""
         name = ask_text(self.arw['window1'], _("New group name"))
         if not name:
             return
-        new_iter = self.groups_store.append()
-        self.groups_store.set_value(new_iter, 0, name)
-        self.groups_store.set_value(new_iter, 1, '')
+        new_iter = self.current_store.append()
+        self.current_store.set_value(new_iter, 0, name)
+        self.current_store.set_value(new_iter, 1, '')
         self.edit_group(new_iter)
 
     def proxy_group_add_item(self, widget):
@@ -258,11 +288,11 @@ class ProxyGroup:
     def proxy_group_finished(self, widget):
         """Finish editing the proxy group"""
         self.proxy_group_window.hide()
-        self.groups_store.set_value(
+        self.current_store.set_value(
             self.editing_iter, 1, '\n'.join(row[0] for row in self.proxy_group_domain_store)
         )
-        if not len(self.groups_store.get_value(self.editing_iter, 0).split('\n')):
-            self.groups_store.set_value(self.editing_iter, 0, _("(error)"))
+        if not len(self.current_store.get_value(self.editing_iter, 0).split('\n')):
+            self.current_store.set_value(self.editing_iter, 0, _("(error)"))
         self.proxy_group_domain_store.clear()
         self.update_proxy_group_list()
 

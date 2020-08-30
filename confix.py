@@ -283,9 +283,7 @@ class Confix:
         tvcolumn = gtk.TreeViewColumn(_('Groups Drag and Drop'), Gtk.CellRendererText(), text=0)
         self.arw["chooser"].append_column(tvcolumn)
         self.arw["chooser"].get_selection()
-        self.chooser_sort = Gtk.TreeModelSort.sort_new_with_model(self.groups_store)
-        self.chooser_sort.set_sort_column_id(0, Gtk.SortType.ASCENDING)
-        self.arw["chooser"].set_model(self.chooser_sort)
+        self.proxy_group.set_group_store('proxy')
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
 
         tvcolumn = gtk.TreeViewColumn(_('Users Drag and Drop'), Gtk.CellRendererText(), text=0)
@@ -299,7 +297,6 @@ class Confix:
         # sel.set_mode(Gtk.SelectionMode.MULTIPLE)
         self.arw["chooser2"].get_selection()
 
-        self.ports_store = gtk.ListStore(str)  #
         self.empty_store = EMPTY_STORE
 
         for chooser in ["chooser", "chooser1", "chooser2"]:
@@ -505,7 +502,7 @@ class Confix:
         self.maclist = self.users.create_maclist()
         self.users.populate_users()
         self.filter_rules.populate_rules()
-        #self.populate_ports()
+        self.populate_ports()
         self.populate_groups()
         self.populate_users_chooser()
         #self.firewall.populate_firewall()
@@ -568,10 +565,11 @@ class Confix:
     """ Load interface """
 
     def populate_ports(self):
-        self.ports_store.clear()
+        self.proxy_group.ports_store.clear()
         data1 = self.config["ports"]
         for key in data1:
-            self.ports_store.append([key])
+            ports = '\n'.join(data1[key].get('ports', []))
+            self.proxy_group.ports_store.append([key, ports])
 
     def populate_groups(self):
         self.groups_store.clear()
@@ -957,12 +955,12 @@ class Confix:
 
     def rebuild_config(self) :
         config2 = OrderedDict()
-        for section in ["users", "rules", "proxy-rules", "ports-rules", "groups"]:
+        for section in ["users", "rules", "proxy-rules", "ports-rules", "groups", "ports"]:
             config2[section] = OrderedDict()
         config2["version"] = self.config.get("version")
 
         # users store
-        for row in self.users_store :
+        for row in self.users_store:
             config2["users"][row[0]] = OrderedDict()
             if row[6]:
                 internet = 'filtered'
@@ -1052,6 +1050,15 @@ class Confix:
 
             if ip:
                 config2['groups'][row[0]]['dest_ip'] = ip
+
+        # ports store
+        for row in self.proxy_group.ports_store:
+            config2['ports'][row[0]] = OrderedDict()
+            ports = []
+            for line in self.format_domain_row(row[1]):
+                ports.append(line)
+
+            config2['ports'][row[0]]['ports'] = ports
 
         return config2
 

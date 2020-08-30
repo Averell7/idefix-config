@@ -105,10 +105,14 @@ class FilterRules:
         """Update which current store"""
         if self.arw['dns_filter_rules_option'].get_active():
             self._active_store = 'dns'
+            self.controller.proxy_group.set_group_store('proxy')
         elif self.arw['proxy_filter_rules_option'].get_active():
             self._active_store = 'proxy'
+            self.controller.proxy_group.set_group_store('proxy')
         elif self.arw['port_filter_rules_option'].get_active():
             self._active_store = 'port'
+            self.controller.proxy_group.set_group_store('port')
+
         self.treeview3.set_model(self.current_store)
 
     def switch_gui(self,widget = None):
