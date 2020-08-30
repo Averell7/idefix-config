@@ -469,7 +469,7 @@ class Information:
         # Populate the potential group/rules to add to
         rule_iter = self.arw['filter_log_rule_destination_store'].append(None)
         self.arw['filter_log_rule_destination_store'].set_value(rule_iter, 0, _("Rules"))
-        for index, item in enumerate(self.controller.proxy_users.filter_store):
+        for index, item in enumerate(self.controller.filter_rules.filter_store):
             iter = self.arw['filter_log_rule_destination_store'].append(rule_iter)
             self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_NAME, item[0])
             self.arw['filter_log_rule_destination_store'].set_value(iter, RULE_DESTINATION_COLUMN_TYPE, 'rule')
@@ -507,12 +507,12 @@ class Information:
                     current_domains.append(domain_to_add)
                 self.controller.proxy_group.groups_store[index][1] = '\n'.join(current_domains)
             elif type == 'rule':
-                current_domains = self.controller.proxy_users.filter_store[index][8].strip().split('\n')
+                current_domains = self.controller.filter_rules.filter_store[index][8].strip().split('\n')
                 if domain_to_add in current_domains:
                     showwarning(_("Domain Already Exists"), _("The domain already exists in the rule. Skipping."))
                 else:
                     current_domains.append(domain_to_add)
-                self.controller.proxy_users.filter_store[index][8] = '\n'.join(current_domains)
+                self.controller.filter_rules.filter_store[index][8] = '\n'.join(current_domains)
 
         self.arw['filter_log_add_rule_dialog'].hide()
 
