@@ -114,6 +114,14 @@ class FilterRules:
             self.controller.proxy_group.set_group_store('port')
 
         self.treeview3.set_model(self.current_store)
+        self.arw['filter_users_store'].clear()
+        self.arw['rule_dest'].get_buffer().set_text("")
+        self.arw['proxy_groups_store'].clear()
+        self.arw["filter_users"].show()
+        self.arw["proxy_group"].show()
+        self.arw["rule_dest"].show()
+        self.toggle_col13_proxy(None)
+        self.load_filter_user2()
 
     def switch_gui(self,widget = None):
 
@@ -187,10 +195,16 @@ class FilterRules:
         # col 13 = allow/deny state; col 15 = text color
 
         treestore = self.current_store
-        if treestore.get_value(self.controller.iter_filter, 13) == 0:
-            treestore.set_value(self.controller.iter_filter, 13, 1)
-            treestore.set_value(self.controller.iter_filter, 2, "allow")
-            treestore.set_value(self.controller.iter_filter, 15, "#009900")
+        if treestore.iter_is_valid(self.controller.iter_filter):
+            data = treestore[self.controller.iter_filter]
+        else:
+            data = None
+
+        if not data or data[13] == 0:
+            if data:
+                treestore.set_value(self.controller.iter_filter, 13, 1)
+                treestore.set_value(self.controller.iter_filter, 2, "allow")
+                treestore.set_value(self.controller.iter_filter, 15, "#009900")
             self.arw["allow_deny_groups"].set_text("Allowed Groups")
             self.arw["allow_deny_sites"].set_text("Allowed Sites")
         else:
@@ -369,10 +383,10 @@ class FilterRules:
         if not proxy_iter:
             proxy_iter = self.controller.iter_filter
 
+        self.arw['filter_users_store'].clear()
+
         if not proxy_iter:
             return
-
-        self.arw['filter_users_store'].clear()
 
         # add users
         users = self.current_store[proxy_iter][5]  # user
@@ -472,7 +486,12 @@ class FilterRules:
         # used by the function above, and by the buttons of the filter tab
         list_color = Gdk.Color(red=50535, green=50535, blue=60535)
 
-        if self.current_store[self.controller.iter_filter][11] == 1:
+        if self.current_store.iter_is_valid(self.controller.iter_filter):
+            data = self.current_store[self.controller.iter_filter]
+        else:
+            data = None
+
+        if data and data[11] == 1:
             self.arw["filter_users_stack"].set_visible_child(self.arw["filter_users_all"])
             x = self.arw["toggle_filter_user_open_button"]
             self.arw["toggle_filter_user_open_button"].set_image(self.controller.all_button)
@@ -483,7 +502,7 @@ class FilterRules:
 
 
         # set full access
-        if self.current_store[self.controller.iter_filter][12] == 1:
+        if data and data[12] == 1:
             self.arw["rule_dest_stack"].set_visible_child(self.arw["rule_dest_all"])
             self.arw["toggle_filter_open_button"].set_image(self.controller.all2_button)
 
@@ -493,7 +512,7 @@ class FilterRules:
 
 
         # set allow/deny button
-        if self.current_store[self.controller.iter_filter][13] == 1:
+        if data and data[13] == 1:
             self.arw["toggle_filter_allow_button"].set_image(self.controller.allow_button)
             message = '<span foreground="#00aa00">' + _("All destinations \nallowed.") +  '</span>'
             self.arw["rule_dest_all"].set_markup(message)

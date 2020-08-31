@@ -566,9 +566,9 @@ class Confix:
 
     def populate_ports(self):
         self.proxy_group.ports_store.clear()
-        data1 = self.config["ports"]
+        data1 = self.config.get("ports", [])
         for key in data1:
-            ports = '\n'.join(data1[key].get('ports', []))
+            ports = '\n'.join(data1[key].get('port', []))
             self.proxy_group.ports_store.append([key, ports])
 
     def populate_groups(self):
@@ -698,9 +698,9 @@ class Confix:
         widget = text_view
 
         if widget.name == "rule_dest":
-            self.filter_store.set(self.iter_filter, 8, text1)
+            self.filter_rules.current_store.set(self.iter_filter, 8, text1)
         elif widget.name == "filter_#comments":
-            self.filter_store.set(self.iter_filter, 4, text1)
+            self.filter_rules.current_store.set(self.iter_filter, 4, text1)
 
         elif widget.name == "firewall_ports":
             self.firewall_store.set(self.iter_firewall, 3, text1)
@@ -1058,7 +1058,7 @@ class Confix:
             for line in self.format_domain_row(row[1]):
                 ports.append(line)
 
-            config2['ports'][row[0]]['ports'] = ports
+            config2['ports'][row[0]]['port'] = ports
 
         return config2
 
