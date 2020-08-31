@@ -195,7 +195,7 @@ class FilterRules:
         # col 13 = allow/deny state; col 15 = text color
 
         treestore = self.current_store
-        if treestore.iter_is_valid(self.controller.iter_filter):
+        if self.controller.iter_filter and treestore.iter_is_valid(self.controller.iter_filter):
             data = treestore[self.controller.iter_filter]
         else:
             data = None
@@ -486,7 +486,7 @@ class FilterRules:
         # used by the function above, and by the buttons of the filter tab
         list_color = Gdk.Color(red=50535, green=50535, blue=60535)
 
-        if self.current_store.iter_is_valid(self.controller.iter_filter):
+        if self.controller.iter_filter and self.current_store.iter_is_valid(self.controller.iter_filter):
             data = self.current_store[self.controller.iter_filter]
         else:
             data = None
