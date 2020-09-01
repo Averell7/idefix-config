@@ -239,20 +239,37 @@ class ProxyGroup:
             if proxy_row[0] == name:
                 self.edit_group(proxy_row.iter)
 
+    def save_ports(self, widget):
+        self.current_store.set_value(self.editing_iter, 1, self.arw['ports_buffer'].get_text(
+            self.arw['ports_buffer'].get_start_iter(),
+            self.arw['ports_buffer'].get_end_iter(),
+            False
+        ))
+        self.arw['ports_window'].hide()
+
     def edit_group(self, iter):
-        """Open the proxy_window for editing with the given iter"""
+        """If the filter is proxy or dns then edit using the proxy_window. if ports then use the ports_window"""
         self.editing_iter = iter
-        self.proxy_group_domain_store.clear()
-        for domain in self.current_store.get_value(iter, 1).split('\n'):
-            if not domain or domain.startswith('('):
-                continue
-            new_iter = self.proxy_group_domain_store.append()
-            self.proxy_group_domain_store.set_value(new_iter, 0, domain)
-        self.proxy_group_window.show_all()
-        self.arw['proxy_group_message_label'].set_label(_("Editing %s") % self.current_store.get_value(iter, 0))
+
+        if self._active_store == 'port':
+            buf = self.arw['ports_buffer'] = Gtk.TextBuffer()
+            self.arw['ports_view'].set_buffer(buf)
+            self.arw['ports_window'].show_all()
+            if iter:
+                buf.set_text(self.current_store.get_value(iter, 1))
+            self.arw['ports_window'].show_all()
+        else:
+            self.proxy_group_domain_store.clear()
+            for domain in self.current_store.get_value(iter, 1).split('\n'):
+                if not domain or domain.startswith('('):
+                    continue
+                new_iter = self.proxy_group_domain_store.append()
+                self.proxy_group_domain_store.set_value(new_iter, 0, domain)
+            self.proxy_group_window.show_all()
+            self.arw['proxy_group_message_label'].set_label(_("Editing %s") % self.current_store.get_value(iter, 0))
 
     def new_proxy_group(self, widget):
-        """Create a new proxy group and open it for editing"""
+        """Create a new filter group and open it for editing"""
         name = ask_text(self.arw['window1'], _("New group name"))
         if not name:
             return

@@ -113,15 +113,6 @@ class Firewall:
             False
         ))
 
-    def save_ports(self, widget):
-        self.controller.config['ports'] = OrderedDict()
-        for item in self.arw['ports_list']:
-            key, value = item
-            self.controller.config['ports'][key] = {
-                'port': value.split('\n')
-            }
-        self.cancel_ports_window(widget)
-
     def toggle_col12_firewall(self, cellrenderer, row, treestore):  # unused
         # callback of ?
         # col 12 = open access state; col 16 = background color
