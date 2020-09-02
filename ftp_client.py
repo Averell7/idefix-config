@@ -2,7 +2,7 @@ import io
 import os
 from ftplib import FTP, all_errors as FTPError
 
-from util import get_config_path
+from util import get_config_path, print_except
 
 
 def ftp_connect(server, login, password, controller = None):
@@ -67,7 +67,9 @@ def ftp_get(ftp, filename, directory="", required=True, json=False):
 
     except FTPError:
         print(_("could not get ") + filename)
-
+    except:
+        print_except()
+        return False
 
 def ftp_send(ftp, filepath, directory=None, dest_name=None):
     if directory:
