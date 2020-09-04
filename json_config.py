@@ -209,6 +209,9 @@ class RestoreDialog:
             self.arw['restore_config_dialog'].hide()
             return
 
+        self.load_from_backup(zf, offline, type)
+
+    def load_from_backup(self, zf, offline=False, type=None, show_warning=True):
         permission_path = self.find_in_zip(zf, 'idefix.json')
         network_path = self.find_in_zip(zf, 'idefix2_conf.json')
         confix_path = self.find_in_zip(zf, 'confix.cfg')
@@ -285,6 +288,7 @@ class RestoreDialog:
         self.controller.update()
         self.update_gui()
 
+        msg = None
         if skip_permissions or skip_network or skip_confix:
             msg = ''
             if skip_permissions:
@@ -294,7 +298,8 @@ class RestoreDialog:
             if skip_confix:
                 msg += skip_confix + '\n'
 
-            showwarning(_("Some files were not restored"), msg)
+            if show_warning:
+                showwarning(_("Some files were not restored"), msg)
 
         if offline:
             configname = os.path.split(self.configpath)[1]
@@ -313,6 +318,8 @@ class RestoreDialog:
         if import_confix and not skip_confix:
             alert(_("Please restart Confix to use your restored profiles"))
             sys.exit(1)
+
+        return msg
 
     def find_in_zip(self, zf, filename):
         """Tries different paths to find the correct file to restore"""
