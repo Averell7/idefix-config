@@ -244,8 +244,8 @@ class Confix:
 
         if self.load_locale:         # development environment
             self.arw['loading_window'].hide()
-            if os.path.isfile(get_config_path("dev\idefix.json")):
-                data_str = open(get_config_path("dev\idefix.json"), "r").read()
+            if os.path.isfile(get_config_path("dev/idefix.json")):
+                data_str = open(get_config_path("dev/idefix.json"), "r").read()
                 try:
                     self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
                     self.update()
