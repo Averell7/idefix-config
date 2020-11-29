@@ -28,9 +28,11 @@
 # version 2.0.0 - Supports Unbound
 
 import http.client
+import io
 import json
 import os
 import sys
+import zipfile
 from collections import OrderedDict
 from copy import deepcopy
 
@@ -392,8 +394,46 @@ class Confix:
             self.arw["save_button1"].set_sensitive(False)
             self.arw["save_button2"].set_sensitive(False)
 
+    def find_good_backup(self):
+        """Find a good backup from Idefix"""
 
-    def open_connexion_profile(self, configname = ""):
+        # Download list of available back ups
+        try:
+            backup_list = json.loads(self.information.get_infos('list_backups'))
+            backup_list.sort(reverse=True)
+        except:
+            backup_list = []
+
+        for backup in backup_list:
+            # Download the zip file and extract it
+            filedata = self.information.get_infos('get_backup ' + backup, result='result.zip')
+            backup_f = io.BytesIO()
+            backup_f.write(filedata)
+            backup_f.seek(0)
+            try:
+                zf = zipfile.ZipFile(backup_f)
+            except zipfile.BadZipFile as e:
+                print("Error extracting backup", backup, e)
+                continue
+
+            # Try load configuration from the file
+            if self.restore_dialog.load_from_backup(zf, type=['permissions'], show_warning=True):
+                print("Error loading backup", backup)
+                continue
+            else:
+                showwarning(
+                    _("Restore Backup"),
+                    _("Restored from backup %s") % backup
+                )
+
+                self.load_connection()
+                return
+
+        self.ftp.close()
+        # No good backups were found
+        return alert("Unable to load configuration. Please import another one.")
+
+    def open_connexion_profile(self, configname=""):
 
         self.mymac = None
         self.arw['loading_window'].show()
@@ -409,19 +449,28 @@ class Confix:
             return False
         else:
             # retrieve files by ftp
-            data0 = ftp_get(self.ftp, "idefix.json", json  = True)
+            data0 = ftp_get(self.ftp, "idefix.json", json=True)
             self.active_config_text = data0
-            if data0 :
+            if data0:
                 try:
                     self.config = json.loads(data0, object_pairs_hook=OrderedDict)
                     self.update()
                     self.update_gui()
                 except:
-                    alert("Unable to load configuration %s. Please import another one." % configname)
+                    # Try load a backup configuration
+                    if askyesno(_("Corrupted Configuration"), _('Your configuration is corrupted. Search for backup?')):
+                        return self.find_good_backup()
+                    else:
+                        self.config = OrderedDict()
+                        self.load_defaults()
                 self.ftp.close()
             else:
                 self.load_defaults()
 
+            self.load_connection()
+
+    def load_connection(self):
+        ftp1 = self.ftp_config
         if ip_address_test(ftp1["server"]):
             ip = ftp1["server"]
             try:
