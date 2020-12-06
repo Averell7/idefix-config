@@ -537,14 +537,10 @@ class Information:
 
         spinner.stop()
 
-        #result = """Jan 21 16:25:44 : denied ===> idefix64.fr. / 192.168.84.100 () - user unknown for mac 8c:16:45:d4:8a:4d
-        #Jan 21 16:25:44 : denied ===> idefix64.fr. / 192.168.84.100 () - user unknown for mac 8c:16:45:d4:8a:4d
-        #Feb 20 04:15:10 : validation failure >detectportal.firefox.com. AAAA IN< key for validation . is marked as invalid because of a previous validation failure &lt;mozilla.org. AAAA IN&gt;: signature before inception date from 195.46.39.39 for trust anchor . while building chain of trust"""
-
         result = me(result)
 
-
         self.arw['filter_log_store'].clear()
+
         for line in result.split('\n'):
             log_iter = self.arw['filter_log_store'].append()
 
@@ -573,7 +569,11 @@ class Information:
                     if domain.endswith('.'):
                         domain = domain[:len(domain) - 1]
                     self.arw['filter_log_store'].set_value(log_iter, 1, domain.lower())
+
             self.arw['filter_log_store'].set_value(log_iter, 0, text)
+            last_iter = self.arw['filter_log_store'].iter_nth_child(None, self.arw['filter_log_store'].iter_n_children() - 1)
+            last_path = self.arw['filter_log_store'].get_path(last_iter)
+            self.arw['filter_log_treeview'].scroll_to_cell(last_path, self.arw['filter_log_treeview'].get_column(0))
 
     def idefix_infos(self, widget):
         self.arw['filter_log_search_entry'].set_text('')
