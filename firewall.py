@@ -73,6 +73,8 @@ class Firewall:
 
     def ports_open_window(self, widget):
         self.arw['ports_window'].show_all()
+        self.controller.config["ports"]["test"] = {}                        # TODO : debug
+        self.controller.config["ports"]["test"]["port"] = ["25"]            # TODO : debug
         for key, value in self.controller.config['ports'].items():
             iter = self.arw['ports_list'].append()
             self.arw['ports_list'].set_value(iter, 0, key)

@@ -2,6 +2,7 @@
 # coding: utf-8
 
 
+# version 2.4.11 - If the configuration is invalid, automatically loads the last valid configuration
 # version 2.4.10b- check the date of Idefix at startup - correct if necessary
 # version 2.4.9 - control panel for services
 # version 2.4.8 - Informations "connected users" allow to create user
@@ -71,7 +72,7 @@ from json_config import RestoreDialog, ExportJsonDialog, ImportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.4.10b"
+version = "2.4.11"
 
 
 gtk = Gtk
@@ -435,6 +436,7 @@ class Confix:
 
     def open_connexion_profile(self, configname=""):
 
+        print("open connexion profile")
         self.mymac = None
         self.arw['loading_window'].show()
         while Gtk.events_pending():
@@ -467,9 +469,11 @@ class Confix:
             else:
                 self.load_defaults()
 
-            self.load_connection()
+            if self.load_connection():
+                return True
 
     def load_connection(self):
+        print("load connexion")
         ftp1 = self.ftp_config
         if ip_address_test(ftp1["server"]):
             ip = ftp1["server"]
@@ -497,13 +501,18 @@ class Confix:
         self.assistant.refresh_detect_list()
 
         # Check our mac address exists
+        print("self.check_mac_and_create_config()")
         self.check_mac_and_create_config()
 
         # Experimental
-        # self.arw2["my_account"].set_text(self.myaccount)
+        if hasattr(self,"myaccount"):
+            self.arw2["my_account"].set_text(self.myaccount)
 
         # Check if the date is correct and if not, update it
+        t1 = time.time()
         self.information.check_date()
+        delta = int(time.time() - t1)
+        print("self.information.check_date() : ", str(delta))
 
         return True
 
