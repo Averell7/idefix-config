@@ -672,7 +672,12 @@ class Confix:
         global iconx
         # col 13 = allow/deny state; col 15 = text color
         # col 14 = on/off state; col 15 = text color
-        for store in [self.filter_store, self.firewall_store]:
+        stores = [
+            self.filter_store, self.firewall_store, self.filter_rules.proxy_rules_store,
+            self.filter_rules.port_rules_store
+        ]
+
+        for store in stores:
             for row in store:
                 if row[13] == 1:  # allow
                     row[15] = "#009900"  # green
