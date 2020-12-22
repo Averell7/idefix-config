@@ -30,7 +30,7 @@ class ProxyGroup:
 
         # The store for each proxy group
         self.groups_store = Gtk.ListStore(str, str)
-        self.ports_store = Gtk.ListStore(str, str)
+        self.ports_store = self.arw['ports_list']
         self.chooser_sort = Gtk.TreeModelSort.sort_new_with_model(self.groups_store)
 
         self.proxy_group_window = self.arw['proxy_group_window']
@@ -239,25 +239,16 @@ class ProxyGroup:
             if proxy_row[0] == name:
                 self.edit_group(proxy_row.iter)
 
-    def save_ports(self, widget):
-        self.current_store.set_value(self.editing_iter, 1, self.arw['ports_buffer'].get_text(
-            self.arw['ports_buffer'].get_start_iter(),
-            self.arw['ports_buffer'].get_end_iter(),
-            False
-        ))
-        self.arw['ports_window'].hide()
-
     def edit_group(self, iter):
         """If the filter is proxy or dns then edit using the proxy_window. if ports then use the ports_window"""
         self.editing_iter = iter
 
         if self._active_store == 'port':
-            buf = self.arw['ports_buffer'] = Gtk.TextBuffer()
-            self.arw['ports_view'].set_buffer(buf)
-            self.arw['ports_window'].show_all()
-            if iter:
-                buf.set_text(self.current_store.get_value(iter, 1))
-            self.arw['ports_window'].show_all()
+            # Find the correct port group to show in the ports window
+            self.controller.firewall.ports_open_window()
+            valid, tree_iter = self.arw['ports_tree'].get_model().convert_child_iter_to_iter(iter)
+            if valid:
+                self.arw['ports_tree'].get_selection().select_iter(tree_iter)
         else:
             self.proxy_group_domain_store.clear()
             for domain in self.current_store.get_value(iter, 1).split('\n'):

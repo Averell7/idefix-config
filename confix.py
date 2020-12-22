@@ -623,11 +623,7 @@ class Confix:
     """ Load interface """
 
     def populate_ports(self):
-        self.proxy_group.ports_store.clear()
-        data1 = self.config.get("ports", [])
-        for key in data1:
-            ports = '\n'.join(data1[key].get('port', []))
-            self.proxy_group.ports_store.append([key, ports])
+        self.firewall.populate_ports()
 
     def populate_groups(self):
         self.groups_store.clear()
