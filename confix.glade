@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.1 -->
+<!-- Generated with glade 3.22.2 -->
 <interface>
   <requires lib="gtk+" version="3.18"/>
   <object class="GtkWindow">
@@ -957,6 +957,28 @@ After clicking close, you will be shown the internet filter rule created for you
   </object>
   <object class="GtkTreeModelSort" id="ports_list_sort">
     <property name="model">ports_list</property>
+  </object>
+  <object class="GtkMenu" id="ports_menu">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">new group</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="ports_new_group" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">delete group</property>
+        <property name="use_underline">True</property>
+        <signal name="activate" handler="ports_delete_group" swapped="no"/>
+      </object>
+    </child>
   </object>
   <object class="GtkMenu" id="profile_context_menu">
     <property name="visible">True</property>
@@ -6296,6 +6318,7 @@ Improper values can ruin your filtering scheme. </property>
                 <property name="height_request">100</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
                 <property name="shadow_type">in</property>
                 <child>
                   <object class="GtkTextView" id="ports_view">
@@ -6315,7 +6338,7 @@ Improper values can ruin your filtering scheme. </property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">label</property>
+                <property name="label" translatable="yes">Group</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -6326,7 +6349,7 @@ Improper values can ruin your filtering scheme. </property>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">label</property>
+                <property name="label" translatable="yes">Ports</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -6338,6 +6361,7 @@ Improper values can ruin your filtering scheme. </property>
                 <property name="width_request">100</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
                 <property name="shadow_type">in</property>
                 <child>
                   <object class="GtkTreeView" id="ports_tree">
@@ -6348,6 +6372,7 @@ Improper values can ruin your filtering scheme. </property>
                     <property name="model">ports_list_sort</property>
                     <property name="headers_visible">False</property>
                     <property name="search_column">0</property>
+                    <signal name="button-release-event" handler="ports_show_menu" swapped="no"/>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection">
                         <signal name="changed" handler="ports_selection_changed" swapped="no"/>
@@ -6374,7 +6399,7 @@ Improper values can ruin your filtering scheme. </property>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
           </packing>

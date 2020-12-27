@@ -623,11 +623,7 @@ class Confix:
     """ Load interface """
 
     def populate_ports(self):
-        self.proxy_group.ports_store.clear()
-        data1 = self.config.get("ports", [])
-        for key in data1:
-            ports = '\n'.join(data1[key].get('port', []))
-            self.proxy_group.ports_store.append([key, ports])
+        self.firewall.populate_ports()
 
     def populate_groups(self):
         self.groups_store.clear()
@@ -672,7 +668,12 @@ class Confix:
         global iconx
         # col 13 = allow/deny state; col 15 = text color
         # col 14 = on/off state; col 15 = text color
-        for store in [self.filter_store, self.firewall_store]:
+        stores = [
+            self.filter_store, self.firewall_store, self.filter_rules.proxy_rules_store,
+            self.filter_rules.port_rules_store
+        ]
+
+        for store in stores:
             for row in store:
                 if row[13] == 1:  # allow
                     row[15] = "#009900"  # green

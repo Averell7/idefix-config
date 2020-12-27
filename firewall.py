@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk
 
 from util import (
     askyesno, ask_text, ip_address_test, mac_address_test, format_comment, format_line, format_directive,
@@ -71,23 +71,30 @@ class Firewall:
         """
         self.arw['ports_tree'].get_model().set_sort_column_id(0, Gtk.SortType.ASCENDING)
 
-    def ports_open_window(self, widget):
-        self.arw['ports_window'].show_all()
-        self.controller.config["ports"]["test"] = {}                        # TODO : debug
-        self.controller.config["ports"]["test"]["port"] = ["25"]            # TODO : debug
+    def populate_ports(self):
+        if not self.controller.config['ports']:
+            self.controller.config['ports'] = OrderedDict()
+
+        self.arw['ports_list'].clear()
         for key, value in self.controller.config['ports'].items():
             iter = self.arw['ports_list'].append()
             self.arw['ports_list'].set_value(iter, 0, key)
-            self.arw['ports_list'].set_value(iter, 1, '\n'.join(value['port']))
+            self.arw['ports_list'].set_value(iter, 1, '\n'.join(value.get('port', [])))
+
+    def ports_open_window(self, widget=None):
+        """Opens the ports window from the developer menu"""
+
+        self.arw['ports_window'].show_all()
         buf = Gtk.TextBuffer()
         self.arw['ports_buffer'] = buf
         self.arw['ports_view'].set_buffer(buf)
+        self.ports_selection_changed(self.arw['ports_tree'].get_selection())
 
     def cancel_ports_window(self, widget):
         self.arw['ports_window'].hide()
         self.arw['ports_buffer'] = Gtk.TextBuffer()
         self.arw['ports_view'].set_buffer(self.arw['ports_buffer'])
-        self.arw['ports_list'].clear()
+        self.populate_ports()
 
     def ports_selection_changed(self, widget):
         model, iter = widget.get_selected()
@@ -114,6 +121,45 @@ class Firewall:
             self.arw['ports_buffer'].get_end_iter(),
             False
         ))
+
+    def save_ports(self, widget):
+        """Write the tree list to the ports store"""
+        model = self.arw['ports_tree'].get_model()
+        self.controller.config['ports'] = OrderedDict()
+        for row in model:
+            self.controller.config['ports'][row[0]] = {
+                'port': row[1].split('\n'),
+            }
+
+        self.arw['ports_window'].hide()
+
+    def ports_new_group(self, widget):
+        """Create a new port group"""
+        name = ask_text(self.arw['ports_window'], _('Enter group name'))
+        if not name:
+            return
+        iter = self.arw['ports_list'].append([name, ''])
+        valid, iter = self.arw['ports_tree'].get_model().convert_child_iter_to_iter(iter)
+        self.arw['ports_tree'].get_selection().select_iter(iter)
+
+    def ports_delete_group(self, widget):
+        """Delete the selected ports group"""
+        model, iter = self.arw['ports_tree'].get_selection().get_selected()
+        name = model.get_value(iter, 0)
+
+        if not askyesno(_('Delete %s') % name, _('Are you sure you want to delete port group?')):
+            return
+
+        model, iter = self.arw['ports_tree'].get_selection().get_selected()
+        iter = model.convert_iter_to_child_iter(iter)
+        model = model.get_model()
+        model.remove(iter)
+
+    def ports_show_menu(self, widget, event=None):
+        if event.type == Gdk.EventType.BUTTON_RELEASE:
+            if event.button == 3:  # right click, runs the context menu
+                self.arw["ports_menu"].popup(None, None, None, None, event.button, event.time)
+        return
 
     def toggle_col12_firewall(self, cellrenderer, row, treestore):  # unused
         # callback of ?
