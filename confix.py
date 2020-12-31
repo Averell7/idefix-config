@@ -1088,6 +1088,7 @@ class Confix:
                 config2[rule_name][name]["any_user"] = row[11]
                 config2[rule_name][name]["any_destination"] = row[12]
                 config2[rule_name][name]["allow_deny"] = row[13]
+                config2[rule_name][name]['strict_end'] = row[20] == 1
 
         for row in self.firewall_store:
             config2["firewall"][row[0]] = OrderedDict()
