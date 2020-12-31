@@ -70,7 +70,7 @@ def _bytes_to_string(binary):
 def _concat_list(a, b):
     return a + b
 
-
+"""
 # Python 3 compatibility
 try:
     xrange
@@ -90,6 +90,22 @@ except Exception:
     # Python 3 cannot concatenate a list onto a bytes, so we bytes-ify it first
     def _concat_list(a, b):
         return a + bytes(b)
+"""
+
+# Python 3 supports bytes, which is already an array of integers
+def _string_to_bytes(text):
+    if isinstance(text, bytes):
+        return text
+    return [ord(c) for c in text]
+
+# In Python 3, we return bytes
+def _bytes_to_string(binary):
+    return bytes(binary)
+
+# Python 3 cannot concatenate a list onto a bytes, so we bytes-ify it first
+def _concat_list(a, b):
+    return a + bytes(b)
+
 
 
 # Based *largely* on the Rijndael implementation
