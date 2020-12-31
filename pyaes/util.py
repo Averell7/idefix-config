@@ -26,8 +26,7 @@
 # represent arbitrary binary data, we must use the "bytes" object. This method
 # ensures the object behaves as we need it to.
 
-"""
-# This was for python 2 compatibility. "xrange" causes an error in the flake8 test when building. 
+
 def to_bufferable(binary):
     return binary
 
@@ -45,15 +44,6 @@ except:
 
     def _get_byte(c):
         return c
-"""
-
-def to_bufferable(binary):
-    if isinstance(binary, bytes):
-        return binary
-    return bytes(ord(b) for b in binary)
-
-def _get_byte(c):
-    return c
 
 
 
