@@ -712,6 +712,11 @@ class FilterRules:
             if not out[13]:
                 out[13] = 0
 
+            if data2.get("active") == 'off':
+                out[14] = 0
+            else:
+                out[14] = 1
+
             if 'strict_end' in data2 and data2['strict_end']:
                 out[20] = 1
 
