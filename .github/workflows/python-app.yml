@@ -25,8 +25,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install wheel
         pip install flake8 pytest stdeb 
-        pip install libgirepository
-        pip install pygobject
+        pip install PyGObject
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
