@@ -2,6 +2,7 @@
 # coding: utf-8
 
 
+# version 2.4.12 - strict_end parameter added
 # version 2.4.11 - If the configuration is invalid, automatically loads the last valid configuration
 # version 2.4.10b- check the date of Idefix at startup - correct if necessary
 # version 2.4.9 - control panel for services
@@ -72,7 +73,7 @@ from json_config import RestoreDialog, ExportJsonDialog, ImportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.4.11"
+version = "2.4.12"
 
 
 gtk = Gtk
