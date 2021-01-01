@@ -23,7 +23,7 @@ from gi.repository import Gtk
 
 from domain_util import extract_domain_parts, extract_domain
 from ftp_client import ftp_connect, ftp_get
-from util import showwarning, get_ip_address, askyesno, alert
+from util import ip_address_test, showwarning, get_ip_address, askyesno, alert
 
 # version 2.3.19 - Edit files added
 
@@ -526,11 +526,21 @@ class Information:
         else:
             command = "squid"
 
-        if not hasattr(self.controller, 'myip'):
-            showwarning(_("IP Not Found"), _("The command cannot be executed"))
-            return
-        else:
-            command += " " + self.controller.myip
+        ip_address = None
+        search_string = self.arw['filter_log_search_entry'].get_text()
+        if search_string.lower().startswith('ip-address='):
+            address = search_string.split('=')[1]
+            if ip_address_test(address):
+                ip_address = address
+
+        if not ip_address:
+            if not hasattr(self.controller, 'myip'):
+                showwarning(_("IP Not Found"), _("The command cannot be executed"))
+                return
+            else:
+                ip_address = self.controller.myip
+
+        command += " " + ip_address
 
         spinner.start()
         result = self.get_infos(command)
@@ -701,6 +711,7 @@ class Information:
     def search_filter_log(self, widget):
         """Search the filter log given the user input"""
         search_string = widget.get_text()
+
         if not search_string:
             self.filter_log_domain = None
         else:

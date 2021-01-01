@@ -44,7 +44,7 @@ class FilterRules:
         17 : reserved (str)
         18 : reserved (str)
         19 : chekbox assistant (0/1)
-        20 : reserved (0/1)
+        20 : checkbox strict_end (0/1)
         """
 
         self.filter_store = Gtk.ListStore(str, str, str, str, str, str, str, str, str, str, str, int, int, int, int,
@@ -471,6 +471,7 @@ class FilterRules:
             print("Invalid time :", data1)
 
         self.arw["filter_#comments"].get_buffer().set_text(self.current_store[iter1][4])
+        self.arw['filter_time_strict_end_checkbox'].set_active(self.current_store[iter1][20])
 
         self.update_filter_user_list(iter1)
         self.controller.proxy_group.update_proxy_group_list(iter1)
@@ -554,6 +555,10 @@ class FilterRules:
         self.arw['filter_time_condition_days'].set_text('')
         self.arw['filter_time_condition_from'].set_text('')
         self.arw['filter_time_condition_to'].set_text('')
+        self.arw['filter_time_strict_end_checkbox'].set_active(False)
+
+        if self.controller.iter_filter:
+            self.arw['filter_time_strict_end_checkbox'].set_active(self.current_store[self.controller.iter_filter][20])
 
         if time_condition:
             splitted = time_condition.split(' ')
@@ -563,6 +568,8 @@ class FilterRules:
             self.arw['filter_time_condition_to'].set_text(to_time)
         else:
             self.update_time_days(text='')
+
+        self.update_time_checkbox()
 
         self.arw["filter_time_conditions"].show()
 
@@ -595,7 +602,7 @@ class FilterRules:
 
         self.block_signals = False
 
-    def update_time_checkbox(self, widget):
+    def update_time_checkbox(self, widget=None):
         """Update the text box based on the checkboxes"""
         if self.block_signals:
             return
@@ -617,6 +624,11 @@ class FilterRules:
         time_condition += self.arw["filter_time_condition_to"].get_text().strip()
         if time_condition == "1234567 -":
             time_condition = ""
+
+        if self.arw['filter_time_strict_end_checkbox'].get_active():
+            self.current_store[self.controller.iter_filter][20] = 1
+        else:
+            self.current_store[self.controller.iter_filter][20] = 0
 
         self.current_store[self.controller.iter_filter][3] = time_condition
 
@@ -654,7 +666,7 @@ class FilterRules:
         keys = ["active", "action", "time_condition", "#comments",
                 "users", "",
                 "dest_groups", "dest_domains", "", "",
-                "any_user", "any_destination", "allow_deny" ]
+                "any_user", "any_destination", "allow_deny"]
         for section in data1:
             if section[0:2] == "@_":  # generated sections must not be loaded
                 continue
@@ -699,6 +711,14 @@ class FilterRules:
                 out[12] = 0
             if not out[13]:
                 out[13] = 0
+
+            if data2.get("active") == 'off':
+                out[14] = 0
+            else:
+                out[14] = 1
+
+            if 'strict_end' in data2 and data2['strict_end']:
+                out[20] = 1
 
             store.append(out)
 
