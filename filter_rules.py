@@ -249,7 +249,8 @@ class FilterRules:
         if x is None:
             return
         else:
-            name = format_name(x)
+            # name = format_name(x)
+            name = x
             iter1 = self.current_store.insert_after(node,
                                                     [name, "on", "allow", "", "", "", "", "", "", "", "", 0,
                                                     0, 1, 1, "#009900", "#ffffff", "", "", 0, 0])
@@ -267,7 +268,7 @@ class FilterRules:
         if x is None:
             return
         else:
-            x = format_name(x)
+            # x = format_name(x)            
             # Set format:
             if model.get_value(node, 1) == 'off':
                 x = '<s>' + x + '</s>'

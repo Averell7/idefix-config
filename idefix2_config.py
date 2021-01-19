@@ -61,7 +61,7 @@ class Idefix2Config:
             self.arw['idefix2_dns_type_store'].append((type['name'], type['value']))
 
         with open('./defaults/idefix2_conf.json', 'r') as f:
-            data = json.load(f)
+            data = json.load(f, object_pairs_hook=OrderedDict)
             self.ddclient_options = data.get('ddclient_options', [])
             for type in self.ddclient_options:
                 self.arw['idefix2_dd_handler_store'].append((type['name'], type['value']))
@@ -71,7 +71,12 @@ class Idefix2Config:
         self.autoddclient_config = None
         self.config = OrderedDict({
             "general": {
-                "idefix_id": "version 2.4.0"
+                "idefix_id": "version 2.4.1"
+            },
+            "ports": {
+                "lan_ports": "",
+                "wan_port": "",
+                "wifi_port": "",
             },
             "eth0": {
                 "wan_ip_type": "dhcp",
@@ -665,11 +670,11 @@ class Idefix2Config:
     def idefix2_load_from_idefix(self, widget=None):
         """Load configuration from idefix (if connected)"""
         data = self.controller.information.get_infos('get_conf')
-        conf_list = json.loads(data)
+        conf_list = json.loads(data, object_pairs_hook=OrderedDict)
         if 'idefix2_conf.json' not in conf_list:
             alert(_("No idefix2 config found"))
             return
-        self.config = json.loads(conf_list['idefix2_conf.json'])
+        self.config = json.loads(conf_list['idefix2_conf.json'], object_pairs_hook=OrderedDict)
         self.set_text_values()
 
     def idefix2_send_config(self, widget=None):

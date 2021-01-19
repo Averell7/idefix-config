@@ -1,7 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
-
+# version 2.5.0 - fine tunes
+# version 2.4.13 - Load connection - Don't execute operations which don't make sense on a FTP connection, outside Idefix
 # version 2.4.12 - strict_end parameter added
 # version 2.4.11 - If the configuration is invalid, automatically loads the last valid configuration
 # version 2.4.10b- check the date of Idefix at startup - correct if necessary
@@ -73,7 +74,7 @@ from json_config import RestoreDialog, ExportJsonDialog, ImportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.4.12"
+version = "2.4.13"
 
 
 gtk = Gtk
@@ -476,7 +477,7 @@ class Confix:
     def load_connection(self):
         print("load connexion")
         ftp1 = self.ftp_config
-        if ip_address_test(ftp1["server"]):
+        if ip_address_test(ftp1["server"]):                 # If we are connected directly to an Idefix module
             ip = ftp1["server"]
             try:
                 h1 = http.client.HTTPConnection(ip, timeout=10)
@@ -496,10 +497,21 @@ class Confix:
                             self.myaccount = _("unknown")
                 except FTPError:
                     print("could not get network-info.php")
+
+                self.assistant.refresh_detect_list()
+
+                # Check if the date is correct and if not, update it
+                t1 = time.time()
+                try:
+                    self.information.check_date()
+                except:
+                    print("Error when checking date")
+                delta = int(time.time() - t1)
+                print("self.information.check_date() : ", str(delta))
+
             except FTPError:
                 print("No ftp connection")
 
-        self.assistant.refresh_detect_list()
 
         # Check our mac address exists
         print("self.check_mac_and_create_config()")
@@ -508,12 +520,6 @@ class Confix:
         # Experimental
         if hasattr(self,"myaccount"):
             self.arw2["my_account"].set_text(self.myaccount)
-
-        # Check if the date is correct and if not, update it
-        t1 = time.time()
-        self.information.check_date()
-        delta = int(time.time() - t1)
-        print("self.information.check_date() : ", str(delta))
 
         return True
 

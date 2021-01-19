@@ -161,7 +161,7 @@ class Users:
                     )
 
                     # check if any sub users have been defined
-                    if "subusers" in  data1[section][user]:
+                    if "subusers" in data1[section][user]:
                         for subuser in data1[section][user].get('subusers').keys():
                             self.users_store.append(
                                 user_iter,
@@ -283,7 +283,7 @@ class Users:
                 if not macaddr or (macaddr[0] == False) or (macaddr[0] == ""):
                     buffer.set_text("")
                     alert(_("No valid mac address for this user1 !"))
-                else :
+                else:
                     if not isinstance(macaddr, list):     # This may happen if the subuser name and the Identifier are identical
                         macaddr = [macaddr]
                     data1 = "\n".join(macaddr)
@@ -324,7 +324,7 @@ class Users:
                 self.arw["users_menu"].popup(None, None, None, None, event.button, event.time)
         return
 
-    def ask_user_dialog(self, level, text = ""):
+    def ask_user_dialog(self, level, text=""):
         if level == 1:
             new = _("Name of the new category")
         else:
@@ -476,7 +476,7 @@ class Users:
                     i = users.index(name)
                     users[i] = x
                 self.controller.filter_store.set_value(item.iter, 5, '\n'.join(users))
-                #self.controller.load_filter_user(self.arw['treeview3'], event=None)
+                # self.controller.load_filter_user(self.arw['treeview3'], event=None)
             # update the mac list
             self.controller.maclist[x] = self.controller.maclist[name]
             del self.controller.maclist[name]
@@ -569,20 +569,9 @@ class Users:
                 _("# No mac address for this user3")
             )
 
-##        email_time_conditions = self.users_store.get_value(parent_iter, 2)
-##        internet_time_conditions = self.users_store.get_value(parent_iter, 3)
-##        email_enabled = self.users_store.get_value(parent_iter, 4)
-
         internet_filtered = self.users_store.get_value(parent_iter, 6)
         internet_open = self.users_store.get_value(parent_iter, 7)
-##
-##        if not email_enabled:
-##            self.arw['user_summary_email_icon'].set_from_pixbuf(email_disabled_icon)
-##        else:
-##            self.arw['user_summary_email_icon'].set_from_pixbuf(email_icon)
-##
-##        if not internet_enabled:
-##            self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_disabled_icon)
+
         if internet_filtered:
             self.arw['user_summary_internet_icon'].set_from_pixbuf(internet_filtered_icon)
             self.arw["user_summary_category_label"].set_markup(_("<b><span color='green' size='x-large'>Access to Internet is limited for this user</span></b>"))
@@ -598,18 +587,6 @@ class Users:
             self.arw["user_summary_category_label"].set_markup(_("<b><span color='red' size='x-large'>This user has no Internet access</span></b>"))
             self.arw["user_summary_tree_view"].hide()
             self.arw["user_summary_footnote"].hide()
-##
-##        # internet time conditions
-##        if internet_time_conditions:
-##            self.arw['user_summary_internet_time_conditions'].set_label(internet_time_conditions)
-##        else:
-##            self.arw['user_summary_internet_time_conditions'].set_label("")
-##
-##        # email time conditions
-##        if email_time_conditions:
-##            self.arw['user_summary_email_time_conditions'].set_label(email_time_conditions)
-##        else:
-##            self.arw['user_summary_email_time_conditions'].set_label("")
 
         store = self.arw['user_summary_tree_store']
         store.clear()
@@ -692,7 +669,7 @@ class Users:
                         store.set_value(parent_iter, 4, 'red')
                         colour = 'red'
 
-                    if row[12] :
+                    if row[12]:
                         if colour != 'red':
                             store.set_value(parent_iter, 2, internet_full_icon)
                             store.set_value(parent_iter, 4, 'blue')

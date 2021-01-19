@@ -72,7 +72,7 @@ class Firewall:
         self.arw['ports_tree'].get_model().set_sort_column_id(0, Gtk.SortType.ASCENDING)
 
     def populate_ports(self):
-        if not self.controller.config['ports']:
+        if not self.controller.config.get('ports'):
             self.controller.config['ports'] = OrderedDict()
 
         self.arw['ports_list'].clear()

@@ -341,7 +341,7 @@ class RestoreDialog:
         ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
 
         tmp_file = get_config_path('tmp_idefix2_conf.json')
-        with open(tmp_file, 'w') as f:
+        with open(tmp_file, 'w', newline="\n") as f:
             f.write(data)
         ftp_send(ftp, filepath=tmp_file, dest_name="idefix2_conf.json")
         os.unlink(tmp_file)

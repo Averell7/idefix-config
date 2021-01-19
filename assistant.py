@@ -9,7 +9,7 @@ from gi.repository import Gtk, GObject
 # import requests
 import http_client as requests
 from ftp_client import FTPError, ftp_connect
-from util import mac_address_test, ip_address_test, showwarning, ask_text
+from util import mac_address_test, ip_address_test, showwarning, ask_text, print_except
 
 
 class Assistant:
@@ -164,6 +164,7 @@ class Assistant:
                     try:                               # this feature is not critical and should not block Confix
                         requests = json.loads(data1)
                     except:
+                        print_except()
                         print("WARNING : there is a problem with the request_account.json file")
                         return
                     if len(requests["account"]) > 0:   # necessary, because if the dictionary is empty,
@@ -177,7 +178,7 @@ class Assistant:
         elif not widget:
             return
 
-        showwarning(_("Not Connected"), _("Plese connect to idefix first"))
+        showwarning(_("Not Connected"), _("Please connect to idefix first"))
 
     def create_user_deny_next(self, *args):
         """Make the next button not sensitive"""
