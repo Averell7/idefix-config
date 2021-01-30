@@ -279,6 +279,7 @@ class Idefix2Config:
                 'wifi_ip': '',
                 'wifi_subnet': '',
                 'wifi_netmask': '',
+                'wifi_network': '',
                 'wifi_broadcast': '',
             }
 
@@ -352,6 +353,7 @@ class Idefix2Config:
         network = ipaddress.IPv4Interface(str(ip) + '/' + str(subnet))
         self.config[interface][type + '_netmask'] = str(network.netmask)
         self.config[interface][type + '_subnet'] = str(network.network)
+        self.config[interface][type + '_network'] = str(network.network).split('/')[0]                # TODO : this is a quick edit. There may be a best option
         self.config[interface][type + '_broadcast'] = str(network.network.broadcast_address)
 
     def recalculate_dns(self):
