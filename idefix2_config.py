@@ -74,8 +74,8 @@ class Idefix2Config:
                 "idefix_id": "version 2.4.1"
             },
             "ports": {
-                "lan_ports": "",
-                "wan_port": "",
+                "lan_ports": "eth1",
+                "wan_port": "eth0",
                 "wifi_port": "",
             },
             "eth0": {
@@ -166,11 +166,13 @@ class Idefix2Config:
                 self.arw['idefix2_wan_type'].set_active_iter(item.iter)
                 break
 
-        self.arw['idefix2_lan_enabled'].set_active(self.config['eth1'].get('wifi_used', 'yes') == 'yes')
+        self.arw['idefix2_wan_port'].set_text(self.config.get('ports', {}).get('wan_port', ''))
+
+        self.arw['idefix2_lan_ports'].set_text(self.config.get('ports', {}).get('lan_ports', ''))
         self.arw['idefix2_lan_ip'].set_text(self.config['eth1']['lan_ip'])
         self.arw['idefix2_lan_subnet'].set_text(self.config['eth1']['lan_netmask'])
 
-        self.arw['idefix2_wifi_enabled'].set_active(self.config.get('wlan0', {}).get('wifi_used') == 'yes')
+        self.arw['idefix2_wifi_port'].set_text(self.config.get('ports', {}).get('wifi_port', ''))
         self.arw['idefix2_wifi_ip'].set_text(self.config.get('wlan0', {}).get('wifi_ip', ''))
         self.arw['idefix2_wifi_subnet'].set_text(self.config.get('wlan0', {}).get('wifi_netmask', ''))
 
@@ -211,6 +213,13 @@ class Idefix2Config:
         if self.block_signals:
             return
 
+        if 'ports' not in self.config:
+            self.config['ports'] = {}
+
+        self.config['ports']['wan_port'] = self.arw['idefix2_wan_port'].get_text()
+        self.config['ports']['lan_ports'] = self.arw['idefix2_lan_ports'].get_text()
+        self.config['ports']['wifi_port'] = self.arw['idefix2_wifi_port'].get_text()
+
         iter = self.arw['idefix2_wan_type'].get_active_iter()
         self.config['eth0']['wan_ip_type'] = self.arw['idefix2_wan_type_store'].get_value(iter, 1)
         if self.arw['idefix2_wan_type_store'].get_value(iter, 1) == 'dhcp':
@@ -234,7 +243,7 @@ class Idefix2Config:
             self.arw['idefix2_wan_subnet'].set_sensitive(True)
             self.recalculate_ip_settings('eth0', 'wan')
 
-        if self.arw['idefix2_lan_enabled'].get_active():
+        if self.arw['idefix2_lan_ports'].get_text():
             self.arw['idefix2_lan_ip'].set_sensitive(True)
             self.arw['idefix2_lan_subnet'].set_sensitive(True)
             self.arw['idefix2_dhcp_start'].set_sensitive(True)
@@ -258,7 +267,7 @@ class Idefix2Config:
                 'lan_broadcast': '',
             }
 
-        if self.arw['idefix2_wifi_enabled'].get_active():
+        if self.arw['idefix2_wifi_port'].get_text():
             self.arw['idefix2_wifi_ip'].set_sensitive(True)
             self.arw['idefix2_wifi_subnet'].set_sensitive(True)
             self.arw['idefix2_dhcpwifi_start'].set_sensitive(True)
