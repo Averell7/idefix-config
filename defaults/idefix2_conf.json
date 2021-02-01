@@ -2,6 +2,11 @@
     "general": {
         "idefix_id": "Idefix Rock 64"
     },
+   "ports": {
+      "wan_port": "eth0",
+      "lan_ports": "eth1",
+      "wifi_port": ""
+   },
     "eth0": {
         "wan_ip_type": "dhcp",
         "wan_ip": "",
