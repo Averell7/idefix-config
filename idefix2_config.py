@@ -9,66 +9,44 @@ import ipaddress
 from ftp_client import ftp_connect
 from util import alert, showwarning
 
-DNS_TYPES = [
-    {
-        'name': _('Automatic'),
-        'value': 'automatic',
-        'ns1': '',
-        'ns2': ''
-    },
-    {
-        'name': _('SafeDNS'),
-        'value': 'SafeDNS',
-        'ns1': '195.46.39.39',
-        'ns2': '195.36.39.40'
-    },
-    {
-        'name': _('OpenDNS'),
-        'value': 'OpenDNS',
-        'ns1': '208.67.222.222',
-        'ns2': '208.67.222.220'
-    },
-    {
-        'name': _('Autre'),
-        'value': 'Autre',
-        'ns1': '',
-        'ns2': ''
-    },
-    {
-        'name': _('Aucun'),
-        'value': 'Aucun',
-        'ns1': '1.1.1.1',
-        'ns2': '8.8.8.8'
-    },
-]
-
-
-def get_by_value(options, value):
-    for opt in options:
-        if opt['value'] == value:
-            return opt
-    return None
-
 
 class Idefix2Config:
+    ddclient_options = {}
+    dns_options = {}
+
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
         self.config = {}
         self.block_signals = False
         self.autoddclient_config = None
-        for type in DNS_TYPES:
-            self.arw['idefix2_dns_type_store'].append((type['name'], type['value']))
+        self.load_default_options()
 
-        with open('./defaults/idefix2_conf.json', 'r') as f:
-            data = json.load(f, object_pairs_hook=OrderedDict)
-            self.ddclient_options = data.get('ddclient_options', [])
-            for type in self.ddclient_options:
-                self.arw['idefix2_dd_handler_store'].append((type['name'], type['value']))
+    def load_default_options(self):
+        self.block_signals = True
+        options = configparser.ConfigParser()
+        options.read('./defaults/option_values.ini')
+        self.arw['idefix2_dns_type_store'].clear()
+        self.arw['idefix2_dd_handler_store'].clear()
+        self.ddclient_options = {}
+        self.dns_options = {}
+        for section in options.sections():
+            if section.startswith('dns:'):
+                value = section.split(':', 1)[1]
+                name = options[section].get('name', value)
+                self.arw['idefix2_dns_type_store'].append((name, value))
+                self.dns_options[value] = options[section]
+            elif section.startswith('ddclient:'):
+                value = section.split(':', 1)[1]
+                name = options[section].get('name', value)
+                self.ddclient_options[value] = options[section]
+                self.arw['idefix2_dd_handler_store'].append((name, value))
+        self.block_signals = False
 
     def idefix2_show_config(self, *args):
         """Load default configuration"""
         self.autoddclient_config = None
+        self.load_default_options()
         self.config = OrderedDict({
             "general": {
                 "idefix_id": "version 2.4.1"
@@ -375,13 +353,13 @@ class Idefix2Config:
             dns_type = 'SafeDNS'
 
         if dns_type != self.config['dns']['dns_filtering']:
-            dns = get_by_value(DNS_TYPES, dns_type)
-            self.arw['idefix2_dns_ns1'].set_text(dns['ns1'])
-            self.arw['idefix2_dns_ns2'].set_text(dns['ns2'])
+            dns = self.dns_options.get(dns_type, {})
+            self.arw['idefix2_dns_ns1'].set_text(dns.get('ns1', ''))
+            self.arw['idefix2_dns_ns2'].set_text(dns.get('ns2', ''))
             self.config['dns'] = {
-                'dns_filtering': dns['value'],
-                'dns_nameserver1': dns['ns1'],
-                'dns_nameserver2': dns['ns2'],
+                'dns_filtering': dns.get('value', dns_type),
+                'dns_nameserver1': dns.get('ns1', ''),
+                'dns_nameserver2': dns.get('ns2', ''),
             }
         else:
             ns1 = ''
@@ -446,16 +424,16 @@ class Idefix2Config:
                 self.arw['idefix2_dd_password'].set_sensitive(True)
                 self.arw['idefix2_dd_domain'].set_sensitive(True)
 
-        dd = get_by_value(self.ddclient_options, dd_handler)
+        dd = self.ddclient_options.get(dd_handler, {})
 
         if self.arw['idefix2_ddclient_auto_config_checkbox'].get_active():
             self.autoddclient_config = {
                 'ddclient_login': self.arw['idefix2_dd_login'].get_text(),
                 'ddclient_password': self.arw['idefix2_dd_password'].get_text(),
                 'ddclient_domain': self.arw['idefix2_dd_domain'].get_text(),
-                'ddclient_server': dd['server'],
-                'ddclient_web': dd['web'],
-                'protocol': dd['protocol']
+                'ddclient_server': dd.get('server', ''),
+                'ddclient_web': dd.get('web', ''),
+                'protocol': dd.get('protocol', '')
             }
             self.config['ddclient'] = {
                 'ip_type': 'dynamic',
@@ -475,9 +453,9 @@ class Idefix2Config:
                 'ddclient_login': self.arw['idefix2_dd_login'].get_text(),
                 'ddclient_password': self.arw['idefix2_dd_password'].get_text(),
                 'ddclient_domain': self.arw['idefix2_dd_domain'].get_text(),
-                'ddclient_server': dd['server'],
-                'ddclient_web': dd['web'],
-                'protocol': dd['protocol']
+                'ddclient_server': dd.get('server', ''),
+                'ddclient_web': dd.get('web', ''),
+                'protocol': dd.get('protocol', '')
             }
 
     def validate_config(self):
