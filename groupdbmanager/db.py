@@ -5,6 +5,8 @@ import json
 
 import mysql.connector
 
+from util import message_dialog
+
 
 class Database:
     def __init__(self, host, port, username, password, database):
@@ -94,7 +96,20 @@ class Database:
         query += ' WHERE id=%s LIMIT 1'
         parameters.append(group_id)
 
-        cur.execute(query, parameters)
+        try:
+            cur.execute(query, parameters)
+        except mysql.connector.errors.IntegrityError as e:
+            if 'duplicate' in e.msg.lower():
+                # This means that the name, group_id and unverified combination already exists
+                # so tell the user they must Merge instead.
+                message_dialog(
+                    "Error",
+                    "Group name and category already exist. You must merge this group with the verified group"
+                )
+            else:
+                message_dialog("Error", e.msg)
+        except mysql.connector.errors.Error as e:
+            message_dialog("Error", e.msg)
         cur.close()
 
     def update_category(self, category_id, name=None, parent_id=None):
@@ -115,13 +130,19 @@ class Database:
             query = query[:-1]
         query += ' WHERE id=%s LIMIT 1'
         parameters.append(category_id)
-        cur.execute(query, parameters)
+        try:
+            cur.execute(query, parameters)
+        except mysql.connector.errors.Error as e:
+            message_dialog("Error", e.msg)
         cur.close()
 
     def delete_group(self, group_id):
         """Remove the group by its id"""
         cur = self.db.cursor()
-        cur.execute("DELETE FROM proxy_groups WHERE id=%s LIMIT 1", (group_id,))
+        try:
+            cur.execute("DELETE FROM proxy_groups WHERE id=%s LIMIT 1", (group_id,))
+        except mysql.connector.errors.Error:
+            message_dialog("Error", e.msg)
         cur.close()
 
     def delete_category(self, category_id):
@@ -131,12 +152,15 @@ class Database:
     def create_group(self, verified, name, domains, category_id):
         """Create a new group and return its id"""
         cur = self.db.cursor()
-        cur.execute("INSERT INTO proxy_groups (unverified, name, domains, category_id) VALUES(%s, %s, %s, %s)", (
-            not verified,
-            name,
-            json.dumps(domains),
-            category_id
-        ))
+        try:
+            cur.execute("INSERT INTO proxy_groups (unverified, name, domains, category_id) VALUES(%s, %s, %s, %s)", (
+                not verified,
+                name,
+                json.dumps(domains),
+                category_id
+            ))
+        except mysql.connector.errors.Error as e:
+            message_dialog("Error", e.msg)
         cur.close()
 
     def create_category(self, name, parent_id):
