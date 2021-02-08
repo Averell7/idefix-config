@@ -229,10 +229,10 @@ class DatabaseManager:
         else:
             child = model.iter_children(iter)
             while child:
-                if not self.filter_verified(model, child):
-                    return False
+                if self.filter_verified(model, child):
+                    return True
                 child = model.iter_next(child)
-            return True
+            return False
 
     def filter_unverified(self, model, iter, data=None):
         """Return true if the iter is verified. Also hides categories that don't have any groups"""
