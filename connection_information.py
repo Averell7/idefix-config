@@ -962,6 +962,7 @@ class Information:
         y = datetime.datetime.now()
         z = y.strftime("%Y-%m-%d %H:%M")
         self.get_infos("set_date " + z + ' ' + tzlocal.get_localzone().zone)
+        alert(_("Updated Date"))
 
     def check_date(self):
         """Test if idefix date is out and if it is then update it"""
