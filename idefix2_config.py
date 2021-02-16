@@ -186,6 +186,18 @@ class Idefix2Config:
         self.block_signals = False
         self.idefix2_entry_changed()
 
+    def update_interfaces(self, widget):
+        """Called when either wifi or lan interfaces are changed"""
+        wifi_interface_set = self.arw['idefix2_wifi_port'].get_text() != ''
+        self.arw['idefix2_wifi_ip'].set_sensitive(wifi_interface_set)
+        self.arw['idefix2_wifi_subnet'].set_sensitive(wifi_interface_set)
+        self.arw['idefix2_dhcpwifi_start'].set_sensitive(wifi_interface_set)
+        self.arw['idefix2_dhcpwifi_end'].set_sensitive(wifi_interface_set)
+
+        lan_interface_set = self.arw['idefix2_lan_ports'].get_text() != ''
+        self.arw['idefix2_lan_ip'].set_sensitive(lan_interface_set)
+        self.arw['idefix2_lan_subnet'].set_sensitive(lan_interface_set)
+
     def idefix2_entry_changed(self, *args):
         """Recalculate the configuration"""
         if self.block_signals:
