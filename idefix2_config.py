@@ -693,7 +693,7 @@ class Idefix2Config:
             del self.config['ddclient_options']
 
         self.controller.restore_dialog.import_network(json.dumps(self.config, indent=3), auto_conf)
-        alert(_("Sent configuration to idefix"))
+        alert(_("Sent configuration to idefix.\nIt may be necessary to restart your device for your changes to take effect"))
 
     def idefix2_load_default(self, widget=None):
         """Load default configuration from 'defaults' directory"""
