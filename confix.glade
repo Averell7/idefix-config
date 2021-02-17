@@ -5641,6 +5641,7 @@ Wrong parameters may crash your system</property>
               <object class="GtkEntry" id="idefix2_lan_ports">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <signal name="changed" handler="update_interfaces" swapped="no"/>
                 <signal name="focus-out-event" handler="idefix2_entry_changed" swapped="no"/>
               </object>
               <packing>
@@ -5663,6 +5664,7 @@ Wrong parameters may crash your system</property>
               <object class="GtkEntry" id="idefix2_wifi_port">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <signal name="changed" handler="update_interfaces" swapped="no"/>
                 <signal name="focus-out-event" handler="idefix2_entry_changed" swapped="no"/>
               </object>
               <packing>
