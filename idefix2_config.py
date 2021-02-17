@@ -11,7 +11,7 @@ from util import alert, showwarning
 
 
 DNS_NAMES = {
-    'automatic': _('Automatic'),
+    'auto': _('Automatic'),
     'none': _('None'),
     'other': _('Other'),
 }
@@ -19,6 +19,7 @@ DNS_NAMES = {
 DD_CLIENT_NAMES = {
     'auto': _('Automatic'),
     'none': _('None'),
+    'other': _('Other'),
 }
 
 
