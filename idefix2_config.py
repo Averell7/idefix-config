@@ -10,6 +10,18 @@ from ftp_client import ftp_connect
 from util import alert, showwarning
 
 
+DNS_NAMES = {
+    'automatic': _('Automatic'),
+    'none': _('None'),
+    'other': _('Other'),
+}
+
+DD_CLIENT_NAMES = {
+    'auto': _('Automatic'),
+    'none': _('None'),
+}
+
+
 class Idefix2Config:
     ddclient_options = {}
     dns_options = {}
@@ -33,12 +45,18 @@ class Idefix2Config:
         for section in options.sections():
             if section.startswith('dns:'):
                 value = section.split(':', 1)[1]
-                name = options[section].get('name', value)
+                if value in DNS_NAMES:
+                    name = DNS_NAMES[value]
+                else:
+                    name = options[section].get('name', value)
                 self.arw['idefix2_dns_type_store'].append((name, value))
                 self.dns_options[value] = options[section]
             elif section.startswith('ddclient:'):
                 value = section.split(':', 1)[1]
-                name = options[section].get('name', value)
+                if value in DD_CLIENT_NAMES:
+                    name = DD_CLIENT_NAMES[value]
+                else:
+                    name = options[section].get('name', value)
                 self.ddclient_options[value] = options[section]
                 self.arw['idefix2_dd_handler_store'].append((name, value))
         self.block_signals = False
