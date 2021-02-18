@@ -44,7 +44,7 @@
         "password": ""
     },
     "dns": {
-        "dns_filtering": "None",
+        "dns_filtering": "none",
         "dns_nameserver1": "1.1.1.1",
         "dns_nameserver2": "8.8.8.8"
     },
