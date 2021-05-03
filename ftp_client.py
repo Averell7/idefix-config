@@ -2,7 +2,7 @@ import io
 import os
 from ftplib import FTP, all_errors as FTPError
 
-from util import get_config_path, print_except
+from util import alert, get_config_path, print_except
 
 
 def ftp_connect(server, login, password, controller = None):
@@ -30,7 +30,10 @@ def ftp_connect(server, login, password, controller = None):
             if controller:
                 controller.idefix_module = False
         return ftp
+    except OSError as e:
+        alert(_("Cannot connect to %s. Host not found") % server)
     except FTPError as e:
+        alert(_("Cannot connect to %s. Reason: %s") % e)
         print("Unable to connect to ftp server with : %s / %s. \nError: %s" % (login, password, e))
 
 
