@@ -33,7 +33,7 @@ def ftp_connect(server, login, password, controller = None):
     except OSError as e:
         alert(_("Cannot connect to %s. Host not found") % server)
     except FTPError as e:
-        alert(_("Cannot connect to %s. Reason: %s") % e)
+        alert(_("Cannot connect to %s. Reason: %s") % (server, e))
         print("Unable to connect to ftp server with : %s / %s. \nError: %s" % (login, password, e))
 
 
