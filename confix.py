@@ -449,7 +449,7 @@ class Confix:
         self.arw['loading_window'].hide()
 
         if not self.ftp:
-            alert(_("Could not connect to %s (%s). \nVerify your cables or your configuration.") % (ftp1["server"], configname))
+            # alert(_("Could not connect to %s (%s). \nVerify your cables or your configuration.") % (ftp1["server"], configname))
             return False
         else:
             # retrieve files by ftp
