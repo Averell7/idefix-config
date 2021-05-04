@@ -1,6 +1,9 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.5.3 - bug fixes
+# version 2.5.2 - bug fixes
+# version 2.5.1 - bug fixes
 # version 2.5.0 - fine tunes
 # version 2.4.13 - Load connection - Don't execute operations which don't make sense on a FTP connection, outside Idefix
 # version 2.4.12 - strict_end parameter added
@@ -57,7 +60,7 @@ from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
     EMPTY_STORE, SignalHandler, get_config_path, ip_address_test,
-    ask_text, PasswordDialog)
+    ask_text, PasswordDialog, print_except)
 from icons import (
     internet_full_icon, internet_filtered_icon, internet_denied_icon
 )
@@ -74,7 +77,7 @@ from json_config import RestoreDialog, ExportJsonDialog, ImportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.4.13"
+version = "2.5.3"
 
 
 gtk = Gtk
@@ -496,7 +499,12 @@ class Confix:
                         else:
                             self.myaccount = _("unknown")
                 except FTPError:
-                    print("could not get network-info.php")
+                    info = print_except(True)
+                    message = ""
+                    for line in info.split("\n"):
+                        if "error" in line.lower():
+                            message += line + "\n"
+                    alert("could not get network-info.php")
 
                 self.assistant.refresh_detect_list()
 
@@ -510,7 +518,12 @@ class Confix:
                 print("self.information.check_date() : ", str(delta))
 
             except FTPError:
-                print("No ftp connection")
+                info = print_except(True)
+                message = ""
+                for line in info.split("\n"):
+                    if "error" in line.lower():
+                        message += line + "\n"
+                alert("Impossible to join " + ip + "\n\n" + message)
 
 
         # Check our mac address exists
