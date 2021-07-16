@@ -85,7 +85,7 @@ tar64_file = "./confix-" + version + ".linux-x86_64.tar.gz"
 corr_tar64_file = "./confix-" + version + "-all_64_corr.tar.gz"
 deb_file = "./confix_" + version + "-2_all.deb"
 
-# ###### à restaurer, normalement ############################
+# ###### to restore normalement ############################
 """
 input1 = tarfile.open(tar64_file, "r")
 output = tarfile.open(corr_tar64_file, "w")
