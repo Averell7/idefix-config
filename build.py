@@ -114,7 +114,7 @@ output.close()
 
 """
 
-"""
+
 # generate Debian package
 print ("\n\n ================ Creating debian package =======================\n\n")
 
@@ -154,7 +154,7 @@ os.system(" echo " + text + "> ./debian/postinst")
 # Build debian package
 os.system("dpkg-buildpackage")
 os.chdir("..")
-"""
+
 
 if os.path.isfile(rpm_file) :
   print ("found rpm", rpm_file)
