@@ -38,7 +38,7 @@ from distutils.core import setup
 sys.prefix = '/usr'
 
 
-data_files=[('/usr/share/confix/data', glob.glob('data/*.*')),
+data_files=[('/usr/share/confix/data', glob.glob('confix/data/*.*')),
             ('/usr/share/confix/documentation', glob.glob('./documentation/*.*')),          
             ('/usr/share/applications', ['confix/data/confix.desktop']),
             ('/usr/share/locale/fr/LC_MESSAGES', glob.glob('share/locale/fr/LC_MESSAGES/*.*')),

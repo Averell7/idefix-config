@@ -44,7 +44,7 @@ def fix_bin_file(file1):
 
 pyinstaller_file = ""
 
-version = "2.5.1"
+version = "2.5.4"
 print ("\n\n ================ start bdist =============================\n\n")
 # creates confix-3.x.x.linux-[system].tar.gz
 os.system('python3 setup.py bdist > /dev/null')
@@ -114,7 +114,7 @@ output.close()
 
 """
 
-"""
+
 # generate Debian package
 print ("\n\n ================ Creating debian package =======================\n\n")
 
@@ -154,7 +154,7 @@ os.system(" echo " + text + "> ./debian/postinst")
 # Build debian package
 os.system("dpkg-buildpackage")
 os.chdir("..")
-"""
+
 
 if os.path.isfile(rpm_file) :
   print ("found rpm", rpm_file)
