@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
 #
-# PdfBooklet 3.1.1 - GTK+ based utility to create booklets and other layouts
+# confix 2.5.1 - GTK+ based utility to create booklets and other layouts
 # from PDF documents.
 # Copyright (C) 2008-2012 GAF Software
-# <https://sourceforge.net/projects/pdfbooklet>
+# <https://sourceforge.net/projects/confix>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -44,12 +44,12 @@ def fix_bin_file(file1):
 
 pyinstaller_file = ""
 
-version = "3.1.2"
+version = "2.5.1"
 print ("\n\n ================ start bdist =============================\n\n")
-# creates pdfbooklet-3.x.x.linux-[system].tar.gz
+# creates confix-3.x.x.linux-[system].tar.gz
 os.system('python3 setup.py bdist > /dev/null')
 print ("\n\n ================ end bdist - start sdist =================\n\n")
-# creates pdfbooklet-3.x.x.tar.gz
+# creates confix-3.x.x.tar.gz
 os.system('python3 setup.py sdist > /dev/null')
 print ("\n\n ================ end sdist - start bdist_rpm =============\n\n")
 os.system('python3 setup.py bdist_rpm > /dev/null')
@@ -60,8 +60,8 @@ print ("\n\n ================ end bdist_rpm ===========================\n\n")
 print ("\n\n ================ Generate pyinstaller file =======================\n\n" )
 
 
-os.chdir('./pdfbooklet')
-os.system('sudo pyinstaller pdfbooklet.py -y > /dev/null')
+os.chdir('./confix')
+os.system('sudo pyinstaller confix.py -y > /dev/null')
 
 pyinstaller_file = "pyinstaller-" + version + ".zip"
 zipfile1 = zipfile.ZipFile("../dist/" + pyinstaller_file, "w")
@@ -79,11 +79,11 @@ os.chdir("..")
 #os.system("tree -d")               # option -d will print directories only
 os.chdir("dist")
 
-rpm_file =   "pdfbooklet-" + version + "-1.noarch.rpm"
-tar_file =   "pdfbooklet-" + version + ".tar.gz"
-tar64_file = "./pdfbooklet-" + version + ".linux-x86_64.tar.gz"
-corr_tar64_file = "./pdfbooklet-" + version + "-all_64_corr.tar.gz"
-deb_file = "./pdfbooklet_" + version + "-2_all.deb"
+rpm_file =   "confix-" + version + "-1.noarch.rpm"
+tar_file =   "confix-" + version + ".tar.gz"
+tar64_file = "./confix-" + version + ".linux-x86_64.tar.gz"
+corr_tar64_file = "./confix-" + version + "-all_64_corr.tar.gz"
+deb_file = "./confix_" + version + "-2_all.deb"
 
 input1 = tarfile.open(tar64_file, "r")
 output = tarfile.open(corr_tar64_file, "w")
@@ -98,7 +98,7 @@ for name in names:
     member = input1.getmember(name)
     member.name = member.name.replace(original_package,"./usr/lib/python3/dist-packages")
     file1 = input1.extractfile(member)
-    if name == "./usr/bin/pdfbooklet" :
+    if name == "./usr/bin/confix" :
         (file2, size) = fix_bin_file(file1)
         file2.seek(0)
         member.size = size
@@ -116,7 +116,7 @@ print ("\n\n ================ Creating debian package =======================\n\
 
 #os.system('alien --generate --scripts ' + rpm_file) 
 os.system('alien --generate ' + corr_tar64_file) 
-new_dir = "./pdfbooklet-" + version + "/"
+new_dir = "./confix-" + version + "/"
 
 os.chdir(new_dir)
 
@@ -139,9 +139,9 @@ else :
     print ("============> ERROR : control NOT found.")
 
 # post installation commands
-# correct pdfbooklet.cfg
+# correct confix.cfg
 
-pb_dir = "./usr/share/pdfbooklet/"
+pb_dir = "./usr/share/confix/"
 text = "chmod 777 " + pb_dir
 # I am unsure of the right place of this file, so let us put it in both places
 os.system(" echo " + text + "> ./postinst")
