@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=2.5.0
+Name=Confix
+Comment=Idefix configuration
+Type=Application
+Exec=confix
+Icon=confix
+Categories=Office;
+Terminal=false
+StartupNotify=false
