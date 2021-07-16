@@ -156,34 +156,32 @@ os.system("dpkg-buildpackage")
 os.chdir("..")
 """
 
-if os.path.isfile(rpm_file) :
+if os.path.isfile("dist/" + rpm_file) :
   print ("found rpm", rpm_file)
 else :
     print ("NOT found rpm", rpm_file)
 
-if os.path.isfile(tar_file) :
+if os.path.isfile("dist/" + tar_file) :
   print ("found tar", tar_file)
 else :
     print ("NOT found tar", tar_file)
 
-if os.path.isfile(tar64_file) :
+if os.path.isfile("dist/" + tar64_file) :
   print ("found tar", tar64_file)
 else :
     print ("NOT found tar", tar64_file)
 
-if os.path.isfile(deb_file) :
+if os.path.isfile("dist/" + deb_file) :
   print ("found deb", deb_file)
 else :
     print ("NOT found deb", deb_file)
 
-if os.path.isfile(pyinstaller_file) :
+if os.path.isfile("dist/" + pyinstaller_file) :
   print ("found pyinstaller", pyinstaller_file)
 else :
     print ("NOT found pyinstaller", pyinstaller_file)
 
 os.system('ls')
-
-
 
 # install package
 """
@@ -191,11 +189,6 @@ print ("\n\n ================ Installing debian package ========================
 os.system("sudo dpkg -i " + deb_file)
 os.system("sudo apt-get -f -y install")
 """
-
-print ("\n\n ================ build terminated =============================\n\n")
-
-
-
 
 print("\n\n ================ End of build.py =======================\n\n")
 
