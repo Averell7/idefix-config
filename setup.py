@@ -40,7 +40,7 @@ sys.prefix = '/usr'
 
 data_files=[('/usr/share/confix/data', glob.glob('data/*.*')),
             ('/usr/share/confix/documentation', glob.glob('./documentation/*.*')),          
-            ('/usr/share/applications', ['data/confix.desktop']),
+            ('/usr/share/applications', ['confix/data/confix.desktop']),
             ('/usr/share/locale/fr/LC_MESSAGES', glob.glob('share/locale/fr/LC_MESSAGES/*.*')),
             ('/usr/share/pixmaps', ['confix/data/confix.png']),
             ('/usr/share/confix/icons/hicolor/scalable', ['confix/data/confix.svg'])]
@@ -56,7 +56,7 @@ setup(name='confix',
       url='https://github.com/Averell7/idefix-configurator',
       license='GNU GPL-3',
       scripts=['bin/confix'],
-      packages=['confix'],
+      packages=['confix', 'confix.pyaes'],
       data_files=data_files,
       #requires=['python-poppler'],          # for distutils
       #install_requires=['python-poppler']   # for setuptools  should work but does not. We can use setup.cfg instead
