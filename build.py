@@ -77,7 +77,7 @@ os.chdir("..")
 """
 
 #os.system("tree -d")               # option -d will print directories only
-os.chdir("dist")
+#os.chdir("dist")
 
 rpm_file =   "confix-" + version + "-1.noarch.rpm"
 tar_file =   "confix-" + version + ".tar.gz"
