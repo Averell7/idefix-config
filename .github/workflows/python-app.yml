@@ -47,7 +47,7 @@ jobs:
       run: |        
         python build.py
         ls -lR ./ > lsdebian.txt
-        python setup.py --command-packages=stdeb.command bdist_deb
+        #python setup.py --command-packages=stdeb.command bdist_deb
         
     - name: builds 1
       uses: actions/upload-artifact@v2
