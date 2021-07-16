@@ -1,0 +1,4 @@
+include README
+recursive-include pdfbooklet *
+recursive-include documentation *.*
+recursive-include locale *
