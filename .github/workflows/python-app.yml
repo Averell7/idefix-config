@@ -30,7 +30,8 @@ jobs:
         #pip install python3-all
         python -m pip install flake8 pytest         
         #python -m pip install stdeb debhelper 
-        python -m pip install rpm alien
+        python -m pip install rpm alien 
+        python -m pip install pyinstaller 
         
         python -m pip install PyGObject
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi

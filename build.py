@@ -56,7 +56,7 @@ os.system('python3 setup.py bdist_rpm > /dev/null')
 # dependencies are set in the setup.cfg file
 print ("\n\n ================ end bdist_rpm ===========================\n\n")
 
-"""
+
 print ("\n\n ================ Generate pyinstaller file =======================\n\n" )
 
 
@@ -74,7 +74,7 @@ for mydir in os.walk("./dist/") :
 zipfile1.close()
 
 os.chdir("..")
-"""
+
 
 #os.system("tree -d")               # option -d will print directories only
 #os.chdir("dist")
