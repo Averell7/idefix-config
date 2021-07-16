@@ -122,7 +122,7 @@ print ("\n\n ================ Creating debian package =======================\n\
 os.system('alien --generate ' + corr_tar64_file) 
 new_dir = "./confix-" + version + "/"
 
-os.chdir(new_dir)
+#os.chdir(new_dir)
 
 
 control_file = "./debian/control"
@@ -144,7 +144,7 @@ else :
 
 # post installation commands
 # correct confix.cfg
-
+"""
 pb_dir = "./usr/share/confix/"
 text = "chmod 777 " + pb_dir
 # I am unsure of the right place of this file, so let us put it in both places
@@ -154,7 +154,7 @@ os.system(" echo " + text + "> ./debian/postinst")
 # Build debian package
 os.system("dpkg-buildpackage")
 os.chdir("..")
-
+"""
 
 if os.path.isfile(rpm_file) :
   print ("found rpm", rpm_file)

@@ -1,4 +1,4 @@
 include README
-recursive-include pdfbooklet *
+recursive-include confix *
 recursive-include documentation *.*
 recursive-include locale *
