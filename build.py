@@ -112,7 +112,7 @@ for name in names:
 input1.close()
 output.close()
 
-"""
+""""""
 
 
 # generate Debian package
@@ -144,6 +144,7 @@ else :
 
 # post installation commands
 # correct confix.cfg
+"""
 """
 pb_dir = "./usr/share/confix/"
 text = "chmod 777 " + pb_dir
