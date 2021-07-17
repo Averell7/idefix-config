@@ -31,7 +31,7 @@ jobs:
         python -m pip install stdeb debhelper 
         python -m pip install rpm alien 
         python -m pip install pyinstaller 
-        #python -m pip install python3-all
+        sudo apt-get install python3-all
         
         python -m pip install PyGObject
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
@@ -48,10 +48,10 @@ jobs:
     #    pytest confix.py
     - name: Create package
       run: |      
-        sudo alien      
+        # sudo alien      
         python build.py
         ls -lR ./ > lsdebian.txt
-        #python setup.py --command-packages=stdeb.command bdist_deb
+        python setup.py --command-packages=stdeb.command bdist_deb
         
     - name: builds 1
       uses: actions/upload-artifact@v2
