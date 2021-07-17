@@ -57,7 +57,7 @@ setup(name='confix',
       license='GNU GPL-3',
       scripts=['bin/confix'],
       packages=['confix', 'confix.pyaes'],
-      data_files=data_filesx
+      data_files= [('/usr/share/confix/data', glob.glob('confix/data/*.*'))]
       #requires=['python-poppler'],          # for distutils
       #install_requires=['python-poppler']   # for setuptools  should work but does not. We can use setup.cfg instead
      )
