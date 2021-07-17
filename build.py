@@ -119,10 +119,10 @@ output.close()
 print ("\n\n ================ Creating debian package =======================\n\n")
 
 #os.system('alien --generate --scripts ' + rpm_file) 
-os.system('alien --generate ' + corr_tar64_file) 
+os.system('sudo alien --generate ' + corr_tar64_file) 
 new_dir = "./confix-" + version + "/"
 
-#os.chdir(new_dir)
+os.chdir(new_dir)
 
 
 control_file = "./debian/control"

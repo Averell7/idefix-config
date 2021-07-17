@@ -48,7 +48,7 @@ jobs:
     #    pytest confix.py
     - name: Create package
       run: |      
-        alien      
+        sudo alien      
         python build.py
         ls -lR ./ > lsdebian.txt
         #python setup.py --command-packages=stdeb.command bdist_deb
