@@ -38,7 +38,7 @@ from distutils.core import setup
 sys.prefix = '/usr'
 
 
-data_filesx=[('/usr/share/confix/data', glob.glob('confix/data/*.*')),
+data_files=[('/usr/share/confix/data', glob.glob('confix/data/*.*')),
             ('/usr/share/confix/documentation', glob.glob('./documentation/*.*')),          
             ('/usr/share/applications', ['confix/data/confix.desktop']),
             ('/usr/share/locale/fr/LC_MESSAGES', glob.glob('share/locale/fr/LC_MESSAGES/*.*')),
@@ -57,7 +57,7 @@ setup(name='confix',
       license='GNU GPL-3',
       scripts=['bin/confix'],
       packages=['confix', 'confix.pyaes'],
-      data_files= [('/usr/share/confix/data', glob.glob('confix/data/*.*'))]
+      data_files=data_files
       #requires=['python-poppler'],          # for distutils
       #install_requires=['python-poppler']   # for setuptools  should work but does not. We can use setup.cfg instead
      )
