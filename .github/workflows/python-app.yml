@@ -27,9 +27,9 @@ jobs:
         sudo apt-get install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0 --yes
         python -m pip install --upgrade pip
         python -m pip install wheel
-        #pip install python3-all
+        pip install makedeb
         python -m pip install flake8 pytest         
-        #python -m pip install stdeb debhelper 
+        #python -m pip install stdeb debhelper python3-all
         python -m pip install rpm alien 
         python -m pip install pyinstaller 
         
@@ -47,7 +47,8 @@ jobs:
     #  run: |
     #    pytest confix.py
     - name: Create package
-      run: |        
+      run: |       
+        make-deb      
         python build.py
         ls -lR ./ > lsdebian.txt
         #python setup.py --command-packages=stdeb.command bdist_deb
