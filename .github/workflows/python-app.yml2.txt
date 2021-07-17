@@ -27,14 +27,14 @@ jobs:
         sudo apt-get install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0 --yes
         python -m pip install --upgrade pip
         python -m pip install wheel
-        python -m 
+        python -m pip install make-deb
         python -m pip install flake8 pytest         
         #python -m pip install stdeb debhelper python3-all
-        #python -m pip install rpm alien 
-        #python -m pip install pyinstaller 
+        python -m pip install rpm alien 
+        python -m pip install pyinstaller 
+        
         python -m pip install PyGObject
-        pip install make-deb
-        #if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         
     - name: Lint with flake8
       run: |
