@@ -2,3 +2,7 @@ include README
 recursive-include confix *
 recursive-include documentation *.*
 recursive-include locale *
+prune dist
+prune build
+prune confix/dist
+prune confix/build

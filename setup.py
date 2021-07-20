@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 #
-# Confix 2.5.4 
+# Confix 2.5.4
 # Copyright (C) 2008-2012 GAF Software
 # <https://sourceforge.net/projects/pdfbooklet>
 #
@@ -32,14 +32,15 @@ except :
 """
 import sys
 
-from distutils.core import setup
+# from distutils.core import setup
+from setuptools import setup
 
 
 sys.prefix = '/usr'
 
 
 data_files=[('/usr/share/confix/data', glob.glob('confix/data/*.*')),
-            ('/usr/share/confix/documentation', glob.glob('./documentation/*.*')),          
+            ('/usr/share/confix/documentation', glob.glob('./documentation/*.*')),
             ('/usr/share/applications', ['confix/data/confix.desktop']),
             ('/usr/share/locale/fr/LC_MESSAGES', glob.glob('share/locale/fr/LC_MESSAGES/*.*')),
             ('/usr/share/pixmaps', ['confix/data/confix.png']),

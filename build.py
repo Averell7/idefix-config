@@ -47,12 +47,12 @@ pyinstaller_file = ""
 version = "2.5.4"
 print ("\n\n ================ start bdist =============================\n\n")
 # creates confix-3.x.x.linux-[system].tar.gz
-os.system('python3 setup.py bdist > /dev/null')
+os.system('python3 setup.py bdist')
 print ("\n\n ================ end bdist - start sdist =================\n\n")
 # creates confix-3.x.x.tar.gz
-os.system('python3 setup.py sdist > /dev/null')
+os.system('python3 setup.py sdist')
 print ("\n\n ================ end sdist - start bdist_rpm =============\n\n")
-os.system('python3 setup.py bdist_rpm > /dev/null')
+os.system('python3 setup.py bdist_rpm')
 # dependencies are set in the setup.cfg file
 print ("\n\n ================ end bdist_rpm ===========================\n\n")
 
@@ -61,7 +61,7 @@ print ("\n\n ================ Generate pyinstaller file =======================\
 
 
 os.chdir('./confix')
-os.system('sudo pyinstaller confix.py -y > /dev/null')
+os.system('pyinstaller confix.py -y > /dev/null')
 
 pyinstaller_file = "pyinstaller-" + version + ".zip"
 zipfile1 = zipfile.ZipFile("../dist/" + pyinstaller_file, "w")
