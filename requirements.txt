@@ -2,7 +2,7 @@ pyaes==1.6.1
 requests==2.22.0
 tldextract==2.2.2
 pytz>=2020.1
-dateutil==2.8.1
+python-dateutil==2.8.1
 tzlocal==2.1
 
 #python3-pyaes
