@@ -59,7 +59,8 @@ print ("\n\n ================ end bdist_rpm ===========================\n\n")
 
 print ("\n\n ================ Generate pyinstaller file =======================\n\n" )
 
-
+# it works but creates a 166 MB file - unusable
+"""
 os.chdir('./confix')
 os.system('pyinstaller confix.py -y > /dev/null')
 
@@ -74,7 +75,7 @@ for mydir in os.walk("./dist/") :
 zipfile1.close()
 
 os.chdir("..")
-
+"""
 
 #os.system("tree -d")               # option -d will print directories only
 #os.chdir("dist")
