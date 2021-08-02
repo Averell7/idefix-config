@@ -26,7 +26,7 @@
 """
 
 try:
-   from confix import main
+   from confix.confix import main
    main()
 except ImportError as e:
    print('Error: Could not import confix')
