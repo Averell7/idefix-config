@@ -1,6 +1,6 @@
 import datetime
-import dateutil
-#import dateutil.parser
+import dateutil.utils
+import dateutil.parser
 import pytz
 import tzlocal
 import http.client
@@ -528,7 +528,7 @@ class Information:
 
         ip_address = None
         search_string = self.arw['filter_log_search_entry'].get_text()
-        if search_string.lower().startswith('ip-address='):
+        if search_string.lower().startswith('ip='):
             address = search_string.split('=')[1]
             if ip_address_test(address):
                 ip_address = address
@@ -586,6 +586,9 @@ class Information:
             self.arw['filter_log_treeview'].scroll_to_cell(last_path, self.arw['filter_log_treeview'].get_column(0))
 
     def idefix_infos(self, widget):
+        if not self.controller.connection_type == "idefix":
+            alert(_("This command cannot work because you are not connected to an Idefix module"))
+            return
         self.arw['filter_log_search_entry'].set_text('')
         self.arw['why_stack'].set_visible_child_name('page0')
         if isinstance(widget, str):
@@ -625,6 +628,9 @@ class Information:
 
     def view_connected_users(self, widget):
         """Gets the connected users and displays it in a list for the user"""
+        if not self.controller.connection_type == "idefix":
+            alert(_("This command cannot work because you are not connected to an Idefix module"))
+            return
         self.arw['why_stack'].set_visible_child_name('connected_users')
         self.arw['add_connected_user_button'].set_sensitive(False)
         self.arw['update_connected_user_button'].set_sensitive(False)
@@ -962,7 +968,7 @@ class Information:
         y = datetime.datetime.now()
         z = y.strftime("%Y-%m-%d %H:%M")
         self.get_infos("set_date " + z + ' ' + tzlocal.get_localzone().zone)
-        alert(_("Updated Date"))
+        alert(_("Your Idefix clock has been set to: \n %s" % z))
 
     def check_date(self):
         """Test if idefix date is out and if it is then update it"""

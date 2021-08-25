@@ -34,6 +34,12 @@
                "20:68:9d:ee:45:7a\t#\t  wifi",
                "60:a4:4c:7b:1d:5f"
             ]
+         },
+         "catch_all": {
+            "mac": [
+               "# aucune adresse mac pour cet utilisateur",
+               "11:22:33:44:55:66"
+            ]
          }
       }
    },
@@ -54,7 +60,8 @@
          ],
          "any_user": 0,
          "any_destination": 0,
-         "allow_deny": 1
+         "allow_deny": 1,
+         "strict_end": false
       },
       "autorisations_g\u00e9n\u00e9rales": {
          "active": "on",
@@ -81,12 +88,13 @@
          ],
          "any_user": 1,
          "any_destination": 0,
-         "allow_deny": 1
+         "allow_deny": 1,
+         "strict_end": false
       },
       "Coupure_de_nuit": {
          "active": "on",
          "action": "deny",
-         "time_condition": "",
+         "time_condition": "1234567 23:00-7:00",
          "comments": "",
          "users": [
             ""
@@ -99,7 +107,8 @@
          ],
          "any_user": 1,
          "any_destination": 1,
-         "allow_deny": 0
+         "allow_deny": 0,
+         "strict_end": false
       },
       "autorisations_temporaires": {
          "active": "on",
@@ -117,7 +126,8 @@
          ],
          "any_user": 1,
          "any_destination": 0,
-         "allow_deny": 1
+         "allow_deny": 1,
+         "strict_end": false
       },
       "Louis": {
          "active": "on",
@@ -142,9 +152,12 @@
          ],
          "any_user": 0,
          "any_destination": 0,
-         "allow_deny": 1
+         "allow_deny": 1,
+         "strict_end": false
       }
    },
+   "proxy-rules": {},
+   "ports-rules": {},
    "groups": {
       "technique": {
          "dest_domains": [
@@ -396,5 +409,6 @@
          ]
       }
    },
+   "ports": {},
    "version": 25
 }

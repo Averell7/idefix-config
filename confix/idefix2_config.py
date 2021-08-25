@@ -24,13 +24,13 @@ DD_CLIENT_NAMES = {
 
 
 class Idefix2Config:
-    ddclient_options = {}
-    dns_options = {}
+    ddclient_options =OrderedDict()
+    dns_options =OrderedDict()
 
     def __init__(self, arw, controller):
         self.arw = arw
         self.controller = controller
-        self.config = {}
+        self.config =OrderedDict()
         self.block_signals = False
         self.autoddclient_config = None
         self.load_default_options()
@@ -41,8 +41,8 @@ class Idefix2Config:
         options.read('./defaults/option_values.ini')
         self.arw['idefix2_dns_type_store'].clear()
         self.arw['idefix2_dd_handler_store'].clear()
-        self.ddclient_options = {}
-        self.dns_options = {}
+        self.ddclient_options =OrderedDict()
+        self.dns_options =OrderedDict()
         for section in options.sections():
             if section.startswith('dns:'):
                 value = section.split(':', 1)[1]
@@ -82,7 +82,9 @@ class Idefix2Config:
                 "wan_subnet": "",
                 "wan_network": "",
                 "wan_broadcast": "",
-                "wan_gateway": ""
+                "wan_gateway": "",
+                "wan_dns1": "",
+                "wan_dns2": ""
             },
             "eth1": {
                 "lan_used": "yes",
@@ -163,15 +165,17 @@ class Idefix2Config:
                 self.arw['idefix2_wan_type'].set_active_iter(item.iter)
                 break
 
-        self.arw['idefix2_wan_port'].set_text(self.config.get('ports', {}).get('wan_port', ''))
+        self.arw['idefix2_wan_port'].set_text(self.config.get('ports',OrderedDict()).get('wan_port', ''))
+        self.arw['idefix2_wan_dns1'].set_text(self.config['eth0'].get('wan_dns1', ''))
+        self.arw['idefix2_wan_dns2'].set_text(self.config['eth0'].get('wan_dns2', ''))
 
-        self.arw['idefix2_lan_ports'].set_text(self.config.get('ports', {}).get('lan_ports', ''))
+        self.arw['idefix2_lan_ports'].set_text(self.config.get('ports',OrderedDict()).get('lan_ports', ''))
         self.arw['idefix2_lan_ip'].set_text(self.config['eth1']['lan_ip'])
         self.arw['idefix2_lan_subnet'].set_text(self.config['eth1']['lan_netmask'])
 
-        self.arw['idefix2_wifi_port'].set_text(self.config.get('ports', {}).get('wifi_port', ''))
-        self.arw['idefix2_wifi_ip'].set_text(self.config.get('wlan0', {}).get('wifi_ip', ''))
-        self.arw['idefix2_wifi_subnet'].set_text(self.config.get('wlan0', {}).get('wifi_netmask', ''))
+        self.arw['idefix2_wifi_port'].set_text(self.config.get('ports',OrderedDict()).get('wifi_port', ''))
+        self.arw['idefix2_wifi_ip'].set_text(self.config.get('wlan0',OrderedDict()).get('wifi_ip', ''))
+        self.arw['idefix2_wifi_subnet'].set_text(self.config.get('wlan0',OrderedDict()).get('wifi_netmask', ''))
 
         self.arw['idefix2_dhcp_start'].set_text(self.config['dhcp'].get('dhcp_begin', ''))
         self.arw['idefix2_dhcp_end'].set_text(self.config['dhcp'].get('dhcp_end', ''))
@@ -223,7 +227,7 @@ class Idefix2Config:
             return
 
         if 'ports' not in self.config:
-            self.config['ports'] = {}
+            self.config['ports'] =OrderedDict()
 
         self.config['ports']['wan_port'] = self.arw['idefix2_wan_port'].get_text()
         self.config['ports']['lan_ports'] = self.arw['idefix2_lan_ports'].get_text()
@@ -238,6 +242,10 @@ class Idefix2Config:
             self.arw['idefix2_wan_subnet'].set_sensitive(False)
             self.arw['idefix2_wan_gateway'].set_text('')
             self.arw['idefix2_wan_gateway'].set_sensitive(False)
+            self.arw['idefix2_wan_dns1'].set_text('')
+            self.arw['idefix2_wan_dns1'].set_sensitive(False)
+            self.arw['idefix2_wan_dns2'].set_text('')
+            self.arw['idefix2_wan_dns2'].set_sensitive(False)
             self.config['eth0'] = {
                 'wan_ip_type': 'dhcp',
                 'wan_ip': '',
@@ -246,12 +254,19 @@ class Idefix2Config:
                 'wan_broadcast': '',
                 'wan_gateway': '',
                 'wan_network': '',
+                'wan_dns1': '',
+                'wan_dns2': '',
+
             }
         else:
             self.arw['idefix2_wan_ip'].set_sensitive(True)
             self.arw['idefix2_wan_gateway'].set_sensitive(True)
             self.arw['idefix2_wan_subnet'].set_sensitive(True)
+            self.arw['idefix2_wan_dns1'].set_sensitive(True)
+            self.arw['idefix2_wan_dns2'].set_sensitive(True)
             self.recalculate_ip_settings('eth0', 'wan')
+            self.config['eth0']['wan_dns1'] = self.arw['idefix2_wan_dns1'].get_text()
+            self.config['eth0']['wan_dns2'] = self.arw['idefix2_wan_dns2'].get_text()
 
         if self.arw['idefix2_lan_ports'].get_text():
             self.arw['idefix2_lan_ip'].set_sensitive(True)
@@ -259,7 +274,7 @@ class Idefix2Config:
             self.arw['idefix2_dhcp_start'].set_sensitive(True)
             self.arw['idefix2_dhcp_end'].set_sensitive(True)
             if 'eth1' not in self.config:
-                self.config['eth1'] = {}
+                self.config['eth1'] =OrderedDict()
             self.config['eth1']['lan_used'] = 'yes'
             self.recalculate_ip_settings('eth1', 'lan')
         else:
@@ -284,7 +299,7 @@ class Idefix2Config:
             self.arw['idefix2_dhcpwifi_start'].set_sensitive(True)
             self.arw['idefix2_dhcpwifi_end'].set_sensitive(True)
             if 'wlan0' not in self.config:
-                self.config['wlan0'] = {}
+                self.config['wlan0'] =OrderedDict()
             self.config['wlan0']['wifi_used'] = 'yes'
             self.recalculate_ip_settings('wlan0', 'wifi')
         else:
@@ -384,7 +399,7 @@ class Idefix2Config:
             dns_type = 'SafeDNS'
 
         if dns_type != self.config['dns']['dns_filtering']:
-            dns = self.dns_options.get(dns_type, {})
+            dns = self.dns_options.get(dns_type,OrderedDict())
             self.arw['idefix2_dns_ns1'].set_text(dns.get('ns1', ''))
             self.arw['idefix2_dns_ns2'].set_text(dns.get('ns2', ''))
             self.config['dns'] = {
@@ -455,7 +470,7 @@ class Idefix2Config:
                 self.arw['idefix2_dd_password'].set_sensitive(True)
                 self.arw['idefix2_dd_domain'].set_sensitive(True)
 
-        dd = self.ddclient_options.get(dd_handler, {})
+        dd = self.ddclient_options.get(dd_handler,OrderedDict())
 
         if self.arw['idefix2_ddclient_auto_config_checkbox'].get_active():
             self.autoddclient_config = {

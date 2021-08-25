@@ -1,6 +1,7 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 2.5.4 - adds dns servers for eth0; needs idefix update 2.5.8 to work.
 # version 2.5.3 - bug fixes
 # version 2.5.2 - bug fixes
 # version 2.5.1 - bug fixes
@@ -42,6 +43,8 @@ import zipfile
 from collections import OrderedDict
 from copy import deepcopy
 
+sys.path.insert(0, os.path.dirname(__file__))
+
 import gi
 import time
 
@@ -77,7 +80,7 @@ from json_config import RestoreDialog, ExportJsonDialog, ImportJsonDialog
 ###########################################################################
 global version, future
 future = True  # Activate beta functions
-version = "2.5.3"
+version = "2.5.4"
 
 
 gtk = Gtk
@@ -372,6 +375,8 @@ class Confix:
                     self.ftp_config = self.profiles.config[configname]
                     if self.open_connexion_profile(configname):
                         self.arw["configname"].set_text(configname)
+                    else:
+                        self.arw["configname"].set_text("---")
 
     def ask_for_profile(self, widget = None):
         # Refresh available configurations?
@@ -481,6 +486,9 @@ class Confix:
         print("load connexion")
         ftp1 = self.ftp_config
         if ip_address_test(ftp1["server"]):                 # If we are connected directly to an Idefix module
+            self.connection_type = "idefix"
+            for name in ["save_button1", "save_button2"]:
+                self.arw[name].set_label("Send configuraton to Idefix")
             ip = ftp1["server"]
             try:
                 h1 = http.client.HTTPConnection(ip, timeout=10)
@@ -494,6 +502,7 @@ class Confix:
                         content = json.loads(data1)
                         self.myip = content["client"]["ip"]
                         self.mymac = content["client"]["mac"]
+                        self.myidefix = True
                         if self.mymac in self.maclist:
                             self.myaccount = self.maclist[self.mymac]
                         else:
@@ -524,13 +533,16 @@ class Confix:
                     if "error" in line.lower():
                         message += line + "\n"
                 alert("Impossible to join " + ip + "\n\n" + message)
-
+        else:
+            self.connection_type = "internet"
+            for name in ["save_button1", "save_button2"]:
+                self.arw[name].set_label("Send configuraton to FTP Server")
 
         # Check our mac address exists
         print("self.check_mac_and_create_config()")
         self.check_mac_and_create_config()
 
-        # Experimental
+        # For the "Experiment user permissionhs" Assistant
         if hasattr(self,"myaccount"):
             self.arw2["my_account"].set_text(self.myaccount)
 
@@ -1027,8 +1039,14 @@ class Confix:
         x = row.strip().split("\n")
         y = []
         for domain in x:
+            # Correct classical syntax errors
+            domain = domain.strip()
             if domain.startswith("."):
                 domain = "*" + domain
+            if domain.endswith("."):
+                domain = domain[:-1]
+            if domain.startswith("*") and (not domain[1:2] == "."):
+                domain = "*." + domain[1:]
             y.append(domain)
         return y
 

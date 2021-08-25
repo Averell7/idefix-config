@@ -409,18 +409,19 @@ class ExportJsonDialog:
             f1.close()
         else:
             zf = zipfile.ZipFile(os.path.splitext(configpath)[0] + ".zip", 'w')
-            try:
-                x = Information.get_infos(self, "get_conf")
-                conf_list = json.loads(x)
-                zf.writestr("idefix2_conf.json", conf_list["idefix2_conf.json"])
-                if "idefix_auto.conf" in conf_list:
-                    zf.writestr("idefix_auto.conf", conf_list["idefix_auto.conf"])
-            except TypeError:
-                if offline:
-                    print("No connection, skipping idefix2_conf.json")
-                else:
-                    alert(_("Cannot retrieve network configuration from Idefix"))
-                    return
+            if offline:
+                print("No connection, skipping idefix2_conf.json")
+            elif self.controller.connection_type == "internet":
+                print("No connected to an Idefix module, skipping idefix2_conf.json")
+            else:
+                try:
+                    x = Information.get_infos(self, "get_conf")
+                    conf_list = json.loads(x)
+                    zf.writestr("idefix2_conf.json", conf_list["idefix2_conf.json"])
+                    if "idefix_auto.conf" in conf_list:
+                        zf.writestr("idefix_auto.conf", conf_list["idefix_auto.conf"])
+                except :
+                    alert(_("Cannot retrieve network configuration from Idefix.\nSkipping idefix2_conf.json"))
 
             zf.writestr("idefix.json", config2_str)
             zf.write(get_config_path('confix.cfg'), 'confix.cfg')
