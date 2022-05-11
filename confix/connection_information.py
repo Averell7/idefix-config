@@ -22,7 +22,7 @@ gi.require_version('Gtk', '3.0')   # to prevent a warning message
 from gi.repository import Gtk
 
 from domain_util import extract_domain_parts, extract_domain
-from ftp_client import ftp_connect, ftp_get
+from ftp_client import ftp_connect, ftp_get, ftp_get_and_save, ftp_send, FTPError
 from util import ip_address_test, showwarning, get_ip_address, askyesno, alert
 
 # version 2.3.19 - Edit files added
@@ -212,7 +212,7 @@ class Information:
             except:
                 h1.close()
                 return
-            h1.request("GET", "/network-info.php")
+            h1.request("GET", "/idefix-post.json")
             res = h1.getresponse()
             if res.status == 200:
                 content = res.read().decode("cp850")
@@ -276,28 +276,28 @@ class Information:
                     message += '<b><span foreground="green">Idefix found at ' + ip + "</span></b>"
                     network = json.loads(content)
                     # check validity to avoid errors
-                    for key in ["eth1", "netmask1", "link_eth1", "eth0", "netmask0", "link_eth0", "gateway"]:
-                        if not key in network["idefix"]:
-                            network["idefix"][key] = ""
-                    message += _("\n\n     Local port (eth1) IP : ") + network["idefix"].get("eth1")
-                    message += _("\n     Local port (eth1) Netmask : ") + network["idefix"]["netmask1"]
-                    if "yes" in network["idefix"]["link_eth1"]:
+                    for key in ["eth1", "eth1-netmask", "eth1-link", "eth0", "eth0-netmask", "eth0-link", "gateway"]:
+                        if not key in network["network"]:
+                            network["network"][key] = ""
+                    message += _("\n\n     Local port (eth1) IP : ") + network["network"].get("eth1")
+                    message += _("\n     Local port (eth1) Netmask : ") + network["network"]["eth1-netmask"]
+                    if "yes" in network["network"]["eth1-link"]:
                         message += _('\n<span foreground="green">     Idefix port (eth1) active : yes </span>')
                     else:
                         message += _('\n<span foreground="red">     Idefix port (eth1) active : no </span>')
 
-                    message += _("\n\n     Internet port (eth0) IP : ") + network["idefix"].get("eth0")
-                    message += _("\n     Internet port (eth0) Netmask : ") + network["idefix"]["netmask0"]
-                    if "yes" in network["idefix"]["link_eth0"]:
+                    message += _("\n\n     Internet port (eth0) IP : ") + network["network"].get("eth0")
+                    message += _("\n     Internet port (eth0) Netmask : ") + network["network"]["eth0-netmask"]
+                    if "yes" in network["network"]["eth0-link"]:
                         message += _('\n<span foreground="green">     Idefix port (eth0) active : yes </span>')
                     else:
                         message += _('\n<span foreground="red">     Idefix port (eth0) active : no </span>')
-                    message += _("\n\n              Gateway : ") + network["idefix"]["gateway"]
+                    message += _("\n\n              Gateway : ") + network["network"]["gateway"]
                     message += "\n\n"
 
-                    if network["idefix"]["eth0"] != "" and network["idefix"]["eth1"] != "":
-                        wan = ipaddress.ip_interface(network["idefix"]["eth0"] + "/" + network["idefix"]["netmask0"])
-                        lan = ipaddress.ip_interface(network["idefix"]["eth1"] + "/" + network["idefix"]["netmask1"])
+                    if network["network"]["eth0"] != "" and network["network"]["eth1"] != "":
+                        wan = ipaddress.ip_interface(network["network"]["eth0"] + "/" + network["network"]["eth0-netmask"])
+                        lan = ipaddress.ip_interface(network["network"]["eth1"] + "/" + network["network"]["eth1-netmask"])
 
                         if lan.network.overlaps(wan.network):
                             message += "\n\n<b>WARNING !!!  WARNING !!!  WARNING !!!  WARNING !!! \n Both subnets overlap !\nIdefix cannot work</b>"
@@ -334,7 +334,7 @@ class Information:
 
 
             network = json.loads(found[0][1])
-            test_ip = network["idefix"]["eth1"]
+            test_ip = network["network"]["eth1"]
             result = subprocess.check_output(["ping", "-n", "1", test_ip ]).decode("cp850")
             if "TTL" in result:
                 message += "%s Ping Idefix eth1 (%s) from local computer : Success %s" % ('\n\n<b><span foreground="green">', test_ip, '</span></b> \n')
@@ -348,7 +348,7 @@ class Information:
             while Gtk.events_pending():
                 Gtk.main_iteration()
 
-            test_ip = network["idefix"]["eth0"]
+            test_ip = network["network"]["eth0"]
             result = subprocess.check_output(["ping", "-n", "1", test_ip ]).decode("cp850")
             if "TTL" in result:
                 message += "%s Ping Idefix eth0 (%s) from local computer : Success %s" % ('\n<b><span foreground="green">', test_ip, '</span></b> \n')
@@ -375,14 +375,16 @@ class Information:
         command_f = io.BytesIO()
         ftp.storlines('STOR ' + result, command_f)       # delete data in result file
 
+        command = command.strip()
         command_f.write(bytes(command, "utf-8"))
         command_f.seek(0)
         # send command
         ftp.storlines('STOR trigger', command_f)
 
+
         # wait until Idefix has finished the job
         time1 = time.time()
-        for i in range(60):     # set absolute maximum to 60 seconds
+        for i in range(20):     # set absolute maximum to 20 seconds
             while time.time() < time1 + i:
                 while Gtk.events_pending():               # necessary to have the spinner work
                         Gtk.main_iteration()
@@ -552,6 +554,7 @@ class Information:
         self.arw['filter_log_store'].clear()
 
         for line in result.split('\n'):
+            #print(line)
             log_iter = self.arw['filter_log_store'].append()
 
             text = ""
@@ -561,7 +564,7 @@ class Information:
                 text = '<span foreground="red">' + line.strip() + "</span>"
             elif "allowed" in line:
                 text = '<span foreground="green">' + line.strip() + "</span>"
-            if "validation failure" in line:
+            if "validation failure" in line or "blocked" in line:
                 text = '<span background="#ff9999">' + line.strip() + "</span>"
 
             # Extract the domain from the log
@@ -641,7 +644,9 @@ class Information:
         spinner.stop()
 
         line_regex = re.compile(
-            r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*\-\s*(([0-9a-f]{2}:){5}[0-9a-f]{2})\s*\-\s*([.a-z]+)\s*(\-\s"(.+)"\s*)?\((.+)\)'
+            #r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*\-\s*(([0-9a-f]{2}:){5}[0-9a-f]{2})\s*\-\s*([.a-z]+)\s*(\-\s"(.+)"\s*)?\((.+)\)'
+            r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s*\-\s*(([0-9a-f]{2}:){5}[0-9a-f]{2})\s*\-\s*([.a-z]+)\s*(\-?\s"(.+)"\s*)?\((.+)\)'        # the last - is not always present
+
         )
 
         for line in result.split("\n"):
@@ -914,22 +919,41 @@ class Information:
     def edit_file(self, widget):
 
         self.arw["display2_stack"].set_visible_child(self.arw["infos_page2_2"])
-        filename = widget.name.replace("file_", "")
-        if filename == "eth0":
-            full_path = "/etc/network/interfaces.d/eth0"
-        elif filename == "eth1":
-            full_path = "/etc/network/interfaces.d/eth1"
-        elif filename == "idefix.conf":
-            full_path = "/etc/idefix/idefix.conf"
-        elif filename == "idefix2_conf":
-            full_path = "/etc/idefix/idefix2_conf.json"
-        elif filename == "ddclient.conf":
-            full_path = "/etc/ddclient.conf"
+        filename = widget.name.replace("ftp_", "")
+        x = filename.split("-")
+        if len(x) == 2:
+            directory = x[0]
+            filename = x[1]
 
-        self.edited_file = full_path
+        self.edited_file = filename
 
-        data1 = self.get_infos("linux cat " + full_path)
+
+        ftp1 = self.controller.ftp_config
+        ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
+        data1 = ftp_get(ftp, filename)
         self.arw["editor_textview"].get_buffer().set_text(data1)
+        ftp.close()
+
+
+    def get_file(self, widget):
+
+        self.arw["display2_stack"].set_visible_child(self.arw["infos_page2_2"])
+        filename = widget.name.replace("ftp_", "")
+        x = filename.split("-")
+        directory = ""
+        if len(x) == 2:
+            directory = x[0]
+            filename = x[1]
+
+        ftp1 = self.controller.ftp_config
+        ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
+
+        files = ftp.nlst(directory)
+        for file1 in files:
+            if filename in file1:
+                ftp_get_and_save(ftp, file1, directory=directory)
+
+        ftp.close()
 
 
     def save_file(self, widget):
@@ -941,11 +965,11 @@ class Information:
         ftp1 = self.controller.ftp_config
         ftp = ftp_connect(ftp1["server"], ftp1["login"], ftp1["pass"])
         command_f.seek(0)
-        ftp.storbinary('STOR buffer', command_f)
-        command_f = io.BytesIO()
-        command_f.write(bytes("linux cp /home/rock64/idefix/buffer " + self.edited_file, "utf-8"))
-        command_f.seek(0)
-        ftp.storbinary('STOR trigger', command_f)
+        ftp.storbinary('STOR ' + self.edited_file, command_f)
+        #command_f = io.BytesIO()
+        #command_f.write(bytes("linux cp /home/rock64/idefix/buffer " + self.edited_file, "utf-8"))
+        #command_f.seek(0)
+        #ftp.storbinary('STOR trigger', command_f)
 
 
     def open_editor(self, widget):

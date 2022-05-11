@@ -162,10 +162,11 @@ class ConfigProfile:
 
     def profile_selection_updated(self, widget):
         """Update the text entries when the selection changes"""
+        print(widget)
         self.block_signals = True
         model, selected_iter = widget.get_selected()
-        if not selected_iter:
-            alert("There is no configuration selected. \nPlease, select a configuration before editing.")
+        #if not selected_iter:  TODO : this is not the right place. It provokes an undesired error message when the list is rebuilt
+        #    alert("There is no configuration selected. \nPlease, select a configuration before editing.")
         self.arw['profile_name_entry'].set_text(model.get_value(selected_iter, COLUMN_NAME))
         self.arw['profile_username_entry'].set_text(model.get_value(selected_iter, COLUMN_USERNAME) or '')
         self.arw['profile_password_entry'].set_text(model.get_value(selected_iter, COLUMN_PASSWORD) or '')

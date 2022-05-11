@@ -47,16 +47,28 @@ class AskForConfig:
                 continue
             self.combo.append_text(key)
         self.combo.set_active(0)
+        self.button1 = Gtk.RadioButton.new_with_label_from_widget(None, "Normal (for LAN 1)")
+        self.button2 = Gtk.RadioButton.new_with_label_from_widget(self.button1, "for LAN 2")
+        self.button3 = Gtk.RadioButton.new_with_label_from_widget(self.button1, "for LAN 3")
         self.dialog.vbox.pack_start(self.label, 0, 0, 0)
         self.dialog.vbox.pack_start(self.combo, 0, 0, 0)
+        self.dialog.vbox.pack_start(self.button1, True, True, 0)
+        self.dialog.vbox.pack_start(self.button2, True, True, 0)
+        self.dialog.vbox.pack_start(self.button3, True, True, 0)
         self.dialog.show_all()
 
     def run(self):
         x = self.dialog.run()
         configname = self.combo.get_active_text()
         self.dialog.destroy()
+        if self.button1.get_active() == True:
+            eth = 1
+        elif self.button2.get_active() == True:
+            eth = 2
+        elif self.button3.get_active() == True:
+            eth = 3
         if x == 1:
-            return configname
+            return configname, eth
         else:
             return ""
 
@@ -88,10 +100,17 @@ class PasswordDialog:
         self.dialog.destroy()
 
 
-def print_except():
+def print_except(info = False):
     a, b, c = sys.exc_info()
+    text = ""
     for d in traceback.format_exception(a, b, c):
-        print(d, end=' ')
+        try:
+            print(d, end=' ')
+        except:
+            print(d.encode("cp850", "ignore"))
+        text += d
+    if info:
+        return text
 
 
 def parse_date_format_to_squid(value):
@@ -236,6 +255,39 @@ def ask_text(parent, message, default='', password=False):
         return text
     else:
         return None
+
+
+def ask_choice(parent, message, default='', password=False):
+    """
+    Display a dialog with radio buttons.
+    Returns the text, or None if canceled.
+    """
+    d = Gtk.MessageDialog(parent,
+                          Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                          Gtk.MessageType.QUESTION,
+                          Gtk.ButtonsType.OK_CANCEL,
+                          message)
+    button1 = Gtk.RadioButton.new_with_label_from_widget(None, "Normal (for LAN 1")
+    button2 = Gtk.RadioButton.new_with_label_from_widget(button1, "for LAN 2")
+    button3 = Gtk.RadioButton.new_with_label_from_widget(button1, "for LAN 3")
+    d.vbox.pack_start(button1, True, True, 0)
+    d.vbox.pack_start(button2, True, True, 0)
+    d.vbox.pack_start(button3, True, True, 0)
+    d.vbox.show_all()
+    #entry.connect('activate', lambda _: d.response(Gtk.ResponseType.OK))
+    #d.set_default_response(Gtk.ResponseType.OK)
+    d.set_keep_above(True)
+
+    r = d.run()
+    d.destroy()
+    if button1.get_active() == True:
+        return 1
+    elif button2.get_active() == True:
+        return 2
+    elif button3.get_active() == True:
+        return 3
+
+
 
 
 def format_line(key, line1):

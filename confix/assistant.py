@@ -549,6 +549,12 @@ class Assistant:
             ]
         )
         self.controller.maclist[username] = mac.split('\n')
+
+        self.controller.devicelist[username] = []
+        i = 1
+        for mac1 in mac.split('\n'):
+            self.controller.devicelist[username].append([mac1, "device" + str(i)])
+            i += 1
         self.controller.set_colors()
         return iternew
 
@@ -571,6 +577,9 @@ class Assistant:
             # to their user
             if self.username not in self.controller.maclist:
                 self.controller.maclist[self.username] = []
+            if self.username not in self.controller.devicelist:
+                self.controller.devicelist[self.username] = []
+
             self.controller.maclist[self.username].extend(self.mac_address.split('\n'))
             self.controller.filter_rules.load_filter_user(None, None)
             if hide_assistant:
@@ -595,7 +604,7 @@ class Assistant:
 
             if not category:
                 # If there is no category, choose the best matching one based on the user rules
-                # this should only happen if a defualt configuration has not been used
+                # this should only happen if a default configuration has not been used
                 if self.arw2['check_full'].get_active():
                     look_category = 'Internet ouvert'
                     filtered = False

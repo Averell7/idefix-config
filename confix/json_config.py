@@ -61,7 +61,7 @@ class ImportJsonDialog:
             self.controller.arw["configname"].set_text(configname)
 
     def update_gui(self):
-        self.controller.maclist = self.controller.users.create_maclist()
+        (self.controller.maclist, self.controller.devicelist) = self.controller.users.create_maclist()
         self.controller.users.populate_users()
         self.controller.filter_rules.populate_rules()
         self.controller.populate_ports()
@@ -362,7 +362,7 @@ class RestoreDialog:
         ftp.close()
 
     def update_gui(self):
-        self.controller.maclist = self.controller.users.create_maclist()
+        (self.controller.maclist, self.controller.devicelist) = self.controller.users.create_maclist()
         self.controller.users.populate_users()
         self.controller.filter_rules.populate_rules()
         self.controller.populate_ports()
@@ -400,7 +400,7 @@ class ExportJsonDialog:
                 configpath = dialog.get_filename()
             dialog.destroy()
 
-        config2 = self.controller.rebuild_config()
+        config2 = self.controller.rebuild_config3()
         config2_str = json.dumps(config2, indent=3)
 
         if to_json:

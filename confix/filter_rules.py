@@ -268,7 +268,7 @@ class FilterRules:
         if x is None:
             return
         else:
-            # x = format_name(x)            
+            # x = format_name(x)
             # Set format:
             if model.get_value(node, 1) == 'off':
                 x = '<s>' + x + '</s>'
@@ -687,6 +687,11 @@ class FilterRules:
 
                     if key == 'time_condition':
                         # days = parse_date_format_from_squid(data[0].split(' ')[0])
+                        if isinstance(data, list):
+                            if len(data) == 0:
+                                data = ""
+                            else:
+                                data = data[0]           # TODO version 3
                         days = data.split(' ')[0]
                         if len(data.split(' ')) > 1:
                             data = days + ' ' + data.split(' ', 1)[1]

@@ -548,8 +548,8 @@ class Idefix2Config:
                 return
 
             if lan_ip and lan_ip in wan:
-                alert(_("LAN must be in a different network to WAN"))
-                return
+                alert(_("LAN must normally be in a different network to WAN"))
+                # return
 
             if wlan_ip and wlan_ip in wan:
                 alert(_("WLAN must be in a different network to WAN"))

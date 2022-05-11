@@ -76,14 +76,21 @@ class Users:
 
     def create_maclist(self):
         maclist = {}
+        devicelist = {}
         data1 = self.controller.config["users"]
         for section in data1:
             for user in data1[section]:
                 if user.startswith("@_"):
                     continue
-
-                maclist[user] = list(filter(lambda d: not isinstance(d, dict), data1[section][user]["mac"]))
-
+                maclist[user] = []
+                devicelist[user] = []                              # better adapted to version 3
+                devices =  list(data1[section][user]["devices"])
+                for device in devices:
+                    #maclist[user].append(data1[section][user]["devices"][device]["mac"] + " # " + device)
+                    # En cours
+                    thismac = data1[section][user]["devices"][device]["mac"]
+                    maclist[user].append(thismac)
+                    devicelist[user].append([thismac,device])
                 if "subusers" in data1[section][user]:
                     for subuser in data1[section][user]["subusers"]:
                         maclist[subuser] = [data1[section][user]["subusers"][subuser]]
@@ -102,7 +109,7 @@ class Users:
                     temp1[mac] = user
         maclist.update(temp1)
 
-        return maclist
+        return (maclist, devicelist)
 
 
     def populate_users(self):
@@ -113,7 +120,7 @@ class Users:
         options_list = [0, 0, 0, 0, 0]
         for section in data1:
 
-            options_list[0] = data1[section].get('@_email', [0]) == '1'
+
             options_list[1] = data1[section].get('@_internet', ['none']) != 'none'
             options_list[2] = data1[section].get('@_internet', ['']) == 'filtered'
             options_list[3] = data1[section].get('@_internet', ['']) == 'open'
@@ -171,6 +178,10 @@ class Users:
     def load_user(self, widget, event, iternew=None):
         """ loads data in right pane when a category or a user is selected in the tree"""
 
+
+        if not isinstance(event, str) and event.button != 1:    # don't load data when right click is used
+            return
+
         self.controller.block_signals = True
         self.block_signals = True  # to prevent the execution of update_check wich causes errors
 
@@ -209,59 +220,7 @@ class Users:
             self.arw["menu_add_subuser"].hide()
             self.arw["menu_rename_cat"].show()
 
-            """
-            self.arw['email_time_condition'].set_sensitive(
-                self.users_store[self.controller.iter_user][4] or self.users_store[self.controller.iter_user][7]
-            )
 
-            self.arw['internet_time_condition'].set_sensitive(
-                self.users_store[self.controller.iter_user][5] and self.users_store[self.controller.iter_user][7]
-            )
-
-            # time conditions internet
-            data1 = self.users_store[iter1][3].strip()
-            if not data1:
-                self.arw["users_time_days_internet"].set_text("")
-                self.arw["users_time_from_internet"].set_text("")
-                self.arw["users_time_to_internet"].set_text("")
-            elif len(data1) > 8:
-                try:
-                    tmp1 = data1.split()
-                    tmp2 = tmp1[1].split("-")
-                    days = tmp1[0].strip()
-                    time_from = tmp2[0].strip()
-                    time_to = tmp2[1].strip()
-
-                    self.arw["users_time_days_internet"].set_text(days)
-                    self.arw["users_time_from_internet"].set_text(time_from)
-                    self.arw["users_time_to_internet"].set_text(time_to)
-                except IndexError:
-                    print("Error handling time condition :", data1)
-            else:
-                print("Invalid time :", data1)
-
-            # time conditions email
-            data1 = self.users_store[iter1][2].strip()
-            if not data1:
-                self.arw["users_time_days_email"].set_text("")
-                self.arw["users_time_from_email"].set_text("")
-                self.arw["users_time_to_email"].set_text("")
-            elif len(data1) > 8:
-                try:
-                    tmp1 = data1.split()
-                    tmp2 = tmp1[1].split("-")
-                    days = tmp1[0].strip()
-                    time_from = tmp2[0].strip()
-                    time_to = tmp2[1].strip()
-
-                    self.arw["users_time_days_email"].set_text(days)
-                    self.arw["users_time_from_email"].set_text(time_from)
-                    self.arw["users_time_to_email"].set_text(time_to)
-                except IndexError:
-                    print("Error handling time condition :", data1)
-            else:
-                print("Invalid time :", data1)
-            """
         elif level in (2, 3):  # user / sub user level
 
             self.arw["users_stack"].set_visible_child(self.arw["user_summary_frame"])
@@ -278,15 +237,19 @@ class Users:
             # fill the mac address frame
             username = self.users_store[iter1][0]
             buffer = self.arw["maclist"].get_buffer()
-            if username in self.controller.maclist:
-                macaddr = self.controller.maclist[username]
-                if not macaddr or (macaddr[0] == False) or (macaddr[0] == ""):
+            if username in self.controller.devicelist:
+                devices = self.controller.devicelist[username]
+                #macaddr = self.controller.maclist[username]
+                if not devices or (devices[0][0] == False) or (devices[0][0] == ""):
                     buffer.set_text("")
                     alert(_("No valid mac address for this user1 !"))
                 else:
-                    if not isinstance(macaddr, list):     # This may happen if the subuser name and the Identifier are identical
-                        macaddr = [macaddr]
-                    data1 = "\n".join(macaddr)
+                    #if not isinstance(macaddr, list):     # This may happen if the subuser name and the Identifier are identical
+                    #    macaddr = [macaddr]
+                    device_str = []
+                    for mac, name in devices:
+                        device_str.append(name + "  #  " + mac)
+                    data1 = "\n".join(device_str)
                     buffer.set_text(data1)
             else:
                 buffer.set_text("")
@@ -477,9 +440,11 @@ class Users:
                     users[i] = x
                 self.controller.filter_store.set_value(item.iter, 5, '\n'.join(users))
                 # self.controller.load_filter_user(self.arw['treeview3'], event=None)
-            # update the mac list
+            # update the mac list and the devices list
             self.controller.maclist[x] = self.controller.maclist[name]
             del self.controller.maclist[name]
+            self.controller.devicelist[x] = self.controller.devicelist[name]
+            del self.controller.devicelist[name]
 
             # Refresh the proxy users list
             self.controller.filter_rules.update_filter_user_list()

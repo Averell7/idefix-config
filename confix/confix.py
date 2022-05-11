@@ -1,6 +1,8 @@
 ﻿#!/usr/bin/env python
 # coding: utf-8
 
+# version 3.0.2 - keeps the device name
+# version 3.0.1 - bug fix
 # version 2.5.4 - adds dns servers for eth0; needs idefix update 2.5.8 to work.
 # version 2.5.3 - bug fixes
 # version 2.5.2 - bug fixes
@@ -63,7 +65,7 @@ from actions import DRAG_ACTION
 from util import (
     AskForConfig, alert, showwarning, askyesno,
     EMPTY_STORE, SignalHandler, get_config_path, ip_address_test,
-    ask_text, PasswordDialog, print_except)
+    ask_text, ask_choice, PasswordDialog, print_except)
 from icons import (
     internet_full_icon, internet_filtered_icon, internet_denied_icon
 )
@@ -78,9 +80,10 @@ from json_config import RestoreDialog, ExportJsonDialog, ImportJsonDialog
 ###########################################################################
 # CONFIGURATION ###########################################################
 ###########################################################################
-global version, future
+global version, future, idefix_domain
 future = True  # Activate beta functions
-version = "2.5.4"
+version = "3.1.2"
+idefix_domain = "idefix.admin"
 
 
 gtk = Gtk
@@ -150,7 +153,7 @@ class Confix:
         window1 = self.arw["window1"]
         window1.show_all()
         window1.set_title(_("Confix"))
-        window1.connect("destroy", self.destroy)
+        #window1.connect("destroy", self.destroy)
 
         self.groups_manager = GroupManager(self.arw, self)
 
@@ -322,7 +325,7 @@ class Confix:
 
         # icons for users list
 
-        self.maclist = self.users.create_maclist()
+        (self.maclist, self.devicelist) = self.users.create_maclist()
         self.users.populate_users()
         self.filter_rules.populate_rules()
         self.populate_ports()
@@ -382,9 +385,11 @@ class Confix:
         # Refresh available configurations?
 
         config_dialog = AskForConfig(self.profiles.config)
-        configname = config_dialog.run()
-        if not configname:
+        result = config_dialog.run()
+        if not result:
             return
+        configname, eth = result
+
         if self.offline == True:                  # if an offline configuration is open, offer to save it
             alert("TODO : Do you want to save your changes, before opening another configuration?")
             # TODO : finish this dialog
@@ -396,8 +401,8 @@ class Confix:
             self.profiles.config['__options'] = {}
         self.profiles.config['__options']["last_config"] = configname
         self.profiles.profile_save_config()
-        if self.open_connexion_profile(configname):
-            self.arw["configname"].set_text(configname)
+        if self.open_connexion_profile(configname, eth):
+            self.arw["configname"].set_text(configname + "- eth" + str(eth))
             self.arw["save_button1"].set_sensitive(True)
             self.arw["save_button2"].set_sensitive(True)
         else:
@@ -444,7 +449,7 @@ class Confix:
         # No good backups were found
         return alert("Unable to load configuration. Please import another one.")
 
-    def open_connexion_profile(self, configname=""):
+    def open_connexion_profile(self, configname="", eth = 1):
 
         print("open connexion profile")
         self.mymac = None
@@ -461,7 +466,15 @@ class Confix:
             return False
         else:
             # retrieve files by ftp
-            data0 = ftp_get(self.ftp, "idefix.json", json=True)
+
+            if eth == 1:
+                configfile = "idefix3.json"
+            elif eth == 2:
+                configfile = "idefix3_2.json"
+            elif eth == 3:
+                configfile = "idefix3_3.json"
+            data0 = ftp_get(self.ftp, configfile, json=True)
+            self.opened_configuration = [configfile, "eth" + str(eth)]
             self.active_config_text = data0
             if data0:
                 try:
@@ -469,6 +482,7 @@ class Confix:
                     self.update()
                     self.update_gui()
                 except:
+                    print_except()
                     # Try load a backup configuration
                     if askyesno(_("Corrupted Configuration"), _('Your configuration is corrupted. Search for backup?')):
                         return self.find_good_backup()
@@ -479,13 +493,15 @@ class Confix:
             else:
                 self.load_defaults()
 
-            if self.load_connection():
+            if self.load_connection(configname):
                 return True
 
-    def load_connection(self):
+    def load_connection(self, configname = ""):
+        global idefix_domain
         print("load connexion")
         ftp1 = self.ftp_config
-        if ip_address_test(ftp1["server"]):                 # If we are connected directly to an Idefix module
+        if (ftp1["server"] == idefix_domain or
+            ip_address_test(ftp1["server"])):                 # If we are connected directly to an Idefix module
             self.connection_type = "idefix"
             for name in ["save_button1", "save_button2"]:
                 self.arw[name].set_label("Send configuraton to Idefix")
@@ -493,7 +509,7 @@ class Confix:
             try:
                 h1 = http.client.HTTPConnection(ip, timeout=10)
                 h1.connect()
-
+                print("load connexion2")
                 try:
                     h1.request("GET", "/network-info.php")
                     res = h1.getresponse()
@@ -515,7 +531,12 @@ class Confix:
                             message += line + "\n"
                     alert("could not get network-info.php")
 
+                self.arw["configname"].set_text(configname)        # set the name of the profile in the gui
+                # TODO : at this point, configname is empty !
+                while Gtk.events_pending():
+                    Gtk.main_iteration()
                 self.assistant.refresh_detect_list()
+
 
                 # Check if the date is correct and if not, update it
                 t1 = time.time()
@@ -525,7 +546,7 @@ class Confix:
                     print("Error when checking date")
                 delta = int(time.time() - t1)
                 print("self.information.check_date() : ", str(delta))
-
+                print("load connexion3c")
             except FTPError:
                 info = print_except(True)
                 message = ""
@@ -551,7 +572,7 @@ class Confix:
     def check_mac_and_create_config(self):
         """Check if there is a configuration for the user's mac address and optionally create a new configuration
         for them"""
-
+        print("check_mac")
         if not self.mymac or self.mymac in self.maclist:
             return
 
@@ -589,7 +610,7 @@ class Confix:
 
     def update_gui(self):
         self.profiles.list_configuration_profiles()
-        self.maclist = self.users.create_maclist()
+        (self.maclist, self.devicelist) = self.users.create_maclist()
         self.users.populate_users()
         self.filter_rules.populate_rules()
         self.populate_ports()
@@ -603,8 +624,8 @@ class Confix:
         response = askyesno(_("No user data"),
                             _("There is no user data present. \nDo you want to create standard categories ?"))
         if response == 1:
-            if os.path.isfile("./idefix-default.json"):
-                data_str = open("./idefix-default.json", "r").read()
+            if os.path.isfile("./defaults/idefix3-default.json"):
+                data_str = open("./defaults/idefix3-default.json", "r").read()
                 self.config = json.loads(data_str, object_pairs_hook=OrderedDict)
                 self.update_gui()
                 self.set_colors()
@@ -801,12 +822,32 @@ class Confix:
             self.firewall_store.set(self.iter_firewall, 5, text1)
 
         elif widget.name == "maclist":
+            devicedata = text1.split("\n")  # create list
+            # get usr name
+            (model, node) = self.arw["treeview1"].get_selection().get_selected()
+            name = model.get_value(node, 0)
+            self.maclist[name] = devicedata
+            self.devicelist[name] = []
+            i = 1
+            for devicedef in devicedata:
+                if devicedef.strip().startswith("#"):   # comment
+                     continue   # not supported by the new config
+                elif "#" in devicedef:
+                    (device, thismac) = devicedef.split("#", 1)
+                    self.devicelist[name].append([thismac,device])
+                elif ip_address_test(devicedef):
+                    self.devicelist[name].append([devicedef, "device" + str(i)])
+                    i += 1
+
+
+        """
+        elif widget.name == "maclist":
             mac_addresses = text1.split("\n")  # create list
             # get usr name
             (model, node) = self.arw["treeview1"].get_selection().get_selected()
             name = model.get_value(node, 0)
             self.maclist[name] = mac_addresses
-
+        """
     def update_check(self, widget):
         # Updates the stores according to the settings of the check buttons
 
@@ -1011,15 +1052,14 @@ class Confix:
     def build_files(self, widget):
         # launched by the GO button
 
-        f1 = open(get_config_path("idefix.json"), "w", newline = "\n")
-        config2 = self.rebuild_config()
-        self.active_config_text = json.dumps(config2, indent = 3)      # update the copy in memory of the config, used to detect changes and remind the user to save.
-        f1.write(self.active_config_text)
+        f1 = open(get_config_path("idefix3.json"), "w", newline = "\n")
+        config3 = self.rebuild_config3()
+        self.active_config_text = json.dumps(config3, indent = 3)      # update the copy in memory of the config, used to detect changes and remind the user to save.
+        json.dump(config3, f1, indent = 3)
         f1.close()
 
         if not self.load_locale:  # send the files by FTP. Load_locale is the development mode, where files are read and written only on the local disk
-            self.ftp_upload()
-
+            self.ftp_upload(dest_name=self.opened_configuration[0])
 
     def format_row(self, row) :
         # used by rebuild_config
@@ -1160,8 +1200,137 @@ class Confix:
 
         return config2
 
+    def rebuild_config3(self) :
+        config2 = OrderedDict()
+        for section in ["users", "rules", "proxy-rules", "ports-rules", "groups", "ports"]:
+            config2[section] = OrderedDict()
+        version = self.config.get("version")
+        if version == 25:
+            version = 30
+        config2["version"] = version
+        # users store
+        for row in self.users_store:
+            config2["users"][row[0]] = OrderedDict()
+            if row[6]:
+                internet = 'filtered'
+            elif row[7]:
+                internet = 'open'
+            else:
+                internet = 'none'
+            config2["users"][row[0]]['@_internet'] = internet
 
-    def ftp_upload(self, uploadlist=None, message=True):
+            for child in row.iterchildren():  # write users and macaddress
+                user = child[0]
+                devices = OrderedDict()
+                if user not in self.maclist:
+                    alert(_("User %s has no mac address !") % user)
+                else:
+                    devicedata = self.devicelist[user]
+                    i = 1
+                    for (address, devicename) in devicedata:
+                        address = address.strip()
+                        devicename = devicename.strip()
+                        if address == "":
+                            continue
+                        if devicename.startswith("#"):
+                            active = 0
+                            address = address[1:]
+                        else:
+                            active = 1
+
+                        address = address.replace("\t", "").strip()
+                        devices[devicename] = OrderedDict()
+                        devices[devicename]["mac"] = address.lower()
+                        devices[devicename]["active"] = active
+                        i += 1
+
+                subusers = OrderedDict()
+
+                for subchild in child.iterchildren():
+                    submac = []
+                    if subchild[0] in self.maclist:
+                        submac = self.maclist[subchild[0]]
+                        password = ""
+                        if not isinstance(submac, list):            # This may happen if the subuser name and the Identifier are identical
+                            submac = [submac]
+                        for line in submac:
+                            if line.strip() == "":
+                                continue
+                            if line.strip().startswith("#"):
+                                continue
+                            else:
+                                password = line.split("#")[0]       # support inline comments
+                                password = password.strip()
+
+                        subusers[subchild[0]] = password
+
+
+                config2["users"][row[0]][user] = OrderedDict()
+                config2["users"][row[0]][user]["devices"] = devices
+                if subusers:
+                    config2["users"][row[0]][user]["subusers"] = subusers
+                pass
+
+        # dns filter rules store
+        rule_stores = [
+            ('rules', self.filter_store),
+            ('proxy-rules', self.filter_rules.proxy_rules_store),
+            ('ports-rules', self.filter_rules.port_rules_store)
+        ]
+        for rule_name, store in rule_stores:
+            for row in store:
+                name = row[0]
+                for code in["<i>", "</i>", "<s>", "</s>"]:  # remove codes which are only for display
+                    name = name.replace(code, "")
+                name = name.replace("_", " ")           # the flask application does not support _ in names
+                config2[rule_name][name] = OrderedDict()
+                config2[rule_name][name]["active"] = row[1]
+                if row[3] != "":
+                    config2[rule_name][name]["time_condition"] = [row[3]]
+                else:
+                    config2[rule_name][name]["time_condition"] = []
+                config2[rule_name][name]["comments"] = row[4]
+                config2[rule_name][name]["users"] = self.format_row(row[5])
+                config2[rule_name][name]["dest_groups"] = self.format_row(row[7])
+                config2[rule_name][name]["dest_domains"] = self.format_domain_row(row[8])
+                config2[rule_name][name]["any_user"] = row[11]
+                config2[rule_name][name]["any_destination"] = row[12]
+                config2[rule_name][name]["allow_deny"] = row[13]
+                config2[rule_name][name]['strict_end'] = row[20] == 1
+
+        for row in self.firewall_store:
+            config2["firewall"][row[0]] = OrderedDict()
+
+        # groups store
+        for row in self.groups_store:
+            config2['groups'][row[0]] = OrderedDict()
+            domains = []
+            ip = []
+
+            for line in self.format_domain_row(row[1]):
+                if ip_address_test(line):
+                    ip.append(line)
+                else:
+                    domains.append(line)
+
+            if domains:
+                config2['groups'][row[0]]['dest_domains'] = domains
+
+            if ip:
+                config2['groups'][row[0]]['dest_ip'] = ip
+
+        # ports store
+        for row in self.proxy_group.ports_store:
+            config2['ports'][row[0]] = OrderedDict()
+            ports = []
+            for line in self.format_domain_row(row[1]):
+                ports.append(line)
+
+            config2['ports'][row[0]]['port'] = ports
+
+        return config2
+
+    def ftp_upload(self, uploadlist=None, message=True, dest_name = None):
         ftp1 = self.ftp_config
         msg = ""
         OK = True
@@ -1170,11 +1339,15 @@ class Confix:
             msg += _("No FTP connexion")
             return
         if uploadlist is None:
-            uploadlist = ["./idefix.json"]
+            uploadlist = ["./idefix3.json"]
         for file1 in uploadlist:
-            ret = ftp_send(ftp, get_config_path(file1))
+            ret = ftp_send(ftp, get_config_path(file1), dest_name=dest_name)
+            if dest_name:
+                out_name = dest_name
+            else:
+                out_name = file1
             if ret == True :
-                msg += file1 + _(" sent\n")
+                msg += out_name + _(" sent\n")
             else :
                 msg += ret
                 OK = False
@@ -1193,9 +1366,11 @@ class Confix:
     def destroy(self, widget=None, donnees=None):
         # are the changes saved ?
         if hasattr(self, "active_config_text"):
-            present_config = self.rebuild_config()
+            present_config = self.rebuild_config3()
             present_config = json.dumps(present_config, indent = 3)
             if present_config != self.active_config_text:
+                open("debug1.txt", "w").write(self.active_config_text)
+                open("debug2.txt", "w").write(present_config)
                 dialog = Gtk.Dialog()
                 dialog.set_transient_for(self.arw['window1'])
                 dialog.add_button(_("Save and Quit"), Gtk.ResponseType.APPLY)
@@ -1208,8 +1383,9 @@ class Confix:
                 if result == Gtk.ResponseType.APPLY:
                      self.build_files("")
 
-        gtk.main_quit()
+
         self.arw["window1"].destroy()
+        gtk.main_quit()
         return (True)
 
     def update(self):
@@ -1236,7 +1412,7 @@ class Confix:
                     if key in x:
                         x[key + "s"] = x[key]
                         del x[key]
-                for key in ["active", "action", "time_condition", "comments"]:
+                for key in ["active", "time_condition", "comments"]:
                     if isinstance(x[key], list):
                         x[key] = x[key][0]
 
